@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../widgets/ambient_background.dart';
+import '../../../widgets/chintamani_logo.dart';
 import '../../../widgets/whatsapp_logo.dart';
 import '../../members/data/member_repository.dart';
 import '../../members/domain/member_model.dart';
@@ -444,61 +445,83 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
                 child: Row(
                   children: [
+                    // Chintamani Library Logo (replaces WhatsApp logo)
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 46,
+                      height: 46,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [Color(0xFF2A1F0D), Color(0xFF140F05)],
                         ),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: const Color(0xFFD4AF37), width: 1.2),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
-                            blurRadius: 10,
+                            color: const Color(0xFFD4AF37).withValues(alpha: 0.30),
+                            blurRadius: 14,
                           ),
                         ],
                       ),
                       child: const Center(
-                        child: WhatsAppLogo(size: 22, color: Color(0xFFFDE68A)),
+                        child: ChintaManiLogo(size: 32, showGlow: false, showCircularBackground: false),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'CHINTA MANI WHATSAPP',
-                          style: TextStyle(
-                            color: Color(0xFFFDE68A),
-                            fontSize: 17,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.5,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'CHINTAMANI WHATSAPP HUB',
+                            style: TextStyle(
+                              color: Color(0xFFFDE68A),
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.4,
+                            ),
                           ),
-                        ),
-                        Row(
-                          children: [
-                            Container(
-                              width: 7,
-                              height: 7,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(0xFF10B981),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Color(0xFF10B981),
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              'Bot Active: +91 $adminNumber',
-                              style: const TextStyle(
-                                color: Color(0xFFD4AF37),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
+                              const SizedBox(width: 5),
+                              const Text(
+                                'Bot ON',
+                                style: TextStyle(
+                                  color: Color(0xFF10B981),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1C160B),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.4), width: 0.8),
+                                ),
+                                child: Text(
+                                  '+91 $adminNumber',
+                                  style: const TextStyle(
+                                    color: Color(0xFFB8975A),
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -527,15 +550,29 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
                   indicatorSize: TabBarIndicatorSize.tab,
                   labelColor: const Color(0xFFFDE68A),
                   unselectedLabelColor: const Color(0xFFD4AF37).withValues(alpha: 0.70),
-                  labelStyle: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800),
-                  unselectedLabelStyle: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
+                  labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+                  unselectedLabelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
                   padding: const EdgeInsets.all(3),
                   dividerColor: Colors.transparent,
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.fill,
                   tabs: const [
-                    Tab(text: '🤖 Auto Bot'),
-                    Tab(text: '📤 Broadcast'),
-                    Tab(text: '👥 Students'),
-                    Tab(text: '⚙️ Settings'),
+                    Tab(
+                      icon: Icon(Icons.smart_toy_rounded, size: 16),
+                      text: 'Auto Bot',
+                    ),
+                    Tab(
+                      icon: Icon(Icons.campaign_rounded, size: 16),
+                      text: 'Broadcast',
+                    ),
+                    Tab(
+                      icon: Icon(Icons.people_alt_rounded, size: 16),
+                      text: 'Students',
+                    ),
+                    Tab(
+                      icon: Icon(Icons.settings_rounded, size: 16),
+                      text: 'Settings',
+                    ),
                   ],
                 ),
               ),
@@ -678,99 +715,40 @@ class _BotEngineTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Royal Purple & Gold Bot Status Card
+              // 1. Slim Bot Active Status Banner (always ON — no toggle)
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF2E1065), Color(0xFF1E1B4B)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFA855F7), width: 1.2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF8B5CF6).withValues(alpha: 0.25),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  color: const Color(0xFF0A1A0F),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.4), width: 1),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF8B5CF6).withValues(alpha: 0.25),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFFC084FC), width: 1),
-                          ),
-                          child: const Text('🤖', style: TextStyle(fontSize: 22)),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'AUTOMATED DUE BOT',
-                                style: TextStyle(
-                                  color: Color(0xFFFDE68A),
-                                  fontSize: 14.5,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.8,
-                                ),
-                              ),
-                              Text(
-                                botActive ? 'Active Engine • Linked: $adminNumber' : 'Bot Engine Paused',
-                                style: const TextStyle(color: Color(0xFFDDD6FE), fontSize: 11.5, fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Switch.adaptive(
-                          value: botActive,
-                          activeThumbColor: const Color(0xFFFDE68A),
-                          activeTrackColor: const Color(0xFF7C3AED),
-                          onChanged: onToggleBot,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
                     Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.35),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFF8B5CF6).withValues(alpha: 0.4)),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.auto_awesome_rounded, color: Color(0xFFFDE68A), size: 16),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Reminders trigger on 1st, 3rd, 5th, and +12h for month-end dues.',
-                              style: TextStyle(color: Color(0xFFFDE68A), fontSize: 11, fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ],
+                      width: 8, height: 8,
+                      decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF10B981)),
+                    ),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Text(
+                        'Auto Bot is permanently active — reminders trigger on 1st, 3rd, 5th & +12h of each month.',
+                        style: TextStyle(color: Color(0xFF6EE7B7), fontSize: 11, fontWeight: FontWeight.w600, height: 1.4),
                       ),
                     ),
+                    const SizedBox(width: 10),
+                    const Text('🤖', style: TextStyle(fontSize: 18)),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
 
               // 2. Today's Alert Banner — prominent when students are due
               if (queue.isNotEmpty) ...[
                 Container(
                   width: double.infinity,
+
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
@@ -1174,47 +1152,93 @@ class _BroadcastTab extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // 2. Filter Selector Chips (Multi-Color)
-              const Text(
-                'APPLY AUDIENCE FILTER',
-                style: TextStyle(
-                  color: Color(0xFFD4AF37),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _filterChips.map((chip) {
-                  final isSel = audience == chip.audience;
-                  return GestureDetector(
-                    onTap: () => onAudienceChanged(chip.audience),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              // 2. Audience Filter Section — premium structured panel
+              Row(
+                children: [
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'AUDIENCE FILTER',
+                          style: TextStyle(
+                            color: Color(0xFFD4AF37),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (ctx) => _AudienceFilterSheet(
+                          selected: audience,
+                          onSelected: (a) {
+                            onAudienceChanged(a);
+                            Navigator.pop(ctx);
+                          },
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: isSel ? chip.bg : const Color(0xFF14120E),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isSel ? chip.color : const Color(0xFF2A2215),
-                          width: isSel ? 1.5 : 1,
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF2A1F0D), Color(0xFF1C160B)],
                         ),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFD4AF37), width: 1),
                       ),
-                      child: Text(
-                        chip.label,
-                        style: TextStyle(
-                          color: isSel ? chip.color : const Color(0xFF999999),
-                          fontSize: 11.5,
-                          fontWeight: isSel ? FontWeight.w800 : FontWeight.w500,
-                        ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.tune_rounded, color: Color(0xFFFDE68A), size: 15),
+                          SizedBox(width: 6),
+                          Text(
+                            'Filter',
+                            style: TextStyle(color: Color(0xFFFDE68A), fontSize: 12, fontWeight: FontWeight.w800),
+                          ),
+                          SizedBox(width: 4),
+                          Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFFD4AF37), size: 16),
+                        ],
                       ),
                     ),
-                  );
-                }).toList(),
+                  ),
+                ],
               ),
+              const SizedBox(height: 8),
+              // Active filter display pill
+              Builder(builder: (context) {
+                final active = _filterChips.firstWhere((c) => c.audience == audience);
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: active.bg,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: active.color, width: 1),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        active.label,
+                        style: TextStyle(color: active.color, fontSize: 12, fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${filtered.length} students',
+                        style: TextStyle(color: active.color.withValues(alpha: 0.7), fontSize: 11, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                );
+              }),
 
               // Individual picker if audience is individual
               if (audience == _Audience.individual) ...[
@@ -1784,89 +1808,113 @@ class _SettingsTab extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 18),
+        ],
+      ),
+    );
+  }
+}
 
-          // 2. How the Bot Works — simple user-friendly explanation
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0D1117),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF2A2215)),
+// ── Audience Filter Bottom Sheet ─────────────────────────────────────────────────
+class _AudienceFilterSheet extends StatelessWidget {
+  final _Audience selected;
+  final ValueChanged<_Audience> onSelected;
+
+  const _AudienceFilterSheet({required this.selected, required this.onSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 24),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1C160B), Color(0xFF100C05)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.5), width: 1.2),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle
+          Padding(
+            padding: const EdgeInsets.only(top: 12, bottom: 6),
+            child: Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+          // Title
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Row(
               children: [
-                const Row(
-                  children: [
-                    Text('🤖', style: TextStyle(fontSize: 20)),
-                    SizedBox(width: 8),
-                    Text(
-                      'HOW THE BOT WORKS',
-                      style: TextStyle(
-                        color: Color(0xFFFDE68A),
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.6,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                const Divider(color: Color(0xFF1E1A10), height: 1),
-                const SizedBox(height: 12),
-                _infoRow('📅 1st of Month', 'First payment reminder sent to overdue students'),
-                _infoRow('📅 3rd of Month', 'Second alert — seat placed on hold notice'),
-                _infoRow('📅 5th of Month', 'Final warning — 12 hour grace period begins'),
-                _infoRow('⏰ +12 hrs after 5th', 'Seat released and student notified'),
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C160B),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.25)),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.info_outline_rounded, color: Color(0xFFD4AF37), size: 15),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'WhatsApp opens automatically with message ready. Tap Send in WhatsApp for each student.',
-                          style: TextStyle(color: Color(0xFFD4AF37), fontSize: 10.5, height: 1.4),
-                        ),
-                      ),
-                    ],
+                Icon(Icons.tune_rounded, color: Color(0xFFFDE68A), size: 18),
+                SizedBox(width: 10),
+                Text(
+                  'SELECT AUDIENCE FILTER',
+                  style: TextStyle(
+                    color: Color(0xFFFDE68A),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
                   ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _infoRow(String label, String desc) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 130,
-            child: Text(
-              label,
-              style: const TextStyle(color: Color(0xFFFDE68A), fontSize: 11.5, fontWeight: FontWeight.w700),
+          const Divider(color: Color(0xFF2A2215), height: 1),
+          // All filter options in a beautiful grid
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _filterChips.map((chip) {
+                final isSel = selected == chip.audience;
+                return GestureDetector(
+                  onTap: () => onSelected(chip.audience),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSel ? chip.bg : const Color(0xFF14120E),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSel ? chip.color : const Color(0xFF2A2215),
+                        width: isSel ? 1.8 : 1,
+                      ),
+                      boxShadow: isSel
+                          ? [BoxShadow(color: chip.color.withValues(alpha: 0.18), blurRadius: 8)]
+                          : [],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          chip.label,
+                          style: TextStyle(
+                            color: isSel ? chip.color : const Color(0xFF888888),
+                            fontSize: 12,
+                            fontWeight: isSel ? FontWeight.w800 : FontWeight.w500,
+                          ),
+                        ),
+                        if (isSel) ...[
+                          const SizedBox(width: 6),
+                          Icon(Icons.check_circle_rounded, color: chip.color, size: 14),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ),
-          Expanded(
-            child: Text(
-              desc,
-              style: const TextStyle(color: Color(0xFF999999), fontSize: 11.5, height: 1.3),
-            ),
-          ),
+          const SizedBox(height: 8),
         ],
       ),
     );

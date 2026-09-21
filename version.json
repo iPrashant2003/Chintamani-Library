@@ -1,14 +1,17 @@
-﻿{
+{
   "version": "2.3.0",
-  "buildNumber": 18,
+  "buildNumber": 19,
   "releaseDate": "21 Sep 2026",
   "title": "Chinta Mani Library v2.3.0 Update",
   "releaseNotes": [
-    "Automatic In-App Live Update Engine (OTA)",
-    "Shows v2.3.0 (Build 18) dynamically in Settings & More",
-    "WhatsApp Bot fully functional: linked to 7388389944",
-    "Auto alert banner for month-end due students with 1-tap Send All",
-    "Clean luxury golden theme with zero developer jargon"
+    "WhatsApp Hub premium rebuild — golden multicolour theme",
+    "Chintamani Library logo replaces WhatsApp logo in header",
+    "All 4 tabs (Auto Bot, Broadcast, Students, Settings) fully visible",
+    "Bot permanently active — no toggle card shown",
+    "Audience filter opens as full bottom sheet with all 10 options",
+    "Linked WhatsApp number shown as small elegant pill",
+    "Removed Automated Due Bot card and How Bot Works card",
+    "OTA Cloud Update Engine active"
   ],
   "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.0/Chintamani-Library-Release.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",

@@ -7,6 +7,7 @@ import '../../../widgets/whatsapp_logo.dart';
 import '../../members/data/member_repository.dart';
 import '../../members/domain/member_model.dart';
 import '../data/whatsapp_service.dart';
+import '../data/whatsapp_ai_service.dart';
 
 // ── Audience filter ─────────────────────────────────────────────────────────────
 enum _Audience {
@@ -24,78 +25,121 @@ enum _Audience {
 
 class _FilterChipItem {
   final _Audience audience;
-  final String label;
+  final String title;
+  final String category;
+  final String subtitle;
+  final IconData icon;
   final Color color;
   final Color bg;
 
   const _FilterChipItem({
     required this.audience,
-    required this.label,
+    required this.title,
+    required this.category,
+    required this.subtitle,
+    required this.icon,
     required this.color,
     required this.bg,
   });
+
+  String get label => title;
 }
 
 const _filterChips = [
-  _FilterChipItem(
-    audience: _Audience.all,
-    label: '🌟 All Members',
-    color: Color(0xFFFDE68A),
-    bg: Color(0x33D4AF37),
-  ),
-  _FilterChipItem(
-    audience: _Audience.botDue,
-    label: '🤖 Bot Due Queue',
-    color: Color(0xFFC084FC),
-    bg: Color(0x33A855F7),
-  ),
+  // ── Category 1: 📅 Due Dates & Sequence ─────────────────────────────────────
   _FilterChipItem(
     audience: _Audience.stage1_1st,
-    label: '🔵 1st of Month (Day 1)',
-    color: Color(0xFF60A5FA),
-    bg: Color(0x333B82F6),
+    category: 'MONTH-END DUE SEQUENCE',
+    title: '1st of Month (Day 1)',
+    subtitle: '1st polite payment reminder sent to students with dues',
+    icon: Icons.calendar_today_rounded,
+    color: Color(0xFF3B82F6), // Royal Blue
+    bg: Color(0xFF0C192E),
   ),
   _FilterChipItem(
     audience: _Audience.stage2_3rd,
-    label: '🟣 3rd of Month (Day 3)',
-    color: Color(0xFFC084FC),
-    bg: Color(0x338B5CF6),
+    category: 'MONTH-END DUE SEQUENCE',
+    title: '3rd of Month (Day 3)',
+    subtitle: 'Seat hold notice & 2nd administrative alert',
+    icon: Icons.event_available_rounded,
+    color: Color(0xFFA855F7), // Royal Purple
+    bg: Color(0xFF1F0B36),
   ),
   _FilterChipItem(
     audience: _Audience.stage3_5th,
-    label: '🔴 5th of Month (Final)',
-    color: Color(0xFFF87171),
-    bg: Color(0x33EF4444),
+    category: 'MONTH-END DUE SEQUENCE',
+    title: '5th of Month (Final Grace)',
+    subtitle: 'Final warning — 12-hour grace period starts',
+    icon: Icons.warning_amber_rounded,
+    color: Color(0xFFEF4444), // Crimson Red
+    bg: Color(0xFF2B0A0A),
   ),
   _FilterChipItem(
     audience: _Audience.stage4_12h,
-    label: '🚨 +12h Deallocation',
-    color: Color(0xFFFCA5A5),
-    bg: Color(0x33DC2626),
+    category: 'MONTH-END DUE SEQUENCE',
+    title: '+12h Seat Release Notice',
+    subtitle: 'Final grace expired — seat deallocated notification',
+    icon: Icons.cancel_outlined,
+    color: Color(0xFFEC4899), // Velvet Berry Pink
+    bg: Color(0xFF2C0B1B),
+  ),
+
+  // ── Category 2: 👥 Student Membership Status ───────────────────────────────
+  _FilterChipItem(
+    audience: _Audience.all,
+    category: 'MEMBERSHIP STATUS',
+    title: 'All Registered Students',
+    subtitle: 'Every registered student across all branches',
+    icon: Icons.groups_rounded,
+    color: Color(0xFFD4AF37), // Imperial Gold
+    bg: Color(0xFF1C1408),
   ),
   _FilterChipItem(
     audience: _Audience.active,
-    label: '🟢 Active Students',
-    color: Color(0xFF34D399),
-    bg: Color(0x3310B981),
+    category: 'MEMBERSHIP STATUS',
+    title: 'Active Students',
+    subtitle: 'Currently enrolled students with valid memberships',
+    icon: Icons.check_circle_outline_rounded,
+    color: Color(0xFF10B981), // Emerald Green
+    bg: Color(0xFF062B1D),
   ),
   _FilterChipItem(
     audience: _Audience.expiring,
-    label: '⏰ Expiring (≤15 Days)',
-    color: Color(0xFFFBBF24),
-    bg: Color(0x33F59E0B),
+    category: 'MEMBERSHIP STATUS',
+    title: 'Expiring Soon (≤ 15 Days)',
+    subtitle: 'Students whose plan ends within the next 15 days',
+    icon: Icons.hourglass_top_rounded,
+    color: Color(0xFFF59E0B), // Warm Amber
+    bg: Color(0xFF241604),
   ),
   _FilterChipItem(
     audience: _Audience.expired,
-    label: '❌ Expired / Overdue',
-    color: Color(0xFFF87171),
-    bg: Color(0x33EF4444),
+    category: 'MEMBERSHIP STATUS',
+    title: 'Expired / Overdue Students',
+    subtitle: 'Students with overdue or expired memberships',
+    icon: Icons.person_off_rounded,
+    color: Color(0xFFDC2626), // Ruby Red
+    bg: Color(0xFF260808),
+  ),
+
+  // ── Category 3: 🤖 Automated & Direct ──────────────────────────────────────
+  _FilterChipItem(
+    audience: _Audience.botDue,
+    category: 'AUTOMATED & DIRECT',
+    title: 'Automated Bot Due Queue',
+    subtitle: 'Students identified automatically by the due cycle bot',
+    icon: Icons.smart_toy_rounded,
+    color: Color(0xFF14B8A6), // Sea Green / Teal
+    bg: Color(0xFF072421),
   ),
   _FilterChipItem(
     audience: _Audience.individual,
-    label: '👤 Pick Student',
-    color: Color(0xFF38BDF8),
-    bg: Color(0x330EA5E9),
+    category: 'AUTOMATED & DIRECT',
+    title: 'Pick Specific Student',
+    subtitle: 'Select an individual student from the directory',
+    icon: Icons.person_search_rounded,
+    color: Color(0xFF0EA5E9), // Sky Blue
+    bg: Color(0xFF082535),
   ),
 ];
 
@@ -117,6 +161,8 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
   final _customBodyCtrl = TextEditingController();
   final _holidayMsgCtrl = TextEditingController();
   final _announcementCtrl = TextEditingController();
+  final _previewCtrl = TextEditingController();
+  bool _previewManuallyEdited = false;
   Member? _pickedMember;
   bool _sending = false;
 
@@ -143,7 +189,17 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
       setState(() {
         _adminNumberCtrl.text = num;
         _botActive = active;
+        if (!_previewManuallyEdited) {
+          _previewCtrl.text = _buildPreview(num);
+        }
       });
+    }
+  }
+
+  void _syncPreview(String adminNumber, {bool force = false}) {
+    if (force || !_previewManuallyEdited) {
+      _previewCtrl.text = _buildPreview(adminNumber);
+      if (force) _previewManuallyEdited = false;
     }
   }
 
@@ -153,6 +209,7 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
     _customBodyCtrl.dispose();
     _holidayMsgCtrl.dispose();
     _announcementCtrl.dispose();
+    _previewCtrl.dispose();
     _adminNumberCtrl.dispose();
     _memberSearchCtrl.dispose();
     super.dispose();
@@ -346,7 +403,17 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
       final m = validMembers[i];
       String msg;
 
-      if (isBotQueue || _audience == _Audience.botDue || _audience == _Audience.stage1_1st ||
+      if (_previewManuallyEdited && _previewCtrl.text.trim().isNotEmpty) {
+        msg = _previewCtrl.text
+            .replaceAll('{name}', m.name)
+            .replaceAll('{student}', m.name)
+            .replaceAll('{memberCode}', m.memberCode)
+            .replaceAll('{code}', m.memberCode)
+            .replaceAll('{seat}', m.currentSeatNumber ?? 'Hold')
+            .replaceAll('{phone}', m.phone ?? '')
+            .replaceAll('{contact}', adminNumber)
+            .replaceAll('{admin}', adminNumber);
+      } else if (isBotQueue || _audience == _Audience.botDue || _audience == _Audience.stage1_1st ||
           _audience == _Audience.stage2_3rd || _audience == _Audience.stage3_5th ||
           _audience == _Audience.stage4_12h) {
         BotDueStage stage = BotDueStage.stage1Day1;
@@ -554,23 +621,26 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
                   unselectedLabelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
                   padding: const EdgeInsets.all(3),
                   dividerColor: Colors.transparent,
-                  isScrollable: true,
-                  tabAlignment: TabAlignment.fill,
+                  isScrollable: false,
                   tabs: const [
                     Tab(
                       icon: Icon(Icons.smart_toy_rounded, size: 16),
+                      iconMargin: EdgeInsets.only(bottom: 2),
                       text: 'Auto Bot',
                     ),
                     Tab(
                       icon: Icon(Icons.campaign_rounded, size: 16),
+                      iconMargin: EdgeInsets.only(bottom: 2),
                       text: 'Broadcast',
                     ),
                     Tab(
                       icon: Icon(Icons.people_alt_rounded, size: 16),
+                      iconMargin: EdgeInsets.only(bottom: 2),
                       text: 'Students',
                     ),
                     Tab(
                       icon: Icon(Icons.settings_rounded, size: 16),
+                      iconMargin: EdgeInsets.only(bottom: 2),
                       text: 'Settings',
                     ),
                   ],
@@ -617,14 +687,26 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
                       customBodyCtrl: _customBodyCtrl,
                       holidayMsgCtrl: _holidayMsgCtrl,
                       announcementCtrl: _announcementCtrl,
+                      previewCtrl: _previewCtrl,
+                      isManuallyEdited: _previewManuallyEdited,
                       pickedMember: _pickedMember,
                       adminNumber: adminNumber,
                       sending: _sending,
                       membersAsync: membersAsync,
-                      preview: _buildPreview(adminNumber),
-                      onAudienceChanged: (a) => setState(() => _audience = a),
-                      onTemplateChanged: (t) => setState(() => _template = t),
-                      onPickMember: (m) => setState(() => _pickedMember = m),
+                      onPreviewEdited: () => setState(() => _previewManuallyEdited = true),
+                      onResetPreview: () => setState(() => _syncPreview(adminNumber, force: true)),
+                      onAudienceChanged: (a) => setState(() {
+                        _audience = a;
+                        _syncPreview(adminNumber);
+                      }),
+                      onTemplateChanged: (t) => setState(() {
+                        _template = t;
+                        _syncPreview(adminNumber);
+                      }),
+                      onPickMember: (m) => setState(() {
+                        _pickedMember = m;
+                        _syncPreview(adminNumber);
+                      }),
                       onSendAll: (all) => _sendMessages(all, adminNumber),
                       onSendFiltered: (filtered) => _sendMessages(filtered, adminNumber),
                       filterMembers: (all) => _filterMembers(all, adminNumber),
@@ -711,40 +793,11 @@ class _BotEngineTab extends StatelessWidget {
         final queue = svc.getBotDueQueue(allMembers, adminNumber);
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(14, 4, 14, 90),
+          padding: const EdgeInsets.fromLTRB(14, 8, 14, 90),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Slim Bot Active Status Banner (always ON — no toggle)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0A1A0F),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.4), width: 1),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 8, height: 8,
-                      decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF10B981)),
-                    ),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Text(
-                        'Auto Bot is permanently active — reminders trigger on 1st, 3rd, 5th & +12h of each month.',
-                        style: TextStyle(color: Color(0xFF6EE7B7), fontSize: 11, fontWeight: FontWeight.w600, height: 1.4),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    const Text('🤖', style: TextStyle(fontSize: 18)),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 14),
-
-              // 2. Today's Alert Banner — prominent when students are due
+              // Today's Alert Banner — prominent when students are due
               if (queue.isNotEmpty) ...[
                 Container(
                   width: double.infinity,
@@ -1022,11 +1075,14 @@ class _BroadcastTab extends StatelessWidget {
   final TextEditingController customBodyCtrl;
   final TextEditingController holidayMsgCtrl;
   final TextEditingController announcementCtrl;
+  final TextEditingController previewCtrl;
+  final bool isManuallyEdited;
   final Member? pickedMember;
   final String adminNumber;
   final bool sending;
   final AsyncValue membersAsync;
-  final String preview;
+  final VoidCallback onPreviewEdited;
+  final VoidCallback onResetPreview;
   final ValueChanged<_Audience> onAudienceChanged;
   final ValueChanged<WaTemplate> onTemplateChanged;
   final ValueChanged<Member?> onPickMember;
@@ -1040,11 +1096,14 @@ class _BroadcastTab extends StatelessWidget {
     required this.customBodyCtrl,
     required this.holidayMsgCtrl,
     required this.announcementCtrl,
+    required this.previewCtrl,
+    required this.isManuallyEdited,
     required this.pickedMember,
     required this.adminNumber,
     required this.sending,
     required this.membersAsync,
-    required this.preview,
+    required this.onPreviewEdited,
+    required this.onResetPreview,
     required this.onAudienceChanged,
     required this.onTemplateChanged,
     required this.onPickMember,
@@ -1053,194 +1112,370 @@ class _BroadcastTab extends StatelessWidget {
     required this.filterMembers,
   });
 
+  void _showAiPromptDialog(BuildContext context) {
+    final promptCtrl = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF161022),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Color(0xFFA855F7), width: 1.2),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.auto_awesome_rounded, color: Color(0xFFC084FC), size: 22),
+            SizedBox(width: 8),
+            Text(
+              'AI Message Writer',
+              style: TextStyle(color: Color(0xFFFDE68A), fontSize: 16, fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Type your notice in simple words (English/Hindi). AI will format it with emojis, bold text & official library style:',
+              style: TextStyle(color: Color(0xFFC5B38B), fontSize: 12, height: 1.4),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: promptCtrl,
+              maxLines: 4,
+              autofocus: true,
+              style: const TextStyle(color: Colors.white, fontSize: 13),
+              decoration: InputDecoration(
+                hintText: 'e.g., Library will remain closed tomorrow 2 PM for AC maintenance...',
+                hintStyle: const TextStyle(color: Color(0xFF777777), fontSize: 12),
+                filled: true,
+                fillColor: const Color(0xFF0F0B18),
+                contentPadding: const EdgeInsets.all(12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF4C1D95)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF4C1D95)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFA855F7), width: 1.5),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: Color(0xFF888888))),
+          ),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFA855F7),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () {
+              final text = promptCtrl.text.trim();
+              if (text.isNotEmpty) {
+                final generated = WhatsAppAiService.instance.generateFromTopic(
+                  text,
+                  adminNumber: adminNumber,
+                );
+                previewCtrl.text = generated;
+                onPreviewEdited();
+                Navigator.pop(ctx);
+              }
+            },
+            icon: const Icon(Icons.bolt_rounded, size: 16),
+            label: const Text('Generate with AI', style: TextStyle(fontWeight: FontWeight.w800)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _aiChip({
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.18),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withValues(alpha: 0.5), width: 1),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return membersAsync.when(
       data: (data) {
         final allMembers = data.data as List<Member>;
         final filtered = filterMembers(allMembers);
+        final activeChip = _filterChips.firstWhere((c) => c.audience == audience);
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(14, 4, 14, 90),
+          padding: const EdgeInsets.fromLTRB(14, 8, 14, 90),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Dual Send Actions (Send All in 1 button vs Send to Filtered)
+              // ── 1. Unified Action Cards: All Members vs Filtered Audience ────
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Button 1: Send to All Members (1-Tap)
+                  // Card 1: All Students (1-Tap Broadcast)
                   Expanded(
-                    child: GestureDetector(
-                      onTap: sending ? null : () => onSendAll(allMembers),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFD4AF37), Color(0xFFF59E0B)],
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF2A1F0D), Color(0xFF140F05)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.5), width: 1.2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                            blurRadius: 10,
+                            offset: const Offset(0, 3),
                           ),
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
-                              blurRadius: 10,
-                              offset: const Offset(0, 3),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(Icons.groups_rounded, color: Color(0xFFFDE68A), size: 16),
+                              ),
+                              const SizedBox(width: 8),
+                              const Expanded(
+                                child: Text(
+                                  'All Students',
+                                  style: TextStyle(color: Color(0xFFFDE68A), fontSize: 12.5, fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '${allMembers.length} Registered',
+                            style: const TextStyle(color: Color(0xFFB8975A), fontSize: 11, fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 10),
+                          GestureDetector(
+                            onTap: sending ? null : () => onSendAll(allMembers),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 9),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFFD4AF37), Color(0xFFF59E0B)],
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.send_rounded, color: Colors.black, size: 13),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      'Send All (${allMembers.length})',
+                                      style: const TextStyle(color: Colors.black, fontSize: 11.5, fontWeight: FontWeight.w900),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.all_inclusive_rounded, color: Colors.black, size: 17),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Send All (${allMembers.length})',
-                              style: const TextStyle(color: Colors.black, fontSize: 13, fontWeight: FontWeight.w900),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   const SizedBox(width: 10),
-                  // Button 2: Send Based on Filter Applied
+
+                  // Card 2: Filtered Card (Work as Filter Selector & Filtered Dispatch)
                   Expanded(
-                    child: GestureDetector(
-                      onTap: sending || filtered.isEmpty ? null : () => onSendFiltered(filtered),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: filtered.isEmpty
-                                ? [const Color(0xFF222222), const Color(0xFF1A1A1A)]
-                                : [const Color(0xFF8B5CF6), const Color(0xFF6D28D9)],
-                          ),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: filtered.isEmpty ? const Color(0xFF333333) : const Color(0xFFA855F7),
-                            width: 1,
-                          ),
-                          boxShadow: filtered.isEmpty
-                              ? []
-                              : [
-                                  BoxShadow(
-                                    color: const Color(0xFF8B5CF6).withValues(alpha: 0.35),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.filter_alt_rounded, color: filtered.isEmpty ? Colors.grey : Colors.white, size: 17),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Filtered (${filtered.length})',
-                              style: TextStyle(
-                                color: filtered.isEmpty ? Colors.grey : Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // 2. Audience Filter Section — premium structured panel
-              Row(
-                children: [
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'AUDIENCE FILTER',
-                          style: TextStyle(
-                            color: Color(0xFFD4AF37),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (ctx) => _AudienceFilterSheet(
-                          selected: audience,
-                          onSelected: (a) {
-                            onAudienceChanged(a);
-                            Navigator.pop(ctx);
-                          },
-                        ),
-                      );
-                    },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF2A1F0D), Color(0xFF1C160B)],
+                        gradient: LinearGradient(
+                          colors: [activeChip.bg, const Color(0xFF100D1A)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFFD4AF37), width: 1),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.tune_rounded, color: Color(0xFFFDE68A), size: 15),
-                          SizedBox(width: 6),
-                          Text(
-                            'Filter',
-                            style: TextStyle(color: Color(0xFFFDE68A), fontSize: 12, fontWeight: FontWeight.w800),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: activeChip.color.withValues(alpha: 0.6), width: 1.2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: activeChip.color.withValues(alpha: 0.18),
+                            blurRadius: 10,
+                            offset: const Offset(0, 3),
                           ),
-                          SizedBox(width: 4),
-                          Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFFD4AF37), size: 16),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (ctx) => _AudienceFilterSheet(
+                                  selected: audience,
+                                  onSelected: (a) {
+                                    onAudienceChanged(a);
+                                    Navigator.pop(ctx);
+                                  },
+                                ),
+                              );
+                            },
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: activeChip.color.withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(activeChip.icon, color: activeChip.color, size: 16),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    activeChip.title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(color: activeChip.color, fontSize: 12, fontWeight: FontWeight.w900),
+                                  ),
+                                ),
+                                const Icon(Icons.arrow_drop_down_rounded, color: Colors.white70, size: 20),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '${filtered.length} Students Selected',
+                            style: TextStyle(color: activeChip.color.withValues(alpha: 0.8), fontSize: 11, fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              // Change Filter button
+                              Expanded(
+                                flex: 4,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      builder: (ctx) => _AudienceFilterSheet(
+                                        selected: audience,
+                                        onSelected: (a) {
+                                          onAudienceChanged(a);
+                                          Navigator.pop(ctx);
+                                        },
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 9),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF14120E),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: activeChip.color.withValues(alpha: 0.5)),
+                                    ),
+                                    child: Center(
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.tune_rounded, color: activeChip.color, size: 12),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Filter',
+                                            style: TextStyle(color: activeChip.color, fontSize: 11, fontWeight: FontWeight.w800),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              // Send Filtered button
+                              Expanded(
+                                flex: 5,
+                                child: GestureDetector(
+                                  onTap: sending || filtered.isEmpty ? null : () => onSendFiltered(filtered),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 9),
+                                    decoration: BoxDecoration(
+                                      gradient: filtered.isEmpty
+                                          ? const LinearGradient(colors: [Color(0xFF333333), Color(0xFF222222)])
+                                          : LinearGradient(
+                                              colors: [activeChip.color, activeChip.color.withValues(alpha: 0.75)],
+                                            ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'Send (${filtered.length})',
+                                        style: TextStyle(
+                                          color: filtered.isEmpty ? Colors.grey : Colors.white,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              // Active filter display pill
-              Builder(builder: (context) {
-                final active = _filterChips.firstWhere((c) => c.audience == audience);
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: active.bg,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: active.color, width: 1),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        active.label,
-                        style: TextStyle(color: active.color, fontSize: 12, fontWeight: FontWeight.w700),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${filtered.length} students',
-                        style: TextStyle(color: active.color.withValues(alpha: 0.7), fontSize: 11, fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                );
-              }),
 
-              // Individual picker if audience is individual
+              // Individual Student Picker Card if individual audience selected
               if (audience == _Audience.individual) ...[
                 const SizedBox(height: 10),
                 GestureDetector(
@@ -1252,38 +1487,46 @@ class _BroadcastTab extends StatelessWidget {
                     onPickMember(picked);
                   },
                   child: Container(
-                    padding: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF14120E),
+                      color: const Color(0xFF082535),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFFD4AF37)),
+                      border: Border.all(color: const Color(0xFF0EA5E9), width: 1.2),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.person_search_rounded, color: Color(0xFFFDE68A), size: 20),
+                        const Icon(Icons.person_search_rounded, color: Color(0xFF38BDF8), size: 20),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: Text(
-                            pickedMember?.name ?? 'Tap to select student...',
-                            style: TextStyle(
-                              color: pickedMember != null ? Colors.white : const Color(0xFF777777),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                pickedMember?.name ?? 'Tap to select student from directory...',
+                                style: TextStyle(
+                                  color: pickedMember != null ? Colors.white : const Color(0xFF888888),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              if (pickedMember != null)
+                                Text(
+                                  'Phone: ${pickedMember!.phone ?? 'N/A'} • Seat: ${pickedMember!.currentSeatNumber ?? 'Hold'}',
+                                  style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 11),
+                                ),
+                            ],
                           ),
                         ),
-                        if (pickedMember != null)
-                          Text(pickedMember!.phone ?? '', style: const TextStyle(color: Color(0xFFD4AF37), fontSize: 11)),
-                        const Icon(Icons.chevron_right_rounded, color: Color(0xFF555555), size: 18),
+                        const Icon(Icons.chevron_right_rounded, color: Color(0xFF38BDF8), size: 18),
                       ],
                     ),
                   ),
                 ),
               ],
 
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
 
-              // 3. Multi-Color Template Cards
+              // ── 2. Message Templates (Multicolour Palette) ───────────────────
               const Text(
                 'CHOOSE MESSAGE TEMPLATE',
                 style: TextStyle(
@@ -1302,28 +1545,28 @@ class _BroadcastTab extends StatelessWidget {
 
                 switch (t.key) {
                   case WaTemplate.feeReminder:
-                    tColor = const Color(0xFFF59E0B);
+                    tColor = const Color(0xFFF59E0B); // Warm Gold / Amber
                     tBg = const Color(0xFF2A1C08);
                     break;
                   case WaTemplate.membershipExpiring:
-                    tColor = const Color(0xFF3B82F6);
-                    tBg = const Color(0xFF0C2448);
+                    tColor = const Color(0xFF3B82F6); // Royal Sapphire Blue
+                    tBg = const Color(0xFF0C192E);
                     break;
                   case WaTemplate.welcome:
-                    tColor = const Color(0xFF10B981);
-                    tBg = const Color(0xFF063327);
+                    tColor = const Color(0xFF10B981); // Emerald Green
+                    tBg = const Color(0xFF062B1D);
                     break;
                   case WaTemplate.holidayClosed:
-                    tColor = const Color(0xFFA855F7);
-                    tBg = const Color(0xFF2E1065);
+                    tColor = const Color(0xFFEC4899); // Velvet Pink
+                    tBg = const Color(0xFF2C0B1B);
                     break;
                   case WaTemplate.announcement:
-                    tColor = const Color(0xFF0EA5E9);
-                    tBg = const Color(0xFF082F49);
+                    tColor = const Color(0xFF14B8A6); // Sea Green / Deep Teal
+                    tBg = const Color(0xFF072421);
                     break;
                   case WaTemplate.custom:
-                    tColor = const Color(0xFFEF4444);
-                    tBg = const Color(0xFF3B0B0B);
+                    tColor = const Color(0xFFA855F7); // Royal Amethyst Purple
+                    tBg = const Color(0xFF1F0B36);
                     break;
                 }
 
@@ -1373,7 +1616,7 @@ class _BroadcastTab extends StatelessWidget {
                 );
               }),
 
-              // Custom Input Fields
+              // Custom Input Fields (if template needs body)
               if (template == WaTemplate.custom) ...[
                 const SizedBox(height: 8),
                 _textArea('Custom Message Body', customBodyCtrl, 'Write your announcement or notice here...', 4),
@@ -1387,61 +1630,193 @@ class _BroadcastTab extends StatelessWidget {
 
               const SizedBox(height: 18),
 
-              // 4. Live WhatsApp Preview
-              const Text(
-                'LIVE WHATSAPP PREVIEW',
-                style: TextStyle(
-                  color: Color(0xFFD4AF37),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.2,
-                ),
+              // ── 3. Live WhatsApp Preview (Editable with AI Writing Assistant) ──
+              Row(
+                children: [
+                  const WhatsAppLogo(size: 16, color: Color(0xFFFDE68A)),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'LIVE WHATSAPP PREVIEW (EDITABLE)',
+                      style: TextStyle(
+                        color: Color(0xFFD4AF37),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ),
+                  if (isManuallyEdited)
+                    GestureDetector(
+                      onTap: onResetPreview,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2A2215),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.4)),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.refresh_rounded, color: Color(0xFFD4AF37), size: 12),
+                            SizedBox(width: 4),
+                            Text('Reset', style: TextStyle(color: Color(0xFFD4AF37), fontSize: 10, fontWeight: FontWeight.w700)),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 8),
+
+              // AI Writing Assistant Toolbar
               Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(14),
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF1C160B), Color(0xFF100C05)],
+                    colors: [Color(0xFF1E1035), Color(0xFF100C1F)],
                   ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF8B5CF6).withValues(alpha: 0.45)),
+                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.auto_awesome_rounded, color: Color(0xFFC084FC), size: 15),
+                          SizedBox(width: 5),
+                          Text('AI Writer:', style: TextStyle(color: Color(0xFFDDD6FE), fontSize: 11, fontWeight: FontWeight.w800)),
+                          SizedBox(width: 8),
+                        ],
+                      ),
+                      _aiChip(
+                        label: '✨ AI Polish',
+                        color: const Color(0xFFA855F7), // Royal Purple
+                        onTap: () {
+                          final polished = WhatsAppAiService.instance.polishAndFormat(
+                            previewCtrl.text,
+                            adminNumber: adminNumber,
+                          );
+                          previewCtrl.text = polished;
+                          onPreviewEdited();
+                        },
+                      ),
+                      const SizedBox(width: 6),
+                      _aiChip(
+                        label: '🙏 Polite Tone',
+                        color: const Color(0xFF10B981), // Emerald Green
+                        onTap: () {
+                          final polite = WhatsAppAiService.instance.makePolite(
+                            previewCtrl.text,
+                            adminNumber: adminNumber,
+                          );
+                          previewCtrl.text = polite;
+                          onPreviewEdited();
+                        },
+                      ),
+                      const SizedBox(width: 6),
+                      _aiChip(
+                        label: '⚡ Urgent',
+                        color: const Color(0xFFEF4444), // Crimson Red
+                        onTap: () {
+                          final urgent = WhatsAppAiService.instance.makeUrgent(
+                            previewCtrl.text,
+                            adminNumber: adminNumber,
+                          );
+                          previewCtrl.text = urgent;
+                          onPreviewEdited();
+                        },
+                      ),
+                      const SizedBox(width: 6),
+                      _aiChip(
+                        label: '🇮🇳 Hindi + English',
+                        color: const Color(0xFFF59E0B), // Warm Amber
+                        onTap: () {
+                          final hindi = WhatsAppAiService.instance.makeBilingualHindi(
+                            previewCtrl.text,
+                            adminNumber: adminNumber,
+                          );
+                          previewCtrl.text = hindi;
+                          onPreviewEdited();
+                        },
+                      ),
+                      const SizedBox(width: 6),
+                      _aiChip(
+                        label: '🪄 Custom AI Prompt',
+                        color: const Color(0xFF38BDF8), // Cyan / Sky Blue
+                        onTap: () => _showAiPromptDialog(context),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Editable Message Container
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0F0D09),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.5)),
+                  border: Border.all(
+                    color: isManuallyEdited
+                        ? const Color(0xFF10B981).withValues(alpha: 0.6)
+                        : const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                    width: 1.2,
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    TextField(
+                      controller: previewCtrl,
+                      maxLines: 8,
+                      minLines: 4,
+                      onChanged: (_) => onPreviewEdited(),
+                      style: const TextStyle(
+                        color: Color(0xFFE2E8F0),
+                        fontSize: 12.5,
+                        height: 1.45,
+                        fontFamily: 'monospace',
+                      ),
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                        border: InputBorder.none,
+                        hintText: 'Type or edit your WhatsApp message...',
+                        hintStyle: TextStyle(color: Color(0xFF555555), fontSize: 12),
+                      ),
+                    ),
+                    const Divider(color: Color(0x33D4AF37), height: 16),
                     Row(
                       children: [
-                        const WhatsAppLogo(size: 16, color: Color(0xFFFDE68A)),
-                        const SizedBox(width: 8),
                         const Text(
-                          'Formatted WhatsApp Preview',
-                          style: TextStyle(color: Color(0xFFFDE68A), fontSize: 11, fontWeight: FontWeight.w800),
+                          'Placeholders: {name}, {seat}, {phone}',
+                          style: TextStyle(color: Color(0xFF777777), fontSize: 10),
                         ),
                         const Spacer(),
                         GestureDetector(
                           onTap: () {
-                            Clipboard.setData(ClipboardData(text: preview));
+                            Clipboard.setData(ClipboardData(text: previewCtrl.text));
                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                               content: Text('Message copied!'),
                               duration: Duration(seconds: 1),
                               behavior: SnackBarBehavior.floating,
                             ));
                           },
-                          child: const Icon(Icons.copy_rounded, color: Color(0xFFFDE68A), size: 16),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.copy_rounded, color: Color(0xFFFDE68A), size: 14),
+                              SizedBox(width: 4),
+                              Text('Copy', style: TextStyle(color: Color(0xFFFDE68A), fontSize: 11, fontWeight: FontWeight.w700)),
+                            ],
+                          ),
                         ),
                       ],
-                    ),
-                    const Divider(color: Color(0x33D4AF37), height: 16),
-                    Text(
-                      preview,
-                      style: const TextStyle(
-                        color: Color(0xFFE2E8F0),
-                        fontSize: 12,
-                        height: 1.5,
-                        fontFamily: 'monospace',
-                      ),
                     ),
                   ],
                 ),
@@ -1823,11 +2198,19 @@ class _AudienceFilterSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final categories = <String, List<_FilterChipItem>>{};
+    for (final chip in _filterChips) {
+      categories.putIfAbsent(chip.category, () => []).add(chip);
+    }
+
     return Container(
-      margin: const EdgeInsets.fromLTRB(12, 0, 12, 24),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.82,
+      ),
+      margin: const EdgeInsets.fromLTRB(10, 0, 10, 20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF1C160B), Color(0xFF100C05)],
+          colors: [Color(0xFF1E170C), Color(0xFF100C05)],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -1839,9 +2222,9 @@ class _AudienceFilterSheet extends StatelessWidget {
         children: [
           // Handle
           Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 6),
+            padding: const EdgeInsets.only(top: 12, bottom: 8),
             child: Container(
-              width: 40, height: 4,
+              width: 44, height: 4,
               decoration: BoxDecoration(
                 color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(2),
@@ -1849,72 +2232,130 @@ class _AudienceFilterSheet extends StatelessWidget {
             ),
           ),
           // Title
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Row(
               children: [
-                Icon(Icons.tune_rounded, color: Color(0xFFFDE68A), size: 18),
-                SizedBox(width: 10),
-                Text(
-                  'SELECT AUDIENCE FILTER',
-                  style: TextStyle(
-                    color: Color(0xFFFDE68A),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
+                const Icon(Icons.filter_list_rounded, color: Color(0xFFFDE68A), size: 20),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'AUDIENCE FILTER SELECTOR',
+                        style: TextStyle(
+                          color: Color(0xFFFDE68A),
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.7,
+                        ),
+                      ),
+                      Text(
+                        'Select due dates, enrollment status, or individual student',
+                        style: TextStyle(color: Color(0xFF999999), fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFF221A0E),
+                    ),
+                    child: const Icon(Icons.close_rounded, color: Color(0xFFD4AF37), size: 16),
                   ),
                 ),
               ],
             ),
           ),
           const Divider(color: Color(0xFF2A2215), height: 1),
-          // All filter options in a beautiful grid
-          Padding(
-            padding: const EdgeInsets.all(14),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _filterChips.map((chip) {
-                final isSel = selected == chip.audience;
-                return GestureDetector(
-                  onTap: () => onSelected(chip.audience),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: isSel ? chip.bg : const Color(0xFF14120E),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isSel ? chip.color : const Color(0xFF2A2215),
-                        width: isSel ? 1.8 : 1,
+          // Structured Categorized List
+          Flexible(
+            child: ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 16),
+              children: [
+                for (final entry in categories.entries) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4, top: 12, bottom: 6),
+                    child: Text(
+                      entry.key,
+                      style: const TextStyle(
+                        color: Color(0xFFD4AF37),
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.1,
                       ),
-                      boxShadow: isSel
-                          ? [BoxShadow(color: chip.color.withValues(alpha: 0.18), blurRadius: 8)]
-                          : [],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          chip.label,
-                          style: TextStyle(
-                            color: isSel ? chip.color : const Color(0xFF888888),
-                            fontSize: 12,
-                            fontWeight: isSel ? FontWeight.w800 : FontWeight.w500,
-                          ),
-                        ),
-                        if (isSel) ...[
-                          const SizedBox(width: 6),
-                          Icon(Icons.check_circle_rounded, color: chip.color, size: 14),
-                        ],
-                      ],
                     ),
                   ),
-                );
-              }).toList(),
+                  for (final item in entry.value) ...[
+                    GestureDetector(
+                      onTap: () => onSelected(item.audience),
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: selected == item.audience ? item.bg : const Color(0xFF14120E),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: selected == item.audience ? item.color : const Color(0xFF2A2215),
+                            width: selected == item.audience ? 1.5 : 1,
+                          ),
+                          boxShadow: selected == item.audience
+                              ? [BoxShadow(color: item.color.withValues(alpha: 0.18), blurRadius: 8)]
+                              : [],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 36, height: 36,
+                              decoration: BoxDecoration(
+                                color: item.color.withValues(alpha: 0.18),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: item.color.withValues(alpha: 0.4)),
+                              ),
+                              child: Center(
+                                child: Icon(item.icon, color: item.color, size: 18),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.title,
+                                    style: TextStyle(
+                                      color: selected == item.audience ? item.color : Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    item.subtitle,
+                                    style: const TextStyle(color: Color(0xFF888888), fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (selected == item.audience)
+                              Icon(Icons.check_circle_rounded, color: item.color, size: 20)
+                            else
+                              const Icon(Icons.chevron_right_rounded, color: Color(0xFF444444), size: 18),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ],
             ),
           ),
-          const SizedBox(height: 8),
         ],
       ),
     );

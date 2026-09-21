@@ -1,0 +1,457 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  OWNER
+  ADMIN
+  BRANCH_MANAGER
+  STAFF
+}
+
+enum SeatStatus {
+  AVAILABLE
+  OCCUPIED
+  RESERVED
+  MAINTENANCE
+}
+
+enum AttendanceMethod {
+  MANUAL
+  QR
+}
+
+enum PaymentMethod {
+  CASH
+  UPI
+  CARD
+  BANK
+  OTHER
+}
+
+enum ExpenseCategory {
+  ELECTRICITY
+  INTERNET
+  MAINTENANCE
+  SALARY
+  CLEANING
+  EQUIPMENT
+  OTHER
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  INTERESTED
+  CONVERTED
+  NOT_INTERESTED
+}
+
+enum CommunicationChannel {
+  SMS
+  WHATSAPP
+  PUSH
+}
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique // e.g. CML, CRH
+  slug      String   @unique // e.g. chintamani, city-reading-hub
+  logo      String?
+  phone     String?
+  email     String?
+  address   String?
+  city      String?
+  state     String?
+  country   String   @default("India")
+  plan      String   @default("STANDARD") // TRIAL, STANDARD, ENTERPRISE
+  status    String   @default("ACTIVE") // ACTIVE, SUSPENDED
+  settings  String?  // JSON string
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  branches         Branch[]
+  users            User[]
+  members          Member[]
+  membershipPlans  MembershipPlan[]
+  subscriptions    Subscription[]
+  seats            Seat[]
+  lockers          Locker[]
+  attendances      Attendance[]
+  payments         Payment[]
+  expenses         Expense[]
+  enquiries        Enquiry[]
+  auditLogs        AuditLog[]
+  settingsRel      Settings[]
+  notifications    Notification[]
+  communicationLogs CommunicationLog[]
+  qrCodes          QrCode[]
+}
+
+model Branch {
+  id        String   @id @default(uuid())
+  tenantId  String
+  name      String
+  address   String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant           Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  users            UserBranchAccess[]
+  members          Member[]
+  seats            Seat[]
+  lockers          Locker[]
+  attendances      Attendance[]
+  expenses         Expense[]
+  enquiries        Enquiry[]
+  auditLogs        AuditLog[]
+  settings         Settings[]
+  MembershipPlan   MembershipPlan[]
+
+  @@index([tenantId])
+}
+
+model User {
+  id        String   @id @default(uuid())
+  tenantId  String?
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(STAFF)
+  phone     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant           Tenant?            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branches         UserBranchAccess[]
+  permissions      Permission[]
+  auditLogs        AuditLog[]
+
+  @@index([tenantId])
+}
+
+model UserBranchAccess {
+  id        String   @id @default(uuid())
+  userId    String
+  branchId  String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch    Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, branchId])
+}
+
+model Permission {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, action])
+}
+
+model Member {
+  id             String   @id @default(uuid())
+  tenantId       String
+  branchId       String
+  memberCode     String
+  name           String
+  email          String?
+  phone          String
+  dob            DateTime?
+  address        String?
+  academicInfo   String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch         Branch         @relation(fields: [branchId], references: [id])
+  subscriptions  Subscription[]
+  attendances    Attendance[]
+  payments       Payment[]
+
+  @@unique([tenantId, memberCode])
+  @@index([tenantId])
+  @@index([phone])
+  @@index([memberCode])
+  @@index([branchId])
+}
+
+model MembershipPlan {
+  id             String   @id @default(uuid())
+  tenantId       String
+  branchId       String
+  name           String
+  durationDays   Int
+  price          Float
+  includesSeat   Boolean  @default(true)
+  includesLocker Boolean  @default(false)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch         Branch         @relation(fields: [branchId], references: [id])
+  subscriptions  Subscription[]
+
+  @@index([tenantId])
+}
+
+model Subscription {
+  id               String   @id @default(uuid())
+  tenantId         String
+  memberId         String
+  planId           String
+  startDate        DateTime
+  endDate          DateTime
+  status           String   @default("ACTIVE") // ACTIVE, EXPIRED, CANCELLED
+  assignedSeatId   String?
+  assignedLockerId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  tenant           Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  member           Member         @relation(fields: [memberId], references: [id])
+  plan             MembershipPlan @relation(fields: [planId], references: [id])
+  seat             Seat?          @relation(fields: [assignedSeatId], references: [id])
+  locker           Locker?        @relation(fields: [assignedLockerId], references: [id])
+  SeatAssignment   SeatAssignment[]
+  LockerAssignment LockerAssignment[]
+
+  @@index([tenantId])
+  @@index([endDate])
+  @@index([status])
+}
+
+model Seat {
+  id          String     @id @default(uuid())
+  tenantId    String
+  branchId    String
+  seatNumber  String
+  floor       String
+  status      SeatStatus @default(AVAILABLE)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch        Branch         @relation(fields: [branchId], references: [id])
+  subscriptions Subscription[]
+  assignments   SeatAssignment[]
+
+  @@unique([branchId, seatNumber])
+  @@index([tenantId])
+  @@index([seatNumber])
+  @@index([status])
+}
+
+model SeatAssignment {
+  id             String   @id @default(uuid())
+  seatId         String
+  subscriptionId String
+  assignedAt     DateTime @default(now())
+  releasedAt     DateTime?
+
+  seat           Seat         @relation(fields: [seatId], references: [id])
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Locker {
+  id           String     @id @default(uuid())
+  tenantId     String
+  branchId     String
+  lockerNumber String
+  status       SeatStatus @default(AVAILABLE) // Reusing enum for simplicity
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch        Branch         @relation(fields: [branchId], references: [id])
+  subscriptions Subscription[]
+  assignments  LockerAssignment[]
+
+  @@unique([branchId, lockerNumber])
+  @@index([tenantId])
+}
+
+model LockerAssignment {
+  id             String   @id @default(uuid())
+  lockerId       String
+  subscriptionId String
+  assignedAt     DateTime @default(now())
+  releasedAt     DateTime?
+
+  locker         Locker       @relation(fields: [lockerId], references: [id])
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Attendance {
+  id          String           @id @default(uuid())
+  tenantId    String
+  memberId    String
+  branchId    String
+  checkIn     DateTime         @default(now())
+  checkOut    DateTime?
+  method      AttendanceMethod @default(MANUAL)
+
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  member      Member   @relation(fields: [memberId], references: [id])
+  branch      Branch   @relation(fields: [branchId], references: [id])
+
+  @@index([tenantId])
+  @@index([checkIn])
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  tenantId    String
+  memberId    String
+  amount      Float
+  method      PaymentMethod
+  status      String        @default("PENDING") // PENDING, PAID, FAILED
+  txnRef      String?
+  paidAt      DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  tenant       Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  member       Member               @relation(fields: [memberId], references: [id])
+  transactions PaymentTransaction[]
+
+  @@index([tenantId])
+  @@index([paidAt])
+  @@index([status])
+}
+
+model PaymentTransaction {
+  id          String   @id @default(uuid())
+  paymentId   String
+  amount      Float
+  status      String
+  providerRef String?
+  createdAt   DateTime @default(now())
+
+  payment     Payment  @relation(fields: [paymentId], references: [id])
+}
+
+model Expense {
+  id          String          @id @default(uuid())
+  tenantId    String
+  branchId    String
+  category    ExpenseCategory
+  amount      Float
+  description String?
+  date        DateTime        @default(now())
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch      Branch   @relation(fields: [branchId], references: [id])
+
+  @@index([tenantId])
+}
+
+model Enquiry {
+  id            String        @id @default(uuid())
+  tenantId      String
+  branchId      String
+  name          String
+  phone         String
+  email         String?
+  status        EnquiryStatus @default(NEW)
+  followUpDate  DateTime?
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch        Branch   @relation(fields: [branchId], references: [id])
+
+  @@index([tenantId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  tenantId  String?
+  userId    String?
+  type      String
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+model CommunicationLog {
+  id        String               @id @default(uuid())
+  tenantId  String?
+  channel   CommunicationChannel
+  recipient String
+  message   String
+  status    String               @default("SENT")
+  createdAt DateTime             @default(now())
+
+  tenant    Tenant?              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+model QrCode {
+  id         String   @id @default(uuid())
+  tenantId   String?
+  entityType String
+  entityId   String
+  token      String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  tenant     Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  tenantId  String?
+  userId    String?
+  branchId  String?
+  action    String
+  entity    String
+  entityId  String
+  metadata  String?  // JSON string
+  createdAt DateTime @default(now())
+
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id])
+  branch    Branch?  @relation(fields: [branchId], references: [id])
+
+  @@index([tenantId])
+}
+
+model Settings {
+  id        String   @id @default(uuid())
+  tenantId  String?
+  branchId  String?
+  key       String
+  value     String   // JSON string
+  updatedAt DateTime @updatedAt
+
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch    Branch?  @relation(fields: [branchId], references: [id])
+
+  @@unique([branchId, key])
+  @@index([tenantId])
+}

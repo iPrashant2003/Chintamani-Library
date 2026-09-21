@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+uploads/
+coverage/
+.prisma/
+cloudflared.exe
+*.apk
+apps/mobile/build/
+apps/mobile/.dart_tool/
+apps/mobile/.flutter-plugins
+apps/mobile/.flutter-plugins-dependencies
+apps/backend/dist/
+apps/backend/node_modules/

@@ -30,8 +30,8 @@ class AppUpdateInfo {
 
   factory AppUpdateInfo.fromJson(Map<String, dynamic> json) {
     return AppUpdateInfo(
-      version: json['version'] as String? ?? '2.2.0',
-      buildNumber: (json['buildNumber'] as num?)?.toInt() ?? 16,
+      version: json['version'] as String? ?? '2.3.0',
+      buildNumber: (json['buildNumber'] as num?)?.toInt() ?? 17,
       releaseDate: json['releaseDate'] as String? ?? '',
       title: json['title'] as String? ?? 'New Update Available',
       releaseNotes: (json['releaseNotes'] as List<dynamic>?)

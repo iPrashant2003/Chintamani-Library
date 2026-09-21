@@ -402,14 +402,14 @@ class _AppUpdateSettingsSectionState extends ConsumerState<_AppUpdateSettingsSec
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: [
-              Icon(Icons.check_circle_rounded, color: Color(0xFF10B981)),
-              SizedBox(width: 8),
+              const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981)),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  '✨ Your app is up to date! (v2.2.0 Build 16)',
-                  style: TextStyle(fontWeight: FontWeight.w700),
+                  '✨ Your app is up to date! (v${AppUpdateService.currentVersion} Build ${AppUpdateService.currentBuildNumber})',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
             ],
@@ -463,9 +463,9 @@ class _AppUpdateSettingsSectionState extends ConsumerState<_AppUpdateSettingsSec
               'Check for Live App Updates',
               style: TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600),
             ),
-            subtitle: const Text(
-              'v2.2.0 (Build 16) • 1-Tap Auto-Install',
-              style: TextStyle(color: Color(0xFFD4AF37), fontSize: 12, fontWeight: FontWeight.w600),
+            subtitle: Text(
+              'v${AppUpdateService.currentVersion} (Build ${AppUpdateService.currentBuildNumber}) • 1-Tap Auto-Install',
+              style: const TextStyle(color: Color(0xFFD4AF37), fontSize: 12, fontWeight: FontWeight.w600),
             ),
             trailing: _isChecking
                 ? const SizedBox(

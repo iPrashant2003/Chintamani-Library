@@ -9,6 +9,7 @@ import '../../../widgets/card_3d.dart';
 import '../../../widgets/icon_3d.dart';
 import '../../branch/providers/branch_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../core/services/app_update_service.dart';
 
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
@@ -373,7 +374,7 @@ class MoreScreen extends ConsumerWidget {
                   title: 'Live App Updates (OTA)',
                   subtitle: '1-Tap update check & automatic background installer',
                   icon: Icons.system_update_rounded,
-                  badge: 'v2.2.0',
+                  badge: 'v${AppUpdateService.currentVersion}',
                   color: const Color(0xFFD4AF37),
                   route: RouteNames.settings,
                 ),

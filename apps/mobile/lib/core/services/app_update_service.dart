@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -106,27 +107,52 @@ class AppUpdateService {
   // ── Check for update with intelligent multi-host resolution ──────────────
   Future<AppUpdateInfo?> checkForUpdate() async {
     final savedUrl = await getManifestUrl();
-    final candidateUrls = <String>{
-      // 1. Primary Global Cloud URL (Accessible from anywhere worldwide 24/7)
+    // Cache-bust the GitHub URL so CDN always serves fresh content
+    final cacheBust = DateTime.now().millisecondsSinceEpoch;
+    final candidateUrls = <String>[
+      // 1. Primary Global Cloud URL with cache-bust (always fresh)
+      'https://raw.githubusercontent.com/iPrashant2003/Chintamani-Library/main/version.json?t=$cacheBust',
+      // 2. Primary without cache-bust (fallback)
       'https://raw.githubusercontent.com/iPrashant2003/Chintamani-Library/main/version.json',
-      // 2. Custom URL configured in Settings (if not the old stale IP)
-      if (savedUrl.isNotEmpty && !savedUrl.contains('172.21.232.210')) savedUrl,
-      // 3. Local network fallbacks
-      'http://192.168.1.35:8090/version.json',
-      'http://localhost:8090/version.json',
-      'http://10.0.2.2:8090/version.json',
-    };
+      // 3. Custom URL configured in Settings (if valid)
+      if (savedUrl.isNotEmpty &&
+          !savedUrl.contains('172.21.232.210') &&
+          savedUrl != _defaultManifestUrl)
+        savedUrl,
+    ];
 
     for (final url in candidateUrls) {
       try {
-        final response = await _dio.get(url);
-        if (response.statusCode == 200 && response.data is Map) {
-          final info = AppUpdateInfo.fromJson(Map<String, dynamic>.from(response.data as Map));
+        final response = await _dio.get(
+          url,
+          options: Options(
+            responseType: ResponseType.plain, // Always get raw text, parse manually
+            headers: {
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache',
+            },
+          ),
+        );
+        if (response.statusCode == 200 && response.data != null) {
+          Map<String, dynamic> json;
+          if (response.data is Map) {
+            json = Map<String, dynamic>.from(response.data as Map);
+          } else {
+            // Force parse as JSON string (handles Dio returning String for plain text)
+            final decoded = jsonDecode(response.data.toString());
+            if (decoded is! Map) continue;
+            json = Map<String, dynamic>.from(decoded);
+          }
+          final info = AppUpdateInfo.fromJson(json);
+          debugPrint('[UpdateService] Remote build: ${info.buildNumber}, Local: $currentBuildNumber');
           if (info.buildNumber > currentBuildNumber) {
             return info;
           }
+          // No update needed — stop trying further URLs
+          return null;
         }
-      } catch (_) {
+      } catch (e) {
+        debugPrint('[UpdateService] Failed: $url — $e');
         // Continue trying next candidate
       }
     }

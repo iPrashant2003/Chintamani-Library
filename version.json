@@ -15,5 +15,5 @@
   ],
   "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.0/Chintamani-Library-Release.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
-  "forceUpdate": false
+  "forceUpdate": true
 }

@@ -10,6 +10,7 @@ class AppLockService {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   static const String _lockEnabledKey = 'cml_app_lock_enabled';
+  static const String _passwordKey = 'app_admin_password';
   static const String masterPin = 'CML6050';
 
   bool _isLocked = false;
@@ -17,12 +18,29 @@ class AppLockService {
 
   Future<bool> isAppLockEnabled() async {
     final val = await _storage.read(key: _lockEnabledKey);
-    // Enabled by default for admin security
     return val == null || val == 'true';
   }
 
   Future<void> setAppLockEnabled(bool enabled) async {
     await _storage.write(key: _lockEnabledKey, value: enabled.toString());
+  }
+
+  Future<String> getMasterPassword() async {
+    final stored = await _storage.read(key: _passwordKey);
+    return stored ?? masterPin;
+  }
+
+  Future<void> setMasterPassword(String newPassword) async {
+    await _storage.write(key: _passwordKey, value: newPassword.trim());
+  }
+
+  Future<bool> verifyPin(String pin) async {
+    final current = await getMasterPassword();
+    if (pin.trim() == current || pin.trim() == masterPin) {
+      _isLocked = false;
+      return true;
+    }
+    return false;
   }
 
   Future<bool> canAuthenticateWithBiometrics() async {
@@ -53,14 +71,6 @@ class AppLockService {
       debugPrint('Biometric authentication error: $e');
       return false;
     }
-  }
-
-  bool verifyPin(String pin) {
-    if (pin.trim() == masterPin) {
-      _isLocked = false;
-      return true;
-    }
-    return false;
   }
 
   void lock() {

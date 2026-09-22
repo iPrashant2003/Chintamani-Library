@@ -7,6 +7,7 @@ import '../../../theme/app_colors.dart';
 import '../../../widgets/chintamani_logo.dart';
 import '../../../widgets/card_3d.dart';
 import '../../../widgets/icon_3d.dart';
+import '../../../widgets/whatsapp_logo.dart';
 import '../../branch/providers/branch_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/services/app_update_service.dart';
@@ -133,7 +134,7 @@ class MoreScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${activeBranch.occupiedSeats}/${activeBranch.totalSeats} Seats Active • 20 Lockers',
+                              '${activeBranch.occupiedSeats}/${activeBranch.totalSeats} Seats Active • 9 Lockers Vault',
                               style: const TextStyle(
                                 color: AppColors.textTertiary,
                                 fontSize: 11,
@@ -152,159 +153,105 @@ class MoreScreen extends ConsumerWidget {
             _buildSectionCategory(
               context,
               title: 'LIBRARY OPERATIONS',
-              accentColor: AppColors.tealPrimary,
+              accentColor: const Color(0xFF10B981),
               items: [
+                _MoreItem(
+                  title: 'Members Directory',
+                  subtitle: 'Live memberships, expired & renew actions',
+                  icon: Icons.people_alt_rounded,
+                  icon3d: Icon3DType.members,
+                  badge: 'LIVE',
+                  color: const Color(0xFF10B981),
+                  route: RouteNames.members,
+                ),
                 _MoreItem(
                   title: '3D Seats Grid',
                   subtitle: 'Visual chair allocation, floor layout & status',
                   icon: Icons.chair_rounded,
                   icon3d: Icon3DType.seat,
                   badge: '3D',
-                  color: AppColors.emeraldPrimary,
+                  color: const Color(0xFF00E5BC),
                   route: RouteNames.seats,
                 ),
                 _MoreItem(
-                  title: '3D Lockers Grid',
-                  subtitle: 'Personal storage lockers L01-L20 management',
+                  title: '9 Lockers Vault',
+                  subtitle: 'Personal storage lockers L01-L09 • ₹200/mo fee',
                   icon: Icons.lock_clock_rounded,
                   icon3d: Icon3DType.locker,
-                  badge: '3D',
-                  color: AppColors.purplePrimary,
+                  badge: '9 VAULT',
+                  color: const Color(0xFF8B5CF6),
                   route: RouteNames.lockers,
+                ),
+                _MoreItem(
+                  title: 'Shift & Batch Timings',
+                  subtitle: '6h ₹500 • 12h ₹800 • 24h ₹1,000 • Editable batches',
+                  icon: Icons.schedule_rounded,
+                  badge: 'EDITABLE',
+                  color: const Color(0xFF3B82F6),
+                  route: RouteNames.plans,
                 ),
                 _MoreItem(
                   title: 'Smart Attendance Hub',
                   subtitle: 'Biometric & QR pass scanning for check-ins',
                   icon: Icons.how_to_reg_rounded,
                   icon3d: Icon3DType.attendance,
-                  color: AppColors.blueAqua,
+                  color: const Color(0xFF06B6D4),
                   route: RouteNames.attendance,
-                ),
-                _MoreItem(
-                  title: 'Members Directory',
-                  subtitle: 'Active scholar profiles, plans & cards',
-                  icon: Icons.people_alt_rounded,
-                  icon3d: Icon3DType.members,
-                  color: AppColors.emeraldPrimary,
-                  route: RouteNames.members,
-                ),
-                _MoreItem(
-                  title: 'Financial Pulse',
-                  subtitle: "Today's cashflow, expenses & operating margin",
-                  icon: Icons.account_balance_wallet_rounded,
-                  badge: 'LIVE',
-                  color: AppColors.goldPrimary,
-                  route: RouteNames.expenses,
-                ),
-                _MoreItem(
-                  title: 'Payments Ledger',
-                  subtitle: 'Approve, verify & track all student payments',
-                  icon: Icons.payments_rounded,
-                  badge: 'VERIFY',
-                  color: AppColors.emeraldPrimary,
-                  route: RouteNames.payments,
-                ),
-                _MoreItem(
-                  title: 'Shift & Batch Timings',
-                  subtitle: 'Morning, afternoon & night shift seat allocations',
-                  icon: Icons.schedule_rounded,
-                  color: AppColors.blueAqua,
-                  route: RouteNames.plans,
-                ),
-                _MoreItem(
-                  title: 'Facilities & Maintenance',
-                  subtitle: 'Infrastructure tickets, repairs & upkeep log',
-                  icon: Icons.build_rounded,
-                  badge: 'NEW',
-                  color: AppColors.amberPrimary,
-                  route: RouteNames.maintenance,
                 ),
               ],
             ),
 
-            // SECTION 2: FINANCIAL MANAGEMENT (Sapphire Blue)
+            // SECTION 2: FINANCIAL MANAGEMENT (Sapphire Blue & Amber)
             _buildSectionCategory(
               context,
               title: 'FINANCIAL MANAGEMENT',
-              accentColor: AppColors.bluePrimary,
+              accentColor: const Color(0xFF3B82F6),
               items: [
                 _MoreItem(
-                  title: 'Fee & Collections',
-                  subtitle: 'Record student payments & generate digital receipts',
+                  title: 'Fee Collections & Receipts',
+                  subtitle: 'Record student payments & generate receipts',
                   icon: Icons.payments_rounded,
                   icon3d: Icon3DType.finance,
-                  color: AppColors.bluePrimary,
-                  route: RouteNames.payments,
+                  color: const Color(0xFF10B981),
+                  route: RouteNames.recordPayment,
                 ),
                 _MoreItem(
                   title: 'Due Payments & Balances',
                   subtitle: 'Track outstanding dues & overdue subscriptions',
                   icon: Icons.pending_actions_rounded,
                   badge: 'OVERDUE',
-                  color: AppColors.redPrimary,
+                  color: const Color(0xFFDC2626),
                   route: RouteNames.duePayments,
                 ),
                 _MoreItem(
                   title: 'Expense Tracker',
                   subtitle: 'Electricity, generator diesel, rent & maintenance',
                   icon: Icons.receipt_long_rounded,
-                  color: AppColors.amberPrimary,
+                  color: const Color(0xFFF59E0B),
                   route: RouteNames.expenses,
                 ),
                 _MoreItem(
-                  title: 'Membership Plans',
-                  subtitle: 'Daily, 1-month, 3-month & annual packages',
-                  icon: Icons.card_membership_rounded,
-                  color: AppColors.goldPrimary,
-                  route: RouteNames.plans,
-                ),
-              ],
-            ),
-
-            // SECTION 3: INTELLIGENCE & ANALYTICS (Imperial Gold)
-            _buildSectionCategory(
-              context,
-              title: 'INTELLIGENCE & ANALYTICS',
-              accentColor: AppColors.goldPrimary,
-              items: [
-                _MoreItem(
-                  title: 'Library Insights',
-                  subtitle: 'Peak study hours, seat duration & retention',
-                  icon: Icons.insights_rounded,
-                  icon3d: Icon3DType.insights,
-                  badge: 'NEW',
-                  color: AppColors.goldBright,
-                  route: RouteNames.insights,
-                ),
-                _MoreItem(
-                  title: 'Branch Comparison',
-                  subtitle: 'Khalilabad vs Mehdawal live side-by-side analytics',
-                  icon: Icons.compare_arrows_rounded,
-                  badge: 'DUAL',
-                  color: AppColors.goldPrimary,
-                  route: RouteNames.branchComparison,
-                ),
-                _MoreItem(
                   title: 'Reports & Audits',
-                  subtitle: 'Export monthly revenue, attendance & audits to PDF',
+                  subtitle: 'Monthly revenue, attendance & audits PDF export',
                   icon: Icons.bar_chart_rounded,
-                  color: AppColors.blueAqua,
+                  color: const Color(0xFF3B82F6),
                   route: RouteNames.reports,
                 ),
               ],
             ),
 
-            // SECTION 4: CRM & OUTREACH (Ruby Red & Amber)
+            // SECTION 3: COMMUNICATIONS & CRM (Emerald & Green)
             _buildSectionCategory(
               context,
-              title: 'INQUIRIES & COMMUNICATION',
-              accentColor: AppColors.redPrimary,
+              title: 'COMMUNICATION & OUTREACH',
+              accentColor: const Color(0xFF25D366),
               items: [
                 _MoreItem(
                   title: 'WhatsApp Hub',
-                  subtitle: 'Broadcast messages, fee reminders & per-member chat',
+                  subtitle: 'Broadcast messages, fee reminders & AI message writer',
                   icon: Icons.chat_rounded,
-                  badge: 'WA',
+                  customIcon: const WhatsAppLogo(size: 20, color: Color(0xFF25D366)),
+                  badge: 'AI WRITER',
                   color: const Color(0xFF25D366),
                   route: RouteNames.whatsapp,
                 ),
@@ -312,71 +259,63 @@ class MoreScreen extends ConsumerWidget {
                   title: 'Enquiries & Admissions',
                   subtitle: 'New student admissions, desk visits & follow-ups',
                   icon: Icons.contact_mail_rounded,
-                  color: AppColors.redPrimary,
+                  color: const Color(0xFFEC4899),
                   route: RouteNames.enquiries,
-                ),
-                _MoreItem(
-                  title: 'Communication Center',
-                  subtitle: 'Send SMS & WhatsApp fee and expiry reminders',
-                  icon: Icons.chat_rounded,
-                  color: AppColors.emeraldPrimary,
-                  route: RouteNames.communication,
                 ),
                 _MoreItem(
                   title: 'Notifications Hub',
                   subtitle: 'Real-time library broadcasts & alerts',
                   icon: Icons.notifications_active_rounded,
-                  color: AppColors.amberPrimary,
+                  color: const Color(0xFFF59E0B),
                   route: RouteNames.notifications,
                 ),
               ],
             ),
 
-            // SECTION 5: BRAND, SUPPORT & THEME (Luxury Champagne)
+            // SECTION 4: SYSTEM, SECURITY & SETTINGS (Luxury Gold)
             _buildSectionCategory(
               context,
-              title: 'CHINTA MANI & SETTINGS',
-              accentColor: AppColors.goldLight,
+              title: 'SYSTEM & PREFERENCES',
+              accentColor: const Color(0xFFD4AF37),
               items: [
                 _MoreItem(
-                  title: 'Library Photos & Campus Tour',
-                  subtitle: 'Khalilabad & Mehdawal campus photos on Google Maps',
-                  icon: Icons.photo_library_rounded,
-                  badge: 'GALLERY',
-                  color: AppColors.goldPrimary,
-                  route: RouteNames.photos,
+                  title: 'Change App Password',
+                  subtitle: 'Update account password & app lock PIN',
+                  icon: Icons.lock_reset_rounded,
+                  badge: 'SECURITY',
+                  color: const Color(0xFFDC2626),
+                  route: RouteNames.settings,
                 ),
                 _MoreItem(
-                  title: 'About Chinta Mani Library',
-                  subtitle: 'Our vision, study environment & official branches',
-                  icon: Icons.info_outline_rounded,
-                  icon3d: Icon3DType.branch,
-                  color: AppColors.goldPrimary,
-                  route: RouteNames.about,
+                  title: 'Customize App Theme',
+                  subtitle: 'Choose from 11 palettes or create custom color',
+                  icon: Icons.palette_outlined,
+                  badge: '11 THEMES',
+                  color: const Color(0xFFD4AF37),
+                  route: RouteNames.themeCustomization,
                 ),
-                _MoreItem(
-                  title: 'Contact & Directions',
-                  subtitle: 'Direct call, WhatsApp & Google Maps navigation',
-                  icon: Icons.phone_in_talk_rounded,
-                  color: AppColors.emeraldPrimary,
-                  route: RouteNames.contact,
-                ),
-
                 _MoreItem(
                   title: 'Database Master Backup',
-                  subtitle: '1-Tap export, WhatsApp/Drive share & local restore',
+                  subtitle: '1-Tap export, WhatsApp/Drive share & restore',
                   icon: Icons.cloud_sync_rounded,
                   badge: 'SAFETY',
-                  color: AppColors.emeraldPrimary,
+                  color: const Color(0xFF10B981),
                   route: RouteNames.databaseBackup,
                 ),
                 _MoreItem(
                   title: 'Live App Updates (OTA)',
-                  subtitle: '1-Tap update check & automatic background installer',
+                  subtitle: '1-Tap update check & background installer',
                   icon: Icons.system_update_rounded,
                   badge: 'v${AppUpdateService.currentVersion}',
-                  color: const Color(0xFFD4AF37),
+                  color: const Color(0xFF3B82F6),
                   route: RouteNames.settings,
+                ),
+                _MoreItem(
+                  title: 'Campus Tour & Photos',
+                  subtitle: 'Khalilabad & Mehdawal campus photos on Google Maps',
+                  icon: Icons.photo_library_rounded,
+                  color: const Color(0xFF8B5CF6),
+                  route: RouteNames.photos,
                 ),
                 _MoreItem(
                   title: 'System Settings',
@@ -489,6 +428,18 @@ class MoreScreen extends ConsumerWidget {
                         },
                         leading: Builder(
                           builder: (context) {
+                            if (item.customIcon != null) {
+                              return Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: item.color.withValues(alpha: 0.14),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: item.color.withValues(alpha: 0.35), width: 0.8),
+                                ),
+                                child: Center(child: item.customIcon),
+                              );
+                            }
                             if (item.icon3d != null) {
                               return Icon3D(type: item.icon3d!, size: 36);
                             }
@@ -562,6 +513,7 @@ class _MoreItem {
   final String title;
   final String subtitle;
   final IconData icon;
+  final Widget? customIcon;
   final Icon3DType? icon3d;
   final String? badge;
   final Color color;
@@ -571,6 +523,7 @@ class _MoreItem {
     required this.title,
     required this.subtitle,
     required this.icon,
+    this.customIcon,
     this.icon3d,
     this.badge,
     required this.color,

@@ -69,8 +69,10 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
     final cleanId = loginId.trim().replaceAll(RegExp(r'[^\d]'), '');
     final cleanPass = password.trim();
 
-    // Verification strictly for 7388389944 and 9415919277 with password CML6050
-    if (cleanPass == 'CML6050' || forceDemo) {
+    // Load the current app password (may be custom or default CML6050)
+    final currentPassword = await _ref.read(tokenManagerProvider).getAppPassword();
+
+    if (cleanPass == currentPassword || forceDemo) {
       if (cleanId == '9415919277' || loginId.contains('9415919277') || (forceDemo && cleanId.isEmpty)) {
         await _ref.read(tokenManagerProvider).saveTokens(
           accessToken: 'cml-session-9415919277',
@@ -85,12 +87,28 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
         );
         state = const AsyncData(AuthAuthenticated(adminDesk));
         return true;
+      } else if (cleanId.isEmpty && forceDemo) {
+        // fallback for demo tap with no ID
+        await _ref.read(tokenManagerProvider).saveTokens(
+          accessToken: 'cml-session-7388389944',
+          refreshToken: 'cml-refresh-7388389944',
+        );
+        state = const AsyncData(AuthAuthenticated(adminDesk));
+        return true;
       }
     }
 
     // Invalid credentials
     state = const AsyncData(AuthUnauthenticated());
     return false;
+  }
+
+  /// Change admin password — validates old password, saves new one persistently
+  Future<bool> changePassword(String oldPassword, String newPassword) async {
+    final currentPassword = await _ref.read(tokenManagerProvider).getAppPassword();
+    if (oldPassword.trim() != currentPassword) return false;
+    await _ref.read(tokenManagerProvider).saveAppPassword(newPassword.trim());
+    return true;
   }
 
   Future<void> signup({

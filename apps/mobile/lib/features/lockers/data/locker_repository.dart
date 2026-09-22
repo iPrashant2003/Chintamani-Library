@@ -38,15 +38,20 @@ class LockerRepository {
   }
 
   List<Locker> _generateMockLockers(String branchId, {String? status}) {
-    final occupants = {
-      'L01': 'Aarav Sharma',
-      'L03': 'Priya Verma',
-      'L08': 'Krishna Yadav',
-      'L12': 'Aditya Tripathi',
-    };
+    final occupants = branchId.contains('mehdawal')
+        ? {
+            'L02': 'Sunil Gupta',
+            'L05': 'Kajal Mishra',
+          }
+        : {
+            'L01': 'Aarav Sharma',
+            'L03': 'Akshara Pandey',
+            'L07': 'Sarita Pandey',
+          };
 
+    // Strictly 9 lockers per branch (L01 - L09) as per official library setup
     final List<Locker> lockers = [];
-    for (int i = 1; i <= 20; i++) {
+    for (int i = 1; i <= 9; i++) {
       final num = 'L${i.toString().padLeft(2, '0')}';
       String lockerStatus = 'AVAILABLE';
       String? memberName;
@@ -61,7 +66,7 @@ class LockerRepository {
       }
 
       lockers.add(Locker(
-        id: 'locker-$num',
+        id: 'locker-$branchId-$num',
         lockerNumber: num,
         status: lockerStatus,
         branchId: branchId,

@@ -8,6 +8,7 @@ import '../features/branch/providers/branch_provider.dart';
 import '../features/auth/providers/auth_provider.dart';
 import '../routing/route_names.dart';
 import 'chintamani_logo.dart';
+import 'whatsapp_logo.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -19,13 +20,13 @@ class AppDrawer extends ConsumerWidget {
     final user = authState is AuthAuthenticated ? authState.user : null;
 
     return Drawer(
-      backgroundColor: const Color(0xF5140F06), // Luxury golden-tinted obsidian
+      backgroundColor: const Color(0xF8100C05), // Luxury golden obsidian
       child: SafeArea(
         child: Column(
           children: [
             // Drawer Header with Official Chinta Mani Brand & Interactive Branch Switch
             Container(
-              padding: const EdgeInsets.fromLTRB(18, 20, 18, 16),
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
               decoration: const BoxDecoration(
                 border: Border(
                   bottom: BorderSide(color: Color(0x33D4AF37), width: 1),
@@ -35,7 +36,7 @@ class AppDrawer extends ConsumerWidget {
                   end: Alignment.bottomRight,
                   colors: [
                     Color(0x33D4AF37),
-                    Color(0x05000000),
+                    Color(0x08000000),
                   ],
                 ),
               ),
@@ -88,7 +89,7 @@ class AppDrawer extends ConsumerWidget {
                   ),
                   const SizedBox(height: 14),
 
-                  // Interactive Quick Branch Switcher Chip inside Drawer
+                  // Interactive Quick Branch Switcher Chip
                   GestureDetector(
                     onTap: () {
                       HapticFeedback.mediumImpact();
@@ -125,14 +126,14 @@ class AppDrawer extends ConsumerWidget {
                                   activeBranch.name,
                                   style: const TextStyle(
                                     color: AppColors.goldLight,
-                                    fontSize: 11,
+                                    fontSize: 11.5,
                                     fontWeight: FontWeight.w700,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const Text(
-                                  'Tap to toggle branch',
+                                  'Tap to switch branch (Khalilabad / Mehdawal)',
                                   style: TextStyle(
                                     color: AppColors.textTertiary,
                                     fontSize: 9,
@@ -154,43 +155,68 @@ class AppDrawer extends ConsumerWidget {
               ),
             ),
 
-            // Navigation List Items - Focused on FAST TOOLS & SHORTCUTS
+            // Organized Navigation List Items
             Expanded(
               child: ListView(
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 children: [
-                  // SECTION 1: INSTANT DAILY TOOLS
-                  _buildSectionHeader('INSTANT DESK TOOLS', AppColors.goldPrimary),
+                  // SECTION 1: LIBRARY DESK OPERATIONS
+                  _buildSectionHeader('LIBRARY OPERATIONS', const Color(0xFFD4AF37)),
                   _buildDrawerItem(
                     context,
-                    title: 'Quick QR Scanner',
-                    subtitle: 'Scan member check-in card',
-                    icon: Icons.qr_code_scanner_rounded,
-                    accentColor: AppColors.blueAqua,
-                    badge: 'FAST',
+                    title: 'Members Directory',
+                    subtitle: 'Live memberships, expired & renew',
+                    icon: Icons.people_alt_rounded,
+                    accentColor: const Color(0xFF10B981),
+                    badge: 'LIVE',
                     onTap: () {
                       Navigator.pop(context);
-                      context.push(RouteNames.qr);
+                      context.push(RouteNames.members);
                     },
                   ),
-                                    _buildDrawerItem(
+                  _buildDrawerItem(
                     context,
-                    title: 'Facilities & Maintenance',
-                    subtitle: 'AC, DG, Wi-Fi, RO & Equipment Health',
-                    icon: Icons.build_circle_rounded,
+                    title: '3D Seats Layout',
+                    subtitle: 'Visual chair allocation & status',
+                    icon: Icons.chair_rounded,
                     accentColor: const Color(0xFF00E5BC),
+                    badge: '3D',
                     onTap: () {
                       Navigator.pop(context);
-                      context.push(RouteNames.maintenance);
+                      context.push(RouteNames.seats);
                     },
                   ),
-_buildDrawerItem(
+                  _buildDrawerItem(
+                    context,
+                    title: '9 Lockers Vault',
+                    subtitle: 'L01-L09 lockers • ₹200/mo fee',
+                    icon: Icons.lock_clock_rounded,
+                    accentColor: const Color(0xFF8B5CF6),
+                    badge: '9 VAULT',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push(RouteNames.lockers);
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    title: 'Shift & Batch Timings',
+                    subtitle: '6h ₹500 • 12h ₹800 • 24h ₹1,000',
+                    icon: Icons.schedule_rounded,
+                    accentColor: const Color(0xFF3B82F6),
+                    badge: 'FEES',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push(RouteNames.plans);
+                    },
+                  ),
+                  _buildDrawerItem(
                     context,
                     title: 'Record Fee Receipt',
-                    subtitle: 'Collect cash or UPI payment',
-                    icon: Icons.add_card_rounded,
-                    accentColor: AppColors.goldPrimary,
+                    subtitle: 'Cash or UPI payment collection',
+                    icon: Icons.payments_rounded,
+                    accentColor: const Color(0xFFD4AF37),
                     onTap: () {
                       Navigator.pop(context);
                       context.push(RouteNames.recordPayment);
@@ -198,53 +224,32 @@ _buildDrawerItem(
                   ),
                   _buildDrawerItem(
                     context,
-                    title: 'Enroll New Scholar',
-                    subtitle: '7-Step admission wizard',
-                    icon: Icons.person_add_alt_1_rounded,
-                    accentColor: AppColors.emeraldPrimary,
+                    title: 'Quick QR Scanner',
+                    subtitle: 'Scan member check-in card',
+                    icon: Icons.qr_code_scanner_rounded,
+                    accentColor: const Color(0xFF06B6D4),
+                    badge: 'FAST',
                     onTap: () {
                       Navigator.pop(context);
-                      context.push(RouteNames.addMember);
-                    },
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    title: 'Search Database',
-                    subtitle: 'Find student by name or mobile',
-                    icon: Icons.search_rounded,
-                    accentColor: AppColors.bluePrimary,
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push(RouteNames.search);
+                      context.push(RouteNames.qr);
                     },
                   ),
 
                   const SizedBox(height: 10),
 
-                  // SECTION 2: EXECUTIVE INTELLIGENCE
-                  _buildSectionHeader('EXECUTIVE MONITORING', AppColors.bluePrimary),
+                  // SECTION 2: COMMUNICATIONS & OUTREACH
+                  _buildSectionHeader('COMMUNICATIONS', const Color(0xFF25D366)),
                   _buildDrawerItem(
                     context,
-                    title: 'Live Branch Comparison',
-                    subtitle: 'Khalilabad vs Mehdawal Digital',
-                    icon: Icons.compare_arrows_rounded,
-                    accentColor: AppColors.purplePrimary,
-                    badge: 'DUAL',
+                    title: 'WhatsApp Hub',
+                    subtitle: 'Broadcasts, fee reminders & AI writer',
+                    icon: Icons.chat_rounded,
+                    customIcon: const WhatsAppLogo(size: 18, color: Color(0xFF25D366)),
+                    accentColor: const Color(0xFF25D366),
+                    badge: 'WA HUB',
                     onTap: () {
                       Navigator.pop(context);
-                      context.push(RouteNames.branchComparison);
-                    },
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    title: 'Deep Analytics & Insights',
-                    subtitle: 'Peak study hours & retention',
-                    icon: Icons.insights_rounded,
-                    accentColor: AppColors.goldBright,
-                    badge: 'NEW',
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push(RouteNames.insights);
+                      context.push(RouteNames.whatsapp);
                     },
                   ),
                   _buildDrawerItem(
@@ -252,7 +257,7 @@ _buildDrawerItem(
                     title: 'Broadcast Inbox',
                     subtitle: 'System alerts & announcements',
                     icon: Icons.notifications_active_outlined,
-                    accentColor: AppColors.amberPrimary,
+                    accentColor: const Color(0xFFF59E0B),
                     onTap: () {
                       Navigator.pop(context);
                       context.push(RouteNames.notifications);
@@ -261,32 +266,42 @@ _buildDrawerItem(
 
                   const SizedBox(height: 10),
 
-                  // SECTION 3: DIRECT HELPLINE
-                  _buildSectionHeader('HELP & PREFERENCES', AppColors.goldPrimary),
+                  // SECTION 3: SYSTEM SECURITY & SETTINGS
+                  _buildSectionHeader('SECURITY & PREFERENCES', const Color(0xFFEC4899)),
                   _buildDrawerItem(
                     context,
-                    title: 'Change App Theme',
-                    subtitle: 'Golden, Purple, Blue, Teal, Sea Green & more',
+                    title: 'Change App Password',
+                    subtitle: 'Update app PIN / access password',
+                    icon: Icons.lock_reset_rounded,
+                    accentColor: const Color(0xFFDC2626),
+                    badge: 'SECURITY',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push(RouteNames.settings);
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    title: 'Customize App Theme',
+                    subtitle: '11 premium palettes & custom colors',
                     icon: Icons.palette_outlined,
-                    accentColor: AppColors.goldPrimary,
-                    badge: '7 THEMES',
+                    accentColor: const Color(0xFFD4AF37),
+                    badge: '11 THEMES',
                     onTap: () {
                       Navigator.pop(context);
                       context.push(RouteNames.themeCustomization);
                     },
                   ),
-
-
                   _buildDrawerItem(
                     context,
-                    title: 'Director Helpline',
-                    subtitle: 'Manglesh Mani Tripathi • 9415919277',
-                    icon: Icons.phone_in_talk_rounded,
-                    accentColor: AppColors.goldPrimary,
-                    badge: 'DIRECT',
+                    title: 'Live App Updates (OTA)',
+                    subtitle: 'Check & 1-tap auto-install',
+                    icon: Icons.system_update_rounded,
+                    accentColor: const Color(0xFF3B82F6),
+                    badge: 'OTA',
                     onTap: () {
                       Navigator.pop(context);
-                      context.push(RouteNames.contact);
+                      context.push(RouteNames.settings);
                     },
                   ),
                   _buildDrawerItem(
@@ -294,17 +309,29 @@ _buildDrawerItem(
                     title: 'Database Master Backup',
                     subtitle: '1-Tap export, share & restore',
                     icon: Icons.cloud_sync_rounded,
-                    accentColor: AppColors.blueAqua,
+                    accentColor: const Color(0xFF10B981),
                     badge: 'BACKUP',
                     onTap: () {
                       Navigator.pop(context);
                       context.push(RouteNames.databaseBackup);
                     },
                   ),
+                  _buildDrawerItem(
+                    context,
+                    title: 'Director Helpline',
+                    subtitle: 'Manglesh Mani Tripathi • 9415919277',
+                    icon: Icons.phone_in_talk_rounded,
+                    accentColor: const Color(0xFFD4AF37),
+                    badge: 'DIRECT',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push(RouteNames.contact);
+                    },
+                  ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
-                  // Mandatory Developer Credit in Drawer
+                  // Mandatory Developer Credit
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -330,7 +357,7 @@ _buildDrawerItem(
                                 ),
                               ),
                               Text(
-                                'Chinta Mani Library v1.6.0+6',
+                                'Chinta Mani Library • Enterprise System',
                                 style: TextStyle(
                                   color: AppColors.textTertiary,
                                   fontSize: 9.5,
@@ -434,6 +461,7 @@ _buildDrawerItem(
     required String title,
     required String subtitle,
     required IconData icon,
+    Widget? customIcon,
     required Color accentColor,
     String? badge,
     required VoidCallback onTap,
@@ -451,7 +479,7 @@ _buildDrawerItem(
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: accentColor.withValues(alpha: 0.3), width: 0.8),
           ),
-          child: Icon(icon, color: accentColor, size: 18),
+          child: customIcon ?? Icon(icon, color: accentColor, size: 18),
         ),
         title: Row(
           children: [

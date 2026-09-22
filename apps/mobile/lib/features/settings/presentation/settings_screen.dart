@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../routing/route_names.dart';
@@ -35,14 +36,28 @@ class SettingsScreen extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: AppColors.bgCard,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.primaryGreen.withOpacity(0.25)),
+                border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.3)),
               ),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 28,
-                    backgroundColor: AppColors.primaryGreen.withOpacity(0.2),
-                    child: const Icon(Icons.person, color: AppColors.accentNeon, size: 30),
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFFD4AF37).withOpacity(0.15),
+                      border: Border.all(color: const Color(0xFFD4AF37), width: 1.5),
+                    ),
+                    child: Center(
+                      child: Text(
+                        user?.name.substring(0, 1).toUpperCase() ?? 'A',
+                        style: const TextStyle(
+                          color: Color(0xFFFDE68A),
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -59,7 +74,7 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          user?.email ?? '—',
+                          user?.phone ?? '—',
                           style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
                         ),
                         const SizedBox(height: 4),
@@ -68,13 +83,13 @@ class SettingsScreen extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppColors.accentNeon.withOpacity(0.12),
+                                color: const Color(0xFFD4AF37).withOpacity(0.12),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                user?.role ?? 'STAFF',
+                                user?.role ?? 'OWNER',
                                 style: const TextStyle(
-                                  color: AppColors.accentNeon,
+                                  color: Color(0xFFD4AF37),
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -108,96 +123,87 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
 
-            const Text('Official Library Profile',
-                style: TextStyle(color: AppColors.accentNeon, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-            const SizedBox(height: 10),
+            // ── Branch & Operations ──────────────────────────────────────
+            _sectionLabel('Branch & Operations'),
             _SettingsTile(
-              icon: Icons.account_balance,
-              title: 'Chinta Mani Library Network',
-              subtitle: 'Sant Kabir Nagar, UP • 2 Official Branches',
-              onTap: () {},
+              icon: Icons.store_mall_directory_outlined,
+              iconColor: const Color(0xFF10B981),
+              title: 'Branch Management',
+              subtitle: 'Khalilabad • Mehdawal — 2 official branches',
+              onTap: () => _showBranchInfoDialog(context, tenant?.name ?? 'Library'),
             ),
             _SettingsTile(
-              icon: Icons.email_outlined,
-              title: 'Contact & Administration',
-              subtitle: 'contact@chintamanilibrary.com • +91 9876543210',
-              onTap: () {},
+              icon: Icons.schedule_rounded,
+              iconColor: const Color(0xFF3B82F6),
+              title: 'Shift & Batch Timings',
+              subtitle: '6 hrs / 12 hrs / 24 hrs — Add or edit custom batches',
+              onTap: () => context.push(RouteNames.plans),
             ),
+            _SettingsTile(
+              icon: Icons.lock_clock_rounded,
+              iconColor: const Color(0xFF8B5CF6),
+              title: 'Locker Configuration',
+              subtitle: '9 Lockers per branch • ₹200/month',
+              onTap: () => context.push(RouteNames.lockers),
+            ),
+
             const SizedBox(height: 20),
 
-            const Text('Appearance & Theme',
-                style: TextStyle(color: AppColors.accentNeon, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-            const SizedBox(height: 10),
+            // ── Fees & Pricing ──────────────────────────────────────────
+            _sectionLabel('Fees & Pricing'),
+            const _FeesPricingCard(),
+
+            const SizedBox(height: 20),
+
+            // ── Appearance ──────────────────────────────────────────────
+            _sectionLabel('Appearance & Theme'),
             _SettingsTile(
               icon: Icons.palette_outlined,
+              iconColor: const Color(0xFFD4AF37),
               title: 'Customize Theme',
               subtitle: 'Choose from 11 premium palettes or create a custom color',
               onTap: () => context.push(RouteNames.themeCustomization),
             ),
+
             const SizedBox(height: 20),
 
-            const Text('Branch & Operations',
-                style: TextStyle(color: AppColors.accentNeon, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-            const SizedBox(height: 10),
-            _SettingsTile(
-              icon: Icons.store_mall_directory_outlined,
-              title: 'Branch Management',
-              subtitle: 'View and manage branches for this library',
-              onTap: () {
-                _showBranchInfoDialog(context, tenant?.name ?? 'Library');
-              },
-            ),
-            _SettingsTile(
-              icon: Icons.access_time,
-              title: 'Library Operational Timings',
-              subtitle: '06:00 AM – 11:00 PM (Daily)',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Timings configured: 06:00 AM – 11:00 PM')),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-
-            const Text('Staff & Security',
-                style: TextStyle(color: AppColors.accentNeon, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-            const SizedBox(height: 10),
+            // ── Security ────────────────────────────────────────────────
+            _sectionLabel('Staff & Security'),
             _SettingsTile(
               icon: Icons.badge_outlined,
+              iconColor: const Color(0xFFEC4899),
               title: 'Staff Management',
               subtitle: 'Manage branch managers and desk staff',
-              onTap: () {
-                _showStaffDialog(context);
-              },
+              onTap: () => _showStaffDialog(context),
             ),
             _SettingsTile(
               icon: Icons.history,
+              iconColor: const Color(0xFFF59E0B),
               title: 'Audit & Activity Logs',
               subtitle: 'View security events and operational logs',
-              onTap: () {
-                _showAuditDialog(context);
-              },
+              onTap: () => _showAuditDialog(context),
             ),
             _SettingsTile(
               icon: Icons.lock_outline,
-              title: 'Change Password',
-              subtitle: 'Update your account access credentials',
-              onTap: () {
-                _showChangePasswordDialog(context);
-              },
+              iconColor: const Color(0xFFDC2626),
+              title: 'Change App Password',
+              subtitle: 'Update the password used to open this app',
+              onTap: () => _showChangePasswordDialog(context, ref),
             ),
+
             const SizedBox(height: 20),
 
+            // ── OTA Updates ─────────────────────────────────────────────
             const _AppUpdateSettingsSection(),
             const SizedBox(height: 20),
 
-            const Text('About System',
-                style: TextStyle(color: AppColors.accentNeon, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-            const SizedBox(height: 10),
+            // ── About ───────────────────────────────────────────────────
+            _sectionLabel('About System'),
             _SettingsTile(
               icon: Icons.info_outline,
+              iconColor: AppColors.textSecondary,
               title: 'LibraryOS Platform',
-              subtitle: 'Version 1.2.0 (Production Build) • Android & iOS',
+              subtitle: 'v${AppUpdateService.currentVersion} Build ${AppUpdateService.currentBuildNumber} • Android',
               onTap: () {},
             ),
             const SizedBox(height: 16),
@@ -227,6 +233,27 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
+  Widget _sectionLabel(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Container(width: 3, height: 14, decoration: BoxDecoration(color: const Color(0xFFD4AF37), borderRadius: BorderRadius.circular(2))),
+          const SizedBox(width: 8),
+          Text(
+            title.toUpperCase(),
+            style: const TextStyle(
+              color: Color(0xFFD4AF37),
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showBranchInfoDialog(BuildContext context, String libraryName) {
     showDialog(
       context: context,
@@ -238,7 +265,7 @@ class SettingsScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '1. Chinta Mani Library — Khalilabad\n   Main Road, Khalilabad\n   Seats: 180 (Floors A & B)\n\n2. Chinta Mani Digital Library — Mehdawal\n   Station Road, Mehdawal\n   Seats: 120 (Floors A & B)\n\nThese two official branches are permanently configured. External branch creation is disabled.',
+              '1. Chinta Mani Library — Khalilabad\n   Main Road, Khalilabad\n   9 Lockers\n\n2. Chinta Mani Library — Mehdawal\n   Station Road, Mehdawal\n   9 Lockers\n\nThese two official branches are permanently configured.',
               style: TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.4),
             ),
           ],
@@ -257,7 +284,7 @@ class SettingsScreen extends ConsumerWidget {
         backgroundColor: AppColors.bgCard,
         title: const Text('Staff Management', style: TextStyle(color: AppColors.textPrimary)),
         content: const Text(
-          'Staff accounts and branch access are managed through the admin portal.\n\nContact your library owner to add or modify staff accounts.',
+          'Staff accounts and branch access are managed by the director.\n\nContact Manglesh Mani Tripathi to add or modify staff accounts.',
           style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
         ),
         actions: [
@@ -292,62 +319,249 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showChangePasswordDialog(BuildContext context) {
+  void _showChangePasswordDialog(BuildContext context, WidgetRef ref) {
     final oldPass = TextEditingController();
     final newPass = TextEditingController();
+    final confirmPass = TextEditingController();
+    bool isLoading = false;
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.bgCard,
-        title: const Text('Change Password', style: TextStyle(color: AppColors.textPrimary)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: oldPass,
-              obscureText: true,
-              style: const TextStyle(color: AppColors.textPrimary),
-              decoration: const InputDecoration(labelText: 'Current Password'),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          backgroundColor: AppColors.bgCard,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: const BorderSide(color: Color(0x44D4AF37), width: 1),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDC2626).withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.lock_outline, color: Color(0xFFDC2626), size: 20),
+              ),
+              const SizedBox(width: 10),
+              const Text('Change Password', style: TextStyle(color: AppColors.textPrimary, fontSize: 16)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _PassField(controller: oldPass, label: 'Current Password'),
+              const SizedBox(height: 12),
+              _PassField(controller: newPass, label: 'New Password'),
+              const SizedBox(height: 12),
+              _PassField(controller: confirmPass, label: 'Confirm New Password'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
             ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: newPass,
-              obscureText: true,
-              style: const TextStyle(color: AppColors.textPrimary),
-              decoration: const InputDecoration(labelText: 'New Password'),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: isLoading
+                  ? const SizedBox(width: 60, height: 36, child: Center(child: CircularProgressIndicator(color: Color(0xFFD4AF37), strokeWidth: 2)))
+                  : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFD4AF37),
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () async {
+                        final old = oldPass.text.trim();
+                        final nw = newPass.text.trim();
+                        final cf = confirmPass.text.trim();
+
+                        if (old.isEmpty || nw.isEmpty || cf.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('All fields are required'), behavior: SnackBarBehavior.floating),
+                          );
+                          return;
+                        }
+                        if (nw != cf) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('New passwords do not match'), behavior: SnackBarBehavior.floating),
+                          );
+                          return;
+                        }
+                        if (nw.length < 4) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Password must be at least 4 characters'), behavior: SnackBarBehavior.floating),
+                          );
+                          return;
+                        }
+
+                        setState(() => isLoading = true);
+                        final success = await ref.read(authProvider.notifier).changePassword(old, nw);
+                        setState(() => isLoading = false);
+
+                        if (ctx.mounted) Navigator.pop(ctx);
+                        if (!context.mounted) return;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                Icon(
+                                  success ? Icons.check_circle_rounded : Icons.error_rounded,
+                                  color: success ? const Color(0xFF10B981) : const Color(0xFFDC2626),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  success
+                                      ? '✅ Password changed successfully!'
+                                      : '❌ Incorrect current password. Try again.',
+                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                            backgroundColor: AppColors.bgCard,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        );
+                      },
+                      child: const Text('Update', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
             ),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryGreen),
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  backgroundColor: AppColors.statusActive,
-                  content: Text('Password updated successfully!'),
-                ),
-              );
-            },
-            child: const Text('Update'),
-          ),
-        ],
       ),
     );
   }
 }
 
+// ── Helper: password text field ────────────────────────────────────────────
+class _PassField extends StatefulWidget {
+  final TextEditingController controller;
+  final String label;
+  const _PassField({required this.controller, required this.label});
+
+  @override
+  State<_PassField> createState() => _PassFieldState();
+}
+
+class _PassFieldState extends State<_PassField> {
+  bool _visible = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: widget.controller,
+      obscureText: !_visible,
+      style: const TextStyle(color: AppColors.textPrimary),
+      decoration: InputDecoration(
+        labelText: widget.label,
+        labelStyle: const TextStyle(color: AppColors.textSecondary),
+        filled: true,
+        fillColor: AppColors.bgDark,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0x33FFFFFF))),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0x22FFFFFF))),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFD4AF37))),
+        suffixIcon: IconButton(
+          icon: Icon(_visible ? Icons.visibility_off : Icons.visibility, color: AppColors.textTertiary, size: 18),
+          onPressed: () => setState(() => _visible = !_visible),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Fees & Pricing Card (static display of standard rates) ─────────────────
+class _FeesPricingCard extends StatelessWidget {
+  const _FeesPricingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final items = [
+      _PriceItem('6 Hrs Batch', '₹500 / month', const Color(0xFF3B82F6), Icons.wb_sunny_rounded),
+      _PriceItem('12 Hrs Batch', '₹800 / month', const Color(0xFF8B5CF6), Icons.brightness_medium_rounded),
+      _PriceItem('24 Hrs / Full Day', '₹1,000 / month', const Color(0xFF10B981), Icons.nightlight_round),
+      _PriceItem('Registration Fee', '₹100 (one time)', const Color(0xFFD4AF37), Icons.how_to_reg_rounded),
+      _PriceItem('Locker Facility', '₹200 / month', const Color(0xFFEC4899), Icons.lock_rounded),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.bgCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0x22D4AF37)),
+      ),
+      child: Column(
+        children: items.asMap().entries.map((e) {
+          final isLast = e.key == items.length - 1;
+          return Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: e.value.color.withOpacity(0.14),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(e.value.icon, color: e.value.color, size: 16),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      e.value.title,
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: e.value.color.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: e.value.color.withOpacity(0.3), width: 0.8),
+                    ),
+                    child: Text(
+                      e.value.price,
+                      style: TextStyle(color: e.value.color, fontSize: 12, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ],
+              ),
+              if (!isLast) ...[
+                const SizedBox(height: 10),
+                const Divider(color: Color(0x15FFFFFF), height: 1),
+                const SizedBox(height: 10),
+              ],
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _PriceItem {
+  final String title;
+  final String price;
+  final Color color;
+  final IconData icon;
+  const _PriceItem(this.title, this.price, this.color, this.icon);
+}
+
+// ── Reusable Settings Tile ─────────────────────────────────────────────────
 class _SettingsTile extends StatelessWidget {
   final IconData icon;
+  final Color iconColor;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
 
   const _SettingsTile({
     required this.icon,
+    required this.iconColor,
     required this.title,
     required this.subtitle,
     required this.onTap,
@@ -366,10 +580,10 @@ class _SettingsTile extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.primaryGreen.withOpacity(0.12),
+            color: iconColor.withOpacity(0.14),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: AppColors.accentNeon, size: 20),
+          child: Icon(icon, color: iconColor, size: 20),
         ),
         title: Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
         subtitle: Text(subtitle, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
@@ -380,6 +594,7 @@ class _SettingsTile extends StatelessWidget {
   }
 }
 
+// ── OTA App Update Settings ────────────────────────────────────────────────
 class _AppUpdateSettingsSection extends ConsumerStatefulWidget {
   const _AppUpdateSettingsSection();
 
@@ -433,28 +648,31 @@ class _AppUpdateSettingsSectionState extends ConsumerState<_AppUpdateSettingsSec
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'App Version & Live Updates (OTA)',
-          style: TextStyle(
-            color: Color(0xFFD4AF37),
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Row(
+            children: [
+              Container(width: 3, height: 14, decoration: BoxDecoration(color: const Color(0xFFD4AF37), borderRadius: BorderRadius.circular(2))),
+              const SizedBox(width: 8),
+              const Text(
+                'APP VERSION & LIVE UPDATES (OTA)',
+                style: TextStyle(color: Color(0xFFD4AF37), fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.0),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 10),
         Container(
           margin: const EdgeInsets.only(bottom: 8),
           decoration: BoxDecoration(
             color: AppColors.bgCard,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.35)),
+            border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.35)),
           ),
           child: ListTile(
             leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                color: const Color(0xFFD4AF37).withOpacity(0.15),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.system_update_rounded, color: Color(0xFFFDE68A), size: 20),
@@ -476,9 +694,7 @@ class _AppUpdateSettingsSectionState extends ConsumerState<_AppUpdateSettingsSec
                 : Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFD4AF37), Color(0xFFF59E0B)],
-                      ),
+                      gradient: const LinearGradient(colors: [Color(0xFFD4AF37), Color(0xFFF59E0B)]),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
@@ -494,15 +710,12 @@ class _AppUpdateSettingsSectionState extends ConsumerState<_AppUpdateSettingsSec
           decoration: BoxDecoration(
             color: AppColors.bgCard,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+            border: Border.all(color: Colors.white.withOpacity(0.06)),
           ),
           child: SwitchListTile.adaptive(
             secondary: Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: const Color(0xFFD4AF37).withOpacity(0.12), shape: BoxShape.circle),
               child: const Icon(Icons.auto_mode_rounded, color: Color(0xFFD4AF37), size: 20),
             ),
             title: const Text(

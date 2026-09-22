@@ -256,19 +256,19 @@ class MembersScreen extends ConsumerWidget {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: 108,
+        width: 110,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF332712) : const Color(0xFF130F08),
+          color: isSelected ? const Color(0xFFDC2626) : const Color(0xFF181510),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? const Color(0xFFD4AF37) : const Color(0xFFD4AF37).withValues(alpha: 0.20),
+            color: isSelected ? const Color(0xFFEF4444) : Colors.white.withValues(alpha: 0.08),
             width: 1.2,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                    color: const Color(0xFFDC2626).withValues(alpha: 0.45),
                     blurRadius: 10,
                     offset: const Offset(0, 3),
                   ),
@@ -283,7 +283,7 @@ class MembersScreen extends ConsumerWidget {
               title,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: isSelected ? Colors.white : AppColors.textSecondary,
+                color: isSelected ? Colors.white : const Color(0xFFA1A1AA),
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 height: 1.2,
@@ -294,15 +294,11 @@ class MembersScreen extends ConsumerWidget {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFFD4AF37) : const Color(0xFF261D0C),
+                color: isSelected ? Colors.white : const Color(0xFFDC2626),
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.50),
-                  width: 1.0,
-                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.4),
+                    color: Colors.black.withValues(alpha: 0.25),
                     blurRadius: 4,
                   ),
                 ],
@@ -311,8 +307,8 @@ class MembersScreen extends ConsumerWidget {
                 child: Text(
                   count.toString(),
                   style: TextStyle(
-                    color: isSelected ? const Color(0xFF100C05) : const Color(0xFFFDE68A),
-                    fontSize: 11,
+                    color: isSelected ? const Color(0xFFDC2626) : Colors.white,
+                    fontSize: 11.5,
                     fontWeight: FontWeight.w900,
                   ),
                 ),

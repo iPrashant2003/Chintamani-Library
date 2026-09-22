@@ -254,6 +254,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ],
                                 ),
                         ),
+                        const SizedBox(height: 12),
+
+                        // Change Password Button
+                        TextButton.icon(
+                          onPressed: () => _showChangePasswordDialog(context),
+                          icon: const Icon(Icons.lock_reset_rounded, color: Color(0xFFD4AF37), size: 16),
+                          label: const Text(
+                            'Change App Password',
+                            style: TextStyle(
+                              color: Color(0xFFFDE68A),
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -280,4 +295,106 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
+  void _showChangePasswordDialog(BuildContext context) {
+    final oldPass = TextEditingController();
+    final newPass = TextEditingController();
+    final confirmPass = TextEditingController();
+    bool isLoading = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: AppColors.bgCard,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: const BorderSide(color: Color(0x44D4AF37), width: 1),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.lock_reset_rounded, color: Color(0xFFD4AF37), size: 22),
+              SizedBox(width: 10),
+              Text('Change Password', style: TextStyle(color: AppColors.textPrimary, fontSize: 16)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: oldPass,
+                obscureText: true,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: const InputDecoration(labelText: 'Current Password'),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: newPass,
+                obscureText: true,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: const InputDecoration(labelText: 'New Password'),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: confirmPass,
+                obscureText: true,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: const InputDecoration(labelText: 'Confirm New Password'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFD4AF37),
+                foregroundColor: Colors.black,
+              ),
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      final oldP = oldPass.text.trim();
+                      final newP = newPass.text.trim();
+                      final cfP = confirmPass.text.trim();
+
+                      if (oldP.isEmpty || newP.isEmpty || cfP.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('All fields are required')),
+                        );
+                        return;
+                      }
+                      if (newP != cfP) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('New passwords do not match')),
+                        );
+                        return;
+                      }
+                      setDialogState(() => isLoading = true);
+                      final ok = await ref.read(authProvider.notifier).changePassword(oldP, newP);
+                      setDialogState(() => isLoading = false);
+
+                      if (ctx.mounted) Navigator.pop(ctx);
+                      if (!context.mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            ok ? '✅ Password changed successfully!' : '❌ Current password is wrong',
+                          ),
+                          backgroundColor: ok ? const Color(0xFF10B981) : const Color(0xFFDC2626),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+              child: isLoading
+                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+                  : const Text('Update', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

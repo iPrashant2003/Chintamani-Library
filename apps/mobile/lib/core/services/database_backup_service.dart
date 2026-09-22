@@ -39,16 +39,13 @@ class DatabaseBackupService {
       final Map<String, dynamic> data = jsonDecode(content);
       final List rawMembers = (data['members'] as List?) ?? [];
       
-      // Purge any legacy demo members if present
-      rawMembers.removeWhere((m) {
-        final id = m['id']?.toString() ?? '';
-        final name = m['name']?.toString() ?? '';
-        return id.startsWith('mem-00') || name == 'Akshara pandey' || name == 'Sarita pandey';
-      });
-
-      final members = rawMembers
+      List<Member> members = rawMembers
           .map((m) => Member.fromJson(Map<String, dynamic>.from(m as Map)))
           .toList();
+
+      if (members.isEmpty) {
+        members = _initialScreenshotMembers();
+      }
       
       _cachedMembers = members;
       if (branchId.isNotEmpty) {
@@ -207,5 +204,77 @@ class DatabaseBackupService {
         'status': 'Ready for Admissions',
       };
     }
+  }
+
+  List<Member> _initialScreenshotMembers() {
+    final now = DateTime.now();
+    return [
+      Member.fromJson({
+        'id': 'mem-akshara-327',
+        'memberCode': 'CML-327',
+        'name': 'Akshara pandey',
+        'phone': '+91 9682960623',
+        'address': 'moti chauraha khalilabad',
+        'branchId': 'chintamani-khalilabad',
+        'batch': 'morning~afternoon~evening',
+        'isActive': true,
+        'subscriptions': [
+          {
+            'id': 'sub-akshara',
+            'memberId': 'mem-akshara-327',
+            'planId': 'plan-6h',
+            'startDate': now.subtract(const Duration(days: 14)).toIso8601String(),
+            'endDate': now.add(const Duration(days: 16)).toIso8601String(),
+            'status': 'ACTIVE',
+            'seat': {'id': 'seat-327', 'seatNumber': '327', 'branchId': 'chintamani-khalilabad', 'isOccupied': true},
+            'plan': {'id': 'plan-6h', 'name': '6 hrs batch', 'durationDays': 30, 'price': 500.0, 'branchId': 'chintamani-khalilabad', 'includesSeat': true},
+          }
+        ],
+      }),
+      Member.fromJson({
+        'id': 'mem-sarita-325',
+        'memberCode': 'CML-325',
+        'name': 'Sarita pandey',
+        'phone': '+91 9956360042',
+        'address': 'madya khalilabad',
+        'branchId': 'chintamani-khalilabad',
+        'batch': 'morning~afternoon~evening',
+        'isActive': true,
+        'subscriptions': [
+          {
+            'id': 'sub-sarita',
+            'memberId': 'mem-sarita-325',
+            'planId': 'plan-6h',
+            'startDate': now.subtract(const Duration(days: 28)).toIso8601String(),
+            'endDate': now.add(const Duration(days: 2)).toIso8601String(),
+            'status': 'ACTIVE',
+            'seat': {'id': 'seat-325', 'seatNumber': '325', 'branchId': 'chintamani-khalilabad', 'isOccupied': true},
+            'plan': {'id': 'plan-6h', 'name': '6 hrs batch', 'durationDays': 30, 'price': 500.0, 'branchId': 'chintamani-khalilabad', 'includesSeat': true},
+          }
+        ],
+      }),
+      Member.fromJson({
+        'id': 'mem-kajal-324',
+        'memberCode': 'CML-324',
+        'name': 'Kajal mishra',
+        'phone': '+91 9559117047',
+        'address': 'madya khalilabad',
+        'branchId': 'chintamani-khalilabad',
+        'batch': 'morning~afternoon~evening',
+        'isActive': true,
+        'subscriptions': [
+          {
+            'id': 'sub-kajal',
+            'memberId': 'mem-kajal-324',
+            'planId': 'plan-6h',
+            'startDate': now.subtract(const Duration(days: 20)).toIso8601String(),
+            'endDate': now.add(const Duration(days: 10)).toIso8601String(),
+            'status': 'ACTIVE',
+            'seat': {'id': 'seat-324', 'seatNumber': '324', 'branchId': 'chintamani-khalilabad', 'isOccupied': true},
+            'plan': {'id': 'plan-6h', 'name': '6 hrs batch', 'durationDays': 30, 'price': 500.0, 'branchId': 'chintamani-khalilabad', 'includesSeat': true},
+          }
+        ],
+      }),
+    ];
   }
 }

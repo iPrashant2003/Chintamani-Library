@@ -174,7 +174,7 @@ class _LockersScreenState extends ConsumerState<LockersScreen> {
                 ),
               ),
 
-              // Legend
+              // Legend & Standard Price
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -188,13 +188,25 @@ class _LockersScreenState extends ConsumerState<LockersScreen> {
                   children: [
                     _Legend(color: AppColors.primaryGreen, label: 'Available'),
                     _Legend(color: AppColors.accentPurple, label: 'Occupied'),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0x22D4AF37),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: const Color(0x55D4AF37), width: 0.8),
+                      ),
+                      child: const Text(
+                        '9 Lockers • ₹200/mo',
+                        style: TextStyle(color: Color(0xFFFDE68A), fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ],
                 ),
               ),
 
               const SizedBox(height: 10),
 
-              // Locker Grid
+              // Locker Grid (3x3 for exactly 9 lockers)
               Expanded(
                 child: lockersAsync.when(
                   data: (lockers) {
@@ -202,10 +214,10 @@ class _LockersScreenState extends ConsumerState<LockersScreen> {
                       physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
                       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 90, top: 4),
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 4,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 0.95,
+                        crossAxisCount: 3,
+                        mainAxisSpacing: 14,
+                        crossAxisSpacing: 14,
+                        childAspectRatio: 1.05,
                       ),
                       itemCount: lockers.length,
                       itemBuilder: (context, index) {

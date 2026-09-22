@@ -40,5 +40,17 @@ class TokenManager {
   Future<String?> getRefreshToken() async {
     return await _storage.read(key: _refreshTokenKey);
   }
-}
 
+  // ── Custom App Password (changeable by admin) ────────────────────────────
+  static const _appPasswordKey = 'app_admin_password';
+  static const _defaultPassword = 'CML6050';
+
+  Future<String> getAppPassword() async {
+    final stored = await _storage.read(key: _appPasswordKey);
+    return stored ?? _defaultPassword;
+  }
+
+  Future<void> saveAppPassword(String newPassword) async {
+    await _storage.write(key: _appPasswordKey, value: newPassword);
+  }
+}

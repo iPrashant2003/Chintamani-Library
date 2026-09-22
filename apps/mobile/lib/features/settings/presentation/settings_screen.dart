@@ -155,18 +155,6 @@ class SettingsScreen extends ConsumerWidget {
 
             const SizedBox(height: 20),
 
-            // ── Appearance ──────────────────────────────────────────────
-            _sectionLabel('Appearance & Theme'),
-            _SettingsTile(
-              icon: Icons.palette_outlined,
-              iconColor: const Color(0xFFD4AF37),
-              title: 'Customize Theme',
-              subtitle: 'Choose from 11 premium palettes or create a custom color',
-              onTap: () => context.push(RouteNames.themeCustomization),
-            ),
-
-            const SizedBox(height: 20),
-
             // ── Security ────────────────────────────────────────────────
             _sectionLabel('Staff & Security'),
             _SettingsTile(

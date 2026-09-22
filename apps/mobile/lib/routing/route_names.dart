@@ -30,7 +30,6 @@ class RouteNames {
   static const String appUpdates = '/settings/app-updates';
   static const String staffManagement = '/settings/staff';
   static const String auditLogs = '/settings/audit-logs';
-  static const String themeCustomization = '/settings/theme';
   static const String branchComparison = '/branches/compare';
   static const String insights = '/insights';
   static const String photos = '/photos';

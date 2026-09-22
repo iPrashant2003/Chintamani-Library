@@ -282,18 +282,6 @@ class AppDrawer extends ConsumerWidget {
                   ),
                   _buildDrawerItem(
                     context,
-                    title: 'Customize App Theme',
-                    subtitle: '11 premium palettes & custom colors',
-                    icon: Icons.palette_outlined,
-                    accentColor: const Color(0xFFD4AF37),
-                    badge: '11 THEMES',
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push(RouteNames.themeCustomization);
-                    },
-                  ),
-                  _buildDrawerItem(
-                    context,
                     title: 'Live App Updates (OTA)',
                     subtitle: 'Check & 1-tap auto-install',
                     icon: Icons.system_update_rounded,

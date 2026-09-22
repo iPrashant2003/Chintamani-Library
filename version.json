@@ -1,16 +1,16 @@
 {
   "version": "2.3.0",
-  "buildNumber": 23,
-  "releaseDate": "22 Sep 2026",
-  "title": "Chinta Mani Library v2.3.0 Update (Build 23)",
+  "buildNumber": 24,
+  "releaseDate": "23 Sep 2026",
+  "title": "Chinta Mani Library v2.3.0 Update (Build 24)",
   "releaseNotes": [
-    "New Luxury Dashboard Background: Updated with elegant library atmosphere & dimmed overlay",
-    "Separated Sections: Change Password now has its own dedicated screen (no longer opens full settings)",
-    "Separated Sections: Live App Updates (OTA) now has its own dedicated screen with 1-tap check",
-    "Streamlined Navigation: Drawer, More, and Settings now cleanly direct to each individual section",
-    "Shift & Batch Timings: 100% editable with custom timings & custom batches",
-    "Standard library pricing: 6 hrs ₹500, 12 hrs ₹800, 24 hrs ₹1,000, Reg ₹100, Locker ₹200",
-    "9 Lockers Vault: Configured for exactly 9 lockers across both branches"
+    "Premium Dashboard: Luxury library background with refined muted gold card styling",
+    "WhatsApp Hub: Settings tab removed — now 3 focused tabs (Auto Bot, Broadcast, Students)",
+    "WhatsApp Config: Link WhatsApp number in App Settings instead of WhatsApp screen",
+    "Due Alert: Refined alert banner to deep burgundy/wine palette (was amber/orange)",
+    "Theme Customization removed: Fixed premium design identity — no more theme switching",
+    "Card Polish: Softer gold borders, reduced shimmer, warm ivory text on all metric cards",
+    "Navigation Cleanup: Drawer and More screen no longer show 'Customize App Theme'"
   ],
   "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.0/Chintamani-Library-Release.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",

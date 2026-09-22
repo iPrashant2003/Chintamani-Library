@@ -178,7 +178,7 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
   @override
   void initState() {
     super.initState();
-    _tabCtrl = TabController(length: 4, vsync: this);
+    _tabCtrl = TabController(length: 3, vsync: this);
     _loadSettings();
   }
 
@@ -638,11 +638,6 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
                       iconMargin: EdgeInsets.only(bottom: 2),
                       text: 'Students',
                     ),
-                    Tab(
-                      icon: Icon(Icons.settings_rounded, size: 16),
-                      iconMargin: EdgeInsets.only(bottom: 2),
-                      text: 'Settings',
-                    ),
                   ],
                 ),
               ),
@@ -721,31 +716,6 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
                       adminNumber: adminNumber,
                       svc: ref.read(whatsAppServiceProvider),
                     ),
-
-                    // Tab 4: Settings
-                    _SettingsTab(
-                      adminNumberCtrl: _adminNumberCtrl,
-                      botActive: _botActive,
-                      saving: _savingNumber,
-                      onToggleBot: (v) async {
-                        setState(() => _botActive = v);
-                        await ref.read(whatsAppServiceProvider).setBotActive(v);
-                      },
-                      onSaveNumber: () async {
-                        final num = _adminNumberCtrl.text.trim();
-                        if (num.length != 10) {
-                          _showSnack('Please enter a valid 10-digit mobile number', isError: true);
-                          return;
-                        }
-                        setState(() => _savingNumber = true);
-                        await ref.read(whatsAppServiceProvider).saveAdminNumber(num);
-                        ref.invalidate(adminWhatsAppNumberProvider);
-                        if (mounted) {
-                          setState(() => _savingNumber = false);
-                          _showSnack('✅ Linked WhatsApp number updated to $num');
-                        }
-                      },
-                    ),
                   ],
                 ),
               ),
@@ -805,15 +775,15 @@ class _BotEngineTab extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF78350F), Color(0xFF451A03)],
+                      colors: [Color(0xFF3D141E), Color(0xFF240B12)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFF59E0B), width: 1.5),
+                    border: Border.all(color: const Color(0xFF9E3D52), width: 1.5),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFF59E0B).withValues(alpha: 0.28),
+                        color: const Color(0xFF9E3D52).withValues(alpha: 0.22),
                         blurRadius: 18,
                         offset: const Offset(0, 4),
                       ),
@@ -833,7 +803,7 @@ class _BotEngineTab extends StatelessWidget {
                                 Text(
                                   '${queue.length} Student${queue.length > 1 ? 's' : ''} Due Today!',
                                   style: const TextStyle(
-                                    color: Color(0xFFFDE68A),
+                                    color: Color(0xFFF8C4D0),
                                     fontSize: 16,
                                     fontWeight: FontWeight.w900,
                                   ),
@@ -841,7 +811,7 @@ class _BotEngineTab extends StatelessWidget {
                                 const Text(
                                   'WhatsApp will open with message ready — just tap Send',
                                   style: TextStyle(
-                                    color: Color(0xFFD97706),
+                                    color: Color(0xFFBB8090),
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -2057,137 +2027,6 @@ class _StudentsTab extends StatelessWidget {
   }
 }
 
-// ── Tab 4: Settings & Number Management ─────────────────────────────────────────
-class _SettingsTab extends StatelessWidget {
-  final TextEditingController adminNumberCtrl;
-  final bool botActive;
-  final bool saving;
-  final ValueChanged<bool> onToggleBot;
-  final VoidCallback onSaveNumber;
-
-  const _SettingsTab({
-    required this.adminNumberCtrl,
-    required this.botActive,
-    required this.saving,
-    required this.onToggleBot,
-    required this.onSaveNumber,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(14, 8, 14, 90),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 1. Linked Number Setting Card
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF2A1F0D), Color(0xFF140F05)],
-              ),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFFD4AF37), width: 1.2),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.20),
-                  blurRadius: 12,
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Row(
-                  children: [
-                    WhatsAppLogo(size: 20, color: Color(0xFFFDE68A)),
-                    SizedBox(width: 10),
-                    Text(
-                      'LINKED WHATSAPP NUMBER',
-                      style: TextStyle(
-                        color: Color(0xFFFDE68A),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Messages and automated bot reminders include this contact number for student replies.',
-                  style: TextStyle(color: Color(0xFFC5B38B), fontSize: 11.5),
-                ),
-                const SizedBox(height: 14),
-                TextField(
-                  controller: adminNumberCtrl,
-                  keyboardType: TextInputType.phone,
-                  maxLength: 10,
-                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1.5),
-                  decoration: InputDecoration(
-                    hintText: '7388389944',
-                    hintStyle: const TextStyle(color: Color(0xFF666666)),
-                    counterStyle: const TextStyle(color: Color(0xFF666666)),
-                    prefixIcon: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                      child: Text('+91 ', style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.w900, fontSize: 15)),
-                    ),
-                    filled: true,
-                    fillColor: const Color(0xFF100C05),
-                    contentPadding: const EdgeInsets.all(14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF3A2C12)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF3A2C12)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFD4AF37), width: 1.5),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: saving ? null : onSaveNumber,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFD4AF37), Color(0xFFF59E0B)],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: saving
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2))
-                          : const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.save_rounded, color: Colors.black, size: 16),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Save Linked WhatsApp Number',
-                                  style: TextStyle(color: Colors.black, fontSize: 13.5, fontWeight: FontWeight.w900),
-                                ),
-                              ],
-                            ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-        ],
-      ),
-    );
-  }
-}
 
 // ── Audience Filter Bottom Sheet ─────────────────────────────────────────────────
 class _AudienceFilterSheet extends StatelessWidget {

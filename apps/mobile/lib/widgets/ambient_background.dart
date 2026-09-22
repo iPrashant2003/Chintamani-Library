@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Deep dark background with optional full-screen photo layer.
-/// When [imagePath] is provided (asset path), it is rendered behind
-/// [child] with reduced brightness and a translucent dark overlay
-/// so every card / module remains clearly readable.
+/// Deep dark background with responsive full-screen luxury library photo layer.
+/// When [imagePath] is provided, it is rendered behind [child] with
+/// calibrated darkness and multi-stop gradient overlay so every card,
+/// metric, and text label maintains high contrast on both mobile and desktop.
 class AmbientBackground extends StatelessWidget {
   final Widget child;
   final String? imagePath;
@@ -19,33 +19,53 @@ class AmbientBackground extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // ── Pitch-black base ───────────────────────────────────────────
+        // ── Pitch-black foundation ─────────────────────────────────────
         const ColoredBox(color: Color(0xFF000000)),
 
-        // ── Optional photo background ──────────────────────────────────
+        // ── Responsive Photo Background Layer ─────────────────────────
         if (imagePath != null)
           Positioned.fill(
             child: Image.asset(
               imagePath!,
               fit: BoxFit.cover,
-              // Darken the image so cards stay readable
-              color: Colors.black.withValues(alpha: 0.60),
+              alignment: Alignment.topCenter,
+              // Darken base to ensure card & text readability
+              color: Colors.black.withValues(alpha: 0.62),
               colorBlendMode: BlendMode.darken,
               errorBuilder: (_, __, ___) => const SizedBox.shrink(),
             ),
           ),
 
-        // ── Very subtle dark vignette overlay ─────────────────────────
+        // ── Vertical gradient overlay for text readability ────────────
+        if (imagePath != null)
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.45, 1.0],
+                  colors: [
+                    Colors.black.withValues(alpha: 0.70), // Protect status bar & top branding
+                    Colors.black.withValues(alpha: 0.48), // Reveal artwork ambiance
+                    Colors.black.withValues(alpha: 0.78), // Smooth blend toward bottom navigation
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+        // ── Soft radial vignette to keep edges calm & luxury ──────────
         if (imagePath != null)
           Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   center: Alignment.center,
-                  radius: 1.4,
+                  radius: 1.35,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.30),
+                    Colors.black.withValues(alpha: 0.40),
                   ],
                 ),
               ),

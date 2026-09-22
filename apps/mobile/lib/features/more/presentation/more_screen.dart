@@ -287,14 +287,6 @@ class MoreScreen extends ConsumerWidget {
                   route: RouteNames.changePassword,
                 ),
                 _MoreItem(
-                  title: 'Customize App Theme',
-                  subtitle: 'Choose from 11 palettes or create custom color',
-                  icon: Icons.palette_outlined,
-                  badge: '11 THEMES',
-                  color: const Color(0xFFD4AF37),
-                  route: RouteNames.themeCustomization,
-                ),
-                _MoreItem(
                   title: 'Database Master Backup',
                   subtitle: '1-Tap export, WhatsApp/Drive share & restore',
                   icon: Icons.cloud_sync_rounded,

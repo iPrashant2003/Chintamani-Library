@@ -57,6 +57,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       backgroundColor: const Color(0xFF000000),
       drawer: const AppDrawer(),
       body: AmbientBackground(
+        imagePath: 'assets/images/dashboard_bg.png',
         child: SafeArea(
           bottom: false,
           child: RefreshIndicator(

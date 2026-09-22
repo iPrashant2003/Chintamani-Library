@@ -277,7 +277,7 @@ class AppDrawer extends ConsumerWidget {
                     badge: 'SECURITY',
                     onTap: () {
                       Navigator.pop(context);
-                      context.push(RouteNames.settings);
+                      context.push(RouteNames.changePassword);
                     },
                   ),
                   _buildDrawerItem(
@@ -301,7 +301,7 @@ class AppDrawer extends ConsumerWidget {
                     badge: 'OTA',
                     onTap: () {
                       Navigator.pop(context);
-                      context.push(RouteNames.settings);
+                      context.push(RouteNames.appUpdates);
                     },
                   ),
                   _buildDrawerItem(

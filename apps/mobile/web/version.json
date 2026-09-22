@@ -1,16 +1,16 @@
 {
   "version": "2.3.0",
-  "buildNumber": 22,
+  "buildNumber": 23,
   "releaseDate": "22 Sep 2026",
-  "title": "Chinta Mani Library v2.3.0 Update (Build 22)",
+  "title": "Chinta Mani Library v2.3.0 Update (Build 23)",
   "releaseNotes": [
-    "Dashboard Background: Beautiful photo background with dark overlay & vignette",
-    "Background image auto-darkened for perfect readability of all cards & modules",
+    "New Luxury Dashboard Background: Updated with elegant library atmosphere & dimmed overlay",
+    "Separated Sections: Change Password now has its own dedicated screen (no longer opens full settings)",
+    "Separated Sections: Live App Updates (OTA) now has its own dedicated screen with 1-tap check",
+    "Streamlined Navigation: Drawer, More, and Settings now cleanly direct to each individual section",
     "Shift & Batch Timings: 100% editable with custom timings & custom batches",
     "Standard library pricing: 6 hrs ₹500, 12 hrs ₹800, 24 hrs ₹1,000, Reg ₹100, Locker ₹200",
-    "9 Lockers Vault: Configured for exactly 9 lockers across both branches",
-    "Fixed Password persistence & added prominent Change Password buttons across app",
-    "Members Directory: Rebuilt with screenshot layout, seat badge, and 17 interactive actions"
+    "9 Lockers Vault: Configured for exactly 9 lockers across both branches"
   ],
   "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.0/Chintamani-Library-Release.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",

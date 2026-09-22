@@ -284,7 +284,7 @@ class MoreScreen extends ConsumerWidget {
                   icon: Icons.lock_reset_rounded,
                   badge: 'SECURITY',
                   color: const Color(0xFFDC2626),
-                  route: RouteNames.settings,
+                  route: RouteNames.changePassword,
                 ),
                 _MoreItem(
                   title: 'Customize App Theme',
@@ -308,7 +308,7 @@ class MoreScreen extends ConsumerWidget {
                   icon: Icons.system_update_rounded,
                   badge: 'v${AppUpdateService.currentVersion}',
                   color: const Color(0xFF3B82F6),
-                  route: RouteNames.settings,
+                  route: RouteNames.appUpdates,
                 ),
                 _MoreItem(
                   title: 'Campus Tour & Photos',

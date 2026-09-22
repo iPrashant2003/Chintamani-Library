@@ -30,6 +30,8 @@ import '../features/qr_code/presentation/qr_hub_screen.dart';
 import '../features/notifications/presentation/notifications_screen.dart';
 import '../features/search/presentation/search_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
+import '../features/settings/presentation/change_password_screen.dart';
+import '../features/settings/presentation/app_updates_screen.dart';
 import '../features/branch/presentation/branch_comparison_screen.dart';
 import '../features/insights/presentation/insights_screen.dart';
 import '../features/more/presentation/about_chintamani_screen.dart';
@@ -229,6 +231,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteNames.settings,
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.changePassword,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ChangePasswordScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.appUpdates,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AppUpdatesScreen(),
       ),
 
       GoRoute(

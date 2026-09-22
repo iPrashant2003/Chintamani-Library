@@ -188,13 +188,20 @@ class SettingsScreen extends ConsumerWidget {
               iconColor: const Color(0xFFDC2626),
               title: 'Change App Password',
               subtitle: 'Update the password used to open this app',
-              onTap: () => _showChangePasswordDialog(context, ref),
+              onTap: () => context.push(RouteNames.changePassword),
             ),
 
             const SizedBox(height: 20),
 
             // ── OTA Updates ─────────────────────────────────────────────
-            const _AppUpdateSettingsSection(),
+            _sectionLabel('Live Updates (OTA)'),
+            _SettingsTile(
+              icon: Icons.system_update_rounded,
+              iconColor: const Color(0xFF3B82F6),
+              title: 'Live App Updates (OTA)',
+              subtitle: 'v${AppUpdateService.currentVersion} Build ${AppUpdateService.currentBuildNumber} • 1-Tap Auto-Install',
+              onTap: () => context.push(RouteNames.appUpdates),
+            ),
             const SizedBox(height: 20),
 
             // ── About ───────────────────────────────────────────────────
@@ -315,159 +322,6 @@ class SettingsScreen extends ConsumerWidget {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close')),
         ],
-      ),
-    );
-  }
-
-  void _showChangePasswordDialog(BuildContext context, WidgetRef ref) {
-    final oldPass = TextEditingController();
-    final newPass = TextEditingController();
-    final confirmPass = TextEditingController();
-    bool isLoading = false;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => AlertDialog(
-          backgroundColor: AppColors.bgCard,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-            side: const BorderSide(color: Color(0x44D4AF37), width: 1),
-          ),
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFDC2626).withOpacity(0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.lock_outline, color: Color(0xFFDC2626), size: 20),
-              ),
-              const SizedBox(width: 10),
-              const Text('Change Password', style: TextStyle(color: AppColors.textPrimary, fontSize: 16)),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _PassField(controller: oldPass, label: 'Current Password'),
-              const SizedBox(height: 12),
-              _PassField(controller: newPass, label: 'New Password'),
-              const SizedBox(height: 12),
-              _PassField(controller: confirmPass, label: 'Confirm New Password'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
-            ),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: isLoading
-                  ? const SizedBox(width: 60, height: 36, child: Center(child: CircularProgressIndicator(color: Color(0xFFD4AF37), strokeWidth: 2)))
-                  : ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFD4AF37),
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      onPressed: () async {
-                        final old = oldPass.text.trim();
-                        final nw = newPass.text.trim();
-                        final cf = confirmPass.text.trim();
-
-                        if (old.isEmpty || nw.isEmpty || cf.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('All fields are required'), behavior: SnackBarBehavior.floating),
-                          );
-                          return;
-                        }
-                        if (nw != cf) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('New passwords do not match'), behavior: SnackBarBehavior.floating),
-                          );
-                          return;
-                        }
-                        if (nw.length < 4) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Password must be at least 4 characters'), behavior: SnackBarBehavior.floating),
-                          );
-                          return;
-                        }
-
-                        setState(() => isLoading = true);
-                        final success = await ref.read(authProvider.notifier).changePassword(old, nw);
-                        setState(() => isLoading = false);
-
-                        if (ctx.mounted) Navigator.pop(ctx);
-                        if (!context.mounted) return;
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Row(
-                              children: [
-                                Icon(
-                                  success ? Icons.check_circle_rounded : Icons.error_rounded,
-                                  color: success ? const Color(0xFF10B981) : const Color(0xFFDC2626),
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  success
-                                      ? '✅ Password changed successfully!'
-                                      : '❌ Incorrect current password. Try again.',
-                                  style: const TextStyle(fontWeight: FontWeight.w600),
-                                ),
-                              ],
-                            ),
-                            backgroundColor: AppColors.bgCard,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                        );
-                      },
-                      child: const Text('Update', style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Helper: password text field ────────────────────────────────────────────
-class _PassField extends StatefulWidget {
-  final TextEditingController controller;
-  final String label;
-  const _PassField({required this.controller, required this.label});
-
-  @override
-  State<_PassField> createState() => _PassFieldState();
-}
-
-class _PassFieldState extends State<_PassField> {
-  bool _visible = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: widget.controller,
-      obscureText: !_visible,
-      style: const TextStyle(color: AppColors.textPrimary),
-      decoration: InputDecoration(
-        labelText: widget.label,
-        labelStyle: const TextStyle(color: AppColors.textSecondary),
-        filled: true,
-        fillColor: AppColors.bgDark,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0x33FFFFFF))),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0x22FFFFFF))),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFD4AF37))),
-        suffixIcon: IconButton(
-          icon: Icon(_visible ? Icons.visibility_off : Icons.visibility, color: AppColors.textTertiary, size: 18),
-          onPressed: () => setState(() => _visible = !_visible),
-        ),
       ),
     );
   }

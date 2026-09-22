@@ -27,6 +27,7 @@ class RouteNames {
   static const String settings = '/settings';
   static const String profile = '/settings/profile';
   static const String changePassword = '/settings/change-password';
+  static const String appUpdates = '/settings/app-updates';
   static const String staffManagement = '/settings/staff';
   static const String auditLogs = '/settings/audit-logs';
   static const String themeCustomization = '/settings/theme';

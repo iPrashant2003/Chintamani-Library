@@ -8,7 +8,6 @@ import '../features/branch/providers/branch_provider.dart';
 import '../features/auth/providers/auth_provider.dart';
 import '../routing/route_names.dart';
 import 'chintamani_logo.dart';
-import 'whatsapp_logo.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -161,147 +160,42 @@ class AppDrawer extends ConsumerWidget {
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 children: [
-                  // SECTION 1: LIBRARY DESK OPERATIONS
-                  _buildSectionHeader('LIBRARY OPERATIONS', const Color(0xFFD4AF37)),
-                  _buildDrawerItem(
-                    context,
-                    title: 'Members Directory',
-                    subtitle: 'Live memberships, expired & renew',
-                    icon: Icons.people_alt_rounded,
-                    accentColor: const Color(0xFF10B981),
-                    badge: 'LIVE',
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push(RouteNames.members);
-                    },
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    title: '3D Seats Layout',
-                    subtitle: 'Visual chair allocation & status',
-                    icon: Icons.chair_rounded,
-                    accentColor: const Color(0xFF00E5BC),
-                    badge: '3D',
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push(RouteNames.seats);
-                    },
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    title: '9 Lockers Vault',
-                    subtitle: 'L01-L09 lockers • ₹200/mo fee',
-                    icon: Icons.lock_clock_rounded,
-                    accentColor: const Color(0xFF8B5CF6),
-                    badge: '9 VAULT',
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push(RouteNames.lockers);
-                    },
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    title: 'Shift & Batch Timings',
-                    subtitle: '6h ₹500 • 12h ₹800 • 24h ₹1,000',
-                    icon: Icons.schedule_rounded,
-                    accentColor: const Color(0xFF3B82F6),
-                    badge: 'FEES',
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push(RouteNames.plans);
-                    },
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    title: 'Record Fee Receipt',
-                    subtitle: 'Cash or UPI payment collection',
-                    icon: Icons.payments_rounded,
-                    accentColor: const Color(0xFFD4AF37),
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push(RouteNames.recordPayment);
-                    },
-                  ),
+                  // SECTION 1: QUICK DESK UTILITIES (Not duplicated in More)
+                  _buildSectionHeader('QUICK UTILITIES', const Color(0xFF06B6D4)),
                   _buildDrawerItem(
                     context,
                     title: 'Quick QR Scanner',
-                    subtitle: 'Scan member check-in card',
+                    subtitle: 'Scan member ID & check-in pass',
                     icon: Icons.qr_code_scanner_rounded,
                     accentColor: const Color(0xFF06B6D4),
-                    badge: 'FAST',
+                    badge: 'FAST SCAN',
                     onTap: () {
                       Navigator.pop(context);
                       context.push(RouteNames.qr);
                     },
                   ),
-
-                  const SizedBox(height: 10),
-
-                  // SECTION 2: COMMUNICATIONS & OUTREACH
-                  _buildSectionHeader('COMMUNICATIONS', const Color(0xFF25D366)),
                   _buildDrawerItem(
                     context,
-                    title: 'WhatsApp Hub',
-                    subtitle: 'Broadcasts, fee reminders & AI writer',
-                    icon: Icons.chat_rounded,
-                    customIcon: const WhatsAppLogo(size: 18, color: Color(0xFF25D366)),
-                    accentColor: const Color(0xFF25D366),
-                    badge: 'WA HUB',
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push(RouteNames.whatsapp);
-                    },
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    title: 'Broadcast Inbox',
-                    subtitle: 'System alerts & announcements',
-                    icon: Icons.notifications_active_outlined,
-                    accentColor: const Color(0xFFF59E0B),
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push(RouteNames.notifications);
-                    },
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // SECTION 3: SYSTEM SECURITY & SETTINGS
-                  _buildSectionHeader('SECURITY & PREFERENCES', const Color(0xFFEC4899)),
-                  _buildDrawerItem(
-                    context,
-                    title: 'Change App Password',
-                    subtitle: 'Update app PIN / access password',
-                    icon: Icons.lock_reset_rounded,
-                    accentColor: const Color(0xFFDC2626),
-                    badge: 'SECURITY',
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push(RouteNames.changePassword);
-                    },
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    title: 'Live App Updates (OTA)',
-                    subtitle: 'Check & 1-tap auto-install',
-                    icon: Icons.system_update_rounded,
+                    title: 'Branch Comparison',
+                    subtitle: 'Khalilabad vs Mehdawal performance',
+                    icon: Icons.compare_arrows_rounded,
                     accentColor: const Color(0xFF3B82F6),
-                    badge: 'OTA',
+                    badge: 'COMPARE',
                     onTap: () {
                       Navigator.pop(context);
-                      context.push(RouteNames.appUpdates);
+                      context.push(RouteNames.branchComparison);
                     },
                   ),
                   _buildDrawerItem(
                     context,
-                    title: 'Database Master Backup',
-                    subtitle: '1-Tap export, share & restore',
-                    icon: Icons.cloud_sync_rounded,
-                    accentColor: const Color(0xFF10B981),
-                    badge: 'BACKUP',
+                    title: 'Library Insights & Trends',
+                    subtitle: 'Occupancy patterns & study rush hours',
+                    icon: Icons.insights_rounded,
+                    accentColor: const Color(0xFF8B5CF6),
+                    badge: 'ANALYTICS',
                     onTap: () {
                       Navigator.pop(context);
-                      context.push(RouteNames.databaseBackup);
+                      context.push(RouteNames.insights);
                     },
                   ),
                   _buildDrawerItem(
@@ -314,6 +208,23 @@ class AppDrawer extends ConsumerWidget {
                     onTap: () {
                       Navigator.pop(context);
                       context.push(RouteNames.contact);
+                    },
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // SECTION 2: ACCESS ALL OPERATIONS
+                  _buildSectionHeader('MORE OPERATIONS', const Color(0xFF10B981)),
+                  _buildDrawerItem(
+                    context,
+                    title: 'More Features Hub',
+                    subtitle: 'Lockers, Timings, Dues, Expenses & System',
+                    icon: Icons.dashboard_customize_rounded,
+                    accentColor: const Color(0xFF10B981),
+                    badge: 'ALL MODULES',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push(RouteNames.more);
                     },
                   ),
 

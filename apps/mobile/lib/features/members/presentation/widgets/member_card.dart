@@ -1,10 +1,7 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../domain/member_model.dart';
-import '../../../../theme/app_colors.dart';
-import '../../../../widgets/member_avatar.dart';
 import '../../../../widgets/whatsapp_logo.dart';
 
 class MemberCard extends StatefulWidget {
@@ -24,7 +21,6 @@ class MemberCard extends StatefulWidget {
 class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _scaleAnimation;
-  int _actionPage = 0; // 0 = first action row, 1 = second action row
 
   @override
   void initState() {
@@ -76,6 +72,20 @@ class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateM
     const paid = 500;
     final due = amt > paid ? amt - paid : 0;
 
+    // Multicolour palette for student cards (blue, purple, sea green, dark yellow, dark green, pinkish red, red, deep blue)
+    const studentPalette = [
+      Color(0xFF2563EB), // Blue
+      Color(0xFF7C3AED), // Purple
+      Color(0xFF059669), // Sea Green
+      Color(0xFFD97706), // Dark Yellow / Amber
+      Color(0xFF0D9488), // Dark Green / Teal
+      Color(0xFFE11D48), // Pinkish Red
+      Color(0xFFDC2626), // Red
+      Color(0xFF4F46E5), // Indigo
+    ];
+    final colorIdx = (member.id.hashCode.abs() + (member.currentSeatNumber?.hashCode.abs() ?? 0)) % studentPalette.length;
+    final cardAccent = studentPalette[colorIdx];
+
     return GestureDetector(
       onTapDown: (_) {
         HapticFeedback.lightImpact();
@@ -98,7 +108,7 @@ class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateM
                 color: const Color(0xFF181510), // Warm luxury dark container
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.08),
+                  color: cardAccent.withValues(alpha: 0.20),
                   width: 1,
                 ),
                 boxShadow: [
@@ -116,20 +126,20 @@ class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateM
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Illustrated circular Avatar
+                      // Illustrated circular Avatar with card accent border
                       Container(
                         width: 52,
                         height: 52,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: const Color(0xFFFDE68A), // Warm yellow from screenshot
-                          border: Border.all(color: const Color(0xFFF59E0B), width: 1.5),
+                          color: cardAccent.withValues(alpha: 0.15),
+                          border: Border.all(color: cardAccent, width: 1.5),
                         ),
                         child: Center(
                           child: Text(
                             member.name.isNotEmpty ? member.name.substring(0, 1).toUpperCase() : 'S',
-                            style: const TextStyle(
-                              color: Color(0xFF92400E),
+                            style: TextStyle(
+                              color: cardAccent,
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
                             ),
@@ -193,10 +203,10 @@ class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateM
                                 Container(
                                   padding: const EdgeInsets.all(2),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFDC2626).withValues(alpha: 0.15),
+                                    color: cardAccent.withValues(alpha: 0.18),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
-                                  child: const Icon(Icons.sim_card_outlined, size: 12, color: Color(0xFFDC2626)),
+                                  child: Icon(Icons.sim_card_outlined, size: 12, color: cardAccent),
                                 ),
                               ],
                             ),
@@ -204,18 +214,18 @@ class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateM
                         ),
                       ),
 
-                      // Seat Pill Badge (Red #DC2626) & Chair Status Indicator
+                      // Seat Pill Badge (in student's multicolour accent) & Chair Status Indicator
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFDC2626), // Screenshot red badge
+                              color: cardAccent,
                               borderRadius: BorderRadius.circular(8),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFFDC2626).withValues(alpha: 0.45),
+                                  color: cardAccent.withValues(alpha: 0.40),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -238,16 +248,16 @@ class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateM
                             ),
                           ),
                           const SizedBox(height: 6),
-                          // Chair icon with dotted line (matching screenshot)
+                          // Chair icon with dotted line in student's multicolour accent
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.chair_alt_rounded, color: Color(0xFFDC2626), size: 13),
+                              Icon(Icons.chair_alt_rounded, color: cardAccent, size: 13),
                               const SizedBox(width: 2),
                               Text(
                                 '.......',
                                 style: TextStyle(
-                                  color: const Color(0xFFDC2626).withValues(alpha: 0.8),
+                                  color: cardAccent.withValues(alpha: 0.8),
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1.0,
@@ -429,22 +439,22 @@ class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateM
                     child: Row(
                       children: [
                         _buildActionBtn(context, Icons.chat_rounded, 'WhatsApp', const Color(0xFF25D366), isWhatsApp: true),
-                        _buildActionBtn(context, Icons.badge_outlined, 'ID-Card', const Color(0xFFDC2626), onTap: () => _showIdCardDialog(context)),
-                        _buildActionBtn(context, Icons.edit_note_rounded, 'Edit', const Color(0xFFDC2626), onTap: () => _showEditDialog(context)),
-                        _buildActionBtn(context, Icons.history_rounded, 'View Logs', const Color(0xFFDC2626), onTap: () => _showLogsDialog(context)),
-                        _buildActionBtn(context, Icons.card_giftcard_rounded, 'Gift Days', const Color(0xFFDC2626), onTap: () => _showGiftDaysDialog(context)),
-                        _buildActionBtn(context, Icons.print_rounded, 'Print', const Color(0xFFDC2626), onTap: () => _showPrintReceipt(context)),
-                        _buildActionBtn(context, Icons.pause_circle_outline_rounded, 'Freeze', const Color(0xFFDC2626), onTap: () => _showFreezeDialog(context)),
-                        _buildActionBtn(context, Icons.person_outline_rounded, 'Profile', const Color(0xFFDC2626), onTap: widget.onTap),
-                        _buildActionBtn(context, Icons.fingerprint_rounded, 'Bio Enroll', const Color(0xFFDC2626), onTap: () => _showBioEnrollDialog(context)),
-                        _buildActionBtn(context, Icons.payments_outlined, 'Add Pay', const Color(0xFFDC2626), onTap: () => _showAddPayDialog(context)),
-                        _buildActionBtn(context, Icons.refresh_rounded, 'Renew', const Color(0xFFDC2626), onTap: () => _showRenewDialog(context)),
-                        _buildActionBtn(context, Icons.receipt_long_rounded, 'Add Bill', const Color(0xFFDC2626), onTap: () => _showAddBillDialog(context)),
-                        _buildActionBtn(context, Icons.sms_outlined, 'SMS', const Color(0xFFDC2626), onTap: () => _sendSms(context)),
-                        _buildActionBtn(context, Icons.lock_outline_rounded, 'Locker', const Color(0xFFDC2626), onTap: () => _showLockerDialog(context)),
+                        _buildActionBtn(context, Icons.badge_outlined, 'ID-Card', const Color(0xFF3B82F6), onTap: () => _showIdCardDialog(context)),
+                        _buildActionBtn(context, Icons.edit_note_rounded, 'Edit', const Color(0xFFD97706), onTap: () => _showEditDialog(context)),
+                        _buildActionBtn(context, Icons.history_rounded, 'View Logs', const Color(0xFF8B5CF6), onTap: () => _showLogsDialog(context)),
+                        _buildActionBtn(context, Icons.card_giftcard_rounded, 'Gift Days', const Color(0xFFE11D48), onTap: () => _showGiftDaysDialog(context)),
+                        _buildActionBtn(context, Icons.print_rounded, 'Print', const Color(0xFF0D9488), onTap: () => _showPrintReceipt(context)),
+                        _buildActionBtn(context, Icons.pause_circle_outline_rounded, 'Freeze', const Color(0xFF06B6D4), onTap: () => _showFreezeDialog(context)),
+                        _buildActionBtn(context, Icons.person_outline_rounded, 'Profile', const Color(0xFF6366F1), onTap: widget.onTap),
+                        _buildActionBtn(context, Icons.fingerprint_rounded, 'Bio Enroll', const Color(0xFF059669), onTap: () => _showBioEnrollDialog(context)),
+                        _buildActionBtn(context, Icons.payments_outlined, 'Add Pay', const Color(0xFF10B981), onTap: () => _showAddPayDialog(context)),
+                        _buildActionBtn(context, Icons.refresh_rounded, 'Renew', const Color(0xFFF97316), onTap: () => _showRenewDialog(context)),
+                        _buildActionBtn(context, Icons.receipt_long_rounded, 'Add Bill', const Color(0xFFA855F7), onTap: () => _showAddBillDialog(context)),
+                        _buildActionBtn(context, Icons.sms_outlined, 'SMS', const Color(0xFF0EA5E9), onTap: () => _sendSms(context)),
+                        _buildActionBtn(context, Icons.lock_outline_rounded, 'Locker', const Color(0xFFCA8A04), onTap: () => _showLockerDialog(context)),
                         _buildActionBtn(context, Icons.delete_outline_rounded, 'Delete', const Color(0xFFDC2626), onTap: () => _showDeleteDialog(context)),
-                        _buildActionBtn(context, Icons.block_rounded, 'Block', const Color(0xFFDC2626), onTap: () => _showBlockDialog(context)),
-                        _buildActionBtn(context, Icons.exit_to_app_rounded, 'Mark Left', const Color(0xFFDC2626), onTap: () => _showMarkLeftDialog(context)),
+                        _buildActionBtn(context, Icons.block_rounded, 'Block', const Color(0xFF991B1B), onTap: () => _showBlockDialog(context)),
+                        _buildActionBtn(context, Icons.exit_to_app_rounded, 'Mark Left', const Color(0xFF64748B), onTap: () => _showMarkLeftDialog(context)),
                       ],
                     ),
                   ),
@@ -491,7 +501,7 @@ class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateM
               width: 34,
               height: 34,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
+                color: color.withValues(alpha: 0.16),
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -504,7 +514,7 @@ class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateM
             Text(
               label,
               style: TextStyle(
-                color: isWhatsApp ? const Color(0xFF25D366) : const Color(0xFFDC2626),
+                color: color,
                 fontSize: 9,
                 fontWeight: FontWeight.w600,
               ),

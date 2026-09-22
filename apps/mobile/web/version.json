@@ -1,16 +1,16 @@
 {
   "version": "2.3.0",
-  "buildNumber": 24,
+  "buildNumber": 25,
   "releaseDate": "23 Sep 2026",
-  "title": "Chinta Mani Library v2.3.0 Update (Build 24)",
+  "title": "Chinta Mani Library v2.3.0 Update (Build 25)",
   "releaseNotes": [
-    "Premium Dashboard: Luxury library background with refined muted gold card styling",
-    "WhatsApp Hub: Settings tab removed — now 3 focused tabs (Auto Bot, Broadcast, Students)",
-    "WhatsApp Config: Link WhatsApp number in App Settings instead of WhatsApp screen",
-    "Due Alert: Refined alert banner to deep burgundy/wine palette (was amber/orange)",
-    "Theme Customization removed: Fixed premium design identity — no more theme switching",
-    "Card Polish: Softer gold borders, reduced shimmer, warm ivory text on all metric cards",
-    "Navigation Cleanup: Drawer and More screen no longer show 'Customize App Theme'"
+    "Dashboard Cards: Numbers styled in deep rich chromatic tones matching each card",
+    "Members Directory: Vibrant multicolour student cards (blue, purple, sea green, dark yellow, dark green, pinkish red)",
+    "Action Buttons: Red color removed — ID-Card, Edit, Logs, Print, Freeze, Renew now in distinct multicolour palette",
+    "Members Filter Cards: Multicolour category selection for Live, Expired, Expiring & All",
+    "WhatsApp Section: Students Due Today card made sleek, compact and decent with quick 1-tap Send",
+    "Multicolour Theme: Unified across Members, WhatsApp, Seats, and Lockers (no gold outside dashboard)",
+    "Navigation Streamlined: Deduplicated content between More section and Left Nav Bar"
   ],
   "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.0/Chintamani-Library-Release.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",

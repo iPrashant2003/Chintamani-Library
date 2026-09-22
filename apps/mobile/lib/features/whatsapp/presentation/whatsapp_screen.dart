@@ -168,7 +168,6 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
 
   // Settings tab state
   final _adminNumberCtrl = TextEditingController();
-  bool _savingNumber = false;
   bool _botActive = true;
 
   // Members tab search
@@ -599,24 +598,24 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
                 margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xF21C160B), Color(0xF8100C05)],
+                    colors: [Color(0xF20F1E17), Color(0xF80A140F)],
                   ),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.40),
+                    color: const Color(0xFF10B981).withValues(alpha: 0.35),
                     width: 1,
                   ),
                 ),
                 child: TabBar(
                   controller: _tabCtrl,
                   indicator: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                    color: const Color(0xFF059669).withValues(alpha: 0.28),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFFDE68A), width: 1.2),
+                    border: Border.all(color: const Color(0xFF34D399), width: 1.2),
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
-                  labelColor: const Color(0xFFFDE68A),
-                  unselectedLabelColor: const Color(0xFFD4AF37).withValues(alpha: 0.70),
+                  labelColor: const Color(0xFF34D399),
+                  unselectedLabelColor: const Color(0xFFA1A1AA),
                   labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
                   unselectedLabelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
                   padding: const EdgeInsets.all(3),
@@ -767,94 +766,96 @@ class _BotEngineTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Today's Alert Banner — prominent when students are due
+              // Today's Alert Banner — compact, sleek & decent
               if (queue.isNotEmpty) ...[
                 Container(
                   width: double.infinity,
-
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF3D141E), Color(0xFF240B12)],
+                      colors: [Color(0xFF2A1018), Color(0xFF16080E)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFF9E3D52), width: 1.5),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFE11D48).withValues(alpha: 0.6), width: 1.2),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF9E3D52).withValues(alpha: 0.22),
-                        blurRadius: 18,
-                        offset: const Offset(0, 4),
+                        color: const Color(0xFFE11D48).withValues(alpha: 0.16),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          const Text('⚡', style: TextStyle(fontSize: 26)),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${queue.length} Student${queue.length > 1 ? 's' : ''} Due Today!',
-                                  style: const TextStyle(
-                                    color: Color(0xFFF8C4D0),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                                const Text(
-                                  'WhatsApp will open with message ready — just tap Send',
-                                  style: TextStyle(
-                                    color: Color(0xFFBB8090),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                      Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE11D48).withValues(alpha: 0.20),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.bolt_rounded, color: Color(0xFFFB7185), size: 18),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${queue.length} Student${queue.length > 1 ? 's' : ''} Due Today',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const Text(
+                              'Tap send to open WhatsApp directly',
+                              style: TextStyle(
+                                color: Color(0xFFFDA4AF),
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       GestureDetector(
                         onTap: sending ? null : () => onRunCycle(queue.map((e) => e.member).toList()),
                         child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             gradient: sending
                                 ? const LinearGradient(colors: [Color(0xFF555555), Color(0xFF444444)])
-                                : const LinearGradient(colors: [Color(0xFFD4AF37), Color(0xFFF59E0B)]),
-                            borderRadius: BorderRadius.circular(12),
+                                : const LinearGradient(colors: [Color(0xFFE11D48), Color(0xFFBE123C)]),
+                            borderRadius: BorderRadius.circular(10),
                             boxShadow: sending
                                 ? []
                                 : [
                                     BoxShadow(
-                                      color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 3),
+                                      color: const Color(0xFFE11D48).withValues(alpha: 0.35),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
                                     ),
                                   ],
                           ),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.send_rounded, color: Colors.black, size: 18),
-                              const SizedBox(width: 8),
+                              Icon(
+                                sending ? Icons.hourglass_top_rounded : Icons.send_rounded,
+                                color: Colors.white,
+                                size: 13,
+                              ),
+                              const SizedBox(width: 5),
                               Text(
-                                sending
-                                    ? 'Opening WhatsApp...'
-                                    : '🚀  Send All ${queue.length} Reminders Now',
+                                sending ? 'Sending...' : 'Send All',
                                 style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
                                 ),
                               ),
                             ],
@@ -864,14 +865,14 @@ class _BotEngineTab extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 14),
               ],
 
               // 3. Queue List Header
               Text(
                 queue.isEmpty ? 'BOT QUEUE' : 'PENDING QUEUE  •  ${queue.length} students',
                 style: const TextStyle(
-                  color: Color(0xFFD4AF37),
+                  color: Color(0xFF10B981),
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.2,

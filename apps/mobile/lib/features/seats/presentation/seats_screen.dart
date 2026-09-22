@@ -264,17 +264,17 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
                     decoration: BoxDecoration(
                       color: AppColors.bgGlass,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: AppColors.goldPrimary.withValues(alpha: 0.3)),
+                      border: Border.all(color: const Color(0xFF2563EB).withValues(alpha: 0.35)),
                     ),
                     child: Row(
                       children: [
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: AppColors.goldPrimary.withValues(alpha: 0.15),
+                            color: const Color(0xFF2563EB).withValues(alpha: 0.18),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.chair_rounded, color: AppColors.goldLight, size: 16),
+                          child: const Icon(Icons.chair_rounded, color: Color(0xFF60A5FA), size: 16),
                         ),
                         const SizedBox(width: 10),
                         Column(
@@ -291,7 +291,7 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
                             Text(
                               '$totalSeatCount Total Seats (${activeBranch.shortName})',
                               style: const TextStyle(
-                                color: AppColors.goldLight,
+                                color: Color(0xFF93C5FD),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -302,13 +302,13 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColors.goldPrimary.withValues(alpha: 0.18),
+                            color: const Color(0xFF2563EB).withValues(alpha: 0.22),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
                             '$totalSeatCount SEATS',
                             style: const TextStyle(
-                              color: AppColors.goldBright,
+                              color: Color(0xFF60A5FA),
                               fontSize: 10.5,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.5,
@@ -323,7 +323,7 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
 
               const SizedBox(height: 10),
 
-              // Status Filter Chips
+              // Status Filter Chips (Unified Multicolour: Blue, Sea Green, Purple, Dark Yellow, Red)
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 child: SingleChildScrollView(
@@ -331,15 +331,15 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
                   physics: const BouncingScrollPhysics(),
                   child: Row(
                     children: [
-                      _buildStatusFilterChip('ALL', 'All Seats', AppColors.goldPrimary),
+                      _buildStatusFilterChip('ALL', 'All Seats', const Color(0xFF3B82F6)),
                       const SizedBox(width: 8),
-                      _buildStatusFilterChip('AVAILABLE', 'Available', AppColors.primaryGreen),
+                      _buildStatusFilterChip('AVAILABLE', 'Available', const Color(0xFF10B981)),
                       const SizedBox(width: 8),
-                      _buildStatusFilterChip('OCCUPIED', 'Occupied', AppColors.primaryEmerald),
+                      _buildStatusFilterChip('OCCUPIED', 'Occupied', const Color(0xFF8B5CF6)),
                       const SizedBox(width: 8),
-                      _buildStatusFilterChip('RESERVED', 'Reserved', AppColors.accentGold),
+                      _buildStatusFilterChip('RESERVED', 'Reserved', const Color(0xFFD97706)),
                       const SizedBox(width: 8),
-                      _buildStatusFilterChip('MAINTENANCE', 'Repair', AppColors.accentRed),
+                      _buildStatusFilterChip('MAINTENANCE', 'Repair', const Color(0xFFDC2626)),
                     ],
                   ),
                 ),

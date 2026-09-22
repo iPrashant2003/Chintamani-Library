@@ -114,7 +114,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.school_rounded,
         iconColor: const Color(0xFF8B7CD0),       // Preserved icon color (Muted Violet)
         discG: const [Color(0xFF221A38), Color(0xFF100C1C)],
-        numColor: const Color(0xFFD6CEE8),        // Soft Silver Lavender
+        numColor: const Color(0xFF8B5CF6),        // Dark Purple / Violet
         value: '${s.totalMembers}',               // Real database data (starts at 0)
         title: 'Active Scholars',
         sub: '${s.totalMembers} registered',
@@ -127,7 +127,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.currency_rupee_rounded,
         iconColor: const Color(0xFFD4AF37),       // Preserved icon color (Gold)
         discG: const [Color(0xFF2E2208), Color(0xFF140F04)],
-        numColor: const Color(0xFFEBDBC1),        // Soft Champagne
+        numColor: const Color(0xFFF59E0B),        // Dark Amber / Rich Gold
         value: '₹${s.todayCollection.toInt()}',
         title: "Today's Revenue",
         sub: 'Cash & UPI daily',
@@ -140,7 +140,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.receipt_long_rounded,
         iconColor: const Color(0xFFD97282),       // Preserved icon color (Rose)
         discG: const [Color(0xFF2C141A), Color(0xFF160A0D)],
-        numColor: const Color(0xFFDFC0C5),        // Muted Dusty Rose
+        numColor: const Color(0xFFF43F5E),        // Dark Rose / Coral
         value: '₹${s.todayExpenses.toInt()}',
         title: "Today's Expense",
         sub: 'Power & wifi',
@@ -153,7 +153,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.verified_user_rounded,
         iconColor: const Color(0xFF34D399),       // Preserved icon color (Emerald Green)
         discG: const [Color(0xFF0D281E), Color(0xFF06140F)],
-        numColor: const Color(0xFFBDDBC9),        // Soft Sea Green / Sage
+        numColor: const Color(0xFF10B981),        // Dark Emerald / Sea Green
         value: '${s.todayCheckIns}',
         title: 'Today Check-ins',
         sub: '${s.todayCheckIns} today',
@@ -166,7 +166,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.chair_alt_rounded,
         iconColor: const Color(0xFF7B85D8),       // Preserved icon color (Slate Blue)
         discG: const [Color(0xFF141834), Color(0xFF0A0C1A)],
-        numColor: const Color(0xFFCBD2E8),        // Soft Silver Ice
+        numColor: const Color(0xFF3B82F6),        // Dark Royal / Slate Blue
         value: '$occ/$total',
         title: 'Seat Occupancy',
         sub: '$avail available seats',
@@ -179,7 +179,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.pending_actions_rounded,
         iconColor: const Color(0xFFE25D74),       // Preserved icon color (Crimson)
         discG: const [Color(0xFF2C0E16), Color(0xFF16070B)],
-        numColor: const Color(0xFFE2C4C9),        // Soft Dusty Rose
+        numColor: const Color(0xFFEF4444),        // Dark Crimson / Red
         value: '₹${s.dueAmount.toInt()}',
         title: 'Pending Dues',
         sub: s.dueAmount > 0 ? 'Dues pending' : 'No dues pending',
@@ -192,7 +192,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.trending_up_rounded,
         iconColor: const Color(0xFFA875D8),       // Preserved icon color (Violet)
         discG: const [Color(0xFF221432), Color(0xFF110A19)],
-        numColor: const Color(0xFFD3C8E4),        // Muted Lavender
+        numColor: const Color(0xFFA855F7),        // Dark Purple / Violet
         value: '${s.totalEnquiries}',
         title: 'Insights & Leads',
         sub: '${s.totalEnquiries} inquiries',
@@ -205,7 +205,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.timer_outlined,
         iconColor: const Color(0xFFE59846),       // Preserved icon color (Amber)
         discG: const [Color(0xFF2C1C0A), Color(0xFF160E05)],
-        numColor: const Color(0xFFE8D3B8),        // Soft Warm Champagne
+        numColor: const Color(0xFFF97316),        // Dark Amber / Orange
         value: '${s.expiringIn1to3Days}',
         title: 'Expiring (1–3d)',
         sub: '${s.expiringIn1to3Days} expiring soon',
@@ -218,7 +218,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.savings_outlined,
         iconColor: const Color(0xFF4FA0DE),       // Preserved icon color (Steel Blue)
         discG: const [Color(0xFF0F2032), Color(0xFF071019)],
-        numColor: const Color(0xFFBDD8E8),        // Soft Silver Sky
+        numColor: const Color(0xFF0EA5E9),        // Dark Sky Blue
         value: '₹${s.monthCollection.toInt()}',
         title: 'This Month',
         sub: 'Total collection',
@@ -231,7 +231,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.schedule_rounded,
         iconColor: const Color(0xFFD4A838),       // Preserved icon color (Antique Gold)
         discG: const [Color(0xFF281E08), Color(0xFF140F04)],
-        numColor: const Color(0xFFE2D1A6),        // Desaturated Gold
+        numColor: const Color(0xFFD97706),        // Dark Bronze Gold
         value: '5:00 PM',
         title: 'Peak Rush Hour',
         sub: 'Evening peak',
@@ -244,7 +244,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.cake_outlined,
         iconColor: const Color(0xFFD86B9E),       // Preserved icon color (Pink)
         discG: const [Color(0xFF2A121E), Color(0xFF15090F)],
-        numColor: const Color(0xFFE2C5D1),        // Muted Cream Rose
+        numColor: const Color(0xFFEC4899),        // Dark Pink / Magenta
         value: '${s.todayBirthdays}',
         title: "Today's Birthdays",
         sub: 'Send greetings',
@@ -257,7 +257,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.health_and_safety_outlined,
         iconColor: const Color(0xFF38B289),       // Preserved icon color (Emerald)
         discG: const [Color(0xFF0C241C), Color(0xFF06120E)],
-        numColor: const Color(0xFFBDDBC9),        // Soft Sea Green
+        numColor: const Color(0xFF14B8A6),        // Dark Teal / Sea Green
         value: '${s.totalMembers > 0 ? ((occ / total) * 100).toInt() : 100}%',
         title: 'Library Health',
         sub: 'Optimal capacity',
@@ -280,7 +280,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.warning_amber_rounded,
         iconColor: const Color(0xFFE25D74),
         discG: const [Color(0xFF2C0E16), Color(0xFF16070B)],
-        numColor: const Color(0xFFE2C4C9),        // Soft Dusty Rose
+        numColor: const Color(0xFFEF4444),        // Dark Crimson / Red
         value: '${s.expiringIn1to3Days}',
         title: 'Expiring (1–3d)',
         sub: '${s.expiringIn1to3Days} immediate',
@@ -291,7 +291,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.schedule_rounded,
         iconColor: const Color(0xFFE59846),
         discG: const [Color(0xFF2C1C0A), Color(0xFF160E05)],
-        numColor: const Color(0xFFE8D3B8),        // Soft Warm Champagne
+        numColor: const Color(0xFFF97316),        // Dark Orange
         value: '${s.expiringIn4to7Days}',
         title: 'Expiring (4–7d)',
         sub: '${s.expiringIn4to7Days} upcoming',
@@ -302,7 +302,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.calendar_month_rounded,
         iconColor: const Color(0xFFD4AF37),
         discG: const [Color(0xFF2E2208), Color(0xFF140F04)],
-        numColor: const Color(0xFFE2D1A6),        // Desaturated Gold
+        numColor: const Color(0xFFF59E0B),        // Dark Amber / Gold
         value: '${s.expiringIn8to15Days}',
         title: 'Expiring (8–15d)',
         sub: '${s.expiringIn8to15Days} notice',
@@ -313,7 +313,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.cancel_outlined,
         iconColor: const Color(0xFFDC2626),
         discG: const [Color(0xFF280808), Color(0xFF140404)],
-        numColor: const Color(0xFFDFBDC2),        // Muted Burgundy Rose
+        numColor: const Color(0xFFDC2626),        // Dark Red
         value: '${s.expiredMemberships}',
         title: 'Expired Total',
         sub: '${s.expiredMemberships} expired',
@@ -324,7 +324,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.thumb_up_alt_outlined,
         iconColor: const Color(0xFF34D399),
         discG: const [Color(0xFF0D281E), Color(0xFF06140F)],
-        numColor: const Color(0xFFBDDBC9),        // Soft Sea Green
+        numColor: const Color(0xFF10B981),        // Dark Sea Green
         value: '${s.totalMembers > 0 ? (((s.totalMembers - s.expiredMemberships) / s.totalMembers) * 100).toInt() : 100}%',
         title: 'Retention Rate',
         sub: 'High loyalty',
@@ -335,7 +335,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.call_outlined,
         iconColor: const Color(0xFF4FA0DE),
         discG: const [Color(0xFF0F2032), Color(0xFF071019)],
-        numColor: const Color(0xFFCBD5E2),        // Soft Silver
+        numColor: const Color(0xFF3B82F6),        // Dark Blue
         value: '${s.todayFollowups}',
         title: 'Follow-ups Due',
         sub: '${s.todayFollowups} scheduled',
@@ -358,7 +358,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.payments_outlined,
         iconColor: const Color(0xFFD4AF37),
         discG: const [Color(0xFF2E2208), Color(0xFF140F04)],
-        numColor: const Color(0xFFEBDBC1),        // Soft Champagne
+        numColor: const Color(0xFFF59E0B),        // Dark Gold / Amber
         value: '₹${s.todayCollection.toInt()}',
         title: "Today's Revenue",
         sub: 'Cash & UPI',
@@ -369,7 +369,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.account_balance_wallet_outlined,
         iconColor: const Color(0xFF4FA0DE),
         discG: const [Color(0xFF0F2032), Color(0xFF071019)],
-        numColor: const Color(0xFFCBD5E2),        // Soft Silver
+        numColor: const Color(0xFF0EA5E9),        // Dark Sky Blue
         value: '₹${s.monthCollection.toInt()}',
         title: 'This Month',
         sub: 'Total collection',
@@ -380,7 +380,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.history_rounded,
         iconColor: const Color(0xFF7B85D8),
         discG: const [Color(0xFF141834), Color(0xFF0A0C1A)],
-        numColor: const Color(0xFFD0D3DE),        // Soft Silver Ice
+        numColor: const Color(0xFF8B5CF6),        // Dark Purple
         value: '₹${s.prevMonthCollection.toInt()}',
         title: 'Last Month',
         sub: 'Previous cycle',
@@ -391,7 +391,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.receipt_outlined,
         iconColor: const Color(0xFFD97282),
         discG: const [Color(0xFF2C141A), Color(0xFF160A0D)],
-        numColor: const Color(0xFFDFC0C5),        // Muted Dusty Rose
+        numColor: const Color(0xFFF43F5E),        // Dark Rose / Coral
         value: '₹${s.todayExpenses.toInt()}',
         title: 'Today Expense',
         sub: 'Utilities',
@@ -402,7 +402,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.pending_actions_rounded,
         iconColor: const Color(0xFFE25D74),
         discG: const [Color(0xFF2C0E16), Color(0xFF16070B)],
-        numColor: const Color(0xFFE2C4C9),        // Soft Dusty Rose
+        numColor: const Color(0xFFEF4444),        // Dark Crimson / Red
         value: '₹${s.dueAmount.toInt()}',
         title: 'Pending Dues',
         sub: s.dueAmount > 0 ? 'Dues pending' : 'No dues pending',
@@ -413,7 +413,7 @@ class _State extends ConsumerState<SegmentedMetricsSection> {
         icon: Icons.trending_up_rounded,
         iconColor: const Color(0xFF38B289),
         discG: const [Color(0xFF0C241C), Color(0xFF06120E)],
-        numColor: const Color(0xFFBDDBC9),        // Soft Sea Green
+        numColor: const Color(0xFF10B981),        // Dark Sea Green
         value: '+100%',
         title: 'Net Margin',
         sub: 'Positive profit',

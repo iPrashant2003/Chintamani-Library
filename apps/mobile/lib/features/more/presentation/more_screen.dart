@@ -7,7 +7,6 @@ import '../../../theme/app_colors.dart';
 import '../../../widgets/chintamani_logo.dart';
 import '../../../widgets/card_3d.dart';
 import '../../../widgets/icon_3d.dart';
-import '../../../widgets/whatsapp_logo.dart';
 import '../../branch/providers/branch_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/services/app_update_service.dart';
@@ -156,24 +155,6 @@ class MoreScreen extends ConsumerWidget {
               accentColor: const Color(0xFF10B981),
               items: [
                 _MoreItem(
-                  title: 'Members Directory',
-                  subtitle: 'Live memberships, expired & renew actions',
-                  icon: Icons.people_alt_rounded,
-                  icon3d: Icon3DType.members,
-                  badge: 'LIVE',
-                  color: const Color(0xFF10B981),
-                  route: RouteNames.members,
-                ),
-                _MoreItem(
-                  title: '3D Seats Grid',
-                  subtitle: 'Visual chair allocation, floor layout & status',
-                  icon: Icons.chair_rounded,
-                  icon3d: Icon3DType.seat,
-                  badge: '3D',
-                  color: const Color(0xFF00E5BC),
-                  route: RouteNames.seats,
-                ),
-                _MoreItem(
                   title: '9 Lockers Vault',
                   subtitle: 'Personal storage lockers L01-L09 • ₹200/mo fee',
                   icon: Icons.lock_clock_rounded,
@@ -246,15 +227,6 @@ class MoreScreen extends ConsumerWidget {
               title: 'COMMUNICATION & OUTREACH',
               accentColor: const Color(0xFF25D366),
               items: [
-                _MoreItem(
-                  title: 'WhatsApp Hub',
-                  subtitle: 'Broadcast messages, fee reminders & AI message writer',
-                  icon: Icons.chat_rounded,
-                  customIcon: const WhatsAppLogo(size: 20, color: Color(0xFF25D366)),
-                  badge: 'AI WRITER',
-                  color: const Color(0xFF25D366),
-                  route: RouteNames.whatsapp,
-                ),
                 _MoreItem(
                   title: 'Enquiries & Admissions',
                   subtitle: 'New student admissions, desk visits & follow-ups',

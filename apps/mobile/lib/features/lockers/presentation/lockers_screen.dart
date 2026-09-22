@@ -191,13 +191,13 @@ class _LockersScreenState extends ConsumerState<LockersScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0x22D4AF37),
+                        color: const Color(0x228B5CF6),
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: const Color(0x55D4AF37), width: 0.8),
+                        border: Border.all(color: const Color(0x558B5CF6), width: 0.8),
                       ),
                       child: const Text(
                         '9 Lockers • ₹200/mo',
-                        style: TextStyle(color: Color(0xFFFDE68A), fontSize: 10, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: Color(0xFFC4B5FD), fontSize: 10, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],

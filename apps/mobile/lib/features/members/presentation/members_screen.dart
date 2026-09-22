@@ -121,6 +121,7 @@ class MembersScreen extends ConsumerWidget {
                         count: stats['active'] ?? 0,
                         statusKey: 'active',
                         currentStatus: filter.status,
+                        accentColor: const Color(0xFF059669), // Sea Green
                       ),
                       const SizedBox(width: 8),
                       _buildCategoryCard(
@@ -129,6 +130,7 @@ class MembersScreen extends ConsumerWidget {
                         count: stats['expired'] ?? 0,
                         statusKey: 'expired',
                         currentStatus: filter.status,
+                        accentColor: const Color(0xFFDC2626), // Red
                       ),
                       const SizedBox(width: 8),
                       _buildCategoryCard(
@@ -137,6 +139,7 @@ class MembersScreen extends ConsumerWidget {
                         count: stats['expiring1_3'] ?? 0,
                         statusKey: 'expiring1_3',
                         currentStatus: filter.status,
+                        accentColor: const Color(0xFFE11D48), // Pinkish Red
                       ),
                       const SizedBox(width: 8),
                       _buildCategoryCard(
@@ -145,6 +148,7 @@ class MembersScreen extends ConsumerWidget {
                         count: stats['expiring4_7'] ?? 0,
                         statusKey: 'expiring4_7',
                         currentStatus: filter.status,
+                        accentColor: const Color(0xFFD97706), // Dark Yellow
                       ),
                       const SizedBox(width: 8),
                       _buildCategoryCard(
@@ -153,6 +157,7 @@ class MembersScreen extends ConsumerWidget {
                         count: stats['expiring8_15'] ?? 0,
                         statusKey: 'expiring8_15',
                         currentStatus: filter.status,
+                        accentColor: const Color(0xFF2563EB), // Blue
                       ),
                       const SizedBox(width: 8),
                       _buildCategoryCard(
@@ -161,6 +166,7 @@ class MembersScreen extends ConsumerWidget {
                         count: stats['all'] ?? 0,
                         statusKey: 'all',
                         currentStatus: filter.status,
+                        accentColor: const Color(0xFF7C3AED), // Purple
                       ),
                     ],
                   ),
@@ -190,7 +196,7 @@ class MembersScreen extends ConsumerWidget {
               // Member list with smooth pull-to-refresh
               Expanded(
                 child: RefreshIndicator(
-                  color: const Color(0xFFDC2626),
+                  color: const Color(0xFF059669),
                   backgroundColor: AppColors.bgCard,
                   onRefresh: () async => ref.invalidate(membersListProvider),
                   child: membersAsync.when(
@@ -245,6 +251,7 @@ class MembersScreen extends ConsumerWidget {
     required int count,
     required String statusKey,
     required String currentStatus,
+    required Color accentColor,
   }) {
     final isSelected = currentStatus == statusKey;
 
@@ -259,16 +266,16 @@ class MembersScreen extends ConsumerWidget {
         width: 110,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFDC2626) : const Color(0xFF181510),
+          color: isSelected ? accentColor : const Color(0xFF181510),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? const Color(0xFFEF4444) : Colors.white.withValues(alpha: 0.08),
+            color: isSelected ? Colors.white.withValues(alpha: 0.5) : accentColor.withValues(alpha: 0.35),
             width: 1.2,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: const Color(0xFFDC2626).withValues(alpha: 0.45),
+                    color: accentColor.withValues(alpha: 0.45),
                     blurRadius: 10,
                     offset: const Offset(0, 3),
                   ),
@@ -294,8 +301,9 @@ class MembersScreen extends ConsumerWidget {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: isSelected ? Colors.white : const Color(0xFFDC2626),
+                color: isSelected ? Colors.white : accentColor.withValues(alpha: 0.20),
                 shape: BoxShape.circle,
+                border: isSelected ? null : Border.all(color: accentColor.withValues(alpha: 0.6), width: 1),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.25),
@@ -307,7 +315,7 @@ class MembersScreen extends ConsumerWidget {
                 child: Text(
                   count.toString(),
                   style: TextStyle(
-                    color: isSelected ? const Color(0xFFDC2626) : Colors.white,
+                    color: isSelected ? accentColor : Colors.white,
                     fontSize: 11.5,
                     fontWeight: FontWeight.w900,
                   ),

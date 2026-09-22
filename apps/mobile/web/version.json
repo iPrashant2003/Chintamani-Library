@@ -1,16 +1,15 @@
 {
   "version": "2.3.0",
-  "buildNumber": 25,
+  "buildNumber": 26,
   "releaseDate": "23 Sep 2026",
-  "title": "Chinta Mani Library v2.3.0 Update (Build 25)",
+  "title": "Chinta Mani Library v2.3.0 Update (Build 26)",
   "releaseNotes": [
-    "Dashboard Cards: Numbers styled in deep rich chromatic tones matching each card",
-    "Members Directory: Vibrant multicolour student cards (blue, purple, sea green, dark yellow, dark green, pinkish red)",
-    "Action Buttons: Red color removed — ID-Card, Edit, Logs, Print, Freeze, Renew now in distinct multicolour palette",
-    "Members Filter Cards: Multicolour category selection for Live, Expired, Expiring & All",
-    "WhatsApp Section: Students Due Today card made sleek, compact and decent with quick 1-tap Send",
-    "Multicolour Theme: Unified across Members, WhatsApp, Seats, and Lockers (no gold outside dashboard)",
-    "Navigation Streamlined: Deduplicated content between More section and Left Nav Bar"
+    "WhatsApp Fixed: Direct whatsapp:// URI scheme used for reliable message sending",
+    "Students Due Card: Changed to deep purple theme (no more pinkish-red)",
+    "Members: Floating 'Add Member' FAB removed — use the top-right icon instead",
+    "Members Sort: Sort button now opens sheet (Newest, Name A-Z, Name Z-A, Expiring Soon)",
+    "Members Filter: Filter button now opens sheet matching all 6 category filters",
+    "No Neon Colors: Enforced throughout — all colours are muted, rich, dark variants"
   ],
   "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.0/Chintamani-Library-Release.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",

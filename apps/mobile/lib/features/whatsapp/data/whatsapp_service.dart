@@ -479,25 +479,41 @@ class WhatsAppService {
     final digits = phone.replaceAll(RegExp(r'[^\d]'), '');
     final fullNumber = digits.length == 10 ? '91$digits' : digits;
     final encoded = Uri.encodeComponent(message);
-    final waUrl = Uri.parse('https://wa.me/$fullNumber?text=$encoded');
 
     HapticFeedback.mediumImpact();
 
+    bool launched = false;
+
+    // 1. Try direct WhatsApp URI scheme (most reliable on Android)
     try {
-      if (await canLaunchUrl(waUrl)) {
-        await launchUrl(waUrl, mode: LaunchMode.externalApplication);
-        await _addToHistory(WaHistoryEntry(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          recipientName: recipientName.isEmpty ? phone : recipientName,
-          recipientPhone: digits,
-          templateLabel: templateLabel,
-          message: message,
-          sentAt: DateTime.now(),
-        ));
-        return true;
+      final directUri = Uri.parse('whatsapp://send?phone=$fullNumber&text=$encoded');
+      if (await canLaunchUrl(directUri)) {
+        await launchUrl(directUri, mode: LaunchMode.externalNonBrowserApplication);
+        launched = true;
       }
     } catch (_) {}
-    return false;
+
+    // 2. Fall back to wa.me HTTPS URL
+    if (!launched) {
+      try {
+        final webUrl = Uri.parse('https://wa.me/$fullNumber?text=$encoded');
+        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
+        launched = true;
+      } catch (_) {}
+    }
+
+    if (launched) {
+      await _addToHistory(WaHistoryEntry(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        recipientName: recipientName.isEmpty ? phone : recipientName,
+        recipientPhone: digits,
+        templateLabel: templateLabel,
+        message: message,
+        sentAt: DateTime.now(),
+      ));
+    }
+
+    return launched;
   }
 }
 

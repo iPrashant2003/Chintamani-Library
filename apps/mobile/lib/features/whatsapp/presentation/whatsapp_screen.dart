@@ -773,15 +773,15 @@ class _BotEngineTab extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF2A1018), Color(0xFF16080E)],
+                      colors: [Color(0xFF1E1035), Color(0xFF120920)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFE11D48).withValues(alpha: 0.6), width: 1.2),
+                    border: Border.all(color: const Color(0xFF7C3AED).withValues(alpha: 0.6), width: 1.2),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFE11D48).withValues(alpha: 0.16),
+                        color: const Color(0xFF7C3AED).withValues(alpha: 0.18),
                         blurRadius: 10,
                         offset: const Offset(0, 2),
                       ),
@@ -792,10 +792,10 @@ class _BotEngineTab extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(7),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE11D48).withValues(alpha: 0.20),
+                          color: const Color(0xFF7C3AED).withValues(alpha: 0.22),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.bolt_rounded, color: Color(0xFFFB7185), size: 18),
+                        child: const Icon(Icons.bolt_rounded, color: Color(0xFFA78BFA), size: 18),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -814,7 +814,7 @@ class _BotEngineTab extends StatelessWidget {
                             const Text(
                               'Tap send to open WhatsApp directly',
                               style: TextStyle(
-                                color: Color(0xFFFDA4AF),
+                                color: Color(0xFFC4B5FD),
                                 fontSize: 10,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -829,13 +829,13 @@ class _BotEngineTab extends StatelessWidget {
                           decoration: BoxDecoration(
                             gradient: sending
                                 ? const LinearGradient(colors: [Color(0xFF555555), Color(0xFF444444)])
-                                : const LinearGradient(colors: [Color(0xFFE11D48), Color(0xFFBE123C)]),
+                                : const LinearGradient(colors: [Color(0xFF7C3AED), Color(0xFF5B21B6)]),
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: sending
                                 ? []
                                 : [
                                     BoxShadow(
-                                      color: const Color(0xFFE11D48).withValues(alpha: 0.35),
+                                      color: const Color(0xFF7C3AED).withValues(alpha: 0.35),
                                       blurRadius: 6,
                                       offset: const Offset(0, 2),
                                     ),
@@ -867,6 +867,7 @@ class _BotEngineTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
               ],
+
 
               // 3. Queue List Header
               Text(

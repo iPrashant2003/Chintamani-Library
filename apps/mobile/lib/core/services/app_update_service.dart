@@ -48,7 +48,7 @@ class AppUpdateInfo {
 
 class AppUpdateService {
   static const currentVersion = '2.3.0';
-  static const currentBuildNumber = 27;
+  static const currentBuildNumber = 29;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   static const _defaultManifestUrl =

@@ -1,15 +1,18 @@
 {
   "version": "2.3.0",
-  "buildNumber": 28,
+  "buildNumber": 29,
   "releaseDate": "23 Sep 2026",
-  "title": "Chinta Mani Library v2.3.0 Update (Build 28) — QR Fix, Member Cards & Glassmorphism",
+  "title": "Chinta Mani Library v2.3.0 (Build 29) — Member Photos, Gender Avatars, Universal QR & Background",
   "releaseNotes": [
-    "Universal QR: Fixed 'failed to load portal' — now renders natively offline-first",
-    "Member Cards: All action buttons now fully wired (Edit, Renew, SMS, WhatsApp, Gift, Block, Delete etc.)",
-    "Member Cards: Beautiful glassmorphism design with deep jewel-tone multicolour palette",
-    "Member Directory: Category filter chips with glassmorphism styling",
-    "Database: Member subscriptions properly serialised — local DB mutations now persist",
-    "Locker Assignment: Fixed constructor field mapping (status: OCCUPIED)"
+    "Universal QR: Portal URL now always uses LAN IP — never localhost; fully scannable from any phone",
+    "Member Directory: Member selfie/photo now displayed on cards and detail screen",
+    "Member Directory: Gender-specific avatars (male/female) when no selfie uploaded",
+    "Member Directory: All screens now have consistent luxury background texture",
+    "WhatsApp Hub: Member avatars shown in Auto Bot queue and Students tab",
+    "Portal (index.html): Supports ?api= param so fetch calls route to correct backend",
+    "Portal Registration: Member record auto-created on submit — appears instantly in Directory",
+    "Background: Added to Seats, Payments, Attendance, Lockers screens",
+    "Update check: Fixed false update prompts by correcting stale build number"
   ],
   "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.0/Chintamani-Library-Release.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",

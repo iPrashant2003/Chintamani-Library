@@ -219,7 +219,8 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AmbientBackground(
-        child: SafeArea(
+          imagePath: 'assets/images/dashboard_bg.png',
+          child: SafeArea(
           bottom: false,
           child: Column(
             children: [

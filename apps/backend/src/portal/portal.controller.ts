@@ -24,7 +24,7 @@ import {
 } from './dto/portal.dto';
 
 @ApiTags('Member Portal (Public)')
-@Controller('portal')
+@Controller(['portal', 'api/portal'])
 export class PortalController {
   constructor(private readonly portalService: PortalService) {}
 

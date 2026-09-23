@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -74,7 +74,8 @@ class PaymentsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AmbientBackground(
-        child: SafeArea(
+          imagePath: 'assets/images/dashboard_bg.png',
+          child: SafeArea(
           bottom: false,
           child: Column(
             children: [

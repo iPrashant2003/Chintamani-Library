@@ -69,10 +69,8 @@ class _MemberDetailScreenState extends ConsumerState<MemberDetailScreen> with Si
                 ),
                 child: Row(
                   children: [
-                    MemberAvatar(
-                      name: member.name,
-                      photoUrl: member.photoUrl,
-                      isActive: member.isActive,
+                    MemberAvatar.fromMember(
+                      member: member,
                       radius: 32,
                     ),
                     const SizedBox(width: 14),

@@ -8,6 +8,7 @@ import '../../members/data/member_repository.dart';
 import '../../members/domain/member_model.dart';
 import '../data/whatsapp_service.dart';
 import '../data/whatsapp_ai_service.dart';
+import '../../../core/utils/member_image_helper.dart';
 
 // ── Audience filter ─────────────────────────────────────────────────────────────
 enum _Audience {
@@ -502,6 +503,7 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AmbientBackground(
+        imagePath: 'assets/images/dashboard_bg.png',
         child: SafeArea(
           bottom: false,
           child: Column(
@@ -960,12 +962,17 @@ class _BotEngineTab extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          CircleAvatar(
-                            radius: 18,
-                            backgroundColor: stageBg,
-                            child: Text(
-                              item.member.name.isNotEmpty ? item.member.name[0].toUpperCase() : 'S',
-                              style: TextStyle(color: stageColor, fontWeight: FontWeight.w900),
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: stageColor, width: 1.2),
+                            ),
+                            child: MemberImageHelper.buildAvatar(
+                              member: item.member,
+                              size: 36,
+                              accentColor: stageColor,
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -1929,15 +1936,20 @@ class _StudentsTab extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          CircleAvatar(
-                            radius: 18,
-                            backgroundColor: isAct ? const Color(0x2210B981) : const Color(0x22EF4444),
-                            child: Text(
-                              m.name.isNotEmpty ? m.name[0].toUpperCase() : 'S',
-                              style: TextStyle(
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
                                 color: isAct ? const Color(0xFF10B981) : const Color(0xFFEF4444),
-                                fontWeight: FontWeight.w800,
+                                width: 1.2,
                               ),
+                            ),
+                            child: MemberImageHelper.buildAvatar(
+                              member: m,
+                              size: 36,
+                              accentColor: isAct ? const Color(0xFF10B981) : const Color(0xFFEF4444),
                             ),
                           ),
                           const SizedBox(width: 12),

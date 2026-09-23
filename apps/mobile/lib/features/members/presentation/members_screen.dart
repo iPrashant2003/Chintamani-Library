@@ -74,6 +74,7 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AmbientBackground(
+        imagePath: 'assets/images/dashboard_bg.png',
         child: SafeArea(
           bottom: false,
           child: Column(

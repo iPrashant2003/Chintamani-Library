@@ -301,6 +301,67 @@ export class PortalService {
       },
     });
 
+    // Auto-create Member record with selfie and subscription so member immediately appears in Directory
+    const tenantCode = branch.tenant?.code || 'CML';
+    const memberCode = `${tenantCode}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const fullAcademicData = {
+      ...academicInfoObj,
+      gender: dto.gender || '',
+      aadhaar: dto.aadhaarNumber || '',
+      emergencyContact: dto.emergencyContact || '',
+      photoUrl: dto.photoUrl || '',
+    };
+
+    let createdMember: any = null;
+    try {
+      createdMember = await this.prisma.member.create({
+        data: {
+          tenantId: branch.tenantId,
+          branchId: branch.id,
+          memberCode,
+          name: dto.name.trim(),
+          phone,
+          email: dto.email?.trim() || null,
+          dob: dto.dob ? new Date(dto.dob) : null,
+          address: dto.address?.trim() || null,
+          academicInfo: JSON.stringify(fullAcademicData),
+          isActive: true,
+          registrationId: registration.id,
+          portalAccess: true,
+        },
+      });
+
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + (plan.durationDays || 30));
+
+      await this.prisma.subscription.create({
+        data: {
+          tenantId: branch.tenantId,
+          memberId: createdMember.id,
+          planId: plan.id,
+          startDate,
+          endDate,
+          status: 'ACTIVE',
+          assignedSeatId: reservedSeat?.id || null,
+        },
+      });
+
+      if (reservedSeat) {
+        await this.prisma.seat.update({
+          where: { id: reservedSeat.id },
+          data: { status: 'OCCUPIED' },
+        });
+      }
+
+      await this.prisma.memberRegistration.update({
+        where: { id: registration.id },
+        data: { status: 'APPROVED' },
+      });
+    } catch (e) {
+      console.error('Member auto-creation during registration:', e);
+    }
+
     // Create Admin Notification
     try {
       await this.prisma.notification.create({
@@ -309,7 +370,7 @@ export class PortalService {
           type: 'NEW_REGISTRATION',
           title: `New Registration: ${dto.name}`,
           body: `${dto.name} registered for ${plan.name}. Application ID: ${applicationId}${
-            reservedSeat ? ` (Seat ${reservedSeat.seatNumber} reserved)` : ''
+            reservedSeat ? ` (Seat ${reservedSeat.seatNumber} allocated)` : ''
           }`,
         },
       });
@@ -318,11 +379,12 @@ export class PortalService {
     return {
       success: true,
       applicationId,
-      status: 'PENDING ADMIN APPROVAL',
+      status: 'APPROVED',
+      memberCode: createdMember?.memberCode || memberCode,
       planName: plan.name,
       planPrice: plan.price,
       reservedSeat: reservedSeat ? { id: reservedSeat.id, seatNumber: reservedSeat.seatNumber } : null,
-      message: 'Registration submitted successfully. Awaiting admin approval.',
+      message: 'Registration submitted successfully. Member created and active in directory.',
     };
   }
 

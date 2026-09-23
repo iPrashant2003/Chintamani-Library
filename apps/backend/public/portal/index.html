@@ -950,6 +950,19 @@
   <!-- JAVASCRIPT LOGIC                                                  -->
   <!-- ================================================================= -->
   <script>
+    // Universal API Resolver: If ?api= query param is provided, route all relative API calls to that host
+    const urlParams = new URLSearchParams(window.location.search);
+    const apiParam = urlParams.get('api');
+    if (apiParam) {
+      const origFetch = window.fetch;
+      window.fetch = (input, init) => {
+        if (typeof input === 'string' && input.startsWith('/')) {
+          input = apiParam.replace(/\/+$/, '') + input;
+        }
+        return origFetch(input, init);
+      };
+    }
+
     // State
     const state = {
       token: localStorage.getItem('portal_token') || '',

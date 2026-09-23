@@ -17,12 +17,14 @@ final universalQrDataProvider = FutureProvider<Map<String, dynamic>>((ref) async
       ApiEndpoints.portalQr,
       queryParameters: {'branchId': branch.id},
     );
-    return response.data as Map<String, dynamic>;
+    final data = response.data as Map<String, dynamic>;
+    // Always override portalUrl with the LAN-accessible URL
+    data['portalUrl'] = UniversalQrScreen.buildPortalUrl();
+    return data;
   } catch (_) {
-    // Fallback locally so it never fails
     final branch = ref.read(activeBranchProvider);
     return {
-      'portalUrl': 'https://chintamani-library.in/portal/index.html',
+      'portalUrl': UniversalQrScreen.buildPortalUrl(),
       'branchName': branch.name,
       'isOffline': true,
     };
@@ -32,7 +34,19 @@ final universalQrDataProvider = FutureProvider<Map<String, dynamic>>((ref) async
 class UniversalQrScreen extends ConsumerWidget {
   const UniversalQrScreen({super.key});
 
-  static const String permanentPortalUrl = 'https://chintamani-library.in/portal/index.html';
+  /// Builds the portal URL from the backend's current base URL.
+  /// Guarantees that localhost / 127.0.0.1 are never used for QR codes.
+  static String buildPortalUrl() {
+    String base = ApiEndpoints.baseUrl.trim();
+    if (base.contains('localhost') || base.contains('127.0.0.1') || base.isEmpty) {
+      base = ApiEndpoints.defaultWifiUrl;
+    }
+    final stripped = base.endsWith('/') ? base.substring(0, base.length - 1) : base;
+    return '$stripped/portal/index.html';
+  }
+
+  /// Permanent fallback in case ApiEndpoints.baseUrl is empty/unavailable
+  static const String _fallbackUrl = 'http://192.168.1.35:3000/portal/index.html';
 
   void _shareViaWhatsApp(BuildContext context, String url, String branchName) async {
     final msg = Uri.encodeComponent(
@@ -155,7 +169,7 @@ class UniversalQrScreen extends ConsumerWidget {
     final qrDataAsync = ref.watch(universalQrDataProvider);
     final activeBranch = ref.watch(activeBranchProvider);
 
-    final portalUrl = qrDataAsync.value?['portalUrl'] as String? ?? permanentPortalUrl;
+    final portalUrl = qrDataAsync.value?['portalUrl'] as String? ?? buildPortalUrl();
     final branchName = qrDataAsync.value?['branchName'] as String? ?? activeBranch.name;
 
     return Scaffold(

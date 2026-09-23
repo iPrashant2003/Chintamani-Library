@@ -8,6 +8,7 @@ import '../../domain/member_model.dart';
 import '../../data/member_repository.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../widgets/whatsapp_logo.dart';
+import '../../../../core/utils/member_image_helper.dart';
 
 class MemberCard extends ConsumerStatefulWidget {
   final Member member;
@@ -797,15 +798,10 @@ class _MemberCardState extends ConsumerState<MemberCard> {
                                   ),
                                 ],
                               ),
-                              child: Center(
-                                child: Text(
-                                  member.name.isNotEmpty ? member.name.substring(0, 1).toUpperCase() : 'S',
-                                  style: TextStyle(
-                                    color: cardAccent,
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
+                              child: MemberImageHelper.buildAvatar(
+                                member: member,
+                                size: 50,
+                                accentColor: cardAccent,
                               ),
                             ),
                             const SizedBox(width: 12),

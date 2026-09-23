@@ -4,6 +4,8 @@ import '../../../core/api/api_endpoints.dart';
 import '../../../core/models/paginated_response.dart';
 import '../../../core/services/database_backup_service.dart';
 import '../domain/member_model.dart';
+import '../../plans/domain/plan_model.dart';
+import '../../lockers/domain/locker_model.dart';
 import '../../branch/providers/branch_provider.dart';
 
 final memberRepositoryProvider = Provider<MemberRepository>((ref) {
@@ -157,6 +159,141 @@ class MemberRepository {
       await _apiClient.dio.delete('${ApiEndpoints.members}/$id');
     } catch (_) {}
     await DatabaseBackupService.instance.deleteMember(id);
+  }
+
+  Future<Member?> renewSubscription(String memberId, {required String planName, required double price, required int days}) async {
+    final local = await DatabaseBackupService.instance.getMembers('');
+    final existing = local.where((m) => m.id == memberId).firstOrNull;
+    if (existing == null) return null;
+
+    final now = DateTime.now();
+    DateTime newStart = now;
+    if (existing.activeSubscription != null && existing.activeSubscription!.endDate.isAfter(now)) {
+      newStart = existing.activeSubscription!.endDate;
+    }
+    final newEnd = newStart.add(Duration(days: days));
+
+    final newSub = Subscription(
+      id: 'sub-${DateTime.now().millisecondsSinceEpoch}',
+      memberId: memberId,
+      planId: 'plan-${planName.replaceAll(' ', '-').toLowerCase()}',
+      startDate: newStart,
+      endDate: newEnd,
+      status: 'ACTIVE',
+      seat: existing.activeSubscription?.seat,
+      locker: existing.activeSubscription?.locker,
+      plan: MembershipPlan(
+        id: 'plan-${planName.replaceAll(' ', '-').toLowerCase()}',
+        name: planName,
+        durationDays: days,
+        price: price,
+        branchId: existing.branchId,
+        includesSeat: true,
+      ),
+    );
+
+    final updated = existing.copyWith(
+      isActive: true,
+      subscriptions: [newSub, ...existing.subscriptions],
+    );
+
+    try {
+      await _apiClient.dio.post('${ApiEndpoints.members}/$memberId/subscriptions', data: {
+        'planName': planName,
+        'price': price,
+        'durationDays': days,
+        'startDate': newStart.toIso8601String(),
+        'endDate': newEnd.toIso8601String(),
+      });
+    } catch (_) {}
+
+    await DatabaseBackupService.instance.updateMember(updated);
+    return updated;
+  }
+
+  Future<Member?> giftDays(String memberId, int days) async {
+    final local = await DatabaseBackupService.instance.getMembers('');
+    final existing = local.where((m) => m.id == memberId).firstOrNull;
+    if (existing == null) return null;
+
+    final sub = existing.activeSubscription;
+    if (sub == null) return null;
+
+    final updatedSub = sub.copyWith(
+      endDate: sub.endDate.add(Duration(days: days)),
+      status: 'ACTIVE',
+    );
+
+    final remainingSubs = existing.subscriptions.where((s) => s.id != sub.id).toList();
+    final updated = existing.copyWith(
+      isActive: true,
+      subscriptions: [updatedSub, ...remainingSubs],
+    );
+
+    await DatabaseBackupService.instance.updateMember(updated);
+    return updated;
+  }
+
+  Future<Member?> toggleBlock(String memberId) async {
+    final local = await DatabaseBackupService.instance.getMembers('');
+    final existing = local.where((m) => m.id == memberId).firstOrNull;
+    if (existing == null) return null;
+
+    final updated = existing.copyWith(isActive: !existing.isActive);
+    try {
+      await _apiClient.dio.patch('${ApiEndpoints.members}/$memberId', data: {'isActive': updated.isActive});
+    } catch (_) {}
+    await DatabaseBackupService.instance.updateMember(updated);
+    return updated;
+  }
+
+  Future<Member?> markLeft(String memberId) async {
+    final local = await DatabaseBackupService.instance.getMembers('');
+    final existing = local.where((m) => m.id == memberId).firstOrNull;
+    if (existing == null) return null;
+
+    final subs = existing.subscriptions.map((s) => s.copyWith(
+      seat: null,
+      assignedSeatId: null,
+      status: 'EXPIRED',
+    )).toList();
+
+    final updated = existing.copyWith(
+      isActive: false,
+      subscriptions: subs,
+    );
+
+    try {
+      await _apiClient.dio.patch('${ApiEndpoints.members}/$memberId', data: {'isActive': false});
+    } catch (_) {}
+    await DatabaseBackupService.instance.updateMember(updated);
+    return updated;
+  }
+
+  Future<Member?> assignLocker(String memberId, String lockerNumber) async {
+    final local = await DatabaseBackupService.instance.getMembers('');
+    final existing = local.where((m) => m.id == memberId).firstOrNull;
+    if (existing == null) return null;
+
+    final sub = existing.activeSubscription;
+    if (sub == null) return null;
+
+    final updatedSub = sub.copyWith(
+      locker: Locker(
+        id: 'locker-$lockerNumber',
+        lockerNumber: lockerNumber,
+        status: 'OCCUPIED',
+        branchId: existing.branchId,
+      ),
+    );
+
+    final remainingSubs = existing.subscriptions.where((s) => s.id != sub.id).toList();
+    final updated = existing.copyWith(
+      subscriptions: [updatedSub, ...remainingSubs],
+    );
+
+    await DatabaseBackupService.instance.updateMember(updated);
+    return updated;
   }
 }
 

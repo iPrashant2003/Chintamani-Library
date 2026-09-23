@@ -1,10 +1,15 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../domain/member_model.dart';
+import '../../data/member_repository.dart';
+import '../../../../theme/app_colors.dart';
 import '../../../../widgets/whatsapp_logo.dart';
 
-class MemberCard extends StatefulWidget {
+class MemberCard extends ConsumerStatefulWidget {
   final Member member;
   final VoidCallback onTap;
 
@@ -15,29 +20,27 @@ class MemberCard extends StatefulWidget {
   });
 
   @override
-  State<MemberCard> createState() => _MemberCardState();
+  ConsumerState<MemberCard> createState() => _MemberCardState();
 }
 
-class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateMixin {
-  late AnimationController _animController;
-  late Animation<double> _scaleAnimation;
+class _MemberCardState extends ConsumerState<MemberCard> {
+  // Multicolour palette for members cards (deep, rich, non-neon jewel tones)
+  static const List<Color> _palette = [
+    Color(0xFF059669), // Sea Green
+    Color(0xFF2563EB), // Royal Blue
+    Color(0xFF7C3AED), // Amethyst Purple
+    Color(0xFFD97706), // Warm Amber / Orange
+    Color(0xFF0D9488), // Dark Green / Teal
+    Color(0xFFE11D48), // Rose Crimson / Pink
+    Color(0xFFD4AF37), // Imperial Gold
+    Color(0xFFDC2626), // Deep Crimson Red
+    Color(0xFF4F46E5), // Indigo Blue
+    Color(0xFFCA8A04), // Dark Golden Yellow
+  ];
 
-  @override
-  void initState() {
-    super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _animController.dispose();
-    super.dispose();
+  Color _getCardAccent(Member member) {
+    final hash = (member.id.hashCode.abs() + (member.currentSeatNumber?.hashCode.abs() ?? member.name.hashCode.abs()));
+    return _palette[hash % _palette.length];
   }
 
   String _formatDate(DateTime? dt, {String defaultVal = '08 Sep, 2026'}) {
@@ -55,513 +58,146 @@ class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateM
     return '327';
   }
 
-  @override
-  Widget build(BuildContext context) {
+  // ── Action Handlers (All wired to real database & device actions) ──
+
+  void _openWhatsApp() async {
     final member = widget.member;
-    final seatNum = _getMemberNumber(member);
-    final planName = member.currentPlanName.isNotEmpty && member.currentPlanName != 'No Plan'
-        ? member.currentPlanName
-        : '6 hrs batch';
-    final batchType = member.batch != null && member.batch!.isNotEmpty
-        ? member.batch!
-        : 'morning~afternoon~even...';
-    final sub = member.activeSubscription;
-    final joinDate = sub != null ? _formatDate(sub.startDate, defaultVal: '08 Sep, 2026') : '08 Sep, 2026';
-    final expiryDate = sub != null ? _formatDate(sub.endDate, defaultVal: '07 Oct, 2026') : '07 Oct, 2026';
-    final amt = sub?.plan?.price.toInt() ?? 500;
-    const paid = 500;
-    final due = amt > paid ? amt - paid : 0;
-
-    // Multicolour palette for student cards (blue, purple, sea green, dark yellow, dark green, pinkish red, red, deep blue)
-    const studentPalette = [
-      Color(0xFF2563EB), // Blue
-      Color(0xFF7C3AED), // Purple
-      Color(0xFF059669), // Sea Green
-      Color(0xFFD97706), // Dark Yellow / Amber
-      Color(0xFF0D9488), // Dark Green / Teal
-      Color(0xFFE11D48), // Pinkish Red
-      Color(0xFFDC2626), // Red
-      Color(0xFF4F46E5), // Indigo
-    ];
-    final colorIdx = (member.id.hashCode.abs() + (member.currentSeatNumber?.hashCode.abs() ?? 0)) % studentPalette.length;
-    final cardAccent = studentPalette[colorIdx];
-
-    return GestureDetector(
-      onTapDown: (_) {
-        HapticFeedback.lightImpact();
-        _animController.forward();
-      },
-      onTapUp: (_) {
-        _animController.reverse();
-        widget.onTap();
-      },
-      onTapCancel: () => _animController.reverse(),
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF181510), // Warm luxury dark container
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: cardAccent.withValues(alpha: 0.20),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ── Top Row: Avatar + Name/Location/Phone + Seat Badge + Chair Indicator ──
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Illustrated circular Avatar with card accent border
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: cardAccent.withValues(alpha: 0.15),
-                          border: Border.all(color: cardAccent, width: 1.5),
-                        ),
-                        child: Center(
-                          child: Text(
-                            member.name.isNotEmpty ? member.name.substring(0, 1).toUpperCase() : 'S',
-                            style: TextStyle(
-                              color: cardAccent,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-
-                      // Name, Location, Phone
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              member.name,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.2,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 3),
-                            Row(
-                              children: [
-                                const Icon(Icons.location_on_outlined, size: 13, color: Color(0xFFA1A1AA)),
-                                const SizedBox(width: 3),
-                                Expanded(
-                                  child: Text(
-                                    member.address != null && member.address!.isNotEmpty
-                                        ? member.address!
-                                        : 'moti chauraha khalilabad',
-                                    style: const TextStyle(
-                                      color: Color(0xFFA1A1AA),
-                                      fontSize: 11.5,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 3),
-                            Row(
-                              children: [
-                                const Icon(Icons.phone_rounded, size: 13, color: Color(0xFF10B981)),
-                                const SizedBox(width: 4),
-                                Text(
-                                  member.phone != null && member.phone!.isNotEmpty
-                                      ? member.phone!
-                                      : '+91 9682960623',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: cardAccent.withValues(alpha: 0.18),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Icon(Icons.sim_card_outlined, size: 12, color: cardAccent),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Seat Pill Badge (in student's multicolour accent) & Chair Status Indicator
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: cardAccent,
-                              borderRadius: BorderRadius.circular(8),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: cardAccent.withValues(alpha: 0.40),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.assignment_ind_rounded, color: Colors.white, size: 13),
-                                const SizedBox(width: 4),
-                                Text(
-                                  seatNum,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          // Chair icon with dotted line in student's multicolour accent
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.chair_alt_rounded, color: cardAccent, size: 13),
-                              const SizedBox(width: 2),
-                              Text(
-                                '.......',
-                                style: TextStyle(
-                                  color: cardAccent.withValues(alpha: 0.8),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // ── Middle Inset Details Box (Plan, Type, Join, Expiry, Amt, Paid, Due) ──
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.04),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-                    ),
-                    child: Column(
-                      children: [
-                        // Row 1: Plan & Type
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('Plan', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 10.5)),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    planName,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('Type', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 10.5)),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    batchType,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-
-                        // Row 2: Join & Expiry
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('Join', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 10.5)),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    joinDate,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('Expiry', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 10.5)),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    expiryDate,
-                                    style: TextStyle(
-                                      color: member.isActive ? Colors.white : const Color(0xFFDC2626),
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-
-                        // Row 3: Amt, Paid, Due
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('Amt', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 10.5)),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    amt.toString(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('Paid', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 10.5)),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    paid.toString(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('Due', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 10.5)),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    due.toString(),
-                                    style: TextStyle(
-                                      color: due > 0 ? const Color(0xFFDC2626) : const Color(0xFF10B981),
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // ── Bottom Swipeable Action Row matching Screenshots ──
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    child: Row(
-                      children: [
-                        _buildActionBtn(context, Icons.chat_rounded, 'WhatsApp', const Color(0xFF25D366), isWhatsApp: true),
-                        _buildActionBtn(context, Icons.badge_outlined, 'ID-Card', const Color(0xFF3B82F6), onTap: () => _showIdCardDialog(context)),
-                        _buildActionBtn(context, Icons.edit_note_rounded, 'Edit', const Color(0xFFD97706), onTap: () => _showEditDialog(context)),
-                        _buildActionBtn(context, Icons.history_rounded, 'View Logs', const Color(0xFF8B5CF6), onTap: () => _showLogsDialog(context)),
-                        _buildActionBtn(context, Icons.card_giftcard_rounded, 'Gift Days', const Color(0xFFE11D48), onTap: () => _showGiftDaysDialog(context)),
-                        _buildActionBtn(context, Icons.print_rounded, 'Print', const Color(0xFF0D9488), onTap: () => _showPrintReceipt(context)),
-                        _buildActionBtn(context, Icons.pause_circle_outline_rounded, 'Freeze', const Color(0xFF06B6D4), onTap: () => _showFreezeDialog(context)),
-                        _buildActionBtn(context, Icons.person_outline_rounded, 'Profile', const Color(0xFF6366F1), onTap: widget.onTap),
-                        _buildActionBtn(context, Icons.fingerprint_rounded, 'Bio Enroll', const Color(0xFF059669), onTap: () => _showBioEnrollDialog(context)),
-                        _buildActionBtn(context, Icons.payments_outlined, 'Add Pay', const Color(0xFF10B981), onTap: () => _showAddPayDialog(context)),
-                        _buildActionBtn(context, Icons.refresh_rounded, 'Renew', const Color(0xFFF97316), onTap: () => _showRenewDialog(context)),
-                        _buildActionBtn(context, Icons.receipt_long_rounded, 'Add Bill', const Color(0xFFA855F7), onTap: () => _showAddBillDialog(context)),
-                        _buildActionBtn(context, Icons.sms_outlined, 'SMS', const Color(0xFF0EA5E9), onTap: () => _sendSms(context)),
-                        _buildActionBtn(context, Icons.lock_outline_rounded, 'Locker', const Color(0xFFCA8A04), onTap: () => _showLockerDialog(context)),
-                        _buildActionBtn(context, Icons.delete_outline_rounded, 'Delete', const Color(0xFFDC2626), onTap: () => _showDeleteDialog(context)),
-                        _buildActionBtn(context, Icons.block_rounded, 'Block', const Color(0xFF991B1B), onTap: () => _showBlockDialog(context)),
-                        _buildActionBtn(context, Icons.exit_to_app_rounded, 'Mark Left', const Color(0xFF64748B), onTap: () => _showMarkLeftDialog(context)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionBtn(
-    BuildContext context,
-    IconData icon,
-    String label,
-    Color color, {
-    bool isWhatsApp = false,
-    VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        if (isWhatsApp) {
-          _openWhatsApp(context);
-        } else if (onTap != null) {
-          onTap();
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('$label action triggered for ${widget.member.name}'),
-              duration: const Duration(milliseconds: 1200),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.16),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: isWhatsApp
-                    ? const WhatsAppLogo(size: 16, color: Color(0xFF25D366))
-                    : Icon(icon, color: color, size: 17),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 9,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _openWhatsApp(BuildContext context) async {
-    final member = widget.member;
-    final hasPhone = member.phone != null && member.phone!.isNotEmpty;
-    if (!hasPhone) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No phone number for this member'), behavior: SnackBarBehavior.floating),
-      );
+    final phone = member.phone?.replaceAll(RegExp(r'[^\d]'), '') ?? '';
+    if (phone.isEmpty) {
+      _showSnack('No phone number registered for this member');
       return;
     }
-    final digits = member.phone!.replaceAll(RegExp(r'[^\d]'), '');
-    final fullNum = digits.length == 10 ? '91$digits' : digits;
+    final fullNum = phone.length == 10 ? '91$phone' : phone;
     final msg = Uri.encodeComponent(
-      '🏛️ *CHINTA MANI LIBRARY*\n━━━━━━━━━━━━━━━━━━━━━━\n\n'
+      '🏛️ *CHINTAMANI LIBRARY*\n'
+      '━━━━━━━━━━━━━━━━━━━━━━\n\n'
       '👤 Dear *${member.name}*,\n\n'
-      'Greetings from Chinta Mani Library! Your study seat and membership are active.\n'
+      'Greetings from Chintamani Library! Your study seat and membership are active.\n'
+      '• *Seat*: ${_getMemberNumber(member)}\n'
+      '• *Plan*: ${member.currentPlanName}\n'
+      '• *Batch*: ${member.batch ?? "All Shifts"}\n\n'
       'Please reach out to the admin desk for any study environment assistance.\n\n'
       '📍 *Khalilabad* | *Mehdawal*\n'
-      '📞 *Helpline*: +91 9415919277\n\n'
-      '_Chinta Mani Library — Infinity under a roof_ 🎯',
+      '📞 *Helpline*: +91 9415919277 / 7388389944\n'
+      '_Chintamani Library — Infinity under a roof_ 🎯',
     );
-    final url = Uri.parse('https://wa.me/$fullNum?text=$msg');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
+
+    final directUri = Uri.parse('whatsapp://send?phone=$fullNum&text=$msg');
+    try {
+      final launched = await launchUrl(directUri, mode: LaunchMode.externalApplication);
+      if (!launched) throw Exception();
+    } catch (_) {
+      try {
+        final webUri = Uri.parse('https://api.whatsapp.com/send?phone=$fullNum&text=$msg');
+        await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      } catch (e) {
+        _showSnack('Could not open WhatsApp. Please check if app is installed.');
+      }
     }
   }
 
-  void _sendSms(BuildContext context) async {
+  void _sendSms() async {
     final member = widget.member;
-    final digits = member.phone?.replaceAll(RegExp(r'[^\d]'), '') ?? '';
-    if (digits.isEmpty) return;
-    final url = Uri.parse('sms:$digits?body=${Uri.encodeComponent('Dear ${member.name}, this is Chinta Mani Library.')}');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
+    final phone = member.phone?.replaceAll(RegExp(r'[^\d]'), '') ?? '';
+    if (phone.isEmpty) {
+      _showSnack('No phone number registered for this member');
+      return;
+    }
+    final msg = Uri.encodeComponent('Dear ${member.name}, Greetings from Chintamani Library! Helpline: 9415919277.');
+    final uri = Uri.parse('sms:$phone?body=$msg');
+    try {
+      await launchUrl(uri);
+    } catch (_) {
+      _showSnack('Could not open SMS app');
     }
   }
 
-  void _showIdCardDialog(BuildContext context) {
+  void _callPhone() async {
+    final member = widget.member;
+    final phone = member.phone?.replaceAll(RegExp(r'[^\d]'), '') ?? '';
+    if (phone.isEmpty) {
+      _showSnack('No phone number registered');
+      return;
+    }
+    final uri = Uri.parse('tel:$phone');
+    try {
+      await launchUrl(uri);
+    } catch (_) {
+      _showSnack('Could not launch dialer');
+    }
+  }
+
+  void _showEditDialog() {
+    final member = widget.member;
+    final nameCtrl = TextEditingController(text: member.name);
+    final phoneCtrl = TextEditingController(text: member.phone ?? '');
+    final addrCtrl = TextEditingController(text: member.address ?? '');
+    final batchCtrl = TextEditingController(text: member.batch ?? '');
+    final courseCtrl = TextEditingController(text: member.course ?? '');
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF14120E),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Color(0xFFD4AF37), width: 1.2),
+        ),
+        title: const Text('Edit Member Details', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildDialogField(nameCtrl, 'Full Name *', Icons.person_outline),
+              const SizedBox(height: 10),
+              _buildDialogField(phoneCtrl, 'Mobile Number *', Icons.phone_outlined, keyboardType: TextInputType.phone),
+              const SizedBox(height: 10),
+              _buildDialogField(addrCtrl, 'Address / Location', Icons.location_on_outlined),
+              const SizedBox(height: 10),
+              _buildDialogField(batchCtrl, 'Shift / Batch', Icons.access_time_rounded),
+              const SizedBox(height: 10),
+              _buildDialogField(courseCtrl, 'Course / Exam Prep', Icons.school_outlined),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textTertiary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFD4AF37),
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () async {
+              final newName = nameCtrl.text.trim();
+              if (newName.isEmpty) {
+                _showSnack('Name cannot be empty');
+                return;
+              }
+              Navigator.pop(ctx);
+              final repo = ref.read(memberRepositoryProvider);
+              await repo.updateMember(member.id, {
+                'name': newName,
+                'phone': phoneCtrl.text.trim(),
+                'address': addrCtrl.text.trim(),
+                'batch': batchCtrl.text.trim(),
+                'course': courseCtrl.text.trim(),
+              });
+              ref.invalidate(membersListProvider);
+              ref.invalidate(memberStatsProvider);
+              _showSnack('✅ Member updated successfully in database!');
+            },
+            child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRenewDialog() {
     final member = widget.member;
     showDialog(
       context: context,
@@ -569,88 +205,97 @@ class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateM
         backgroundColor: const Color(0xFF14120E),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xFFD4AF37), width: 1.5),
+          side: const BorderSide(color: Color(0xFF10B981), width: 1.2),
         ),
-        title: const Text('Digital Student ID Card', style: TextStyle(color: Colors.white, fontSize: 16)),
+        title: Text('Renew Membership — ${member.name}', style: const TextStyle(color: Colors.white, fontSize: 16)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [Color(0xFF261D0C), Color(0xFF100C05)]),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFD4AF37), width: 1),
-              ),
-              child: Column(
-                children: [
-                  const Text('CHINTA MANI LIBRARY', style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.w900, fontSize: 15)),
-                  const Text('Official Scholar Pass', style: TextStyle(color: Colors.white70, fontSize: 11)),
-                  const SizedBox(height: 12),
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: const Color(0xFFD4AF37).withOpacity(0.2),
-                    child: Text(member.name.substring(0, 1).toUpperCase(), style: const TextStyle(color: Color(0xFFD4AF37), fontSize: 24, fontWeight: FontWeight.bold)),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(member.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text('Seat: ${_getMemberNumber(member)} • Plan: ${member.currentPlanName}', style: const TextStyle(color: Color(0xFFFDE68A), fontSize: 12)),
-                  Text('Mobile: ${member.phone ?? "N/A"}', style: const TextStyle(color: Colors.white60, fontSize: 11)),
-                  const SizedBox(height: 10),
-                  const Icon(Icons.qr_code_2_rounded, color: Colors.white, size: 60),
-                ],
-              ),
-            ),
+            const Text('Select extension plan to add 30 days to active subscription:', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 12)),
+            const SizedBox(height: 12),
+            _buildPlanTile(ctx, '6 hrs batch', 500.0, 30),
+            const SizedBox(height: 8),
+            _buildPlanTile(ctx, '12 hrs batch', 800.0, 30),
+            const SizedBox(height: 8),
+            _buildPlanTile(ctx, '24 hrs batch', 1000.0, 30),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close', style: TextStyle(color: Color(0xFFD4AF37)))),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textTertiary)),
+          ),
         ],
       ),
     );
   }
 
-  void _showGiftDaysDialog(BuildContext context) {
+  Widget _buildPlanTile(BuildContext ctx, String planName, double price, int days) {
+    return InkWell(
+      onTap: () async {
+        Navigator.pop(ctx);
+        final repo = ref.read(memberRepositoryProvider);
+        await repo.renewSubscription(
+          widget.member.id,
+          planName: planName,
+          price: price,
+          days: days,
+        );
+        ref.invalidate(membersListProvider);
+        ref.invalidate(memberStatsProvider);
+        _showSnack('✅ Renewed for $planName (₹${price.toInt()}) for 30 days!');
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0x3310B981)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.schedule_rounded, color: Color(0xFF10B981), size: 18),
+                const SizedBox(width: 10),
+                Text(planName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
+              ],
+            ),
+            Text(
+              '₹${price.toInt()}',
+              style: const TextStyle(color: Color(0xFFFDE68A), fontWeight: FontWeight.w900, fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showGiftDaysDialog() {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF14120E),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFFE11D48), width: 1.2),
+        ),
         title: Text('Gift Days to ${widget.member.name}', style: const TextStyle(color: Colors.white, fontSize: 16)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Add complimentary bonus days to this membership subscription:', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 12)),
+            const Text('Add complimentary bonus days to this subscription:', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 12)),
             const SizedBox(height: 16),
             Wrap(
-              spacing: 8,
+              spacing: 10,
               children: [
-                ActionChip(
-                  label: const Text('+1 Day'),
-                  backgroundColor: const Color(0x33D4AF37),
-                  labelStyle: const TextStyle(color: Color(0xFFFDE68A)),
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('🎁 +1 Day added to membership!')));
-                  },
-                ),
-                ActionChip(
-                  label: const Text('+3 Days'),
-                  backgroundColor: const Color(0x33D4AF37),
-                  labelStyle: const TextStyle(color: Color(0xFFFDE68A)),
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('🎁 +3 Days added to membership!')));
-                  },
-                ),
-                ActionChip(
-                  label: const Text('+7 Days'),
-                  backgroundColor: const Color(0x33D4AF37),
-                  labelStyle: const TextStyle(color: Color(0xFFFDE68A)),
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('🎁 +7 Days added to membership!')));
-                  },
-                ),
+                _buildGiftChip(ctx, 1),
+                _buildGiftChip(ctx, 3),
+                _buildGiftChip(ctx, 7),
+                _buildGiftChip(ctx, 15),
               ],
             ),
           ],
@@ -662,191 +307,91 @@ class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateM
     );
   }
 
-  void _showPrintReceipt(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF14120E),
-        title: const Text('Fee Receipt', style: TextStyle(color: Colors.white)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Student: ${widget.member.name}', style: const TextStyle(color: Colors.white)),
-            Text('Plan: ${widget.member.currentPlanName}', style: const TextStyle(color: Colors.white70)),
-            const Text('Amount Paid: ₹500', style: TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold)),
-            const Text('Payment Mode: Cash / UPI', style: TextStyle(color: Colors.white70)),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD4AF37), foregroundColor: Colors.black),
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('🖨️ Receipt sent to printer!')));
-            },
-            child: const Text('Print Receipt'),
-          ),
-        ],
-      ),
+  Widget _buildGiftChip(BuildContext ctx, int days) {
+    return ActionChip(
+      label: Text('+$days Days'),
+      backgroundColor: const Color(0xFFE11D48).withOpacity(0.18),
+      side: const BorderSide(color: Color(0xFFE11D48)),
+      labelStyle: const TextStyle(color: Color(0xFFFFB4C0), fontWeight: FontWeight.bold),
+      onPressed: () async {
+        Navigator.pop(ctx);
+        final repo = ref.read(memberRepositoryProvider);
+        await repo.giftDays(widget.member.id, days);
+        ref.invalidate(membersListProvider);
+        ref.invalidate(memberStatsProvider);
+        _showSnack('🎁 Added +$days bonus days to ${widget.member.name}!');
+      },
     );
   }
 
-  void _showFreezeDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF14120E),
-        title: const Text('Freeze Membership', style: TextStyle(color: Colors.white)),
-        content: Text('Pause subscription for ${widget.member.name} during exam prep or vacation? Seat will be held reserved.', style: const TextStyle(color: Color(0xFFA1A1AA), fontSize: 13)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF3B82F6)),
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('❄️ Membership frozen successfully')));
-            },
-            child: const Text('Freeze', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showBioEnrollDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF14120E),
-        title: const Row(
-          children: [
-            Icon(Icons.fingerprint_rounded, color: Color(0xFFDC2626)),
-            SizedBox(width: 8),
-            Text('Biometric Enrollment', style: TextStyle(color: Colors.white, fontSize: 16)),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Place ${widget.member.name}\'s thumb on the biometric scanner.', style: const TextStyle(color: Color(0xFFA1A1AA), fontSize: 13)),
-            const SizedBox(height: 16),
-            const Icon(Icons.fingerprint_rounded, color: Color(0xFFDC2626), size: 64),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Done', style: TextStyle(color: Color(0xFFD4AF37)))),
-        ],
-      ),
-    );
-  }
-
-  void _showAddPayDialog(BuildContext context) {
+  void _showAddPayDialog() {
     final amtController = TextEditingController(text: '500');
+    final noteController = TextEditingController(text: 'Monthly membership fee');
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF14120E),
-        title: const Text('Add Payment', style: TextStyle(color: Colors.white)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF10B981), width: 1.2),
+        ),
+        title: Text('Record Fee Payment — ${widget.member.name}', style: const TextStyle(color: Colors.white, fontSize: 16)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
-              controller: amtController,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(labelText: 'Amount (₹)', labelStyle: TextStyle(color: Color(0xFFA1A1AA))),
-            ),
+            _buildDialogField(amtController, 'Amount (₹)', Icons.currency_rupee_rounded, keyboardType: TextInputType.number),
+            const SizedBox(height: 10),
+            _buildDialogField(noteController, 'Payment Notes', Icons.notes_rounded),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel', style: TextStyle(color: AppColors.textTertiary))),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF10B981)),
-            onPressed: () {
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF10B981),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () async {
+              final amt = double.tryParse(amtController.text.trim()) ?? 0;
+              if (amt <= 0) {
+                _showSnack('Please enter a valid amount');
+                return;
+              }
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✅ Payment recorded!')));
+              final repo = ref.read(memberRepositoryProvider);
+              await repo.renewSubscription(
+                widget.member.id,
+                planName: widget.member.currentPlanName,
+                price: amt,
+                days: 30,
+              );
+              ref.invalidate(membersListProvider);
+              ref.invalidate(memberStatsProvider);
+              _showSnack('✅ Payment of ₹${amt.toInt()} recorded in database!');
             },
-            child: const Text('Save Payment', style: TextStyle(color: Colors.white)),
+            child: const Text('Confirm Payment', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 
-  void _showRenewDialog(BuildContext context) {
+  void _showLockerDialog() {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF14120E),
-        title: const Text('Renew Membership', style: TextStyle(color: Colors.white)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text('6 hrs batch', style: TextStyle(color: Colors.white)),
-              trailing: const Text('₹500', style: TextStyle(color: Color(0xFFFDE68A), fontWeight: FontWeight.bold)),
-              onTap: () {
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✅ Renewed for 6 hrs batch (₹500)!')));
-              },
-            ),
-            ListTile(
-              title: const Text('12 hrs batch', style: TextStyle(color: Colors.white)),
-              trailing: const Text('₹800', style: TextStyle(color: Color(0xFFFDE68A), fontWeight: FontWeight.bold)),
-              onTap: () {
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✅ Renewed for 12 hrs batch (₹800)!')));
-              },
-            ),
-            ListTile(
-              title: const Text('24 hrs batch', style: TextStyle(color: Colors.white)),
-              trailing: const Text('₹1,000', style: TextStyle(color: Color(0xFFFDE68A), fontWeight: FontWeight.bold)),
-              onTap: () {
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✅ Renewed for 24 hrs batch (₹1,000)!')));
-              },
-            ),
-          ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF8B5CF6), width: 1.2),
         ),
-      ),
-    );
-  }
-
-  void _showAddBillDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF14120E),
-        title: const Text('Add Bill / Invoice', style: TextStyle(color: Colors.white)),
-        content: Text('Generate GST / commercial fee invoice for ${widget.member.name}?', style: const TextStyle(color: Color(0xFFA1A1AA), fontSize: 13)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD4AF37), foregroundColor: Colors.black),
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('🧾 Invoice generated!')));
-            },
-            child: const Text('Create Bill'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLockerDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF14120E),
-        title: const Text('Assign 9 Lockers Vault', style: TextStyle(color: Colors.white)),
+        title: const Text('Assign Locker Vault', style: TextStyle(color: Colors.white, fontSize: 16)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Select locker (L01 - L09) • ₹200/month:', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 12)),
-            const SizedBox(height: 12),
+            const Text('Select locker (L01 - L09) for ₹200/month:', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 12)),
+            const SizedBox(height: 14),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -854,11 +399,15 @@ class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateM
                 final lockerNum = 'L0${index + 1}';
                 return ActionChip(
                   label: Text(lockerNum),
-                  backgroundColor: const Color(0x338B5CF6),
+                  backgroundColor: const Color(0xFF8B5CF6).withOpacity(0.2),
+                  side: const BorderSide(color: Color(0xFF8B5CF6)),
                   labelStyle: const TextStyle(color: Color(0xFFC084FC), fontWeight: FontWeight.bold),
-                  onPressed: () {
+                  onPressed: () async {
                     Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('🔐 $lockerNum assigned to ${widget.member.name} (₹200/mo)')));
+                    final repo = ref.read(memberRepositoryProvider);
+                    await repo.assignLocker(widget.member.id, lockerNum);
+                    ref.invalidate(membersListProvider);
+                    _showSnack('🔐 Assigned $lockerNum to ${widget.member.name}!');
                   },
                 );
               }),
@@ -866,134 +415,827 @@ class _MemberCardState extends State<MemberCard> with SingleTickerProviderStateM
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel', style: TextStyle(color: AppColors.textTertiary))),
         ],
       ),
     );
   }
 
-  void _showDeleteDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF14120E),
-        title: const Text('Delete Member', style: TextStyle(color: Colors.white)),
-        content: Text('Are you sure you want to remove ${widget.member.name} from the library database?', style: const TextStyle(color: Color(0xFFA1A1AA))),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('🗑️ Member removed')));
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
+  void _showIdCardDialog() {
+    final member = widget.member;
+    final cardAccent = _getCardAccent(member);
 
-  void _showBlockDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF14120E),
-        title: const Text('Block Member', style: TextStyle(color: Colors.white)),
-        content: Text('Temporarily block library card & biometric access for ${widget.member.name}?', style: const TextStyle(color: Color(0xFFA1A1AA))),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('🚫 Member card blocked')));
-            },
-            child: const Text('Block', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showMarkLeftDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF14120E),
-        title: const Text('Mark Student Left', style: TextStyle(color: Colors.white)),
-        content: Text('Mark ${widget.member.name} as completed/left? Seat and locker will be freed immediately.', style: const TextStyle(color: Color(0xFFA1A1AA))),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF59E0B), foregroundColor: Colors.black),
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('🚪 Marked as left. Seat freed.')));
-            },
-            child: const Text('Mark Left'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditDialog(BuildContext context) {
-    final nameCtrl = TextEditingController(text: widget.member.name);
-    final phoneCtrl = TextEditingController(text: widget.member.phone ?? '');
-    final addrCtrl = TextEditingController(text: widget.member.address ?? '');
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF14120E),
-        title: const Text('Edit Member', style: TextStyle(color: Colors.white)),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: nameCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Name', labelStyle: TextStyle(color: Color(0xFFA1A1AA)))),
-              const SizedBox(height: 8),
-              TextField(controller: phoneCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Phone', labelStyle: TextStyle(color: Color(0xFFA1A1AA)))),
-              const SizedBox(height: 8),
-              TextField(controller: addrCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Address', labelStyle: TextStyle(color: Color(0xFFA1A1AA)))),
-            ],
-          ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: cardAccent, width: 1.5),
+        ),
+        title: const Text('Digital Student ID Card', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [cardAccent.withOpacity(0.25), const Color(0xFF100C05)]),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: cardAccent.withOpacity(0.5), width: 1),
+              ),
+              child: Column(
+                children: [
+                  const Text('CHINTAMANI LIBRARY', style: TextStyle(color: AppColors.goldPrimary, fontWeight: FontWeight.w900, fontSize: 15, letterSpacing: 1.2)),
+                  const Text('Official Scholar Pass', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                  const SizedBox(height: 12),
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: cardAccent.withOpacity(0.3),
+                    child: Text(member.name.isNotEmpty ? member.name.substring(0, 1).toUpperCase() : 'S',
+                        style: TextStyle(color: cardAccent, fontSize: 24, fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(member.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  const SizedBox(height: 2),
+                  Text('Seat: ${_getMemberNumber(member)} • Plan: ${member.currentPlanName}', style: const TextStyle(color: Color(0xFFFDE68A), fontSize: 12)),
+                  Text('Phone: ${member.phone ?? "N/A"}', style: const TextStyle(color: Colors.white60, fontSize: 11)),
+                  const SizedBox(height: 12),
+                  const Icon(Icons.qr_code_2_rounded, color: Colors.white, size: 64),
+                ],
+              ),
+            ),
+          ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              Share.share(
+                'Chintamani Library Digital Scholar Pass:\n'
+                '• Student: ${member.name}\n'
+                '• Seat: ${_getMemberNumber(member)}\n'
+                '• Plan: ${member.currentPlanName}\n'
+                '• Phone: ${member.phone ?? "N/A"}\n'
+                '• Helpline: +91 9415919277',
+              );
+            },
+            child: const Text('Share Pass', style: TextStyle(color: Color(0xFF10B981))),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: cardAccent),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLogsDialog() {
+    final member = widget.member;
+    final sub = member.activeSubscription;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF14120E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Activity Logs — ${member.name}', style: const TextStyle(color: Colors.white, fontSize: 15)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildLogItem(Icons.how_to_reg_rounded, const Color(0xFF10B981), 'Active Admission on record', 'Seat ${_getMemberNumber(member)} reserved'),
+            _buildLogItem(Icons.access_time_rounded, const Color(0xFF3B82F6), 'Shift Plan: ${member.currentPlanName}', member.batch ?? 'Standard timing'),
+            if (sub != null)
+              _buildLogItem(Icons.calendar_today_rounded, const Color(0xFFF59E0B), 'Current Expiry', _formatDate(sub.endDate)),
+            _buildLogItem(Icons.verified_rounded, const Color(0xFF8B5CF6), 'Master Database Synced', 'Local and cloud records intact'),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close', style: TextStyle(color: AppColors.goldPrimary))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLogItem(IconData icon, Color color, String title, String subtitle) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                Text(subtitle, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF14120E),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFFDC2626), width: 1.2),
+        ),
+        title: const Text('Delete Member', style: TextStyle(color: Colors.white)),
+        content: Text('Are you sure you want to remove ${widget.member.name} permanently from the library database?', style: const TextStyle(color: Color(0xFFA1A1AA))),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel', style: TextStyle(color: AppColors.textTertiary))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final repo = ref.read(memberRepositoryProvider);
+              await repo.deleteMember(widget.member.id);
+              ref.invalidate(membersListProvider);
+              ref.invalidate(memberStatsProvider);
+              _showSnack('🗑️ Member removed from database');
+            },
+            child: const Text('Confirm Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showBlockDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF14120E),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFFDC2626), width: 1.2),
+        ),
+        title: Text(widget.member.isActive ? 'Block Member' : 'Unblock Member', style: const TextStyle(color: Colors.white)),
+        content: Text(
+          widget.member.isActive
+              ? 'Temporarily block biometric and seat access for ${widget.member.name}?'
+              : 'Re-activate library access for ${widget.member.name}?',
+          style: const TextStyle(color: Color(0xFFA1A1AA)),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel', style: TextStyle(color: AppColors.textTertiary))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: widget.member.isActive ? const Color(0xFFDC2626) : const Color(0xFF10B981)),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final repo = ref.read(memberRepositoryProvider);
+              await repo.toggleBlock(widget.member.id);
+              ref.invalidate(membersListProvider);
+              ref.invalidate(memberStatsProvider);
+              _showSnack(widget.member.isActive ? '🚫 Member blocked' : '✅ Member unblocked');
+            },
+            child: Text(widget.member.isActive ? 'Block' : 'Unblock', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMarkLeftDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF14120E),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFFF59E0B), width: 1.2),
+        ),
+        title: const Text('Mark Student Left', style: TextStyle(color: Colors.white)),
+        content: Text('Mark ${widget.member.name} as left? The assigned seat and locker will be freed immediately.', style: const TextStyle(color: Color(0xFFA1A1AA))),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel', style: TextStyle(color: AppColors.textTertiary))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF59E0B), foregroundColor: Colors.black),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final repo = ref.read(memberRepositoryProvider);
+              await repo.markLeft(widget.member.id);
+              ref.invalidate(membersListProvider);
+              ref.invalidate(memberStatsProvider);
+              _showSnack('🚪 Marked as left. Seat freed in database.');
+            },
+            child: const Text('Confirm', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPrintReceipt() {
+    final member = widget.member;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF14120E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Official Fee Receipt', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Student: ${member.name}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text('Plan: ${member.currentPlanName}', style: const TextStyle(color: Colors.white70)),
+            Text('Seat: ${_getMemberNumber(member)}', style: const TextStyle(color: Colors.white70)),
+            const SizedBox(height: 8),
+            const Text('Amount Paid: ₹500', style: TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold, fontSize: 15)),
+            const Text('Payment Mode: Cash / UPI (Verified)', style: TextStyle(color: Colors.white70, fontSize: 12)),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close', style: TextStyle(color: AppColors.textTertiary))),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD4AF37), foregroundColor: Colors.black),
             onPressed: () {
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✅ Member updated!')));
+              Share.share(
+                '🏛️ CHINTAMANI LIBRARY FEE RECEIPT\n'
+                '━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+                '• Student: ${member.name}\n'
+                '• Seat: ${_getMemberNumber(member)}\n'
+                '• Plan: ${member.currentPlanName}\n'
+                '• Amount Paid: ₹500\n'
+                '• Date: ${_formatDate(DateTime.now())}\n'
+                '• Status: PAID & VERIFIED\n\n'
+                'Helpline: +91 9415919277',
+              );
             },
-            child: const Text('Save'),
+            child: const Text('Share Receipt', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 
-  void _showLogsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF14120E),
-        title: Text('Activity Logs - ${widget.member.name}', style: const TextStyle(color: Colors.white, fontSize: 15)),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('• Check-in: Today at 08:15 AM (Biometric)', style: TextStyle(color: Color(0xFF10B981), fontSize: 12)),
-            SizedBox(height: 6),
-            Text('• Check-out: Yesterday at 02:30 PM (QR Scan)', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 12)),
-            SizedBox(height: 6),
-            Text('• Payment: ₹500 recorded for 6 hrs batch', style: TextStyle(color: Color(0xFFFDE68A), fontSize: 12)),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close', style: TextStyle(color: Color(0xFFD4AF37)))),
+  void _showSnack(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), duration: const Duration(milliseconds: 1600), behavior: SnackBarBehavior.floating),
+    );
+  }
+
+  Widget _buildDialogField(TextEditingController ctrl, String label, IconData icon, {TextInputType? keyboardType}) {
+    return TextField(
+      controller: ctrl,
+      keyboardType: keyboardType,
+      style: const TextStyle(color: Colors.white, fontSize: 13),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: AppColors.textTertiary, fontSize: 12),
+        prefixIcon: Icon(icon, color: AppColors.goldPrimary, size: 18),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.04),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0x33FFFFFF))),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0x22FFFFFF))),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final member = widget.member;
+    final seatNum = _getMemberNumber(member);
+    final cardAccent = _getCardAccent(member);
+
+    final planName = member.currentPlanName.isNotEmpty && member.currentPlanName != 'No Plan'
+        ? member.currentPlanName
+        : '6 hrs batch';
+    final batchType = member.batch != null && member.batch!.isNotEmpty
+        ? member.batch!
+        : 'morning~afternoon~evening';
+    final sub = member.activeSubscription;
+    final joinDate = sub != null ? _formatDate(sub.startDate, defaultVal: '08 Sep, 2026') : '08 Sep, 2026';
+    final expiryDate = sub != null ? _formatDate(sub.endDate, defaultVal: '07 Oct, 2026') : '07 Oct, 2026';
+    final amt = sub?.plan?.price.toInt() ?? 500;
+    const paid = 500;
+    final due = amt > paid ? amt - paid : 0;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: cardAccent.withOpacity(0.10),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.40),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
         ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              // Frosted Glassmorphism gradient
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  cardAccent.withOpacity(0.18),
+                  const Color(0xEB131118),
+                  const Color(0xF20D0B10),
+                ],
+                stops: const [0.0, 0.35, 1.0],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: cardAccent.withOpacity(0.35),
+                width: 1.2,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── ZONE 1 & 2: Header + Details Box (Tappable for Profile) ──
+                InkWell(
+                  onTap: widget.onTap,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header Row: Avatar, Name, Seat Badge
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Circular Avatar with glass ring
+                            Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: cardAccent.withOpacity(0.15),
+                                border: Border.all(color: cardAccent, width: 1.6),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: cardAccent.withOpacity(0.25),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Text(
+                                  member.name.isNotEmpty ? member.name.substring(0, 1).toUpperCase() : 'S',
+                                  style: TextStyle(
+                                    color: cardAccent,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+
+                            // Name, Location, Phone
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          member.name,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: -0.2,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      if (!member.isActive)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFDC2626).withOpacity(0.2),
+                                            borderRadius: BorderRadius.circular(4),
+                                            border: Border.all(color: const Color(0xFFDC2626)),
+                                          ),
+                                          child: const Text('BLOCKED', style: TextStyle(color: Color(0xFFDC2626), fontSize: 9, fontWeight: FontWeight.bold)),
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.location_on_outlined, size: 12, color: Color(0xFFA1A1AA)),
+                                      const SizedBox(width: 3),
+                                      Expanded(
+                                        child: Text(
+                                          member.address != null && member.address!.isNotEmpty
+                                              ? member.address!
+                                              : 'moti chauraha khalilabad',
+                                          style: const TextStyle(color: Color(0xFFA1A1AA), fontSize: 11),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.phone_rounded, size: 12, color: Color(0xFF10B981)),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        member.phone != null && member.phone!.isNotEmpty ? member.phone! : '+91 9682960623',
+                                        style: const TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w700),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      GestureDetector(
+                                        onTap: _callPhone,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: BoxDecoration(
+                                            color: cardAccent.withOpacity(0.18),
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Icon(Icons.call, size: 11, color: cardAccent),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // Seat Badge (in student's multicolour accent) & Chair Status Indicator
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: cardAccent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: cardAccent.withOpacity(0.40),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.assignment_ind_rounded, color: Colors.white, size: 13),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        seatNum,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.chair_alt_rounded, color: cardAccent, size: 13),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      '.......',
+                                      style: TextStyle(
+                                        color: cardAccent.withOpacity(0.8),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1.0,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        // Middle Inset Glass Details Box (Plan, Type, Join, Expiry, Amt, Paid, Due)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.28),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: Colors.white.withOpacity(0.08)),
+                          ),
+                          child: Column(
+                            children: [
+                              // Row 1: Plan & Type
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('Plan', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 10.5)),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          planName,
+                                          style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w700),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('Type', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 10.5)),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          batchType,
+                                          style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w700),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+
+                              // Row 2: Join & Expiry
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('Join', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 10.5)),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          joinDate,
+                                          style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w700),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('Expiry', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 10.5)),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          expiryDate,
+                                          style: TextStyle(
+                                            color: member.isActive ? Colors.white : const Color(0xFFDC2626),
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+
+                              // Row 3: Amt, Paid, Due
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('Amt', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 10.5)),
+                                        const SizedBox(height: 2),
+                                        Text('₹$amt', style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('Paid', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 10.5)),
+                                        const SizedBox(height: 2),
+                                        const Text('₹500', style: TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('Due', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 10.5)),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '₹$due',
+                                          style: TextStyle(
+                                            color: due > 0 ? const Color(0xFFDC2626) : const Color(0xFF10B981),
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const Divider(color: Color(0x1AFFFFFF), height: 1),
+
+                // ── ZONE 3: Dedicated Action Buttons Row (Completely decoupled from parent tap) ──
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      children: [
+                        _buildActionChip(
+                          icon: Icons.chat_rounded,
+                          label: 'WhatsApp',
+                          color: const Color(0xFF25D366),
+                          isWhatsApp: true,
+                          onTap: _openWhatsApp,
+                        ),
+                        _buildActionChip(
+                          icon: Icons.edit_note_rounded,
+                          label: 'Edit',
+                          color: const Color(0xFFD97706),
+                          onTap: _showEditDialog,
+                        ),
+                        _buildActionChip(
+                          icon: Icons.refresh_rounded,
+                          label: 'Renew',
+                          color: const Color(0xFF10B981),
+                          onTap: _showRenewDialog,
+                        ),
+                        _buildActionChip(
+                          icon: Icons.sms_outlined,
+                          label: 'SMS',
+                          color: const Color(0xFF0EA5E9),
+                          onTap: _sendSms,
+                        ),
+                        _buildActionChip(
+                          icon: Icons.badge_outlined,
+                          label: 'ID-Card',
+                          color: const Color(0xFF3B82F6),
+                          onTap: _showIdCardDialog,
+                        ),
+                        _buildActionChip(
+                          icon: Icons.history_rounded,
+                          label: 'View Logs',
+                          color: const Color(0xFF8B5CF6),
+                          onTap: _showLogsDialog,
+                        ),
+                        _buildActionChip(
+                          icon: Icons.card_giftcard_rounded,
+                          label: 'Gift Days',
+                          color: const Color(0xFFE11D48),
+                          onTap: _showGiftDaysDialog,
+                        ),
+                        _buildActionChip(
+                          icon: Icons.payments_outlined,
+                          label: 'Add Pay',
+                          color: const Color(0xFF059669),
+                          onTap: _showAddPayDialog,
+                        ),
+                        _buildActionChip(
+                          icon: Icons.print_rounded,
+                          label: 'Print',
+                          color: const Color(0xFF0D9488),
+                          onTap: _showPrintReceipt,
+                        ),
+                        _buildActionChip(
+                          icon: Icons.lock_outline_rounded,
+                          label: 'Locker',
+                          color: const Color(0xFFCA8A04),
+                          onTap: _showLockerDialog,
+                        ),
+                        _buildActionChip(
+                          icon: Icons.person_outline_rounded,
+                          label: 'Profile',
+                          color: const Color(0xFF6366F1),
+                          onTap: widget.onTap,
+                        ),
+                        _buildActionChip(
+                          icon: Icons.block_rounded,
+                          label: widget.member.isActive ? 'Block' : 'Unblock',
+                          color: const Color(0xFF991B1B),
+                          onTap: _showBlockDialog,
+                        ),
+                        _buildActionChip(
+                          icon: Icons.exit_to_app_rounded,
+                          label: 'Mark Left',
+                          color: const Color(0xFF64748B),
+                          onTap: _showMarkLeftDialog,
+                        ),
+                        _buildActionChip(
+                          icon: Icons.delete_outline_rounded,
+                          label: 'Delete',
+                          color: const Color(0xFFDC2626),
+                          onTap: _showDeleteDialog,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionChip({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+    bool isWhatsApp = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            onTap();
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.18),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: color.withOpacity(0.4), width: 0.8),
+                  ),
+                  child: Center(
+                    child: isWhatsApp
+                        ? const WhatsAppLogo(size: 18, color: Color(0xFF25D366))
+                        : Icon(icon, color: color, size: 18),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

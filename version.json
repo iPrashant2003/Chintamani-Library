@@ -1,16 +1,15 @@
 {
   "version": "2.3.0",
-  "buildNumber": 27,
+  "buildNumber": 28,
   "releaseDate": "23 Sep 2026",
-  "title": "Chinta Mani Library v2.3.0 Update (Build 27) — Universal QR Portal",
+  "title": "Chinta Mani Library v2.3.0 Update (Build 28) — QR Fix, Member Cards & Glassmorphism",
   "releaseNotes": [
-    "Universal QR Member Portal: Permanent QR code for student self-service & admissions",
-    "Self Registration: Multi-step form with live selfie capture & Aadhaar uploads",
-    "Smart Seat Allocation: 24h plans automatically reserve seats; 6h/12h admin allocated",
-    "Payment Verifications: Direct UPI pay with screenshot proof & 1-tap admin verification",
-    "Member Complaints Desk: Ticket tracking & resolution for AC, power, seating & Wi-Fi",
-    "6-Month Activity Timeline: Detailed member history of payments, seats & complaints",
-    "Seat Reallocation: Support for blocking, unblocking, and editable seat transfers"
+    "Universal QR: Fixed 'failed to load portal' — now renders natively offline-first",
+    "Member Cards: All action buttons now fully wired (Edit, Renew, SMS, WhatsApp, Gift, Block, Delete etc.)",
+    "Member Cards: Beautiful glassmorphism design with deep jewel-tone multicolour palette",
+    "Member Directory: Category filter chips with glassmorphism styling",
+    "Database: Member subscriptions properly serialised — local DB mutations now persist",
+    "Locker Assignment: Fixed constructor field mapping (status: OCCUPIED)"
   ],
   "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.0/Chintamani-Library-Release.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",

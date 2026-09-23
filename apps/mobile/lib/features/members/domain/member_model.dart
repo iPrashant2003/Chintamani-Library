@@ -106,7 +106,52 @@ class Member {
       'notes': notes,
       'branchId': branchId,
       'isActive': isActive,
+      'subscriptions': subscriptions.map((s) => s.toJson()).toList(),
     };
+  }
+
+  Member copyWith({
+    String? id,
+    String? memberCode,
+    String? name,
+    String? fatherName,
+    String? phone,
+    String? email,
+    String? address,
+    String? gender,
+    DateTime? dob,
+    String? photoUrl,
+    String? institute,
+    String? course,
+    String? batch,
+    String? emergencyContact,
+    String? aadhaar,
+    String? notes,
+    String? branchId,
+    bool? isActive,
+    List<Subscription>? subscriptions,
+  }) {
+    return Member(
+      id: id ?? this.id,
+      memberCode: memberCode ?? this.memberCode,
+      name: name ?? this.name,
+      fatherName: fatherName ?? this.fatherName,
+      phone: phone ?? this.phone,
+      email: email ?? this.email,
+      address: address ?? this.address,
+      gender: gender ?? this.gender,
+      dob: dob ?? this.dob,
+      photoUrl: photoUrl ?? this.photoUrl,
+      institute: institute ?? this.institute,
+      course: course ?? this.course,
+      batch: batch ?? this.batch,
+      emergencyContact: emergencyContact ?? this.emergencyContact,
+      aadhaar: aadhaar ?? this.aadhaar,
+      notes: notes ?? this.notes,
+      branchId: branchId ?? this.branchId,
+      isActive: isActive ?? this.isActive,
+      subscriptions: subscriptions ?? this.subscriptions,
+    );
   }
 
   Subscription? get activeSubscription {
@@ -187,6 +232,34 @@ class Subscription {
       'assignedSeatId': assignedSeatId,
       'assignedLockerId': assignedLockerId,
     };
+  }
+
+  Subscription copyWith({
+    String? id,
+    String? memberId,
+    String? planId,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? status,
+    String? assignedSeatId,
+    String? assignedLockerId,
+    MembershipPlan? plan,
+    Seat? seat,
+    Locker? locker,
+  }) {
+    return Subscription(
+      id: id ?? this.id,
+      memberId: memberId ?? this.memberId,
+      planId: planId ?? this.planId,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      status: status ?? this.status,
+      assignedSeatId: assignedSeatId ?? this.assignedSeatId,
+      assignedLockerId: assignedLockerId ?? this.assignedLockerId,
+      plan: plan ?? this.plan,
+      seat: seat ?? this.seat,
+      locker: locker ?? this.locker,
+    );
   }
 
   bool get isActive => status == 'ACTIVE' && endDate.isAfter(DateTime.now());

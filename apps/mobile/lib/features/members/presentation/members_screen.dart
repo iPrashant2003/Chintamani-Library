@@ -319,21 +319,19 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
         width: 110,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? accentColor : const Color(0xFF181510),
-          borderRadius: BorderRadius.circular(14),
+          color: isSelected ? accentColor.withOpacity(0.25) : const Color(0xCC161412),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? Colors.white.withValues(alpha: 0.5) : accentColor.withValues(alpha: 0.35),
-            width: 1.2,
+            color: isSelected ? accentColor : accentColor.withOpacity(0.35),
+            width: isSelected ? 1.6 : 1.0,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: accentColor.withValues(alpha: 0.45),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
+          boxShadow: [
+            BoxShadow(
+              color: isSelected ? accentColor.withOpacity(0.35) : Colors.black.withOpacity(0.3),
+              blurRadius: isSelected ? 12 : 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

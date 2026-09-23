@@ -6,6 +6,7 @@ import {
   PortalRegisterDto,
   PortalPaymentDto,
   PortalComplaintDto,
+  PortalFeedbackDto,
 } from './dto/portal.dto';
 import * as crypto from 'crypto';
 
@@ -782,4 +783,95 @@ export class PortalService {
 
     return { timeline };
   }
+
+  async submitFeedback(dto: PortalFeedbackDto) {
+    let branch = dto.branchId
+      ? await this.prisma.branch.findUnique({ where: { id: dto.branchId } })
+      : await this.prisma.branch.findFirst();
+
+    if (!branch) {
+      throw new NotFoundException('Library branch not found');
+    }
+
+    const feedback = await this.prisma.feedback.create({
+      data: {
+        tenantId: branch.tenantId,
+        branchId: branch.id,
+        memberId: dto.memberId || null,
+        memberName: dto.memberName.trim(),
+        memberPhone: dto.memberPhone ? this.cleanPhone(dto.memberPhone) : null,
+        rating: Math.max(1, Math.min(5, dto.rating || 5)),
+        category: (dto.category || 'OVERALL').toUpperCase(),
+        review: dto.review.trim(),
+        status: 'NEW',
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Thank you for your valuable feedback!',
+      feedbackId: feedback.id,
+    };
+  }
+
+  async getFeedback(branchId?: string) {
+    const where: any = {};
+    if (branchId) where.branchId = branchId;
+
+    const [feedbacks, total, avgAgg] = await Promise.all([
+      this.prisma.feedback.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+        select: {
+          id: true,
+          memberName: true,
+          rating: true,
+          category: true,
+          review: true,
+          response: true,
+          createdAt: true,
+        },
+      }),
+      this.prisma.feedback.count({ where }),
+      this.prisma.feedback.aggregate({
+        where,
+        _avg: { rating: true },
+      }),
+    ]);
+
+    return {
+      total,
+      averageRating: avgAgg._avg.rating ? Number(avgAgg._avg.rating.toFixed(1)) : 5.0,
+      feedbacks,
+    };
+  }
+
+  async getSeatsByBatch(batch?: string, timing?: string, branchId?: string) {
+    let branch = branchId
+      ? await this.prisma.branch.findUnique({ where: { id: branchId } })
+      : await this.prisma.branch.findFirst();
+
+    const where: any = branch ? { branchId: branch.id } : {};
+
+    const seats = await this.prisma.seat.findMany({
+      where,
+      orderBy: [{ floor: 'asc' }, { seatNumber: 'asc' }],
+      select: {
+        id: true,
+        seatNumber: true,
+        floor: true,
+        status: true,
+      },
+    });
+
+    return seats.map((s) => ({
+      id: s.id,
+      seatNumber: s.seatNumber,
+      floor: s.floor,
+      status: s.status,
+      isAvailable: s.status === 'AVAILABLE',
+    }));
+  }
 }
+

@@ -186,13 +186,30 @@ export class PaymentsService {
       },
     });
 
-    // 3. If member was inactive, check if approved registration exists to activate
-    if (!verification.member.isActive) {
-      await this.prisma.member.update({
-        where: { id: verification.memberId },
-        data: { isActive: true },
+    // 3. Activate member & activate subscription / seat
+    await this.prisma.member.update({
+      where: { id: verification.memberId },
+      data: { isActive: true },
+    });
+
+    try {
+      const activeSub = await this.prisma.subscription.findFirst({
+        where: { memberId: verification.memberId },
+        orderBy: { createdAt: 'desc' },
       });
-    }
+      if (activeSub) {
+        await this.prisma.subscription.update({
+          where: { id: activeSub.id },
+          data: { status: 'ACTIVE' },
+        });
+        if (activeSub.assignedSeatId) {
+          await this.prisma.seat.update({
+            where: { id: activeSub.assignedSeatId },
+            data: { status: 'OCCUPIED' },
+          });
+        }
+      }
+    } catch (_) {}
 
     // 4. Audit Log
     try {

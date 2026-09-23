@@ -118,6 +118,7 @@ model Tenant {
   memberRegistrations  MemberRegistration[]
   complaints           Complaint[]
   paymentVerifications PaymentVerification[]
+  feedbacks            Feedback[]
 }
 
 model Branch {
@@ -142,6 +143,7 @@ model Branch {
   MembershipPlan       MembershipPlan[]
   memberRegistrations  MemberRegistration[]
   complaints           Complaint[]
+  feedbacks            Feedback[]
 
   @@index([tenantId])
 }
@@ -209,6 +211,7 @@ model Member {
   payments             Payment[]
   complaints           Complaint[]
   paymentVerifications PaymentVerification[]
+  feedbacks            Feedback[]
   registration         MemberRegistration?  @relation(fields: [registrationId], references: [id])
 
   @@unique([tenantId, memberCode])
@@ -600,4 +603,27 @@ model MemberPortalSession {
 
   @@index([phone])
   @@index([token])
+}
+
+model Feedback {
+  id          String   @id @default(uuid())
+  tenantId    String
+  branchId    String
+  memberId    String?
+  memberName  String
+  memberPhone String?
+  rating      Int      @default(5)
+  category    String   // LIBRARY, STAFF, SEATING, CLEANLINESS, FACILITIES, TIMING, OVERALL
+  review      String
+  status      String   @default("NEW") // NEW, REVIEWED, RESPONDED
+  response    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch  Branch   @relation(fields: [branchId], references: [id])
+  member  Member?  @relation(fields: [memberId], references: [id])
+
+  @@index([tenantId])
+  @@index([status])
 }

@@ -34,19 +34,24 @@ final universalQrDataProvider = FutureProvider<Map<String, dynamic>>((ref) async
 class UniversalQrScreen extends ConsumerWidget {
   const UniversalQrScreen({super.key});
 
-  /// Builds the portal URL from the backend's current base URL.
-  /// Guarantees that localhost / 127.0.0.1 are never used for QR codes.
+  /// Permanent global public production URL hosted on GitHub Pages (24/7 HTTPS, accessible worldwide)
+  static const String publicProductionUrl = 'https://iprashant2003.github.io/Chintamani-Library/';
+
+  /// Builds the portal URL from the production deployment or active HTTPS backend.
+  /// Guarantees that localhost / 127.0.0.1 / private LAN IPs are never used for external QR scanning.
   static String buildPortalUrl() {
-    String base = ApiEndpoints.baseUrl.trim();
-    if (base.contains('localhost') || base.contains('127.0.0.1') || base.isEmpty) {
-      base = ApiEndpoints.defaultWifiUrl;
+    final base = ApiEndpoints.baseUrl.trim();
+    // If backend baseUrl is an external HTTPS URL (e.g. custom domain or tunnel), use it
+    if (base.startsWith('https://') && !base.contains('localhost') && !base.contains('127.0.0.1')) {
+      final stripped = base.endsWith('/') ? base.substring(0, base.length - 1) : base;
+      return '$stripped/portal/index.html';
     }
-    final stripped = base.endsWith('/') ? base.substring(0, base.length - 1) : base;
-    return '$stripped/portal/index.html';
+    // Production public URL accessible globally from any network / phone camera
+    return publicProductionUrl;
   }
 
-  /// Permanent fallback in case ApiEndpoints.baseUrl is empty/unavailable
-  static const String _fallbackUrl = 'http://192.168.1.35:3000/portal/index.html';
+  /// Permanent fallback
+  static const String _fallbackUrl = publicProductionUrl;
 
   void _shareViaWhatsApp(BuildContext context, String url, String branchName) async {
     final msg = Uri.encodeComponent(

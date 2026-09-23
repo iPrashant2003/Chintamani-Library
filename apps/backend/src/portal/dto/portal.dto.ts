@@ -160,3 +160,33 @@ export class PortalComplaintDto {
   @IsString()
   attachmentUrls?: string;
 }
+
+export class PortalFeedbackDto {
+  @IsString()
+  @IsNotEmpty()
+  memberName!: string;
+
+  @IsOptional()
+  @IsString()
+  memberPhone?: string;
+
+  @IsNumber()
+  rating!: number; // 1 to 5
+
+  @IsString()
+  @IsNotEmpty()
+  category!: string; // LIBRARY, STAFF, SEATING, CLEANLINESS, FACILITIES, TIMING, OVERALL
+
+  @IsString()
+  @IsNotEmpty()
+  review!: string;
+
+  @IsOptional()
+  @IsString()
+  branchId?: string;
+
+  @IsOptional()
+  @IsString()
+  memberId?: string;
+}
+

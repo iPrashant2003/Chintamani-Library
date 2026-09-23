@@ -21,6 +21,7 @@ import {
   PortalRegisterDto,
   PortalPaymentDto,
   PortalComplaintDto,
+  PortalFeedbackDto,
 } from './dto/portal.dto';
 
 @ApiTags('Member Portal (Public)')
@@ -103,6 +104,29 @@ export class PortalController {
   @ApiOperation({ summary: 'Get 6-month member activity & payment history timeline' })
   getHistory(@Query('identifier') identifier: string) {
     return this.portalService.getMemberHistory(identifier);
+  }
+
+  @Post('feedback')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Submit feedback & review' })
+  submitFeedback(@Body() dto: PortalFeedbackDto) {
+    return this.portalService.submitFeedback(dto);
+  }
+
+  @Get('feedback')
+  @ApiOperation({ summary: 'Get public feedback & reviews' })
+  getFeedback(@Query('branchId') branchId?: string) {
+    return this.portalService.getFeedback(branchId);
+  }
+
+  @Get('seats/by-batch')
+  @ApiOperation({ summary: 'Get dynamic available seats filtered by batch and timing' })
+  getSeatsByBatch(
+    @Query('batch') batch?: string,
+    @Query('timing') timing?: string,
+    @Query('branchId') branchId?: string,
+  ) {
+    return this.portalService.getSeatsByBatch(batch, timing, branchId);
   }
 
   @Post('upload')

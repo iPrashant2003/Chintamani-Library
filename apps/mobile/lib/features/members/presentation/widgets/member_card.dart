@@ -9,6 +9,7 @@ import '../../data/member_repository.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../widgets/whatsapp_logo.dart';
 import '../../../../core/utils/member_image_helper.dart';
+import 'member_history_dialog.dart';
 
 class MemberCard extends ConsumerStatefulWidget {
   final Member member;
@@ -682,6 +683,10 @@ class _MemberCardState extends ConsumerState<MemberCard> {
     );
   }
 
+  void _showSixMonthHistoryDialog() {
+    MemberSixMonthHistoryDialog.show(context, widget.member);
+  }
+
   void _showSnack(String msg) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -1077,6 +1082,46 @@ class _MemberCardState extends ConsumerState<MemberCard> {
 
                 const Divider(color: Color(0x1AFFFFFF), height: 1),
 
+                // ── PROMINENT 6 MONTHS HISTORY BUTTON ──
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 2),
+                  child: InkWell(
+                    onTap: _showSixMonthHistoryDialog,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0xFFD4AF37).withOpacity(0.22),
+                            const Color(0xFFB89223).withOpacity(0.08),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.45)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.history_toggle_off_rounded, color: Color(0xFFE6CA65), size: 16),
+                          SizedBox(width: 8),
+                          Text(
+                            '6 Months History',
+                            style: TextStyle(
+                              color: Color(0xFFF3E5AB),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                          SizedBox(width: 6),
+                          Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFE6CA65), size: 11),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
                 // ── ZONE 3: Dedicated Action Buttons Row (Completely decoupled from parent tap) ──
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1086,6 +1131,12 @@ class _MemberCardState extends ConsumerState<MemberCard> {
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: Row(
                       children: [
+                        _buildActionChip(
+                          icon: Icons.history_rounded,
+                          label: '6M History',
+                          color: const Color(0xFFD4AF37),
+                          onTap: _showSixMonthHistoryDialog,
+                        ),
                         _buildActionChip(
                           icon: Icons.chat_rounded,
                           label: 'WhatsApp',

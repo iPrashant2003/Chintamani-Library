@@ -39,4 +39,10 @@ class RouteNames {
   static const String databaseBackup = '/database-backup';
   static const String maintenance = '/maintenance';
   static const String whatsapp = '/whatsapp';
+  static const String registrations = '/registrations';
+  static const String registrationDetail = '/registrations/:id';
+  static const String complaints = '/complaints';
+  static const String complaintDetail = '/complaints/:id';
+  static const String paymentVerifications = '/payments/verifications';
+  static const String universalQr = '/universal-qr';
 }

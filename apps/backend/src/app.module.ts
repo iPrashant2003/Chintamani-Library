@@ -23,6 +23,9 @@ import { UploadModule } from './upload/upload.module';
 import { AuditModule } from './audit/audit.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { QrModule } from './qr/qr.module';
+import { PortalModule } from './portal/portal.module';
+import { RegistrationsModule } from './registrations/registrations.module';
+import { ComplaintsModule } from './complaints/complaints.module';
 
 @Module({
   imports: [
@@ -50,6 +53,9 @@ import { QrModule } from './qr/qr.module';
     UploadModule,
     AuditModule,
     QrModule,
+    PortalModule,
+    RegistrationsModule,
+    ComplaintsModule,
   ],
 })
 export class AppModule {}

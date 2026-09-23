@@ -55,4 +55,70 @@ export class QrService {
       throw new BadRequestException('Invalid QR token');
     }
   }
+
+  // ── UNIVERSAL PORTAL QR ───────────────────────────────────────────────────
+
+  async getUniversalPortalQr(branchId?: string, hostOrigin?: string) {
+    let branch = branchId
+      ? await this.prisma.branch.findUnique({ where: { id: branchId }, include: { tenant: true } })
+      : await this.prisma.branch.findFirst({ include: { tenant: true } });
+
+    if (!branch) {
+      const tenant = await this.prisma.tenant.findFirst({ include: { branches: true } });
+      branch = tenant?.branches[0] ? { ...tenant.branches[0], tenant } : null;
+    }
+
+    const base = hostOrigin || process.env.BASE_URL || 'https://chintamani-library.in';
+    const portalUrl = `${base}/portal/index.html?branch=${branch?.id || 'default'}`;
+
+    // Import qrcode
+    const QRCode = require('qrcode');
+    const qrDataUrl = await QRCode.toDataURL(portalUrl, {
+      width: 512,
+      margin: 2,
+      color: { dark: '#000000', light: '#ffffff' },
+      errorCorrectionLevel: 'H',
+    });
+
+    // Save PNG file to public/qr
+    const fs = require('fs');
+    const path = require('path');
+    const qrDir = path.join(process.cwd(), 'public', 'qr');
+    if (!fs.existsSync(qrDir)) {
+      fs.mkdirSync(qrDir, { recursive: true });
+    }
+    const filePath = path.join(qrDir, 'universal-portal-qr.png');
+    await QRCode.toFile(filePath, portalUrl, {
+      width: 600,
+      margin: 2,
+      color: { dark: '#000000', light: '#ffffff' },
+      errorCorrectionLevel: 'H',
+    });
+
+    // Save or update permanent QrCode record in DB
+    const token = `PORTAL_${branch?.id || 'GLOBAL'}`;
+    const farFuture = new Date();
+    farFuture.setFullYear(farFuture.getFullYear() + 20); // 20 years
+
+    await this.prisma.qrCode.upsert({
+      where: { token },
+      update: { url: portalUrl, expiresAt: farFuture },
+      create: {
+        tenantId: branch?.tenantId,
+        entityType: 'LIBRARY_PORTAL',
+        entityId: branch?.id || 'ALL',
+        token,
+        url: portalUrl,
+        expiresAt: farFuture,
+      },
+    });
+
+    return {
+      portalUrl,
+      qrDataUrl,
+      qrImageUrl: '/qr/universal-portal-qr.png',
+      branchName: branch?.name || 'Chintamani Library',
+      tenantName: branch?.tenant?.name || 'Chintamani Library',
+    };
+  }
 }

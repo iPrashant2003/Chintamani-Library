@@ -164,6 +164,18 @@ class AppDrawer extends ConsumerWidget {
                   _buildSectionHeader('QUICK UTILITIES', const Color(0xFF06B6D4)),
                   _buildDrawerItem(
                     context,
+                    title: 'Universal Portal QR',
+                    subtitle: 'Permanent library QR for registration & pay',
+                    icon: Icons.qr_code_2_rounded,
+                    accentColor: const Color(0xFFD4AF37),
+                    badge: 'PORTAL QR',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push(RouteNames.universalQr);
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
                     title: 'Quick QR Scanner',
                     subtitle: 'Scan member ID & check-in pass',
                     icon: Icons.qr_code_scanner_rounded,

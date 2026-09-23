@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, Param, Query, UseGuards } from '@nestjs/common';
 import { SeatsService } from './seats.service';
 import { CreateSeatDto } from './dto/create-seat.dto';
 import { AssignSeatDto } from './dto/assign-seat.dto';
 import { UpdateSeatStatusDto } from './dto/update-seat-status.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('seats')
@@ -23,9 +24,39 @@ export class SeatsController {
     return this.seatsService.findAll(branchId, floor, status);
   }
 
+  @Get('summary')
+  getSummary(@Query('branchId') branchId?: string) {
+    return this.seatsService.getSummary(branchId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.seatsService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() body: { seatNumber?: string; floor?: string; notes?: string }) {
+    return this.seatsService.update(id, body);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.seatsService.remove(id);
+  }
+
+  @Patch(':id/block')
+  block(@Param('id') id: string, @Body('notes') notes?: string, @CurrentUser() user?: any) {
+    return this.seatsService.block(id, notes, user);
+  }
+
+  @Patch(':id/unblock')
+  unblock(@Param('id') id: string, @CurrentUser() user?: any) {
+    return this.seatsService.unblock(id, user);
+  }
+
+  @Post(':id/reassign')
+  reassign(@Param('id') id: string, @Body('newSeatId') newSeatId: string, @CurrentUser() user?: any) {
+    return this.seatsService.reassign(id, newSeatId, user);
   }
 
   @Patch(':id/status')

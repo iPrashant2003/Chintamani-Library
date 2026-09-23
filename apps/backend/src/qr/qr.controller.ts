@@ -1,4 +1,5 @@
-import { Controller, Post, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, HttpCode, HttpStatus, Query, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { QrService } from './qr.service';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -20,6 +21,15 @@ class ValidateQrDto {
 @Controller('qr')
 export class QrController {
   constructor(private readonly qrService: QrService) {}
+
+  @Get('portal')
+  @ApiOperation({ summary: 'Get permanent Universal Library QR code for Member Portal' })
+  getPortalQr(@Query('branchId') branchId: string | undefined, @Req() req: Request) {
+    const protocol = req.protocol || 'http';
+    const host = req.get('host') || 'localhost:3000';
+    const origin = `${protocol}://${host}`;
+    return this.qrService.getUniversalPortalQr(branchId, origin);
+  }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)

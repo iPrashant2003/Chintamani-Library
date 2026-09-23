@@ -32,6 +32,38 @@ export class PaymentsController {
     return this.paymentsService.getSummary(branchId, dateFrom, dateTo);
   }
 
+  // ── PAYMENT VERIFICATION (ADMIN) ──────────────────────────────────────────
+
+  @Get('verifications')
+  getVerifications(
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.paymentsService.getVerifications({ status, search, page, limit });
+  }
+
+  @Get('verifications/pending-count')
+  getPendingVerificationCount() {
+    return this.paymentsService.getPendingVerificationCount();
+  }
+
+  @Get('verifications/:id')
+  getVerification(@Param('id') id: string) {
+    return this.paymentsService.getVerification(id);
+  }
+
+  @Patch('verifications/:id/approve')
+  approveVerification(@Param('id') id: string) {
+    return this.paymentsService.approveVerification(id);
+  }
+
+  @Patch('verifications/:id/reject')
+  rejectVerification(@Param('id') id: string, @Body('reason') reason?: string) {
+    return this.paymentsService.rejectVerification(id, reason);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.paymentsService.findOne(id);

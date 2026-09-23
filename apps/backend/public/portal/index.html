@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Chintamani Library — Member Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Cinzel"', 'serif'],
+          },
+          colors: {
+            gold: {
+              300: '#F3E5AB',
+              400: '#E6CA65',
+              500: '#D4AF37',
+              600: '#B89223',
+              700: '#8C6C10',
+            },
+            dark: {
+              bg: '#0A0E14',
+              surface: '#111822',
+              card: '#16202E',
+              border: 'rgba(212, 175, 55, 0.18)',
+              borderSubtle: 'rgba(255, 255, 255, 0.08)',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0A0E14;
+      color: #E2E8F0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+    .gold-gradient {
+      background: linear-gradient(135deg, #ECC94B 0%, #D4AF37 50%, #975A16 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .gold-btn {
+      background: linear-gradient(135deg, #D4AF37 0%, #B89223 100%);
+      color: #0A0E14;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(212, 175, 55, 0.25);
+      transition: all 0.2s ease;
+    }
+    .gold-btn:active {
+      transform: scale(0.98);
+      filter: brightness(0.92);
+    }
+    .portal-card {
+      background: linear-gradient(145deg, #131A24 0%, #0E141D 100%);
+      border: 1px solid rgba(212, 175, 55, 0.18);
+      border-radius: 18px;
+      transition: all 0.2s ease;
+    }
+    .portal-card:active {
+      transform: scale(0.985);
+      border-color: rgba(212, 175, 55, 0.4);
+    }
+    .glass-input {
+      background: rgba(14, 20, 29, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #F8FAFC;
+      border-radius: 12px;
+      padding: 12px 14px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .glass-input:focus {
+      border-color: #D4AF37;
+      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+    }
+    .step-pill {
+      height: 4px;
+      border-radius: 2px;
+      flex: 1;
+      transition: all 0.3s ease;
+    }
+    .timeline-line::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 24px;
+      bottom: 0;
+      width: 2px;
+      background: rgba(212, 175, 55, 0.2);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-40 bg-[#0A0E14]/90 backdrop-blur-md border-b border-gold-500/20 px-4 py-3">
+    <div class="max-w-md mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="showView('landing')">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-gold-600 to-gold-400 p-[1px] shadow-lg flex items-center justify-center">
+          <div class="w-full h-full bg-dark-bg rounded-xl flex items-center justify-center text-gold-400">
+            <i data-lucide="book-open" class="w-5 h-5"></i>
+          </div>
+        </div>
+        <div>
+          <h1 class="text-sm font-extrabold tracking-tight text-white leading-tight font-serif">CHINTAMANI</h1>
+          <p class="text-[10px] font-semibold text-gold-400 tracking-wider uppercase" id="hdr-branch-name">Library Portal</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <button id="nav-btn-status" onclick="showView('status')" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-gray-300 bg-white/5 border border-white/10 flex items-center space-x-1 hover:bg-white/10">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-gold-400"></i>
+          <span>Track</span>
+        </button>
+        <button id="nav-btn-auth" onclick="toggleAuthView()" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-dark-bg bg-gold-500 flex items-center space-x-1">
+          <i data-lucide="user" class="w-3.5 h-3.5"></i>
+          <span id="nav-auth-text">Login</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-md w-full mx-auto px-4 py-4">
+
+    <!-- ================================================================= -->
+    <!-- 1. LANDING VIEW                                                   -->
+    <!-- ================================================================= -->
+    <section id="view-landing" class="space-y-4">
+      <!-- Luxury Hero Banner -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1A2332] to-[#0E1520] p-5 border border-gold-500/30 shadow-xl">
+        <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-gold-500/10 rounded-full blur-2xl"></div>
+        <div class="relative z-10 space-y-1.5">
+          <div class="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-gold-500/15 border border-gold-500/30 text-[10px] font-bold text-gold-400 uppercase tracking-widest">
+            <span class="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse"></span>
+            <span>Universal QR Portal</span>
+          </div>
+          <h2 class="text-xl font-bold text-white tracking-tight">MEMBER PORTAL</h2>
+          <p class="text-xs text-gray-300 max-w-[280px]">Instant access to registration, fee payments, seat status, and support.</p>
+
+          <!-- Live quick stats chips -->
+          <div class="pt-2 flex items-center space-x-2 text-[11px]">
+            <div class="px-2.5 py-1 rounded-lg bg-black/40 border border-emerald-500/30 text-emerald-400 flex items-center space-x-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>Available Seats: <strong id="quick-seats-avail">--</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Cards Grid (7 Actions from user requirements) -->
+      <div class="grid grid-cols-2 gap-3 pt-1">
+        
+        <!-- 1. New Member Registration -->
+        <div onclick="showView('register')" class="col-span-2 portal-card p-4 flex items-center justify-between cursor-pointer group hover:border-gold-500/50">
+          <div class="flex items-center space-x-3.5">
+            <div class="w-11 h-11 rounded-xl bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-gold-400 group-hover:bg-gold-500 group-hover:text-dark-bg transition">
+              <i data-lucide="user-plus" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-extrabold text-white">New Member Registration</h3>
+              <p class="text-[11px] text-gray-400">Join library in 3 easy steps</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 group-hover:text-gold-400 group-hover:translate-x-0.5 transition"></i>
+        </div>
+
+        <!-- 2. Membership / Maintenance Payment -->
+        <div onclick="showView('payment')" class="portal-card p-3.5 cursor-pointer group hover:border-gold-500/50 flex flex-col justify-between">
+          <div class="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-2">
+            <i data-lucide="credit-card" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-white">Membership Payment</h4>
+            <p class="text-[10px] text-gray-400 mt-0.5">UPI Pay & Verification</p>
+          </div>
+        </div>
+
+        <!-- 3. Payment History -->
+        <div onclick="checkAuthAndGo('history')" class="portal-card p-3.5 cursor-pointer group hover:border-gold-500/50 flex flex-col justify-between">
+          <div class="w-9 h-9 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-2">
+            <i data-lucide="receipt" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-white">Payment History</h4>
+            <p class="text-[10px] text-gray-400 mt-0.5">Verified receipts & logs</p>
+          </div>
+        </div>
+
+        <!-- 4. Seat / Plan Information -->
+        <div onclick="showView('seats')" class="portal-card p-3.5 cursor-pointer group hover:border-gold-500/50 flex flex-col justify-between">
+          <div class="w-9 h-9 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-2">
+            <i data-lucide="armchair" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-white">Seat & Plan Info</h4>
+            <p class="text-[10px] text-gray-400 mt-0.5">24h, 12h, 6h & Live count</p>
+          </div>
+        </div>
+
+        <!-- 5. Submit Complaint -->
+        <div onclick="showView('complaint')" class="portal-card p-3.5 cursor-pointer group hover:border-gold-500/50 flex flex-col justify-between">
+          <div class="w-9 h-9 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-2">
+            <i data-lucide="wrench" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-white">Submit Complaint</h4>
+            <p class="text-[10px] text-gray-400 mt-0.5">AC, electricity, cleaner</p>
+          </div>
+        </div>
+
+        <!-- 6. My Profile / Dashboard -->
+        <div onclick="checkAuthAndGo('dashboard')" class="portal-card p-3.5 cursor-pointer group hover:border-gold-500/50 flex flex-col justify-between">
+          <div class="w-9 h-9 rounded-lg bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-gold-400 mb-2">
+            <i data-lucide="user-check" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-white">My Profile</h4>
+            <p class="text-[10px] text-gray-400 mt-0.5">Active seat & renewal</p>
+          </div>
+        </div>
+
+        <!-- 7. Application & Payment Status -->
+        <div onclick="showView('status')" class="portal-card p-3.5 cursor-pointer group hover:border-gold-500/50 flex flex-col justify-between">
+          <div class="w-9 h-9 rounded-lg bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-400 mb-2">
+            <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-white">Check Status</h4>
+            <p class="text-[10px] text-gray-400 mt-0.5">Track REG- / Payment</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Reception Contact Footer -->
+      <div class="portal-card p-4 text-xs text-gray-300 space-y-2 border-white/5 bg-white/[0.02]">
+        <div class="flex items-center justify-between text-gray-400">
+          <span class="flex items-center space-x-1.5">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gold-400"></i>
+            <span id="ftr-address">Main Road, Khalilabad, Sant Kabir Nagar</span>
+          </span>
+        </div>
+        <div class="flex items-center justify-between pt-1 border-t border-white/5">
+          <span class="flex items-center space-x-1.5 text-gray-400">
+            <i data-lucide="phone" class="w-3.5 h-3.5 text-gold-400"></i>
+            <span id="ftr-phone">9876543210</span>
+          </span>
+          <span class="text-gold-400 font-semibold">Support Desk</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 2. REGISTRATION VIEW (3-STEP WIZARD)                              -->
+    <!-- ================================================================= -->
+    <section id="view-register" class="hidden space-y-4">
+      <!-- Breadcrumb -->
+      <div class="flex items-center justify-between">
+        <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Back to Home</span>
+        </button>
+        <span class="text-xs font-bold text-gold-400" id="reg-step-indicator">Step 1 of 3</span>
+      </div>
+
+      <!-- Step Progress Bar -->
+      <div class="flex items-center space-x-2">
+        <div id="prog-step-1" class="step-pill bg-gold-500"></div>
+        <div id="prog-step-2" class="step-pill bg-white/10"></div>
+        <div id="prog-step-3" class="step-pill bg-white/10"></div>
+      </div>
+
+      <!-- STEP 1: Personal Details -->
+      <div id="reg-content-step-1" class="portal-card p-5 space-y-3.5">
+        <div class="border-b border-white/10 pb-2.5">
+          <h3 class="text-base font-bold text-white">Step 1 — Personal Details</h3>
+          <p class="text-xs text-gray-400">Enter your basic identification details</p>
+        </div>
+
+        <div>
+          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Full Name *</label>
+          <input id="reg-name" type="text" placeholder="e.g. Rahul Sharma" class="glass-input text-sm">
+        </div>
+
+        <div>
+          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Mobile Number *</label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-3 text-sm text-gray-400 font-semibold">+91</span>
+            <input id="reg-phone" type="tel" maxlength="10" placeholder="9876543210" class="glass-input text-sm pl-12">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Date of Birth</label>
+            <input id="reg-dob" type="date" class="glass-input text-sm">
+          </div>
+          <div>
+            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Gender</label>
+            <select id="reg-gender" class="glass-input text-sm">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Email Address</label>
+          <input id="reg-email" type="email" placeholder="rahul@example.com" class="glass-input text-sm">
+        </div>
+
+        <div>
+          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Address</label>
+          <textarea id="reg-address" rows="2" placeholder="Local address or village/city" class="glass-input text-sm resize-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Aadhaar No.</label>
+            <input id="reg-aadhaar" type="text" maxlength="14" placeholder="12-digit Aadhaar" class="glass-input text-sm">
+          </div>
+          <div>
+            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Emergency Contact</label>
+            <input id="reg-emergency" type="tel" maxlength="10" placeholder="Parent / Guardian" class="glass-input text-sm">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Course / Prep</label>
+            <input id="reg-course" type="text" placeholder="UPSC, SSC, NEET..." class="glass-input text-sm">
+          </div>
+          <div>
+            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Batch / Shift</label>
+            <input id="reg-batch" type="text" placeholder="Morning / Evening" class="glass-input text-sm">
+          </div>
+        </div>
+
+        <button onclick="goToRegStep(2)" class="w-full py-3 rounded-xl gold-btn text-sm flex items-center justify-center space-x-2 mt-2">
+          <span>Continue to Documents</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- STEP 2: Documents Upload -->
+      <div id="reg-content-step-2" class="hidden portal-card p-5 space-y-4">
+        <div class="border-b border-white/10 pb-2.5">
+          <h3 class="text-base font-bold text-white">Step 2 — Document Upload</h3>
+          <p class="text-xs text-gray-400">Capture a selfie and upload Aadhaar for quick verification</p>
+        </div>
+
+        <!-- Live Camera Selfie -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-gold-400 flex items-center space-x-1.5">
+            <i data-lucide="camera" class="w-4 h-4"></i>
+            <span>Live Selfie / Profile Photo *</span>
+          </label>
+          <div class="p-3.5 rounded-xl bg-black/40 border border-dashed border-gold-500/40 text-center relative cursor-pointer hover:bg-black/60 transition" onclick="document.getElementById('file-selfie').click()">
+            <input type="file" id="file-selfie" accept="image/*" capture="user" class="hidden" onchange="handleFileUpload(this, 'preview-selfie', 'url-selfie')">
+            <div id="preview-selfie" class="flex flex-col items-center justify-center py-2 text-gray-400">
+              <i data-lucide="camera" class="w-8 h-8 text-gold-400 mb-1"></i>
+              <span class="text-xs font-semibold text-white">Tap to Capture Camera Selfie</span>
+              <span class="text-[10px] text-gray-400 mt-0.5">Use your phone's front camera</span>
+            </div>
+            <input type="hidden" id="url-selfie">
+          </div>
+        </div>
+
+        <!-- Aadhaar Front -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-gray-300 flex items-center space-x-1.5">
+            <i data-lucide="id-card" class="w-4 h-4 text-gray-400"></i>
+            <span>Aadhaar Card — Front Side</span>
+          </label>
+          <div class="p-3 rounded-xl bg-black/40 border border-dashed border-white/15 text-center relative cursor-pointer hover:bg-black/60 transition" onclick="document.getElementById('file-aadhaar-front').click()">
+            <input type="file" id="file-aadhaar-front" accept="image/*" class="hidden" onchange="handleFileUpload(this, 'preview-aadhaar-front', 'url-aadhaar-front')">
+            <div id="preview-aadhaar-front" class="flex items-center justify-center space-x-2 py-1 text-gray-400">
+              <i data-lucide="upload" class="w-4 h-4 text-gold-400"></i>
+              <span class="text-xs font-semibold text-white">Upload Front Photo</span>
+            </div>
+            <input type="hidden" id="url-aadhaar-front">
+          </div>
+        </div>
+
+        <!-- Aadhaar Back -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-gray-300 flex items-center space-x-1.5">
+            <i data-lucide="id-card" class="w-4 h-4 text-gray-400"></i>
+            <span>Aadhaar Card — Back Side</span>
+          </label>
+          <div class="p-3 rounded-xl bg-black/40 border border-dashed border-white/15 text-center relative cursor-pointer hover:bg-black/60 transition" onclick="document.getElementById('file-aadhaar-back').click()">
+            <input type="file" id="file-aadhaar-back" accept="image/*" class="hidden" onchange="handleFileUpload(this, 'preview-aadhaar-back', 'url-aadhaar-back')">
+            <div id="preview-aadhaar-back" class="flex items-center justify-center space-x-2 py-1 text-gray-400">
+              <i data-lucide="upload" class="w-4 h-4 text-gold-400"></i>
+              <span class="text-xs font-semibold text-white">Upload Back Photo</span>
+            </div>
+            <input type="hidden" id="url-aadhaar-back">
+          </div>
+        </div>
+
+        <div class="flex space-x-2 pt-2">
+          <button onclick="goToRegStep(1)" class="w-1/3 py-3 rounded-xl bg-white/10 text-xs font-bold text-gray-300">
+            Back
+          </button>
+          <button onclick="goToRegStep(3)" class="w-2/3 py-3 rounded-xl gold-btn text-sm font-bold flex items-center justify-center space-x-1">
+            <span>Select Membership Plan</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Plan Selection & Auto-Seat Booking -->
+      <div id="reg-content-step-3" class="hidden portal-card p-5 space-y-4">
+        <div class="border-b border-white/10 pb-2.5">
+          <h3 class="text-base font-bold text-white">Step 3 — Select Membership Plan</h3>
+          <p class="text-xs text-gray-400">Choose your duration and seat allocation type</p>
+        </div>
+
+        <!-- Available seats callout -->
+        <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-xs">
+          <span class="text-emerald-300 font-medium">Currently Available Seats:</span>
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold text-sm" id="reg-avail-seats-count">08</span>
+        </div>
+
+        <!-- Dynamic Plans Container -->
+        <div id="reg-plans-list" class="space-y-2.5">
+          <!-- Populated dynamically via JS -->
+          <div class="text-center py-4 text-gray-400 text-xs">Loading available plans...</div>
+        </div>
+
+        <!-- Plan Seat Notice Box -->
+        <div id="reg-seat-notice" class="p-3 rounded-xl bg-gold-500/10 border border-gold-500/30 text-xs text-gold-300 space-y-1 hidden">
+          <div class="font-bold flex items-center space-x-1">
+            <i data-lucide="shield-check" class="w-4 h-4 text-gold-400"></i>
+            <span>24-Hour Plan Guarantee</span>
+          </div>
+          <p class="text-[11px] text-gray-300">An available seat will be <strong>automatically reserved</strong> for you upon application submission.</p>
+        </div>
+
+        <div class="flex space-x-2 pt-2">
+          <button onclick="goToRegStep(2)" class="w-1/3 py-3 rounded-xl bg-white/10 text-xs font-bold text-gray-300">
+            Back
+          </button>
+          <button id="btn-submit-registration" onclick="submitRegistration()" class="w-2/3 py-3 rounded-xl gold-btn text-sm font-bold flex items-center justify-center space-x-1.5">
+            <span>Submit Registration</span>
+            <i data-lucide="check" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Success Screen -->
+      <div id="reg-content-success" class="hidden portal-card p-6 text-center space-y-4">
+        <div class="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center mx-auto text-emerald-400">
+          <i data-lucide="check-circle" class="w-9 h-9"></i>
+        </div>
+
+        <div class="space-y-1">
+          <span class="px-3 py-1 rounded-full bg-gold-500/20 border border-gold-500/40 text-gold-400 text-xs font-bold uppercase tracking-wider">
+            Pending Admin Approval
+          </span>
+          <h3 class="text-lg font-extrabold text-white pt-2">REGISTRATION SUBMITTED</h3>
+          <p class="text-xs text-gray-300">Your application has been received and is queued for verification.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-black/40 border border-white/10 text-left space-y-2 text-xs">
+          <div class="flex justify-between">
+            <span class="text-gray-400">Application ID:</span>
+            <strong class="text-gold-400 font-mono text-sm" id="succ-app-id">REG-000123</strong>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">Selected Plan:</span>
+            <span class="text-white font-semibold" id="succ-plan-name">24 Hours Plan</span>
+          </div>
+          <div class="flex justify-between" id="succ-seat-row">
+            <span class="text-gray-400">Seat Reservation:</span>
+            <span class="text-emerald-400 font-bold" id="succ-seat-no">Seat A-12 (Reserved)</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">Applicant:</span>
+            <span class="text-white font-medium" id="succ-applicant-name">Rahul Sharma</span>
+          </div>
+        </div>
+
+        <div class="space-y-2 pt-2">
+          <button onclick="copyApplicationId()" class="w-full py-2.5 rounded-xl bg-white/10 border border-white/15 text-xs font-bold text-gray-300 flex items-center justify-center space-x-1.5 hover:bg-white/20">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>Copy Application ID</span>
+          </button>
+          <button onclick="goToPaymentFromReg()" class="w-full py-3 rounded-xl gold-btn text-xs font-bold flex items-center justify-center space-x-1.5">
+            <span>Proceed to Payment</span>
+            <i data-lucide="credit-card" class="w-4 h-4"></i>
+          </button>
+          <button onclick="showView('landing')" class="w-full py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white">
+            Return to Portal Home
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 3. PAYMENT VIEW                                                   -->
+    <!-- ================================================================= -->
+    <section id="view-payment" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Back</span>
+        </button>
+        <span class="text-xs font-bold text-emerald-400">UPI Instant Payment</span>
+      </div>
+
+      <div class="portal-card p-5 space-y-4">
+        <div class="border-b border-white/10 pb-2.5">
+          <h3 class="text-base font-bold text-white">Membership / Fee Payment</h3>
+          <p class="text-xs text-gray-400">Pay via UPI and submit proof for admin verification</p>
+        </div>
+
+        <div>
+          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Your Mobile Number *</label>
+          <input id="pay-phone" type="tel" maxlength="10" placeholder="10-digit registered number" class="glass-input text-sm">
+        </div>
+
+        <div>
+          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Your Full Name</label>
+          <input id="pay-name" type="text" placeholder="Rahul Sharma" class="glass-input text-sm">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Payment Type *</label>
+            <select id="pay-type" class="glass-input text-sm">
+              <option value="MEMBERSHIP">Membership Fee</option>
+              <option value="MAINTENANCE">Maintenance</option>
+              <option value="RENEWAL">Plan Renewal</option>
+              <option value="LOCKER">Locker Fee</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Amount (₹) *</label>
+            <input id="pay-amount" type="number" value="1200" placeholder="₹ Amount" class="glass-input text-sm font-bold text-gold-400">
+          </div>
+        </div>
+
+        <!-- UPI Deep Link Button -->
+        <div class="pt-1">
+          <button onclick="openUpiApp()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-extrabold text-sm flex items-center justify-center space-x-2 shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition">
+            <i data-lucide="smartphone" class="w-4 h-4"></i>
+            <span id="btn-upi-text">PAY NOW (₹1,200 via UPI)</span>
+          </button>
+          <p class="text-[10px] text-gray-400 text-center mt-1.5">Opens GPay, PhonePe, Paytm, or BHIM directly</p>
+        </div>
+
+        <!-- Screenshot Upload -->
+        <div class="space-y-1.5 pt-2 border-t border-white/10">
+          <label class="text-xs font-bold text-gold-400 flex items-center space-x-1.5">
+            <i data-lucide="image" class="w-4 h-4"></i>
+            <span>Upload Payment Screenshot *</span>
+          </label>
+          <div class="p-3.5 rounded-xl bg-black/40 border border-dashed border-gold-500/40 text-center relative cursor-pointer hover:bg-black/60 transition" onclick="document.getElementById('file-pay-screenshot').click()">
+            <input type="file" id="file-pay-screenshot" accept="image/*" class="hidden" onchange="handleFileUpload(this, 'preview-pay-screenshot', 'url-pay-screenshot')">
+            <div id="preview-pay-screenshot" class="flex flex-col items-center justify-center py-1 text-gray-400">
+              <i data-lucide="upload-cloud" class="w-6 h-6 text-gold-400 mb-1"></i>
+              <span class="text-xs font-semibold text-white">Tap to Upload Screenshot</span>
+              <span class="text-[10px] text-gray-400">Capture from UPI success screen</span>
+            </div>
+            <input type="hidden" id="url-pay-screenshot">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">UTR / Transaction Reference ID</label>
+          <input id="pay-utr" type="text" placeholder="12-digit UTR or Txn ID" class="glass-input text-sm font-mono">
+        </div>
+
+        <button onclick="submitPaymentProof()" class="w-full py-3 rounded-xl gold-btn text-sm font-bold flex items-center justify-center space-x-1.5">
+          <span>Submit for Verification</span>
+          <i data-lucide="send" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Payment Confirmation Modal / Note -->
+      <div id="pay-success-box" class="hidden portal-card p-5 text-center space-y-3 border-emerald-500/40 bg-emerald-500/5">
+        <i data-lucide="check-circle" class="w-8 h-8 text-emerald-400 mx-auto"></i>
+        <div>
+          <h4 class="text-sm font-extrabold text-white">Payment Proof Submitted</h4>
+          <p class="text-xs text-gray-300 mt-0.5">Status: <strong class="text-amber-400">WAITING FOR ADMIN VERIFICATION</strong></p>
+        </div>
+        <p class="text-[11px] text-gray-400">Our team will verify the transaction screenshot and update your account.</p>
+        <button onclick="showView('landing')" class="w-full py-2.5 rounded-lg bg-white/10 text-xs font-bold text-gray-200">
+          Back to Home
+        </button>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 4. SUBMIT COMPLAINT VIEW                                          -->
+    <!-- ================================================================= -->
+    <section id="view-complaint" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Back</span>
+        </button>
+        <span class="text-xs font-bold text-purple-400">Support & Feedback</span>
+      </div>
+
+      <div class="portal-card p-5 space-y-3.5">
+        <div class="border-b border-white/10 pb-2.5">
+          <h3 class="text-base font-bold text-white">Submit a Complaint / Issue</h3>
+          <p class="text-xs text-gray-400">Report any facility issue for rapid resolution</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Your Name *</label>
+            <input id="cmp-name" type="text" placeholder="Rahul Sharma" class="glass-input text-sm">
+          </div>
+          <div>
+            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Mobile No. *</label>
+            <input id="cmp-phone" type="tel" maxlength="10" placeholder="9876543210" class="glass-input text-sm">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1.5">Category *</label>
+          <div class="grid grid-cols-3 gap-2" id="cmp-category-group">
+            <button type="button" onclick="selectComplaintCat(this, 'AC')" class="cmp-cat-btn py-2 px-1 text-center rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300 hover:border-purple-400">AC Cooling</button>
+            <button type="button" onclick="selectComplaintCat(this, 'ELECTRICITY')" class="cmp-cat-btn py-2 px-1 text-center rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300 hover:border-purple-400">Power / Socket</button>
+            <button type="button" onclick="selectComplaintCat(this, 'SEAT')" class="cmp-cat-btn py-2 px-1 text-center rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300 hover:border-purple-400">Seat / Chair</button>
+            <button type="button" onclick="selectComplaintCat(this, 'CLEANLINESS')" class="cmp-cat-btn py-2 px-1 text-center rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300 hover:border-purple-400">Cleaning</button>
+            <button type="button" onclick="selectComplaintCat(this, 'INTERNET')" class="cmp-cat-btn py-2 px-1 text-center rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300 hover:border-purple-400">Wi-Fi / Net</button>
+            <button type="button" onclick="selectComplaintCat(this, 'OTHER')" class="cmp-cat-btn py-2 px-1 text-center rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300 hover:border-purple-400">Other Issue</button>
+          </div>
+          <input type="hidden" id="cmp-category" value="AC">
+        </div>
+
+        <div>
+          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Issue Description *</label>
+          <textarea id="cmp-desc" rows="3" placeholder="Explain the problem in detail (seat number, location, etc.)..." class="glass-input text-sm resize-none"></textarea>
+        </div>
+
+        <!-- Optional Photo Attachment -->
+        <div>
+          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Attach Photo (Optional)</label>
+          <div class="p-3 rounded-xl bg-black/40 border border-dashed border-white/15 text-center relative cursor-pointer hover:bg-black/60 transition" onclick="document.getElementById('file-cmp-attachment').click()">
+            <input type="file" id="file-cmp-attachment" accept="image/*" class="hidden" onchange="handleFileUpload(this, 'preview-cmp-attachment', 'url-cmp-attachment')">
+            <div id="preview-cmp-attachment" class="flex items-center justify-center space-x-2 py-0.5 text-gray-400">
+              <i data-lucide="paperclip" class="w-4 h-4 text-purple-400"></i>
+              <span class="text-xs text-white">Tap to attach photo</span>
+            </div>
+            <input type="hidden" id="url-cmp-attachment">
+          </div>
+        </div>
+
+        <button onclick="submitComplaint()" class="w-full py-3 rounded-xl gold-btn text-sm font-bold flex items-center justify-center space-x-1.5 mt-2">
+          <span>Submit Complaint</span>
+          <i data-lucide="send" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Complaint Success Box -->
+      <div id="cmp-success-box" class="hidden portal-card p-5 text-center space-y-3 border-purple-500/40 bg-purple-500/5">
+        <i data-lucide="check-circle" class="w-8 h-8 text-purple-400 mx-auto"></i>
+        <div>
+          <h4 class="text-sm font-extrabold text-white">Complaint Registered</h4>
+          <p class="text-xs text-gray-300 mt-0.5">Complaint ID: <strong class="text-gold-400 font-mono" id="succ-cmp-id">CMP-0012</strong></p>
+        </div>
+        <p class="text-[11px] text-gray-400">Library maintenance has been notified and will resolve it promptly.</p>
+        <button onclick="showView('landing')" class="w-full py-2.5 rounded-lg bg-white/10 text-xs font-bold text-gray-200">
+          Back to Home
+        </button>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 5. SEATS & PLANS VIEW                                             -->
+    <!-- ================================================================= -->
+    <section id="view-seats" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Back</span>
+        </button>
+        <span class="text-xs font-bold text-amber-400">Live Seat Status</span>
+      </div>
+
+      <!-- Live Seat Count Meter -->
+      <div class="portal-card p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white">Seat Availability Status</h3>
+          <span class="text-[11px] text-gold-400 flex items-center space-x-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Live Sync</span>
+          </span>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2 text-center">
+          <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <span class="text-base font-extrabold text-emerald-400" id="stat-avail">--</span>
+            <p class="text-[10px] text-emerald-300 font-semibold mt-0.5">Available</p>
+          </div>
+          <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
+            <span class="text-base font-extrabold text-amber-400" id="stat-reserved">--</span>
+            <p class="text-[10px] text-amber-300 font-semibold mt-0.5">Reserved</p>
+          </div>
+          <div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20">
+            <span class="text-base font-extrabold text-rose-400" id="stat-occupied">--</span>
+            <p class="text-[10px] text-rose-300 font-semibold mt-0.5">Occupied</p>
+          </div>
+          <div class="p-2.5 rounded-xl bg-gray-500/10 border border-gray-500/20">
+            <span class="text-base font-extrabold text-gray-400" id="stat-blocked">--</span>
+            <p class="text-[10px] text-gray-300 font-semibold mt-0.5">Blocked</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plan Comparison Cards -->
+      <div class="space-y-3">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider px-1">Available Membership Plans</h3>
+        <div id="seats-plans-container" class="space-y-2.5">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <button onclick="showView('register')" class="w-full py-3.5 rounded-xl gold-btn text-sm font-bold flex items-center justify-center space-x-2">
+        <span>Register for a Seat Now</span>
+        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+      </button>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 6. TRACK STATUS VIEW                                              -->
+    <!-- ================================================================= -->
+    <section id="view-status" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Back</span>
+        </button>
+        <span class="text-xs font-bold text-teal-400">Application Tracker</span>
+      </div>
+
+      <div class="portal-card p-5 space-y-3.5">
+        <div>
+          <h3 class="text-base font-bold text-white">Track Application or Ticket</h3>
+          <p class="text-xs text-gray-400">Enter your Application ID (REG-...) or Complaint ID (CMP-...)</p>
+        </div>
+
+        <div class="flex space-x-2">
+          <input id="track-input" type="text" placeholder="e.g. REG-123456 or CMP-1234" class="glass-input text-sm font-mono uppercase">
+          <button onclick="performTracking()" class="px-4 py-2.5 rounded-xl gold-btn text-xs font-bold flex items-center space-x-1">
+            <i data-lucide="search" class="w-4 h-4"></i>
+            <span>Track</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Track Result Box -->
+      <div id="track-result-box" class="hidden portal-card p-5 space-y-3">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 7. OTP LOGIN VIEW                                                 -->
+    <!-- ================================================================= -->
+    <section id="view-login" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Back</span>
+        </button>
+        <span class="text-xs font-bold text-gold-400">Member Verification</span>
+      </div>
+
+      <div class="portal-card p-5 space-y-4">
+        <div class="text-center space-y-1">
+          <div class="w-12 h-12 rounded-xl bg-gold-500/15 border border-gold-500/30 text-gold-400 flex items-center justify-center mx-auto">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-base font-bold text-white pt-2">Member Mobile Login</h3>
+          <p class="text-xs text-gray-400">Enter your registered mobile number to receive OTP</p>
+        </div>
+
+        <!-- Phone Step -->
+        <div id="login-step-phone" class="space-y-3">
+          <div>
+            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Mobile Number</label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-3 text-sm text-gray-400 font-semibold">+91</span>
+              <input id="login-phone" type="tel" maxlength="10" placeholder="9876543210" class="glass-input text-sm pl-12">
+            </div>
+          </div>
+          <button onclick="requestOtp()" class="w-full py-3 rounded-xl gold-btn text-sm font-bold flex items-center justify-center space-x-1.5">
+            <span>Send OTP</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- OTP Step -->
+        <div id="login-step-otp" class="hidden space-y-3">
+          <div>
+            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Enter 6-Digit OTP</label>
+            <input id="login-otp" type="text" maxlength="6" placeholder="• • • • • •" class="glass-input text-lg font-mono text-center tracking-widest text-gold-400">
+            <p class="text-[10px] text-gray-400 text-center mt-1" id="login-otp-hint">Enter the OTP sent to your phone</p>
+          </div>
+          <button onclick="verifyOtp()" class="w-full py-3 rounded-xl gold-btn text-sm font-bold flex items-center justify-center space-x-1.5">
+            <span>Verify & Open Portal</span>
+            <i data-lucide="lock" class="w-4 h-4"></i>
+          </button>
+          <button onclick="document.getElementById('login-step-phone').classList.remove('hidden'); document.getElementById('login-step-otp').classList.add('hidden');" class="w-full text-xs text-gray-400 hover:text-white py-1">
+            Change phone number
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 8. MEMBER DASHBOARD VIEW (AFTER LOGIN)                            -->
+    <!-- ================================================================= -->
+    <section id="view-dashboard" class="hidden space-y-4">
+      <!-- Member Greeting & Status Card -->
+      <div class="portal-card p-5 space-y-3 relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-xs text-gray-400">WELCOME BACK</span>
+            <h2 class="text-lg font-extrabold text-white" id="dash-member-name">Rahul Sharma</h2>
+            <p class="text-xs text-gold-400 font-mono" id="dash-member-code">LIB-00125</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold uppercase tracking-wider" id="dash-member-status">
+            Active
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5 pt-2 border-t border-white/10 text-xs">
+          <div class="p-2.5 rounded-xl bg-black/40 border border-white/5">
+            <span class="text-[10px] text-gray-400 block">PLAN</span>
+            <strong class="text-sm text-white" id="dash-plan-name">24 Hours Plan</strong>
+          </div>
+          <div class="p-2.5 rounded-xl bg-black/40 border border-white/5">
+            <span class="text-[10px] text-gray-400 block">SEAT</span>
+            <strong class="text-sm text-gold-400" id="dash-seat-number">Seat A-23</strong>
+          </div>
+          <div class="p-2.5 rounded-xl bg-black/40 border border-white/5">
+            <span class="text-[10px] text-gray-400 block">EXPIRY DATE</span>
+            <span class="text-xs text-white font-semibold" id="dash-expiry-date">23 Mar 2027</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-black/40 border border-white/5">
+            <span class="text-[10px] text-gray-400 block">DAYS LEFT</span>
+            <span class="text-xs text-emerald-400 font-bold" id="dash-days-left">180 Days</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Grid -->
+      <div class="grid grid-cols-4 gap-2 text-center text-xs">
+        <button onclick="showView('payment')" class="p-3 rounded-xl portal-card hover:border-gold-500/40 flex flex-col items-center space-y-1">
+          <i data-lucide="credit-card" class="w-5 h-5 text-emerald-400"></i>
+          <span class="text-[11px] font-semibold text-white">Pay</span>
+        </button>
+        <button onclick="showView('history')" class="p-3 rounded-xl portal-card hover:border-gold-500/40 flex flex-col items-center space-y-1">
+          <i data-lucide="clock" class="w-5 h-5 text-blue-400"></i>
+          <span class="text-[11px] font-semibold text-white">History</span>
+        </button>
+        <button onclick="showView('complaint')" class="p-3 rounded-xl portal-card hover:border-gold-500/40 flex flex-col items-center space-y-1">
+          <i data-lucide="wrench" class="w-5 h-5 text-purple-400"></i>
+          <span class="text-[11px] font-semibold text-white">Complaint</span>
+        </button>
+        <button onclick="logoutPortal()" class="p-3 rounded-xl portal-card hover:border-gold-500/40 flex flex-col items-center space-y-1">
+          <i data-lucide="log-out" class="w-5 h-5 text-gray-400"></i>
+          <span class="text-[11px] font-semibold text-gray-300">Logout</span>
+        </button>
+      </div>
+
+      <!-- Member Profile Details (Aadhaar Masked) -->
+      <div class="portal-card p-4 space-y-2.5 text-xs">
+        <h4 class="text-xs font-bold text-gold-400 uppercase tracking-wider">Profile Information</h4>
+        <div class="space-y-1.5 text-gray-300">
+          <div class="flex justify-between py-1 border-b border-white/5">
+            <span class="text-gray-400">Phone:</span>
+            <span id="dash-profile-phone" class="font-mono text-white">9876543210</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-white/5">
+            <span class="text-gray-400">Aadhaar (Masked):</span>
+            <span id="dash-profile-aadhaar" class="font-mono text-gray-300">XXXX-XXXX-1234</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-white/5">
+            <span class="text-gray-400">Branch:</span>
+            <span id="dash-profile-branch" class="text-white">Main Branch</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 9. 6-MONTH MEMBER HISTORY TIMELINE                                -->
+    <!-- ================================================================= -->
+    <section id="view-history" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Back</span>
+        </button>
+        <span class="text-xs font-bold text-blue-400">6-Month Activity History</span>
+      </div>
+
+      <div class="portal-card p-4 space-y-3">
+        <div class="flex items-center justify-between border-b border-white/10 pb-2">
+          <div>
+            <h3 class="text-sm font-bold text-white">Activity Timeline</h3>
+            <p class="text-[10px] text-gray-400">Payments, seat allocations & complaints</p>
+          </div>
+          <button onclick="loadMemberHistory()" class="text-xs text-gold-400 flex items-center space-x-1">
+            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+            <span>Refresh</span>
+          </button>
+        </div>
+
+        <!-- Timeline Container -->
+        <div id="history-timeline-container" class="relative timeline-line space-y-4 pt-1">
+          <!-- Populated via JS -->
+          <div class="text-center py-6 text-xs text-gray-400">Loading your history...</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="text-center py-4 text-[11px] text-gray-500 border-t border-white/5">
+    <p>© 2026 Chintamani Library. Universal QR Member Portal.</p>
+  </footer>
+
+  <!-- ================================================================= -->
+  <!-- JAVASCRIPT LOGIC                                                  -->
+  <!-- ================================================================= -->
+  <script>
+    // State
+    const state = {
+      token: localStorage.getItem('portal_token') || '',
+      phone: localStorage.getItem('portal_phone') || '',
+      member: null,
+      libraryInfo: null,
+      plans: [],
+      seatStats: null,
+      currentStep: 1,
+      selectedPlanId: null,
+    };
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async () => {
+      lucide.createIcons();
+      await fetchInitialData();
+      checkSavedSession();
+    });
+
+    async function fetchInitialData() {
+      try {
+        const [infoRes, plansRes, statsRes] = await Promise.all([
+          fetch('/api/portal/info').then(r => r.json()),
+          fetch('/api/portal/plans').then(r => r.json()),
+          fetch('/api/portal/seats/stats').then(r => r.json())
+        ]);
+
+        state.libraryInfo = infoRes;
+        state.plans = plansRes;
+        state.seatStats = statsRes;
+
+        // Populate header & hero
+        if (infoRes) {
+          document.getElementById('hdr-branch-name').innerText = infoRes.branchName || 'Library Portal';
+          document.getElementById('ftr-address').innerText = infoRes.address || '';
+          document.getElementById('ftr-phone').innerText = infoRes.phone || '';
+        }
+
+        if (statsRes) {
+          document.getElementById('quick-seats-avail').innerText = statsRes.available ?? '--';
+          document.getElementById('reg-avail-seats-count').innerText = (statsRes.available < 10 ? '0' : '') + (statsRes.available ?? 0);
+          document.getElementById('stat-avail').innerText = statsRes.available ?? 0;
+          document.getElementById('stat-reserved').innerText = statsRes.reserved ?? 0;
+          document.getElementById('stat-occupied').innerText = statsRes.occupied ?? 0;
+          document.getElementById('stat-blocked').innerText = statsRes.blocked ?? 0;
+        }
+
+        renderPlans();
+      } catch (err) {
+        console.error('Failed to load initial portal data', err);
+      }
+    }
+
+    function renderPlans() {
+      const container = document.getElementById('reg-plans-list');
+      const seatsContainer = document.getElementById('seats-plans-container');
+      if (!state.plans || state.plans.length === 0) return;
+
+      let regHtml = '';
+      let infoHtml = '';
+
+      state.plans.forEach((p, idx) => {
+        const is24h = p.seatAllocation === 'AUTO';
+        const isSelected = state.selectedPlanId === p.id || (idx === 0 && !state.selectedPlanId);
+        if (isSelected) state.selectedPlanId = p.id;
+
+        regHtml += `
+          <div onclick="selectPlan('${p.id}', ${is24h})" id="plan-card-${p.id}" class="plan-card p-3.5 rounded-xl border ${isSelected ? 'border-gold-500 bg-gold-500/10' : 'border-white/10 bg-black/40'} cursor-pointer transition flex items-center justify-between">
+            <div class="space-y-0.5">
+              <div class="flex items-center space-x-2">
+                <span class="text-sm font-bold text-white">${p.name}</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${is24h ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/20 text-blue-400'}">
+                  ${is24h ? 'Auto Seat' : 'Admin Assigned'}
+                </span>
+              </div>
+              <p class="text-[11px] text-gray-400">${p.allocationLabel}</p>
+            </div>
+            <div class="text-right">
+              <span class="text-base font-extrabold text-gold-400">₹${p.price}</span>
+              <span class="text-[10px] text-gray-400 block">${p.durationDays} Days</span>
+            </div>
+          </div>
+        `;
+
+        infoHtml += `
+          <div class="p-3.5 rounded-xl portal-card flex items-center justify-between">
+            <div>
+              <h4 class="text-sm font-bold text-white">${p.name}</h4>
+              <p class="text-[11px] text-gray-400 mt-0.5">${p.allocationLabel}</p>
+            </div>
+            <div class="text-right">
+              <span class="text-sm font-bold text-gold-400">₹${p.price}</span>
+              <span class="text-[10px] text-gray-400 block">${p.durationDays} Days</span>
+            </div>
+          </div>
+        `;
+      });
+
+      if (container) container.innerHTML = regHtml;
+      if (seatsContainer) seatsContainer.innerHTML = infoHtml;
+      toggleSeatNotice(state.plans.find(p => p.id === state.selectedPlanId)?.seatAllocation === 'AUTO');
+    }
+
+    function selectPlan(planId, is24h) {
+      state.selectedPlanId = planId;
+      document.querySelectorAll('.plan-card').forEach(el => {
+        el.classList.remove('border-gold-500', 'bg-gold-500/10');
+        el.classList.add('border-white/10', 'bg-black/40');
+      });
+      const selected = document.getElementById(`plan-card-${planId}`);
+      if (selected) {
+        selected.classList.remove('border-white/10', 'bg-black/40');
+        selected.classList.add('border-gold-500', 'bg-gold-500/10');
+      }
+      toggleSeatNotice(is24h);
+    }
+
+    function toggleSeatNotice(show) {
+      const el = document.getElementById('reg-seat-notice');
+      if (el) {
+        if (show) el.classList.remove('hidden');
+        else el.classList.add('hidden');
+      }
+    }
+
+    // View Navigation
+    function showView(viewId) {
+      const views = ['landing', 'register', 'payment', 'complaint', 'seats', 'status', 'login', 'dashboard', 'history'];
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.add('hidden');
+      });
+      const target = document.getElementById(`view-${viewId}`);
+      if (target) {
+        target.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      lucide.createIcons();
+    }
+
+    function toggleAuthView() {
+      if (state.token && state.phone) {
+        showView('dashboard');
+      } else {
+        showView('login');
+      }
+    }
+
+    function checkAuthAndGo(viewId) {
+      if (state.token && state.phone) {
+        if (viewId === 'dashboard') loadMemberDashboard();
+        if (viewId === 'history') loadMemberHistory();
+        showView(viewId);
+      } else {
+        showView('login');
+      }
+    }
+
+    // Registration Flow
+    function goToRegStep(step) {
+      if (step === 2) {
+        const name = document.getElementById('reg-name').value.trim();
+        const phone = document.getElementById('reg-phone').value.trim();
+        if (!name || phone.length < 10) {
+          alert('Please enter your full name and valid 10-digit mobile number.');
+          return;
+        }
+      }
+
+      state.currentStep = step;
+      document.getElementById('reg-step-indicator').innerText = `Step ${step} of 3`;
+
+      document.getElementById('reg-content-step-1').classList.toggle('hidden', step !== 1);
+      document.getElementById('reg-content-step-2').classList.toggle('hidden', step !== 2);
+      document.getElementById('reg-content-step-3').classList.toggle('hidden', step !== 3);
+
+      document.getElementById('prog-step-1').className = `step-pill ${step >= 1 ? 'bg-gold-500' : 'bg-white/10'}`;
+      document.getElementById('prog-step-2').className = `step-pill ${step >= 2 ? 'bg-gold-500' : 'bg-white/10'}`;
+      document.getElementById('prog-step-3').className = `step-pill ${step >= 3 ? 'bg-gold-500' : 'bg-white/10'}`;
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      lucide.createIcons();
+    }
+
+    async function handleFileUpload(input, previewId, hiddenUrlId) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const previewEl = document.getElementById(previewId);
+
+      previewEl.innerHTML = `
+        <div class="flex items-center justify-center space-x-2 text-gold-400 py-1">
+          <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+          <span class="text-xs">Uploading ${file.name}...</span>
+        </div>
+      `;
+      lucide.createIcons();
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/api/portal/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.url) {
+          document.getElementById(hiddenUrlId).value = data.url;
+          previewEl.innerHTML = `
+            <div class="flex items-center justify-center space-x-2 text-emerald-400 py-1">
+              <i data-lucide="check-circle" class="w-4 h-4"></i>
+              <span class="text-xs font-bold">Uploaded: ${file.name}</span>
+            </div>
+          `;
+          lucide.createIcons();
+        }
+      } catch (err) {
+        previewEl.innerHTML = `<span class="text-xs text-red-400 font-semibold">Upload failed. Please retry.</span>`;
+      }
+    }
+
+    async function submitRegistration() {
+      const btn = document.getElementById('btn-submit-registration');
+      btn.disabled = true;
+      btn.innerHTML = `<span>Submitting...</span>`;
+
+      const payload = {
+        name: document.getElementById('reg-name').value.trim(),
+        phone: document.getElementById('reg-phone').value.trim(),
+        dob: document.getElementById('reg-dob').value || undefined,
+        gender: document.getElementById('reg-gender').value,
+        email: document.getElementById('reg-email').value.trim() || undefined,
+        address: document.getElementById('reg-address').value.trim() || undefined,
+        aadhaarNumber: document.getElementById('reg-aadhaar').value.trim() || undefined,
+        emergencyContact: document.getElementById('reg-emergency').value.trim() || undefined,
+        course: document.getElementById('reg-course').value.trim() || undefined,
+        batch: document.getElementById('reg-batch').value.trim() || undefined,
+        photoUrl: document.getElementById('url-selfie').value || undefined,
+        aadhaarFrontUrl: document.getElementById('url-aadhaar-front').value || undefined,
+        aadhaarBackUrl: document.getElementById('url-aadhaar-back').value || undefined,
+        planId: state.selectedPlanId,
+      };
+
+      try {
+        const res = await fetch('/api/portal/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.message || 'Registration failed. Please check your details.');
+          btn.disabled = false;
+          btn.innerHTML = `<span>Submit Registration</span>`;
+          return;
+        }
+
+        // Show Success
+        document.getElementById('reg-content-step-1').classList.add('hidden');
+        document.getElementById('reg-content-step-2').classList.add('hidden');
+        document.getElementById('reg-content-step-3').classList.add('hidden');
+        document.getElementById('reg-content-success').classList.remove('hidden');
+
+        document.getElementById('succ-app-id').innerText = data.applicationId;
+        document.getElementById('succ-plan-name').innerText = data.planName || 'Selected Plan';
+        document.getElementById('succ-applicant-name').innerText = payload.name;
+
+        if (data.reservedSeat) {
+          document.getElementById('succ-seat-row').classList.remove('hidden');
+          document.getElementById('succ-seat-no').innerText = `Seat ${data.reservedSeat.seatNumber} (Reserved)`;
+        } else {
+          document.getElementById('succ-seat-row').classList.add('hidden');
+        }
+
+        // Save application ID in local state
+        localStorage.setItem('portal_last_app_id', data.applicationId);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        alert('Network error. Please check your connection and try again.');
+        btn.disabled = false;
+        btn.innerHTML = `<span>Submit Registration</span>`;
+      }
+      lucide.createIcons();
+    }
+
+    function copyApplicationId() {
+      const appId = document.getElementById('succ-app-id').innerText;
+      navigator.clipboard.writeText(appId);
+      alert(`Copied Application ID: ${appId}`);
+    }
+
+    function goToPaymentFromReg() {
+      const phone = document.getElementById('reg-phone').value.trim();
+      const name = document.getElementById('reg-name').value.trim();
+      document.getElementById('pay-phone').value = phone;
+      document.getElementById('pay-name').value = name;
+      showView('payment');
+    }
+
+    // Payment Logic
+    function openUpiApp() {
+      const phone = document.getElementById('pay-phone').value.trim();
+      const name = document.getElementById('pay-name').value.trim() || 'Member';
+      const amount = document.getElementById('pay-amount').value.trim() || '1200';
+      const payType = document.getElementById('pay-type').value;
+
+      const upiId = state.libraryInfo?.upiId || '9876543210@upi';
+      const upiName = encodeURIComponent(state.libraryInfo?.upiName || 'Chintamani Library');
+      const note = encodeURIComponent(`${payType} - ${name}`);
+
+      const upiUrl = `upi://pay?pa=${upiId}&pn=${upiName}&am=${amount}&cu=INR&tn=${note}`;
+      window.location.href = upiUrl;
+    }
+
+    async function submitPaymentProof() {
+      const phone = document.getElementById('pay-phone').value.trim();
+      const amount = parseFloat(document.getElementById('pay-amount').value);
+      const paymentType = document.getElementById('pay-type').value;
+      const screenshotUrl = document.getElementById('url-pay-screenshot').value;
+      const txnRef = document.getElementById('pay-utr').value.trim();
+
+      if (!phone || phone.length < 10) {
+        alert('Please enter your 10-digit mobile number.');
+        return;
+      }
+      if (!amount || isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid payment amount.');
+        return;
+      }
+      if (!screenshotUrl && !txnRef) {
+        alert('Please upload a payment screenshot or enter the transaction reference / UTR.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/portal/payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            memberPhone: phone,
+            memberName: document.getElementById('pay-name').value.trim() || undefined,
+            amount,
+            paymentType,
+            screenshotUrl: screenshotUrl || undefined,
+            txnRef: txnRef || undefined,
+          }),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('pay-success-box').classList.remove('hidden');
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        } else {
+          alert(data.message || 'Payment submission failed.');
+        }
+      } catch (err) {
+        alert('Error submitting payment proof. Please retry.');
+      }
+    }
+
+    // Complaints Logic
+    function selectComplaintCat(btn, cat) {
+      document.querySelectorAll('.cmp-cat-btn').forEach(b => {
+        b.classList.remove('bg-purple-500/20', 'border-purple-400', 'text-white');
+        b.classList.add('bg-white/5', 'border-white/10', 'text-gray-300');
+      });
+      btn.classList.remove('bg-white/5', 'border-white/10', 'text-gray-300');
+      btn.classList.add('bg-purple-500/20', 'border-purple-400', 'text-white');
+      document.getElementById('cmp-category').value = cat;
+    }
+
+    async function submitComplaint() {
+      const name = document.getElementById('cmp-name').value.trim();
+      const phone = document.getElementById('cmp-phone').value.trim();
+      const category = document.getElementById('cmp-category').value;
+      const description = document.getElementById('cmp-desc').value.trim();
+      const attachmentUrls = document.getElementById('url-cmp-attachment').value;
+
+      if (!name || phone.length < 10 || !description) {
+        alert('Please enter your name, valid mobile number, and issue description.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/portal/complaint', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            memberName: name,
+            memberPhone: phone,
+            category,
+            description,
+            attachmentUrls: attachmentUrls || undefined,
+          }),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('succ-cmp-id').innerText = data.complaintId;
+          document.getElementById('cmp-success-box').classList.remove('hidden');
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        } else {
+          alert(data.message || 'Failed to register complaint.');
+        }
+      } catch (err) {
+        alert('Network error. Please try again.');
+      }
+      lucide.createIcons();
+    }
+
+    // Tracking Logic
+    async function performTracking() {
+      const input = document.getElementById('track-input').value.trim().toUpperCase();
+      const resultBox = document.getElementById('track-result-box');
+      if (!input) {
+        alert('Please enter an Application ID (e.g. REG-123456) or Complaint ID (CMP-1234)');
+        return;
+      }
+
+      resultBox.innerHTML = `<div class="text-center py-4 text-xs text-gray-400">Searching records...</div>`;
+      resultBox.classList.remove('hidden');
+
+      try {
+        if (input.startsWith('REG-')) {
+          const res = await fetch(`/api/portal/registration/${input}`);
+          const data = await res.json();
+          if (!res.ok) {
+            resultBox.innerHTML = `<p class="text-xs text-rose-400 font-semibold">${data.message || 'Application not found'}</p>`;
+            return;
+          }
+
+          const statusColor = data.status === 'APPROVED' ? 'emerald' : data.status === 'REJECTED' ? 'rose' : 'amber';
+
+          resultBox.innerHTML = `
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono font-bold text-white">${data.applicationId}</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-${statusColor}-500/20 text-${statusColor}-400 text-[11px] font-bold uppercase">
+                  ${data.status}
+                </span>
+              </div>
+              <div class="text-xs text-gray-300 space-y-1 pt-1 border-t border-white/10">
+                <div class="flex justify-between"><span class="text-gray-400">Applicant:</span><span>${data.name}</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">Plan:</span><span class="text-gold-400 font-bold">${data.planName}</span></div>
+                ${data.seatNumber ? `<div class="flex justify-between"><span class="text-gray-400">Seat:</span><span class="text-emerald-400 font-bold">Seat ${data.seatNumber}</span></div>` : ''}
+                <div class="flex justify-between"><span class="text-gray-400">Submitted:</span><span>${new Date(data.submittedAt).toLocaleDateString()}</span></div>
+                ${data.rejectionReason ? `<div class="p-2 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-[11px] mt-2">Reason: ${data.rejectionReason}</div>` : ''}
+              </div>
+            </div>
+          `;
+        } else if (input.startsWith('CMP-')) {
+          const res = await fetch(`/api/portal/complaint/${input}`);
+          const data = await res.json();
+          if (!res.ok) {
+            resultBox.innerHTML = `<p class="text-xs text-rose-400 font-semibold">${data.message || 'Complaint not found'}</p>`;
+            return;
+          }
+
+          resultBox.innerHTML = `
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono font-bold text-white">${data.complaintId}</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[11px] font-bold uppercase">
+                  ${data.status}
+                </span>
+              </div>
+              <div class="text-xs text-gray-300 space-y-1 pt-1 border-t border-white/10">
+                <div class="flex justify-between"><span class="text-gray-400">Category:</span><span>${data.category}</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">Registered:</span><span>${new Date(data.createdAt).toLocaleDateString()}</span></div>
+                <p class="text-gray-400 pt-1"><strong>Issue:</strong> ${data.description}</p>
+                ${data.resolution ? `<div class="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] mt-2">Resolution: ${data.resolution}</div>` : ''}
+              </div>
+            </div>
+          `;
+        } else {
+          resultBox.innerHTML = `<p class="text-xs text-gray-400">Please enter an ID starting with REG- or CMP-.</p>`;
+        }
+      } catch (err) {
+        resultBox.innerHTML = `<p class="text-xs text-rose-400">Failed to fetch record. Please check connection.</p>`;
+      }
+    }
+
+    // OTP Auth
+    async function requestOtp() {
+      const phone = document.getElementById('login-phone').value.trim();
+      if (!phone || phone.length < 10) {
+        alert('Please enter a valid 10-digit mobile number.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/portal/otp/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          state.phone = phone;
+          document.getElementById('login-step-phone').classList.add('hidden');
+          document.getElementById('login-step-otp').classList.remove('hidden');
+          if (data.devOtp) {
+            document.getElementById('login-otp-hint').innerText = `Demo OTP: ${data.devOtp} (Development Mode)`;
+          }
+        } else {
+          alert(data.message || 'Failed to send OTP.');
+        }
+      } catch (err) {
+        alert('Network error. Please try again.');
+      }
+    }
+
+    async function verifyOtp() {
+      const otp = document.getElementById('login-otp').value.trim();
+      if (!otp || otp.length !== 6) {
+        alert('Please enter the 6-digit OTP.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/portal/otp/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: state.phone, otp }),
+        });
+        const data = await res.json();
+        if (res.ok && data.verified) {
+          state.token = data.token;
+          localStorage.setItem('portal_token', data.token);
+          localStorage.setItem('portal_phone', state.phone);
+          document.getElementById('nav-auth-text').innerText = 'Dashboard';
+          loadMemberDashboard();
+          showView('dashboard');
+        } else {
+          alert(data.message || 'Invalid OTP.');
+        }
+      } catch (err) {
+        alert('Verification error. Please retry.');
+      }
+    }
+
+    function checkSavedSession() {
+      if (state.token && state.phone) {
+        document.getElementById('nav-auth-text').innerText = 'Dashboard';
+      }
+    }
+
+    function logoutPortal() {
+      state.token = '';
+      state.phone = '';
+      localStorage.removeItem('portal_token');
+      localStorage.removeItem('portal_phone');
+      document.getElementById('nav-auth-text').innerText = 'Login';
+      showView('landing');
+    }
+
+    async function loadMemberDashboard() {
+      try {
+        const res = await fetch(`/api/portal/dashboard?identifier=${state.phone}`);
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('dash-member-name').innerText = data.name;
+          document.getElementById('dash-member-code').innerText = data.memberCode || 'PORTAL MEMBER';
+          document.getElementById('dash-plan-name').innerText = data.plan || 'No Active Plan';
+          document.getElementById('dash-seat-number').innerText = data.seatNumber ? `Seat ${data.seatNumber}` : 'Unassigned';
+          document.getElementById('dash-expiry-date').innerText = data.expiryDate ? new Date(data.expiryDate).toLocaleDateString() : 'N/A';
+          document.getElementById('dash-days-left').innerText = `${data.daysRemaining || 0} Days`;
+          document.getElementById('dash-profile-phone').innerText = data.phone;
+          document.getElementById('dash-profile-aadhaar').innerText = data.maskedAadhaar || 'XXXX-XXXX-****';
+          document.getElementById('dash-profile-branch').innerText = data.branchName || 'Main Branch';
+        }
+      } catch (err) {
+        console.error('Failed to load dashboard', err);
+      }
+    }
+
+    async function loadMemberHistory() {
+      const container = document.getElementById('history-timeline-container');
+      container.innerHTML = `<div class="text-center py-6 text-xs text-gray-400">Loading timeline...</div>`;
+
+      try {
+        const res = await fetch(`/api/portal/history?identifier=${state.phone}`);
+        const data = await res.json();
+        if (!res.ok || !data.timeline || data.timeline.length === 0) {
+          container.innerHTML = `<div class="text-center py-6 text-xs text-gray-400">No activity recorded in the past 6 months.</div>`;
+          return;
+        }
+
+        let html = '';
+        data.timeline.forEach(item => {
+          let dotColor = 'gold';
+          let icon = 'calendar';
+          if (item.type === 'PAYMENT') {
+            dotColor = item.status === 'PAID' ? 'emerald' : 'amber';
+            icon = 'credit-card';
+          } else if (item.type === 'MEMBERSHIP') {
+            dotColor = 'blue';
+            icon = 'armchair';
+          } else if (item.type === 'COMPLAINT') {
+            dotColor = 'purple';
+            icon = 'wrench';
+          } else if (item.type === 'REGISTRATION') {
+            dotColor = item.status === 'APPROVED' ? 'emerald' : 'gold';
+            icon = 'user-plus';
+          }
+
+          html += `
+            <div class="relative pl-7 space-y-1">
+              <div class="absolute left-0 top-1 w-3.5 h-3.5 rounded-full bg-${dotColor}-500/20 border-2 border-${dotColor}-400"></div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white">${item.title}</span>
+                <span class="text-[10px] text-gray-400 font-mono">${new Date(item.date).toLocaleDateString()}</span>
+              </div>
+              <p class="text-[11px] text-gray-300">${item.subtitle}</p>
+              ${item.details ? `<p class="text-[10px] text-gray-400 pt-0.5">${item.details}</p>` : ''}
+              ${item.screenshotUrl ? `<a href="${item.screenshotUrl}" target="_blank" class="inline-flex items-center space-x-1 text-[10px] text-gold-400 font-semibold pt-0.5 hover:underline"><i data-lucide="external-link" class="w-3 h-3"></i><span>View Payment Screenshot</span></a>` : ''}
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+        lucide.createIcons();
+      } catch (err) {
+        container.innerHTML = `<div class="text-center py-6 text-xs text-rose-400">Failed to load history.</div>`;
+      }
+    }
+  </script>
+</body>
+</html>

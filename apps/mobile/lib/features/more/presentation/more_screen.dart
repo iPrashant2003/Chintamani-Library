@@ -10,6 +10,8 @@ import '../../../widgets/icon_3d.dart';
 import '../../branch/providers/branch_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/services/app_update_service.dart';
+import '../../registrations/data/registration_repository.dart';
+import '../../complaints/data/complaint_repository.dart';
 
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
@@ -19,6 +21,9 @@ class MoreScreen extends ConsumerWidget {
     final activeBranch = ref.watch(activeBranchProvider);
     final authState = ref.watch(authProvider).value;
     final user = authState is AuthAuthenticated ? authState.user : null;
+    final pendingRegs = ref.watch(pendingRegistrationsCountProvider).value ?? 0;
+    final pendingVerifs = ref.watch(pendingVerificationsCountProvider).value ?? 0;
+    final openComplaints = ref.watch(openComplaintsCountProvider).value ?? 0;
 
     return Scaffold(
       backgroundColor: AppColors.bgDark,
@@ -146,6 +151,47 @@ class MoreScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+            ),
+
+            // SECTION 0: UNIVERSAL PORTAL & ADMISSIONS (Gold & Emerald)
+            _buildSectionCategory(
+              context,
+              title: 'UNIVERSAL PORTAL & ADMISSIONS',
+              accentColor: const Color(0xFFD4AF37),
+              items: [
+                _MoreItem(
+                  title: 'Universal QR Portal',
+                  subtitle: 'Permanent QR code for student registration & fee pay',
+                  icon: Icons.qr_code_2_rounded,
+                  badge: 'PORTAL QR',
+                  color: const Color(0xFFD4AF37),
+                  route: RouteNames.universalQr,
+                ),
+                _MoreItem(
+                  title: 'Member Registrations',
+                  subtitle: 'Review student applications & allocate seats',
+                  icon: Icons.how_to_reg_rounded,
+                  badge: pendingRegs > 0 ? '$pendingRegs PENDING' : 'ACTIVE',
+                  color: const Color(0xFF059669),
+                  route: RouteNames.registrations,
+                ),
+                _MoreItem(
+                  title: 'Payment Verifications',
+                  subtitle: 'Inspect UPI screenshots & approve fee receipts',
+                  icon: Icons.verified_user_rounded,
+                  badge: pendingVerifs > 0 ? '$pendingVerifs PENDING' : 'VERIFIED',
+                  color: const Color(0xFF8B5CF6),
+                  route: RouteNames.paymentVerifications,
+                ),
+                _MoreItem(
+                  title: 'Complaints & Support',
+                  subtitle: 'AC cooling, power sockets, seats & Wi-Fi tickets',
+                  icon: Icons.report_problem_rounded,
+                  badge: openComplaints > 0 ? '$openComplaints OPEN' : 'ALL CLEAR',
+                  color: const Color(0xFFDC2626),
+                  route: RouteNames.complaints,
+                ),
+              ],
             ),
 
             // SECTION 1: LIBRARY OPERATIONS (Emerald/Cyan)

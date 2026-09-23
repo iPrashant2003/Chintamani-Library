@@ -22,6 +22,7 @@ enum SeatStatus {
   OCCUPIED
   RESERVED
   MAINTENANCE
+  BLOCKED
 }
 
 enum AttendanceMethod {
@@ -61,6 +62,25 @@ enum CommunicationChannel {
   PUSH
 }
 
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ComplaintStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum PaymentVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Tenant {
   id        String   @id @default(uuid())
   name      String
@@ -79,22 +99,25 @@ model Tenant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  branches         Branch[]
-  users            User[]
-  members          Member[]
-  membershipPlans  MembershipPlan[]
-  subscriptions    Subscription[]
-  seats            Seat[]
-  lockers          Locker[]
-  attendances      Attendance[]
-  payments         Payment[]
-  expenses         Expense[]
-  enquiries        Enquiry[]
-  auditLogs        AuditLog[]
-  settingsRel      Settings[]
-  notifications    Notification[]
-  communicationLogs CommunicationLog[]
-  qrCodes          QrCode[]
+  branches             Branch[]
+  users                User[]
+  members              Member[]
+  membershipPlans      MembershipPlan[]
+  subscriptions        Subscription[]
+  seats                Seat[]
+  lockers              Locker[]
+  attendances          Attendance[]
+  payments             Payment[]
+  expenses             Expense[]
+  enquiries            Enquiry[]
+  auditLogs            AuditLog[]
+  settingsRel          Settings[]
+  notifications        Notification[]
+  communicationLogs    CommunicationLog[]
+  qrCodes              QrCode[]
+  memberRegistrations  MemberRegistration[]
+  complaints           Complaint[]
+  paymentVerifications PaymentVerification[]
 }
 
 model Branch {
@@ -106,17 +129,19 @@ model Branch {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tenant           Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  users            UserBranchAccess[]
-  members          Member[]
-  seats            Seat[]
-  lockers          Locker[]
-  attendances      Attendance[]
-  expenses         Expense[]
-  enquiries        Enquiry[]
-  auditLogs        AuditLog[]
-  settings         Settings[]
-  MembershipPlan   MembershipPlan[]
+  tenant               Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  users                UserBranchAccess[]
+  members              Member[]
+  seats                Seat[]
+  lockers              Locker[]
+  attendances          Attendance[]
+  expenses             Expense[]
+  enquiries            Enquiry[]
+  auditLogs            AuditLog[]
+  settings             Settings[]
+  MembershipPlan       MembershipPlan[]
+  memberRegistrations  MemberRegistration[]
+  complaints           Complaint[]
 
   @@index([tenantId])
 }
@@ -172,14 +197,19 @@ model Member {
   address        String?
   academicInfo   String?
   isActive       Boolean  @default(true)
+  registrationId String?  // link to MemberRegistration that created this member
+  portalAccess   Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  branch         Branch         @relation(fields: [branchId], references: [id])
-  subscriptions  Subscription[]
-  attendances    Attendance[]
-  payments       Payment[]
+  tenant               Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch               Branch               @relation(fields: [branchId], references: [id])
+  subscriptions        Subscription[]
+  attendances          Attendance[]
+  payments             Payment[]
+  complaints           Complaint[]
+  paymentVerifications PaymentVerification[]
+  registration         MemberRegistration?  @relation(fields: [registrationId], references: [id])
 
   @@unique([tenantId, memberCode])
   @@index([tenantId])
@@ -197,13 +227,15 @@ model MembershipPlan {
   price          Float
   includesSeat   Boolean  @default(true)
   includesLocker Boolean  @default(false)
+  seatAllocation String   @default("ADMIN") // AUTO (24hr) or ADMIN (6hr/12hr)
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  branch         Branch         @relation(fields: [branchId], references: [id])
-  subscriptions  Subscription[]
+  tenant              Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch              Branch               @relation(fields: [branchId], references: [id])
+  subscriptions       Subscription[]
+  memberRegistrations MemberRegistration[]
 
   @@index([tenantId])
 }
@@ -241,13 +273,15 @@ model Seat {
   seatNumber  String
   floor       String
   status      SeatStatus @default(AVAILABLE)
+  notes       String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  branch        Branch         @relation(fields: [branchId], references: [id])
-  subscriptions Subscription[]
-  assignments   SeatAssignment[]
+  tenant              Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch              Branch               @relation(fields: [branchId], references: [id])
+  subscriptions       Subscription[]
+  assignments         SeatAssignment[]
+  memberRegistrations MemberRegistration[] @relation("ReservedSeat")
 
   @@unique([branchId, seatNumber])
   @@index([tenantId])
@@ -318,8 +352,10 @@ model Payment {
   memberId    String
   amount      Float
   method      PaymentMethod
-  status      String        @default("PENDING") // PENDING, PAID, FAILED
+  status      String        @default("PENDING") // PENDING, PAID, FAILED, REJECTED
+  paymentType String?       // MEMBERSHIP, MAINTENANCE, RENEWAL, OTHER
   txnRef      String?
+  notes       String?
   paidAt      DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -327,6 +363,7 @@ model Payment {
   tenant       Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   member       Member               @relation(fields: [memberId], references: [id])
   transactions PaymentTransaction[]
+  verification PaymentVerification?
 
   @@index([tenantId])
   @@index([paidAt])
@@ -384,6 +421,7 @@ model Notification {
   id        String   @id @default(uuid())
   tenantId  String?
   userId    String?
+  memberId  String?
   type      String
   title     String
   body      String
@@ -412,15 +450,17 @@ model CommunicationLog {
 model QrCode {
   id         String   @id @default(uuid())
   tenantId   String?
-  entityType String
+  entityType String   // MEMBER, LIBRARY_PORTAL, etc.
   entityId   String
   token      String   @unique
+  url        String?  // full encoded URL
   expiresAt  DateTime
   createdAt  DateTime @default(now())
 
   tenant     Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([entityType, entityId])
 }
 
 model AuditLog {
@@ -454,4 +494,110 @@ model Settings {
 
   @@unique([branchId, key])
   @@index([tenantId])
+}
+
+// ── NEW MODELS ────────────────────────────────────────────────────────────────
+
+model MemberRegistration {
+  id               String             @id @default(uuid())
+  tenantId         String
+  branchId         String
+  applicationId    String             @unique // e.g. REG-000123
+  name             String
+  phone            String
+  email            String?
+  dob              DateTime?
+  gender           String?
+  address          String?
+  aadhaarNumber    String?            // masked before display
+  emergencyContact String?
+  academicInfo     String?            // JSON: batch, course, institute, occupation
+  planId           String?
+  photoUrl         String?
+  aadhaarFrontUrl  String?
+  aadhaarBackUrl   String?
+  otherDocUrls     String?            // JSON array
+  status           RegistrationStatus @default(PENDING)
+  rejectionReason  String?
+  reservedSeatId   String?            // auto-reserved for AUTO-allocation plans
+  memberId         String?            // set after approval
+  reviewedBy       String?
+  reviewedAt       DateTime?
+  submittedAt      DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  tenant       Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch       Branch          @relation(fields: [branchId], references: [id])
+  plan         MembershipPlan? @relation(fields: [planId], references: [id])
+  reservedSeat Seat?           @relation("ReservedSeat", fields: [reservedSeatId], references: [id])
+  members      Member[]
+
+  @@index([tenantId])
+  @@index([phone])
+  @@index([status])
+}
+
+model Complaint {
+  id             String          @id @default(uuid())
+  tenantId       String
+  branchId       String
+  complaintId    String          @unique // e.g. CMP-0012
+  memberId       String?
+  memberName     String
+  memberPhone    String
+  category       String          // AC, ELECTRICITY, SEAT, CLEANLINESS, INTERNET, OTHER
+  description    String
+  attachmentUrls String?         // JSON array of URLs
+  status         ComplaintStatus @default(OPEN)
+  resolution     String?
+  assignedTo     String?
+  resolvedAt     DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch  Branch   @relation(fields: [branchId], references: [id])
+  member  Member?  @relation(fields: [memberId], references: [id])
+
+  @@index([tenantId])
+  @@index([status])
+}
+
+model PaymentVerification {
+  id              String                    @id @default(uuid())
+  tenantId        String
+  paymentId       String                    @unique
+  memberId        String
+  amount          Float
+  paymentType     String                    // MEMBERSHIP, MAINTENANCE, RENEWAL, OTHER
+  screenshotUrl   String?
+  txnRef          String?
+  upiId           String?
+  status          PaymentVerificationStatus @default(PENDING)
+  rejectionReason String?
+  verifiedBy      String?
+  verifiedAt      DateTime?
+  submittedAt     DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payment Payment  @relation(fields: [paymentId], references: [id])
+  member  Member   @relation(fields: [memberId], references: [id])
+
+  @@index([tenantId])
+  @@index([status])
+}
+
+model MemberPortalSession {
+  id        String   @id @default(uuid())
+  phone     String
+  otp       String
+  verified  Boolean  @default(false)
+  memberId  String?
+  token     String?  @unique // session token after OTP verified
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+  @@index([token])
 }

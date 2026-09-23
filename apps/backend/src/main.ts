@@ -35,6 +35,10 @@ async function bootstrap() {
   const publicPath = join(process.cwd(), 'public');
   app.useStaticAssets(publicPath);
 
+  // Serve uploaded files (photos, documents, payment screenshots)
+  const uploadsPath = join(process.cwd(), 'uploads');
+  app.useStaticAssets(uploadsPath, { prefix: '/uploads/' });
+
   // Swagger setup
   const config = new DocumentBuilder()
     .setTitle('Chintamani Library API')

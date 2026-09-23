@@ -1,15 +1,16 @@
 {
   "version": "2.3.0",
-  "buildNumber": 26,
+  "buildNumber": 27,
   "releaseDate": "23 Sep 2026",
-  "title": "Chinta Mani Library v2.3.0 Update (Build 26)",
+  "title": "Chinta Mani Library v2.3.0 Update (Build 27) — Universal QR Portal",
   "releaseNotes": [
-    "WhatsApp Fixed: Direct whatsapp:// URI scheme used for reliable message sending",
-    "Students Due Card: Changed to deep purple theme (no more pinkish-red)",
-    "Members: Floating 'Add Member' FAB removed — use the top-right icon instead",
-    "Members Sort: Sort button now opens sheet (Newest, Name A-Z, Name Z-A, Expiring Soon)",
-    "Members Filter: Filter button now opens sheet matching all 6 category filters",
-    "No Neon Colors: Enforced throughout — all colours are muted, rich, dark variants"
+    "Universal QR Member Portal: Permanent QR code for student self-service & admissions",
+    "Self Registration: Multi-step form with live selfie capture & Aadhaar uploads",
+    "Smart Seat Allocation: 24h plans automatically reserve seats; 6h/12h admin allocated",
+    "Payment Verifications: Direct UPI pay with screenshot proof & 1-tap admin verification",
+    "Member Complaints Desk: Ticket tracking & resolution for AC, power, seating & Wi-Fi",
+    "6-Month Activity Timeline: Detailed member history of payments, seats & complaints",
+    "Seat Reallocation: Support for blocking, unblocking, and editable seat transfers"
   ],
   "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.0/Chintamani-Library-Release.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",

@@ -38,6 +38,12 @@ import '../features/more/presentation/about_chintamani_screen.dart';
 import '../features/more/presentation/contact_chintamani_screen.dart';
 import '../features/settings/presentation/database_backup_screen.dart';
 import '../features/whatsapp/presentation/whatsapp_screen.dart';
+import '../features/registrations/presentation/registrations_screen.dart';
+import '../features/registrations/presentation/registration_detail_screen.dart';
+import '../features/complaints/presentation/complaints_screen.dart';
+import '../features/complaints/presentation/complaint_detail_screen.dart';
+import '../features/payments/presentation/payment_verifications_screen.dart';
+import '../features/qr_code/presentation/universal_qr_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -272,6 +278,40 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteNames.databaseBackup,
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const DatabaseBackupScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.registrations,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const RegistrationsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.registrationDetail,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => RegistrationDetailScreen(
+          registrationId: state.pathParameters['id'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: RouteNames.complaints,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ComplaintsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.complaintDetail,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => ComplaintDetailScreen(
+          complaintId: state.pathParameters['id'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: RouteNames.paymentVerifications,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PaymentVerificationsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.universalQr,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const UniversalQrScreen(),
       ),
     ],
   );

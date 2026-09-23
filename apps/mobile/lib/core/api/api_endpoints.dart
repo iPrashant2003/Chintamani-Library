@@ -23,4 +23,8 @@ class ApiEndpoints {
   static const String search = '/search';
   static const String branches = '/branches';
   static const String users = '/users';
+  static const String registrations = '/registrations';
+  static const String complaints = '/complaints';
+  static const String paymentVerifications = '/payments/verifications';
+  static const String portalQr = '/qr/portal';
 }

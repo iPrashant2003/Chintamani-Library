@@ -201,6 +201,15 @@ class MoreScreen extends ConsumerWidget {
               accentColor: const Color(0xFF10B981),
               items: [
                 _MoreItem(
+                  title: 'Everyday Live Attendance Checker',
+                  subtitle: 'Real-time present vs absent roster for all active members',
+                  icon: Icons.fact_check_rounded,
+                  icon3d: Icon3DType.attendance,
+                  badge: 'LIVE ROSTER',
+                  color: const Color(0xFF10B981),
+                  route: RouteNames.attendanceChecker,
+                ),
+                _MoreItem(
                   title: '9 Lockers Vault',
                   subtitle: 'Personal storage lockers L01-L09 • ₹200/mo fee',
                   icon: Icons.lock_clock_rounded,

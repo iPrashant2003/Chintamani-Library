@@ -190,3 +190,13 @@ export class PortalFeedbackDto {
   memberId?: string;
 }
 
+export class PortalAttendanceDto {
+  @IsString()
+  @IsNotEmpty()
+  identifier!: string; // Mobile number or Member Code (e.g., CML-942810)
+
+  @IsOptional()
+  @IsString()
+  branchId?: string;
+}
+

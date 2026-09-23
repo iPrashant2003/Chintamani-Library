@@ -73,7 +73,7 @@ class _DesktopLayout extends StatelessWidget {
   }
 }
 
-// ── Mobile layout: docked dark luxury bottom bar matching reference image ─────
+// ── Mobile layout: 3D multicolour animated bottom bar ─────────────────────────
 class _MobileLayout extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
   final int currentIndex;
@@ -86,47 +86,72 @@ class _MobileLayout extends StatelessWidget {
   });
 
   static const _navItems = [
-    _NavItem(icon: Icons.grid_view_rounded, activeIcon: Icons.grid_view_rounded, label: 'Home'),
-    _NavItem(icon: Icons.group_outlined, activeIcon: Icons.group_rounded, label: 'Members'),
-    _NavItem(icon: Icons.chair_outlined, activeIcon: Icons.chair_rounded, label: 'Seats'),
-    _NavItem(icon: Icons.chat_outlined, activeIcon: Icons.chat_rounded, label: 'WhatsApp', isWhatsApp: true),
-    _NavItem(icon: Icons.apps_rounded, activeIcon: Icons.apps_rounded, label: 'More'),
+    _NavItem(
+      icon: Icons.grid_view_outlined,
+      activeIcon: Icons.grid_view_rounded,
+      label: 'Home',
+      color: Color(0xFF38BDF8), // Electric Sky Blue
+      gradient: [Color(0xFF0284C7), Color(0xFF38BDF8)],
+    ),
+    _NavItem(
+      icon: Icons.group_outlined,
+      activeIcon: Icons.group_rounded,
+      label: 'Members',
+      color: Color(0xFF10B981), // Emerald Green
+      gradient: [Color(0xFF059669), Color(0xFF10B981)],
+    ),
+    _NavItem(
+      icon: Icons.chair_outlined,
+      activeIcon: Icons.chair_rounded,
+      label: 'Seats',
+      color: Color(0xFFF59E0B), // Warm Amber
+      gradient: [Color(0xFFD97706), Color(0xFFF59E0B)],
+    ),
+    _NavItem(
+      icon: Icons.chat_outlined,
+      activeIcon: Icons.chat_rounded,
+      label: 'WhatsApp',
+      color: Color(0xFF25D366), // Official WhatsApp Green
+      gradient: [Color(0xFF128C7E), Color(0xFF25D366)],
+      isWhatsApp: true,
+    ),
+    _NavItem(
+      icon: Icons.apps_outlined,
+      activeIcon: Icons.apps_rounded,
+      label: 'More',
+      color: Color(0xFFA855F7), // Royal Violet
+      gradient: [Color(0xFF7C3AED), Color(0xFFA855F7)],
+    ),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      backgroundColor: const Color(0xFF0D0D0F),
+      backgroundColor: const Color(0xFF080B12),
       drawer: const AppDrawer(),
       body: navigationShell,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xF21C160B), // Luxury warm gold-tinted obsidian with 95% opacity
-              Color(0xF8100C05), // Deep rich velvet gold base
-            ],
+          color: const Color(0xF7090C14),
+          border: Border(
+            top: BorderSide(
+              color: Colors.white.withValues(alpha: 0.08),
+              width: 0.8,
+            ),
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
+              color: Colors.black.withValues(alpha: 0.90),
               blurRadius: 20,
               offset: const Offset(0, -4),
-            ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.85),
-              blurRadius: 12,
-              offset: const Offset(0, -1),
             ),
           ],
         ),
         child: SafeArea(
           top: false,
           child: SizedBox(
-            height: 62,
+            height: 66,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: List.generate(_navItems.length, (index) {
@@ -134,53 +159,10 @@ class _MobileLayout extends StatelessWidget {
                 final isSelected = index == currentIndex;
 
                 return Expanded(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
+                  child: _BottomNav3DItem(
+                    item: item,
+                    isSelected: isSelected,
                     onTap: () => onTap(index),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
-                          decoration: isSelected
-                              ? BoxDecoration(
-                                  color: const Color(0xFFD4AF37).withValues(alpha: 0.20),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: const Color(0xFFD4AF37).withValues(alpha: 0.45),
-                                    width: 1.0,
-                                  ),
-                                )
-                              : null,
-                          child: item.isWhatsApp
-                              ? WhatsAppLogo(
-                                  size: 20,
-                                  color: isSelected
-                                      ? const Color(0xFFFDE68A)
-                                      : const Color(0xFFD4AF37).withValues(alpha: 0.72),
-                                )
-                              : Icon(
-                                  isSelected ? item.activeIcon : item.icon,
-                                  size: 21,
-                                  color: isSelected
-                                      ? const Color(0xFFFDE68A)
-                                      : const Color(0xFFD4AF37).withValues(alpha: 0.72),
-                                ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          item.label,
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                            color: isSelected
-                                ? const Color(0xFFFDE68A)
-                                : const Color(0xFFD4AF37).withValues(alpha: 0.80),
-                            letterSpacing: isSelected ? 0.2 : 0,
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 );
               }),
@@ -192,15 +174,137 @@ class _MobileLayout extends StatelessWidget {
   }
 }
 
+class _BottomNav3DItem extends StatefulWidget {
+  final _NavItem item;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _BottomNav3DItem({
+    required this.item,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  State<_BottomNav3DItem> createState() => _BottomNav3DItemState();
+}
+
+class _BottomNav3DItemState extends State<_BottomNav3DItem> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final item = widget.item;
+    final isSelected = widget.isSelected;
+
+    final scale = _isPressed ? 0.90 : (isSelected ? 1.05 : 1.0);
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedScale(
+        scale: scale,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutBack,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // 3D Elevated Tile Container with Specular Highlight & Ambient Glow
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 240),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: isSelected
+                    ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          item.color.withValues(alpha: 0.28),
+                          item.color.withValues(alpha: 0.08),
+                          Colors.black.withValues(alpha: 0.40),
+                        ],
+                      )
+                    : null,
+                border: isSelected
+                    ? Border.all(
+                        color: item.color.withValues(alpha: 0.55),
+                        width: 1.2,
+                      )
+                    : null,
+                boxShadow: isSelected
+                    ? [
+                        // Ambient multi-colour glow in item's natural colour
+                        BoxShadow(
+                          color: item.color.withValues(alpha: 0.35),
+                          blurRadius: 14,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 2),
+                        ),
+                        // Bottom drop shadow for 3D elevation
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.7),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: item.isWhatsApp
+                  ? WhatsAppLogo(
+                      size: 21,
+                      color: isSelected
+                          ? const Color(0xFF25D366)
+                          : const Color(0xFF25D366).withValues(alpha: 0.55),
+                    )
+                  : Icon(
+                      isSelected ? item.activeIcon : item.icon,
+                      size: 21,
+                      color: isSelected
+                          ? item.color
+                          : Colors.white.withValues(alpha: 0.48),
+                    ),
+            ),
+            const SizedBox(height: 3),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
+                color: isSelected
+                    ? item.color
+                    : Colors.white.withValues(alpha: 0.55),
+                letterSpacing: isSelected ? 0.2 : 0,
+              ),
+              child: Text(item.label),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _NavItem {
   final IconData icon;
   final IconData activeIcon;
   final String label;
+  final Color color;
+  final List<Color> gradient;
   final bool isWhatsApp;
+
   const _NavItem({
     required this.icon,
     required this.activeIcon,
     required this.label,
+    required this.color,
+    required this.gradient,
     this.isWhatsApp = false,
   });
 }

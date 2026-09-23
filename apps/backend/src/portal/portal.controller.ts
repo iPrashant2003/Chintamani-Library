@@ -22,6 +22,7 @@ import {
   PortalPaymentDto,
   PortalComplaintDto,
   PortalFeedbackDto,
+  PortalAttendanceDto,
 } from './dto/portal.dto';
 
 @ApiTags('Member Portal (Public)')
@@ -127,6 +128,13 @@ export class PortalController {
     @Query('branchId') branchId?: string,
   ) {
     return this.portalService.getSeatsByBatch(batch, timing, branchId);
+  }
+
+  @Post('attendance')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Submit member self-attendance (Check-in/Check-out via QR or mobile)' })
+  submitAttendance(@Body() dto: PortalAttendanceDto) {
+    return this.portalService.submitAttendance(dto);
   }
 
   @Post('upload')

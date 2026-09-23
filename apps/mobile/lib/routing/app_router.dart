@@ -44,6 +44,7 @@ import '../features/complaints/presentation/complaints_screen.dart';
 import '../features/complaints/presentation/complaint_detail_screen.dart';
 import '../features/payments/presentation/payment_verifications_screen.dart';
 import '../features/qr_code/presentation/universal_qr_screen.dart';
+import '../features/attendance/presentation/live_attendance_checker_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -314,9 +315,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const UniversalQrScreen(),
       ),
       GoRoute(
-        path: RouteNames.qr,
+        path: RouteNames.attendanceChecker,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const UniversalQrScreen(),
+        builder: (context, state) => const LiveAttendanceCheckerScreen(),
       ),
     ],
   );

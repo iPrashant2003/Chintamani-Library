@@ -22,7 +22,7 @@ class QuickActionData {
 class MulticolorQuickAccessBar extends StatelessWidget {
   const MulticolorQuickAccessBar({super.key});
 
-  // 5 actions with premium muted tones — NO neon/bright colors
+  // 4 actions with premium muted tones — NO neon/bright colors
   static const List<QuickActionData> _actions = [
     QuickActionData(
       label: 'Add Member',
@@ -32,13 +32,6 @@ class MulticolorQuickAccessBar extends StatelessWidget {
       route: RouteNames.addMember,
     ),
     QuickActionData(
-      label: 'Insights',
-      icon: Icons.auto_graph_rounded,
-      accent: Color(0xFF4A7AAD),           // Steel blue
-      discGradient: [Color(0xFF0D1F38), Color(0xFF07101D)],
-      route: RouteNames.insights,
-    ),
-    QuickActionData(
       label: 'Record Fee',
       icon: Icons.receipt_long_rounded,
       accent: Color(0xFF7B6AA0),           // Muted amethyst
@@ -46,18 +39,18 @@ class MulticolorQuickAccessBar extends StatelessWidget {
       route: RouteNames.recordPayment,
     ),
     QuickActionData(
-      label: 'Scan QR',
-      icon: Icons.qr_code_scanner_rounded,
+      label: 'Universal QR',
+      icon: Icons.qr_code_2_rounded,
       accent: Color(0xFF8B2F3C),           // Deep wine red
       discGradient: [Color(0xFF2A0D12), Color(0xFF150609)],
       route: RouteNames.qr,
     ),
     QuickActionData(
-      label: 'Compare',
-      icon: Icons.compare_arrows_rounded,
-      accent: Color(0xFF3A7A62),           // Forest teal
-      discGradient: [Color(0xFF0D2520), Color(0xFF071310)],
-      route: RouteNames.branchComparison,
+      label: 'Insights',
+      icon: Icons.auto_graph_rounded,
+      accent: Color(0xFF4A7AAD),           // Steel blue
+      discGradient: [Color(0xFF0D1F38), Color(0xFF07101D)],
+      route: RouteNames.insights,
     ),
   ];
 
@@ -70,7 +63,7 @@ class MulticolorQuickAccessBar extends StatelessWidget {
         children: _actions.map((act) {
           return Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 3),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               child: _QuickActionButton(action: act),
             ),
           );

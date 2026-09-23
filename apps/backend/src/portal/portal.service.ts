@@ -7,6 +7,7 @@ import {
   PortalPaymentDto,
   PortalComplaintDto,
   PortalFeedbackDto,
+  PortalAttendanceDto,
 } from './dto/portal.dto';
 import * as crypto from 'crypto';
 
@@ -872,6 +873,101 @@ export class PortalService {
       status: s.status,
       isAvailable: s.status === 'AVAILABLE',
     }));
+  }
+
+  // ── SELF ATTENDANCE (PORTAL / QR PASS) ───────────────────────────────────────
+
+  async submitAttendance(dto: PortalAttendanceDto) {
+    const raw = dto.identifier.trim();
+    if (!raw) {
+      throw new BadRequestException('Please enter your Mobile Number or Member ID');
+    }
+
+    const digits = raw.replace(/[^\d]/g, '');
+
+    // Search for member by memberCode (exact/case-insensitive) or phone (last 10 digits)
+    const member = await this.prisma.member.findFirst({
+      where: {
+        OR: [
+          { memberCode: { equals: raw, mode: 'insensitive' } },
+          ...(digits.length >= 10 ? [{ phone: { contains: digits.slice(-10) } }] : []),
+        ],
+      },
+      include: {
+        branch: true,
+        subscriptions: {
+          where: { status: 'ACTIVE' },
+          include: { seat: true, plan: true },
+          take: 1,
+        },
+      },
+    });
+
+    if (!member) {
+      throw new NotFoundException(
+        `Member not found with "${raw}". Please enter your registered 10-digit mobile number or Member ID (e.g. CML-942810).`,
+      );
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const openRecord = await this.prisma.attendance.findFirst({
+      where: {
+        memberId: member.id,
+        checkIn: { gte: today },
+        checkOut: null,
+      },
+      orderBy: { checkIn: 'desc' },
+    });
+
+    if (openRecord) {
+      // Toggle to Check-Out
+      const updated = await this.prisma.attendance.update({
+        where: { id: openRecord.id },
+        data: { checkOut: new Date() },
+      });
+
+      return {
+        success: true,
+        action: 'CHECK_OUT',
+        message: `Checked out successfully! Have a great day, ${member.name}.`,
+        member: {
+          id: member.id,
+          name: member.name,
+          memberCode: member.memberCode,
+          branchName: member.branch.name,
+          seatNumber: member.subscriptions[0]?.seat?.seatNumber ?? 'Unassigned',
+        },
+        checkIn: openRecord.checkIn,
+        checkOut: updated.checkOut,
+      };
+    }
+
+    // Create Check-In
+    const newRecord = await this.prisma.attendance.create({
+      data: {
+        tenantId: member.tenantId,
+        memberId: member.id,
+        branchId: member.branchId,
+        method: 'QR',
+      },
+    });
+
+    return {
+      success: true,
+      action: 'CHECK_IN',
+      message: `Checked in successfully! Welcome to Chinta Mani Library, ${member.name}.`,
+      member: {
+        id: member.id,
+        name: member.name,
+        memberCode: member.memberCode,
+        branchName: member.branch.name,
+        seatNumber: member.subscriptions[0]?.seat?.seatNumber ?? 'Unassigned',
+        planName: member.subscriptions[0]?.plan?.name ?? 'Standard Plan',
+      },
+      checkIn: newRecord.checkIn,
+    };
   }
 }
 

@@ -8,6 +8,7 @@ import '../../../theme/app_colors.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../branch/providers/branch_provider.dart';
+import 'widgets/member_self_attendance_card.dart';
 
 final universalQrDataProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   try {
@@ -502,6 +503,11 @@ class UniversalQrScreen extends ConsumerWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+
+            // ── MEMBER ATTENDANCE CARD ───────────────────────────────────────
+            const MemberSelfAttendanceCard(),
+
             const SizedBox(height: 16),
 
             // Clean Brand Value Card (Replaces Cluttered Capabilities Section)

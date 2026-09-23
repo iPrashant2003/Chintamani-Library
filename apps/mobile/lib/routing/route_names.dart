@@ -45,4 +45,5 @@ class RouteNames {
   static const String complaintDetail = '/complaints/:id';
   static const String paymentVerifications = '/payments/verifications';
   static const String universalQr = '/universal-qr';
+  static const String attendanceChecker = '/attendance-checker';
 }

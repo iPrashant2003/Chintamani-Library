@@ -1,17 +1,16 @@
 {
   "version": "2.3.0",
-  "buildNumber": 31,
+  "buildNumber": 32,
   "releaseDate": "24 Sep 2026",
-  "title": "Chinta Mani Library v2.3.0 (Build 31) — Premium Luxury Member Portal & Admin Universal QR Redesign",
+  "title": "Chinta Mani Library v2.3.0 (Build 32) — Multicolour 3D Bottom Bar, Reorganized Scan QR & Everyday Live Attendance Checker",
   "releaseNotes": [
-    "Premium Luxury Portal UI/UX: Redesigned with deep obsidian base, metallic gold branding, glassmorphism, and restrained multi-colour module accents without bright card borders",
-    "3D Animated Visuals: Integrated floating 3D geometric crystal emblem with smooth CSS continuous rotation and lighting",
-    "Admin Dashboard Universal QR: Dedicated Universal QR module directly on the main Admin Dashboard with live status and instant action controls",
-    "Mobile-First Architecture: 6 core service modules (New Registration, Payments, Feedback, Complaint Desk, Membership, Help & Support)",
-    "UPI Payments Gateway: Integrated Prashant Mani Tripathi UPI (prashantmanitripathi2003-2@oksbi) with official QR code, one-click copy, and screenshot verification",
-    "Dynamic Seat Matrix: Real-time availability by shift, gold selection highlight, and automatic seat reservation",
-    "Strict Privacy Standards: Student account verification and confidential member record retrieval",
-    "Removed Clutter: Completely eliminated developer terminology and generic capabilities cards for a finished commercial product experience"
+    "Reorganized Bottom Navigation Bar: Brand new animated 3D graphics & icons in original multicolours (Sky Blue, Emerald, Amber, WhatsApp Green, Royal Violet — NO golden styling) with spring scale interactions and ambient color glows",
+    "Streamlined Dashboard Quick Access: Reconfigured to 4 primary cards (Add Member, Record Fee, Universal QR, Insights) for balanced and ergonomic access",
+    "Removed Universal QR Card from Main Dashboard: Cleaned dashboard view per operational preferences",
+    "Reorganized Scan QR Hub: Removed legacy tabs (Admission Poster, Scholar Pass QR, Scanner Simulation); now features the permanent Universal QR portal card alongside the new Member Self-Attendance Check-In card",
+    "Member Self-Attendance Submission: Members can submit attendance via mobile number or Member ID, immediately reflecting across the admin dashboard and live attendance stream",
+    "Everyday Live Attendance Checker: New dedicated screen in More menu displaying real-time Present vs Absent status for all active members with check-in timestamps, filters, and 1-tap attendance marking",
+    "Public Portal Self Check-In: Added 1-Tap Attendance Check-In directly on the public web portal with instant verification feedback"
   ],
   "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.0/Chintamani-Library-Release.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",

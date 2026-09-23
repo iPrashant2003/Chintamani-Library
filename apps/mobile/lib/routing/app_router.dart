@@ -313,6 +313,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const UniversalQrScreen(),
       ),
+      GoRoute(
+        path: RouteNames.qr,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const UniversalQrScreen(),
+      ),
     ],
   );
 });

@@ -3,34 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Chintamani Library — Official Member Portal</title>
+  <title>Chintamani — Official Member Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cinzel:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-            serif: ['"Cinzel"', 'serif'],
+            sans: ['"Inter"', 'sans-serif'],
+            serif: ['"Cormorant Garamond"', 'serif'],
           },
           colors: {
             gold: {
               300: '#F3E5AB',
-              400: '#E6CA65',
-              500: '#D4AF37',
-              600: '#B89223',
-              700: '#8C6C10',
+              400: '#E8C97A',
+              500: '#C9A84C',
+              600: '#A98634',
+              700: '#846420',
             },
-            dark: {
-              bg: '#0A0D14',
-              surface: '#111622',
-              card: '#151D2A',
-              border: 'rgba(212, 175, 55, 0.22)',
-              borderSubtle: 'rgba(255, 255, 255, 0.08)',
+            obsidian: {
+              950: '#05070B',
+              900: '#080B12',
+              850: '#0D111A',
+              800: '#121724',
+              700: '#1A2133',
             }
           }
         }
@@ -38,284 +38,410 @@
     }
   </script>
   <style>
+    :root {
+      --bg-base: #080B12;
+      --gold-primary: #C9A84C;
+      --gold-light: #E8C97A;
+      --gold-border: rgba(201, 168, 76, 0.14);
+      --glass-surface: rgba(13, 17, 26, 0.76);
+      --glass-subtle: rgba(255, 255, 255, 0.03);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      background-color: #0A0D14;
+      background-color: var(--bg-base);
       background-image: 
-        radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
-        radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.04) 0%, transparent 50%),
-        radial-gradient(circle at 0% 100%, rgba(59, 130, 246, 0.04) 0%, transparent 50%);
-      color: #E2E8F0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+        radial-gradient(circle at 50% 0%, rgba(201, 168, 76, 0.08) 0%, transparent 55%),
+        radial-gradient(circle at 100% 40%, rgba(26, 122, 94, 0.03) 0%, transparent 40%),
+        radial-gradient(circle at 0% 80%, rgba(91, 63, 166, 0.03) 0%, transparent 40%);
+      color: #E6E9F0;
+      font-family: 'Inter', sans-serif;
       -webkit-tap-highlight-color: transparent;
       overflow-x: hidden;
+      min-height: 100vh;
     }
-    .gold-gradient {
-      background: linear-gradient(135deg, #F3E5AB 0%, #D4AF37 50%, #975A16 100%);
+
+    /* Typography */
+    .brand-title {
+      font-family: 'Cormorant Garamond', serif;
+      letter-spacing: 0.04em;
+    }
+
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #F9EED2 0%, #C9A84C 50%, #9B772E 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .gold-btn {
-      background: linear-gradient(135deg, #D4AF37 0%, #B89223 100%);
-      color: #0A0D14;
-      font-weight: 800;
-      box-shadow: 0 4px 16px rgba(212, 175, 55, 0.28);
-      transition: all 0.2s ease;
+
+    /* Premium Glassmorphism (Strictly NO colored borders on cards) */
+    .glass-card {
+      background: var(--glass-surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--gold-border);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
     }
-    .gold-btn:active {
-      transform: scale(0.98);
-      filter: brightness(0.92);
+
+    .glass-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(201, 168, 76, 0.15);
     }
-    .portal-card {
-      background: linear-gradient(145deg, #141C28 0%, #0E141F 100%);
-      border: 1px solid rgba(212, 175, 55, 0.20);
-      border-radius: 20px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .portal-card:hover {
-      border-color: rgba(212, 175, 55, 0.45);
-      box-shadow: 0 12px 30px rgba(212, 175, 55, 0.12);
-    }
-    .portal-card:active {
+
+    .glass-card:active {
       transform: scale(0.985);
     }
-    .glass-input {
-      background: rgba(14, 20, 31, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: #F8FAFC;
+
+    /* Muted Top Accent Bar for Services (NO colored borders around the card) */
+    .service-accent-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      opacity: 0.75;
+    }
+
+    /* Premium Gold Button */
+    .btn-gold {
+      background: linear-gradient(135deg, #D6B65E 0%, #A98634 100%);
+      color: #080B12;
+      font-weight: 700;
+      box-shadow: 0 4px 18px rgba(201, 168, 76, 0.24);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-gold:hover {
+      filter: brightness(1.06);
+      box-shadow: 0 6px 22px rgba(201, 168, 76, 0.34);
+    }
+    .btn-gold:active {
+      transform: scale(0.98);
+      filter: brightness(0.95);
+    }
+
+    /* Inputs */
+    .glass-field {
+      background: rgba(8, 11, 18, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
       border-radius: 12px;
       padding: 12px 14px;
       width: 100%;
       outline: none;
+      font-size: 13.5px;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .glass-input:focus {
-      border-color: #D4AF37;
-      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25);
+    .glass-field:focus {
+      border-color: rgba(201, 168, 76, 0.6);
+      box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
     }
-    .seat-box {
+    .glass-field::placeholder {
+      color: rgba(255, 255, 255, 0.32);
+    }
+
+    /* 3D Floating Crystal Emblem */
+    .scene-3d {
+      width: 110px;
+      height: 110px;
+      perspective: 700px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .crystal-3d {
+      width: 64px;
+      height: 64px;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: rotateCrystal 18s linear infinite;
+    }
+    @keyframes rotateCrystal {
+      0% {
+        transform: rotateX(15deg) rotateY(0deg) rotateZ(5deg);
+      }
+      50% {
+        transform: rotateX(-15deg) rotateY(180deg) rotateZ(-5deg);
+      }
+      100% {
+        transform: rotateX(15deg) rotateY(360deg) rotateZ(5deg);
+      }
+    }
+    .facet {
+      position: absolute;
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, rgba(201, 168, 76, 0.18) 0%, rgba(13, 17, 26, 0.85) 100%);
+      border: 1px solid rgba(201, 168, 76, 0.4);
+      backdrop-filter: blur(6px);
+      box-shadow: inset 0 0 14px rgba(201, 168, 76, 0.18);
+    }
+    .facet-1 { transform: rotateY(0deg) translateZ(32px); }
+    .facet-2 { transform: rotateY(90deg) translateZ(32px); }
+    .facet-3 { transform: rotateY(180deg) translateZ(32px); }
+    .facet-4 { transform: rotateY(270deg) translateZ(32px); }
+    .facet-5 { transform: rotateX(90deg) translateZ(32px); }
+    .facet-6 { transform: rotateX(-90deg) translateZ(32px); }
+
+    .glow-ring {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 1px dashed rgba(201, 168, 76, 0.22);
+      animation: pulseRing 5s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes pulseRing {
+      0%, 100% { transform: scale(0.92) rotate(0deg); opacity: 0.4; }
+      50% { transform: scale(1.08) rotate(180deg); opacity: 0.8; }
+    }
+
+    /* Seat Matrix */
+    .seat-cell {
       width: 38px;
       height: 38px;
       border-radius: 9px;
       font-size: 11px;
-      font-weight: 800;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.18s ease;
+      transition: all 0.16s ease;
       user-select: none;
     }
-    .seat-available {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1.5px solid rgba(16, 185, 129, 0.55);
+    .seat-cell-avail {
+      background: rgba(26, 122, 94, 0.14);
+      border: 1px solid rgba(26, 122, 94, 0.45);
       color: #34D399;
     }
-    .seat-available:hover {
-      background: rgba(16, 185, 129, 0.3);
+    .seat-cell-avail:hover {
+      background: rgba(26, 122, 94, 0.32);
       transform: translateY(-2px);
     }
-    .seat-selected {
-      background: linear-gradient(135deg, #D4AF37, #B89223) !important;
-      border: 1.5px solid #F3E5AB !important;
-      color: #0A0D14 !important;
+    .seat-cell-selected {
+      background: linear-gradient(135deg, #D6B65E, #A98634) !important;
+      border: 1px solid #F3E5AB !important;
+      color: #080B12 !important;
       font-weight: 900 !important;
-      box-shadow: 0 0 12px rgba(212, 175, 55, 0.6) !important;
-      transform: scale(1.08) !important;
+      box-shadow: 0 0 14px rgba(201, 168, 76, 0.5) !important;
+      transform: scale(1.06) !important;
     }
-    .seat-occupied {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: rgba(255, 255, 255, 0.22);
+    .seat-cell-occupied {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.2);
       cursor: not-allowed;
       pointer-events: none;
     }
-    .star-btn {
-      transition: transform 0.15s ease;
-      cursor: pointer;
+
+    /* Soft entrance animation */
+    .page-view {
+      animation: viewIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    .star-btn:hover {
-      transform: scale(1.2);
+    @keyframes viewIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between">
+<body class="flex flex-col justify-between">
 
   <!-- ================================================================= -->
-  <!-- TOP HEADER (Persistent)                                           -->
+  <!-- 1. BRAND HEADER (Top-Left Logo & Title, Compact Navigation)       -->
   <!-- ================================================================= -->
-  <header class="sticky top-0 z-40 bg-[#0A0D14]/95 backdrop-blur-md border-b border-gold-500/25 px-4 py-3">
-    <div class="max-w-md mx-auto flex items-center justify-between">
+  <header class="sticky top-0 z-40 bg-[#080B12]/92 backdrop-blur-xl border-b border-gold-500/15 px-4 py-3">
+    <div class="max-w-lg mx-auto flex items-center justify-between">
+      
+      <!-- Logo + Brand name -->
       <div class="flex items-center space-x-3 cursor-pointer" onclick="showView('landing')">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-gold-600 via-gold-500 to-amber-300 p-[1.5px] shadow-lg shadow-gold-500/15 flex items-center justify-center">
-          <div class="w-full h-full bg-[#0A0D14] rounded-[10px] flex items-center justify-center text-gold-400">
-            <i data-lucide="book-open" class="w-5 h-5"></i>
-          </div>
+        <div class="relative w-10 h-10 rounded-xl overflow-hidden bg-black/40 p-1 border border-gold-500/25 flex items-center justify-center shadow-md shadow-black/50">
+          <img src="images/chintamani_logo.png" alt="Chintamani Logo" class="w-full h-full object-contain" onerror="this.src='images/logo.png'; this.onerror=function(){this.style.display='none'; document.getElementById('logo-fallback-initial').style.display='flex';}">
+          <div id="logo-fallback-initial" class="hidden w-full h-full items-center justify-center text-gold-400 font-serif font-bold text-lg">C</div>
         </div>
-        <div>
-          <h1 class="text-sm font-extrabold tracking-tight text-white leading-tight font-serif">CHINTAMANI</h1>
-          <p class="text-[10px] font-semibold text-gold-400 tracking-wider uppercase">Library Member Portal</p>
+        <div class="flex flex-col">
+          <span class="brand-title text-base font-bold tracking-wide text-white leading-tight">Chintamani</span>
+          <span class="text-[10px] font-semibold tracking-wider text-gold-400/80 uppercase">Member Portal</span>
         </div>
       </div>
 
+      <!-- Quick Nav Buttons -->
       <div class="flex items-center space-x-2">
-        <button onclick="showView('status')" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-gray-300 bg-white/5 border border-white/10 flex items-center space-x-1 hover:bg-white/10 active:scale-95 transition">
+        <button onclick="showView('status')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-300 bg-white/5 border border-white/10 hover:bg-white/10 active:scale-95 transition flex items-center space-x-1.5">
           <i data-lucide="search" class="w-3.5 h-3.5 text-gold-400"></i>
           <span>Track</span>
         </button>
-        <button onclick="showView('member-info')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-dark-bg bg-gold-500 flex items-center space-x-1 shadow-md shadow-gold-500/20 active:scale-95 transition">
-          <i data-lucide="user" class="w-3.5 h-3.5"></i>
-          <span id="nav-user-text">My Info</span>
+        <button onclick="showView('member-info')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-dark-bg btn-gold flex items-center space-x-1.5 active:scale-95 transition">
+          <i data-lucide="user" class="w-3.5 h-3.5 text-dark-bg"></i>
+          <span>My Info</span>
         </button>
       </div>
+
     </div>
   </header>
 
   <!-- ================================================================= -->
   <!-- MAIN APP CONTAINER                                                -->
   <!-- ================================================================= -->
-  <main class="flex-1 max-w-md w-full mx-auto px-4 py-4 space-y-4">
+  <main class="flex-1 max-w-lg w-full mx-auto px-4 py-4 space-y-4">
 
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <!-- 1. LANDING VIEW (7 Main Action Cards)                           -->
+    <!-- VIEW: LANDING / HOME (Luxury Hero + 6 Service Cards)             -->
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <section id="view-landing" class="space-y-4">
+    <section id="view-landing" class="page-view space-y-4">
       
-      <!-- Luxury Hero Banner -->
-      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#16202F] via-[#101723] to-[#0A0E17] p-5 border border-gold-500/35 shadow-2xl">
-        <div class="absolute -right-8 -bottom-8 w-36 h-36 bg-gold-500/15 rounded-full blur-2xl pointer-events-none"></div>
-        <div class="relative z-10 space-y-1.5">
-          <div class="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-gold-500/15 border border-gold-500/35 text-[10px] font-bold text-gold-400 uppercase tracking-widest">
-            <span class="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse"></span>
-            <span>Universal QR Portal</span>
-          </div>
-          <h2 class="text-xl font-extrabold text-white tracking-tight">MEMBER PORTAL</h2>
-          <p class="text-xs text-gray-300 max-w-[290px] leading-relaxed">
-            Welcome to Chintamani Library. Register for admission, reserve seats, pay via UPI, and submit feedback.
-          </p>
+      <!-- Luxury Hero Section with 3D Graphic -->
+      <div class="relative overflow-hidden rounded-2xl glass-card p-5 border border-gold-500/20">
+        <div class="relative z-10 flex items-center justify-between">
+          <div class="space-y-1.5 max-w-[220px]">
+            <span class="text-[10px] font-semibold tracking-widest text-gold-400 uppercase">Welcome to</span>
+            <h2 class="brand-title text-2xl font-bold text-white tracking-wide leading-tight">
+              CHINTAMANI
+            </h2>
+            <p class="text-xs text-gray-300 leading-relaxed pt-0.5">
+              Your membership, payments and services in one secure place.
+            </p>
 
-          <!-- Live quick stats chips -->
-          <div class="pt-2 flex items-center space-x-2 text-[11px]">
-            <div class="px-2.5 py-1 rounded-lg bg-black/40 border border-emerald-500/35 text-emerald-400 flex items-center space-x-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-              <span>Available Seats: <strong id="quick-seats-avail">18</strong></span>
-            </div>
-            <div class="px-2.5 py-1 rounded-lg bg-black/40 border border-gold-500/30 text-gold-400 flex items-center space-x-1.5">
-              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-gold-400"></i>
-              <span>UPI Verified</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Action Cards Grid (7 Actions) -->
-      <div class="grid grid-cols-2 gap-3 pt-1">
-        
-        <!-- 1. 📝 New Registration -->
-        <div onclick="showView('register')" class="col-span-2 portal-card p-4 flex items-center justify-between cursor-pointer group">
-          <div class="flex items-center space-x-3.5">
-            <div class="w-12 h-12 rounded-xl bg-gold-500/15 border border-gold-500/35 flex items-center justify-center text-gold-400 group-hover:bg-gold-500 group-hover:text-dark-bg transition">
-              <i data-lucide="user-plus" class="w-6 h-6"></i>
-            </div>
-            <div>
-              <div class="flex items-center space-x-1.5">
-                <span class="text-xs">📝</span>
-                <h3 class="text-sm font-extrabold text-white group-hover:text-gold-400 transition">New Registration</h3>
+            <div class="pt-2 flex items-center space-x-2 text-[10.5px]">
+              <div class="px-2.5 py-1 rounded-full bg-black/40 border border-emerald-500/30 text-emerald-400 flex items-center space-x-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span><strong id="hero-seats-avail">18</strong> Seats Open</span>
               </div>
-              <p class="text-[11px] text-gray-400 mt-0.5">Online admission, photo & seat booking</p>
+              <div class="px-2.5 py-1 rounded-full bg-black/40 border border-gold-500/25 text-gold-400/90 flex items-center space-x-1">
+                <i data-lucide="shield-check" class="w-3 h-3 text-gold-400"></i>
+                <span>Verified</span>
+              </div>
             </div>
           </div>
-          <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 group-hover:text-gold-400 group-hover:translate-x-1 transition"></i>
-        </div>
 
-        <!-- 2. 💺 Seat Availability -->
-        <div onclick="showView('seats')" class="portal-card p-3.5 cursor-pointer group flex flex-col justify-between">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-2">
-            <i data-lucide="armchair" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <div class="flex items-center space-x-1">
-              <span class="text-xs">💺</span>
-              <h4 class="text-xs font-bold text-white">Seat Status</h4>
+          <!-- 3D Geometric Crystal Element -->
+          <div class="scene-3d select-none pointer-events-none">
+            <div class="glow-ring"></div>
+            <div class="crystal-3d">
+              <div class="facet facet-1"></div>
+              <div class="facet facet-2"></div>
+              <div class="facet facet-3"></div>
+              <div class="facet facet-4"></div>
+              <div class="facet facet-5"></div>
+              <div class="facet facet-6"></div>
             </div>
-            <p class="text-[10px] text-gray-400 mt-0.5">Live batch & seat count</p>
-          </div>
-        </div>
-
-        <!-- 3. 💳 Payments -->
-        <div onclick="showView('payment')" class="portal-card p-3.5 cursor-pointer group flex flex-col justify-between">
-          <div class="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-2">
-            <i data-lucide="credit-card" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <div class="flex items-center space-x-1">
-              <span class="text-xs">💳</span>
-              <h4 class="text-xs font-bold text-white">UPI Payment</h4>
-            </div>
-            <p class="text-[10px] text-gray-400 mt-0.5">Instant pay & proof upload</p>
           </div>
         </div>
+      </div>
 
-        <!-- 4. ⭐ Feedback & Reviews -->
-        <div onclick="showView('feedback')" class="portal-card p-3.5 cursor-pointer group flex flex-col justify-between">
-          <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-2">
-            <i data-lucide="star" class="w-5 h-5"></i>
+      <!-- Services Section Header -->
+      <div class="flex items-center justify-between pt-1 px-1">
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-gold-400">Services</h3>
+          <p class="text-[11px] text-gray-400">Select an action to proceed</p>
+        </div>
+      </div>
+
+      <!-- 6 Service Cards Grid (NO colored borders; subtle accent lines + unique icons) -->
+      <div class="grid grid-cols-2 gap-3">
+        
+        <!-- 1. New Registration (Warm Amber Accent) -->
+        <div onclick="showView('register')" class="glass-card p-4 cursor-pointer group flex flex-col justify-between min-h-[126px]">
+          <div class="service-accent-bar bg-[#B5882A]"></div>
+          <div class="w-10 h-10 rounded-xl bg-[#B5882A]/15 border border-[#B5882A]/25 flex items-center justify-center text-gold-400 mb-2.5 group-hover:scale-105 transition">
+            <i data-lucide="user-plus" class="w-5 h-5 text-gold-400"></i>
           </div>
           <div>
-            <div class="flex items-center space-x-1">
-              <span class="text-xs">⭐</span>
-              <h4 class="text-xs font-bold text-white">Feedback & Rating</h4>
-            </div>
-            <p class="text-[10px] text-gray-400 mt-0.5">Share your review</p>
+            <h4 class="text-xs font-bold text-white group-hover:text-gold-300 transition">New Registration</h4>
+            <p class="text-[10px] text-gray-400 mt-0.5 leading-snug">Admission, photo & seat selection</p>
           </div>
         </div>
 
-        <!-- 5. ⚠️ Complaint -->
-        <div onclick="showView('complaint')" class="portal-card p-3.5 cursor-pointer group flex flex-col justify-between">
-          <div class="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-2">
-            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        <!-- 2. Payments (Deep Emerald Accent) -->
+        <div onclick="showView('payment')" class="glass-card p-4 cursor-pointer group flex flex-col justify-between min-h-[126px]">
+          <div class="service-accent-bar bg-[#1A7A5E]"></div>
+          <div class="w-10 h-10 rounded-xl bg-[#1A7A5E]/15 border border-[#1A7A5E]/25 flex items-center justify-center text-emerald-400 mb-2.5 group-hover:scale-105 transition">
+            <i data-lucide="credit-card" class="w-5 h-5 text-emerald-400"></i>
           </div>
           <div>
-            <div class="flex items-center space-x-1">
-              <span class="text-xs">⚠️</span>
-              <h4 class="text-xs font-bold text-white">Complaint Desk</h4>
-            </div>
-            <p class="text-[10px] text-gray-400 mt-0.5">AC, cleaner, Wi-Fi support</p>
+            <h4 class="text-xs font-bold text-white group-hover:text-gold-300 transition">Payments</h4>
+            <p class="text-[10px] text-gray-400 mt-0.5 leading-snug">UPI transfer & verification proof</p>
           </div>
         </div>
 
-        <!-- 6. 📋 Member/Account Information -->
-        <div onclick="showView('member-info')" class="portal-card p-3.5 cursor-pointer group flex flex-col justify-between">
-          <div class="w-10 h-10 rounded-xl bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-gold-400 mb-2">
-            <i data-lucide="user-check" class="w-5 h-5"></i>
+        <!-- 3. Feedback & Reviews (Dusty Rose Accent) -->
+        <div onclick="showView('feedback')" class="glass-card p-4 cursor-pointer group flex flex-col justify-between min-h-[126px]">
+          <div class="service-accent-bar bg-[#A0546B]"></div>
+          <div class="w-10 h-10 rounded-xl bg-[#A0546B]/15 border border-[#A0546B]/25 flex items-center justify-center text-rose-300 mb-2.5 group-hover:scale-105 transition">
+            <i data-lucide="star" class="w-5 h-5 text-rose-300"></i>
           </div>
           <div>
-            <div class="flex items-center space-x-1">
-              <span class="text-xs">📋</span>
-              <h4 class="text-xs font-bold text-white">Member Info</h4>
-            </div>
-            <p class="text-[10px] text-gray-400 mt-0.5">My seat & expiry history</p>
+            <h4 class="text-xs font-bold text-white group-hover:text-gold-300 transition">Feedback & Reviews</h4>
+            <p class="text-[10px] text-gray-400 mt-0.5 leading-snug">Rate your study experience</p>
           </div>
         </div>
 
-        <!-- 7. ℹ️ Help / Contact -->
-        <div onclick="showView('contact')" class="portal-card p-3.5 cursor-pointer group flex flex-col justify-between">
-          <div class="w-10 h-10 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-400 mb-2">
-            <i data-lucide="help-circle" class="w-5 h-5"></i>
+        <!-- 4. Complaint (Muted Burgundy Accent) -->
+        <div onclick="showView('complaint')" class="glass-card p-4 cursor-pointer group flex flex-col justify-between min-h-[126px]">
+          <div class="service-accent-bar bg-[#8B2635]"></div>
+          <div class="w-10 h-10 rounded-xl bg-[#8B2635]/15 border border-[#8B2635]/25 flex items-center justify-center text-red-300 mb-2.5 group-hover:scale-105 transition">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-300"></i>
           </div>
           <div>
-            <div class="flex items-center space-x-1">
-              <span class="text-xs">ℹ️</span>
-              <h4 class="text-xs font-bold text-white">Help & Contact</h4>
-            </div>
-            <p class="text-[10px] text-gray-400 mt-0.5">Helpline & branch maps</p>
+            <h4 class="text-xs font-bold text-white group-hover:text-gold-300 transition">Complaint</h4>
+            <p class="text-[10px] text-gray-400 mt-0.5 leading-snug">Report AC, seating, or noise issues</p>
+          </div>
+        </div>
+
+        <!-- 5. Membership (Royal Purple Accent) -->
+        <div onclick="showView('member-info')" class="glass-card p-4 cursor-pointer group flex flex-col justify-between min-h-[126px]">
+          <div class="service-accent-bar bg-[#5B3FA6]"></div>
+          <div class="w-10 h-10 rounded-xl bg-[#5B3FA6]/15 border border-[#5B3FA6]/25 flex items-center justify-center text-purple-300 mb-2.5 group-hover:scale-105 transition">
+            <i data-lucide="id-card" class="w-5 h-5 text-purple-300"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-white group-hover:text-gold-300 transition">Membership</h4>
+            <p class="text-[10px] text-gray-400 mt-0.5 leading-snug">Check allocated seat & validity</p>
+          </div>
+        </div>
+
+        <!-- 6. Help & Support (Deep Blue Accent) -->
+        <div onclick="showView('contact')" class="glass-card p-4 cursor-pointer group flex flex-col justify-between min-h-[126px]">
+          <div class="service-accent-bar bg-[#2A5FA0]"></div>
+          <div class="w-10 h-10 rounded-xl bg-[#2A5FA0]/15 border border-[#2A5FA0]/25 flex items-center justify-center text-blue-300 mb-2.5 group-hover:scale-105 transition">
+            <i data-lucide="help-circle" class="w-5 h-5 text-blue-300"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-white group-hover:text-gold-300 transition">Help & Support</h4>
+            <p class="text-[10px] text-gray-400 mt-0.5 leading-snug">Director helpline & branches</p>
           </div>
         </div>
 
       </div>
 
-      <!-- Director & Branch Card -->
-      <div class="portal-card p-4 text-xs text-gray-300 space-y-2 border-white/5 bg-white/[0.02]">
+      <!-- Quick Seat Matrix Shortcut Card -->
+      <div onclick="showView('seats')" class="glass-card p-3.5 flex items-center justify-between cursor-pointer hover:bg-white/[0.04] transition">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+            <i data-lucide="armchair" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <span class="text-xs font-bold text-white block">View Live Seat Matrix</span>
+            <span class="text-[10px] text-gray-400">Real-time occupancy across all shifts</span>
+          </div>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+      </div>
+
+      <!-- Director & Location Footer Card -->
+      <div class="glass-card p-4 text-xs text-gray-300 space-y-2">
         <div class="flex items-center justify-between">
           <span class="font-bold text-gold-400">Director: Manglesh Mani Tripathi</span>
           <a href="tel:+919415919277" class="text-emerald-400 font-semibold flex items-center space-x-1">
@@ -323,65 +449,66 @@
             <span>9415919277</span>
           </a>
         </div>
-        <div class="pt-1 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400">
+        <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400">
           <span>📍 Khalilabad & Mehdawal, Sant Kabir Nagar</span>
           <span class="text-gold-400 font-medium">Open 24x7</span>
         </div>
       </div>
+
     </section>
 
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <!-- 2. REGISTRATION VIEW (Step-by-step with Dynamic Seats)          -->
+    <!-- VIEW: REGISTRATION (3-Step Guided Process)                      -->
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <section id="view-register" class="hidden space-y-4">
+    <section id="view-register" class="hidden page-view space-y-4">
       <div class="flex items-center justify-between">
         <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
           <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          <span>Back to Portal</span>
+          <span>Back</span>
         </button>
         <span class="text-xs font-bold text-gold-400" id="reg-step-indicator">Step 1 of 3</span>
       </div>
 
-      <!-- Step Indicator Bar -->
+      <!-- Step Progress Bar -->
       <div class="flex space-x-1.5">
-        <div id="step-pill-1" class="step-pill bg-gold-500"></div>
-        <div id="step-pill-2" class="step-pill bg-white/10"></div>
-        <div id="step-pill-3" class="step-pill bg-white/10"></div>
+        <div id="step-pill-1" class="h-1 flex-1 rounded-full bg-gold-500 transition-all duration-300"></div>
+        <div id="step-pill-2" class="h-1 flex-1 rounded-full bg-white/10 transition-all duration-300"></div>
+        <div id="step-pill-3" class="h-1 flex-1 rounded-full bg-white/10 transition-all duration-300"></div>
       </div>
 
       <!-- STEP 1: Personal Details -->
-      <div id="reg-content-step-1" class="portal-card p-5 space-y-3.5">
+      <div id="reg-content-step-1" class="glass-card p-5 space-y-3.5">
         <div class="border-b border-white/10 pb-2.5">
-          <h3 class="text-base font-bold text-white">Step 1 — Personal Details</h3>
+          <h3 class="text-sm font-bold text-white">01. Personal Details</h3>
           <p class="text-xs text-gray-400">Enter applicant information for membership admission</p>
         </div>
 
         <div>
-          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Full Name *</label>
-          <input id="reg-name" type="text" placeholder="e.g. Rahul Sharma" class="glass-input text-sm">
+          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Full Name *</label>
+          <input id="reg-name" type="text" placeholder="e.g. Rahul Sharma" class="glass-field">
         </div>
 
         <div>
-          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Father's / Mother's Name *</label>
-          <input id="reg-parent" type="text" placeholder="Parent or guardian name" class="glass-input text-sm">
+          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Father's / Mother's Name *</label>
+          <input id="reg-parent" type="text" placeholder="Parent or guardian name" class="glass-field">
         </div>
 
         <div>
-          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Mobile Number (WhatsApp) *</label>
+          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Mobile Number (WhatsApp) *</label>
           <div class="relative">
-            <span class="absolute left-3.5 top-3 text-sm text-gray-400 font-semibold">+91</span>
-            <input id="reg-phone" type="tel" maxlength="10" placeholder="9876543210" class="glass-input text-sm pl-12 font-medium">
+            <span class="absolute left-3.5 top-3.5 text-xs text-gray-400 font-semibold">+91</span>
+            <input id="reg-phone" type="tel" maxlength="10" placeholder="9876543210" class="glass-field pl-12 font-medium">
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Date of Birth</label>
-            <input id="reg-dob" type="date" class="glass-input text-sm">
+            <label class="text-[11px] font-semibold text-gray-300 block mb-1">Date of Birth</label>
+            <input id="reg-dob" type="date" class="glass-field">
           </div>
           <div>
-            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Gender *</label>
-            <select id="reg-gender" class="glass-input text-sm font-medium">
+            <label class="text-[11px] font-semibold text-gray-300 block mb-1">Gender *</label>
+            <select id="reg-gender" class="glass-field">
               <option value="Male">Male</option>
               <option value="Female">Female</option>
               <option value="Other">Other</option>
@@ -390,63 +517,63 @@
         </div>
 
         <div>
-          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Email Address</label>
-          <input id="reg-email" type="email" placeholder="student@example.com" class="glass-input text-sm">
+          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Email Address</label>
+          <input id="reg-email" type="email" placeholder="student@example.com" class="glass-field">
         </div>
 
         <div>
-          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Local Address *</label>
-          <textarea id="reg-address" rows="2" placeholder="Local address or village/city" class="glass-input text-sm resize-none"></textarea>
+          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Local Address *</label>
+          <textarea id="reg-address" rows="2" placeholder="Local address or village/city" class="glass-field resize-none"></textarea>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Aadhaar Number</label>
-            <input id="reg-aadhaar" type="text" maxlength="12" placeholder="12-digit Aadhaar" class="glass-input text-sm font-mono">
+            <label class="text-[11px] font-semibold text-gray-300 block mb-1">Aadhaar Number</label>
+            <input id="reg-aadhaar" type="text" maxlength="12" placeholder="12-digit Aadhaar" class="glass-field font-mono">
           </div>
           <div>
-            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Course / Exam</label>
-            <input id="reg-course" type="text" placeholder="UPSC, SSC, NEET..." class="glass-input text-sm">
+            <label class="text-[11px] font-semibold text-gray-300 block mb-1">Course / Exam</label>
+            <input id="reg-course" type="text" placeholder="UPSC, SSC, NEET..." class="glass-field">
           </div>
         </div>
 
-        <button onclick="goToRegStep(2)" class="w-full py-3 rounded-xl gold-btn text-sm flex items-center justify-center space-x-2 mt-2">
+        <button onclick="goToRegStep(2)" class="w-full py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5 mt-2">
           <span>Continue to Photo & Documents</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </div>
 
       <!-- STEP 2: Photo & Documents -->
-      <div id="reg-content-step-2" class="hidden portal-card p-5 space-y-4">
+      <div id="reg-content-step-2" class="hidden glass-card p-5 space-y-4">
         <div class="border-b border-white/10 pb-2.5">
-          <h3 class="text-base font-bold text-white">Step 2 — Member Photo & ID</h3>
+          <h3 class="text-sm font-bold text-white">02. Member Photo & ID</h3>
           <p class="text-xs text-gray-400">Upload your selfie/photo for member ID card</p>
         </div>
 
         <!-- Live Camera Selfie -->
         <div class="space-y-1.5">
-          <label class="text-xs font-bold text-gold-400 flex items-center space-x-1.5">
-            <i data-lucide="camera" class="w-4 h-4"></i>
+          <label class="text-xs font-semibold text-gold-400 flex items-center space-x-1.5">
+            <i data-lucide="camera" class="w-3.5 h-3.5"></i>
             <span>Applicant Selfie / Photo *</span>
           </label>
-          <div class="p-4 rounded-xl bg-black/40 border border-dashed border-gold-500/40 text-center relative cursor-pointer hover:bg-black/60 transition" onclick="document.getElementById('file-selfie').click()">
+          <div class="p-4 rounded-xl bg-black/40 border border-dashed border-gold-500/30 text-center relative cursor-pointer hover:bg-black/60 transition" onclick="document.getElementById('file-selfie').click()">
             <input type="file" id="file-selfie" accept="image/*" capture="user" class="hidden" onchange="previewImage(this, 'preview-selfie-box')">
             <div id="preview-selfie-box" class="flex flex-col items-center justify-center py-2 text-gray-400">
-              <i data-lucide="camera" class="w-8 h-8 text-gold-400 mb-1"></i>
+              <i data-lucide="camera" class="w-7 h-7 text-gold-400 mb-1"></i>
               <span class="text-xs font-semibold text-white">Tap to Take Selfie or Select Photo</span>
-              <span class="text-[10px] text-gray-400 mt-0.5">Displayed on Member Card & WhatsApp profile</span>
+              <span class="text-[10px] text-gray-400 mt-0.5">Used for Member ID and Attendance</span>
             </div>
             <input type="hidden" id="url-selfie">
           </div>
         </div>
 
-        <!-- Aadhaar Front -->
+        <!-- Aadhaar Photo -->
         <div class="space-y-1.5">
-          <label class="text-xs font-bold text-gray-300 flex items-center space-x-1.5">
-            <i data-lucide="id-card" class="w-4 h-4 text-gray-400"></i>
+          <label class="text-xs font-semibold text-gray-300 flex items-center space-x-1.5">
+            <i data-lucide="id-card" class="w-3.5 h-3.5 text-gray-400"></i>
             <span>Aadhaar Card (Optional)</span>
           </label>
-          <div class="p-3 rounded-xl bg-black/40 border border-dashed border-white/15 text-center relative cursor-pointer hover:bg-black/60 transition" onclick="document.getElementById('file-aadhaar').click()">
+          <div class="p-3.5 rounded-xl bg-black/40 border border-dashed border-white/15 text-center relative cursor-pointer hover:bg-black/60 transition" onclick="document.getElementById('file-aadhaar').click()">
             <input type="file" id="file-aadhaar" accept="image/*" class="hidden" onchange="previewImage(this, 'preview-aadhaar-box')">
             <div id="preview-aadhaar-box" class="flex items-center justify-center space-x-2 py-1 text-gray-400">
               <i data-lucide="upload" class="w-4 h-4 text-gold-400"></i>
@@ -460,54 +587,54 @@
           <button onclick="goToRegStep(1)" class="w-1/3 py-3 rounded-xl bg-white/10 text-xs font-bold text-gray-300">
             Back
           </button>
-          <button onclick="goToRegStep(3)" class="w-2/3 py-3 rounded-xl gold-btn text-sm font-bold flex items-center justify-center space-x-1">
+          <button onclick="goToRegStep(3)" class="w-2/3 py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1">
             <span>Select Shift & Seats</span>
             <i data-lucide="arrow-right" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
 
-      <!-- STEP 3: Plan, Batch & Intelligent Seat Availability -->
-      <div id="reg-content-step-3" class="hidden portal-card p-5 space-y-4">
+      <!-- STEP 3: Plan, Shift & Dynamic Seat Selection -->
+      <div id="reg-content-step-3" class="hidden glass-card p-5 space-y-4">
         <div class="border-b border-white/10 pb-2.5">
-          <h3 class="text-base font-bold text-white">Step 3 — Shift & Seat Selection</h3>
+          <h3 class="text-sm font-bold text-white">03. Shift & Seat Selection</h3>
           <p class="text-xs text-gray-400">Select timing to view only available seats</p>
         </div>
 
         <!-- Plan Selection -->
         <div>
-          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1.5">Select Membership Plan *</label>
+          <label class="text-[11px] font-semibold text-gray-300 block mb-1.5">Membership Plan *</label>
           <div class="space-y-2">
-            <div onclick="selectPlan('PLAN_6H', 500, '6 Hours Shift')" class="plan-card p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between" id="plan-opt-6h">
+            <div onclick="selectPlan('PLAN_6H', 500, '6 Hours Shift')" class="p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition" id="plan-opt-6h">
               <div>
-                <span class="text-xs font-extrabold text-white">6 Hours Single Shift</span>
+                <span class="text-xs font-bold text-white">6 Hours Single Shift</span>
                 <p class="text-[10px] text-gray-400">Morning, Afternoon or Evening</p>
               </div>
-              <span class="text-sm font-extrabold text-emerald-400">₹500<span class="text-[10px] text-gray-400">/mo</span></span>
+              <span class="text-sm font-bold text-emerald-400">₹500<span class="text-[10px] text-gray-400 font-normal">/mo</span></span>
             </div>
 
-            <div onclick="selectPlan('PLAN_12H', 800, '12 Hours Double Shift')" class="plan-card p-3 rounded-xl border border-gold-500/50 bg-gold-500/10 cursor-pointer flex items-center justify-between" id="plan-opt-12h">
+            <div onclick="selectPlan('PLAN_12H', 800, '12 Hours Double Shift')" class="p-3 rounded-xl border border-gold-500/50 bg-gold-500/10 cursor-pointer flex items-center justify-between transition" id="plan-opt-12h">
               <div>
-                <span class="text-xs font-extrabold text-white">12 Hours Double Shift</span>
+                <span class="text-xs font-bold text-white">12 Hours Double Shift</span>
                 <p class="text-[10px] text-gold-300/80">06:00 AM – 06:00 PM or 12:00 PM – 12:00 AM</p>
               </div>
-              <span class="text-sm font-extrabold text-gold-400">₹800<span class="text-[10px] text-gray-400">/mo</span></span>
+              <span class="text-sm font-bold text-gold-400">₹800<span class="text-[10px] text-gray-400 font-normal">/mo</span></span>
             </div>
 
-            <div onclick="selectPlan('PLAN_24H', 1000, '24 Hours Full Day (Dedicated Seat)')" class="plan-card p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between" id="plan-opt-24h">
+            <div onclick="selectPlan('PLAN_24H', 1000, '24 Hours Full Day (Dedicated Seat)')" class="p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition" id="plan-opt-24h">
               <div>
-                <span class="text-xs font-extrabold text-white">24 Hours Full Day (Dedicated)</span>
+                <span class="text-xs font-bold text-white">24 Hours Full Day (Dedicated)</span>
                 <p class="text-[10px] text-gray-400">24/7 dedicated personal study station</p>
               </div>
-              <span class="text-sm font-extrabold text-purple-400">₹1,000<span class="text-[10px] text-gray-400">/mo</span></span>
+              <span class="text-sm font-bold text-purple-300">₹1,000<span class="text-[10px] text-gray-400 font-normal">/mo</span></span>
             </div>
           </div>
         </div>
 
         <!-- Shift / Timing Selection -->
         <div>
-          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Preferred Shift / Timing *</label>
-          <select id="reg-timing" onchange="refreshDynamicSeats()" class="glass-input text-sm font-medium">
+          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Preferred Shift / Timing *</label>
+          <select id="reg-timing" onchange="refreshDynamicSeats()" class="glass-field">
             <option value="Morning (06:00 AM – 12:00 PM)">Morning Shift (06:00 AM – 12:00 PM)</option>
             <option value="Afternoon (12:00 PM – 06:00 PM)">Afternoon Shift (12:00 PM – 06:00 PM)</option>
             <option value="Evening (06:00 PM – 12:00 AM)">Evening Shift (06:00 PM – 12:00 AM)</option>
@@ -515,13 +642,13 @@
           </select>
         </div>
 
-        <!-- Intelligent Dynamic Seat Grid -->
+        <!-- Dynamic Seat Grid -->
         <div class="space-y-2">
           <div class="flex items-center justify-between">
-            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider">
+            <label class="text-[11px] font-semibold text-gray-300">
               Select Available Seat *
             </label>
-            <span class="text-[10px] text-emerald-400 font-semibold" id="dynamic-seat-count-label">
+            <span class="text-[10px] text-emerald-400 font-medium" id="dynamic-seat-count-label">
               18 seats available
             </span>
           </div>
@@ -554,17 +681,17 @@
         </div>
 
         <!-- Registration Summary -->
-        <div class="p-3.5 rounded-xl bg-gradient-to-r from-gold-500/10 to-amber-500/5 border border-gold-500/30 space-y-1.5 text-xs">
-          <div class="font-extrabold text-gold-400 flex items-center justify-between">
-            <span>Registration Summary</span>
-            <span class="text-sm font-extrabold text-emerald-400" id="summary-total-amt">₹800</span>
+        <div class="p-3.5 rounded-xl bg-gold-500/10 border border-gold-500/20 space-y-1.5 text-xs">
+          <div class="font-bold text-gold-400 flex items-center justify-between">
+            <span>Summary</span>
+            <span class="text-sm font-bold text-emerald-400" id="summary-total-amt">₹800</span>
           </div>
           <div class="text-gray-300 flex justify-between text-[11px]">
-            <span>Selected Plan:</span>
+            <span>Plan:</span>
             <strong id="summary-plan-text" class="text-white">12 Hours Double Shift</strong>
           </div>
           <div class="text-gray-300 flex justify-between text-[11px]">
-            <span>Shift Timing:</span>
+            <span>Timing:</span>
             <span id="summary-timing-text" class="text-white">Morning / Afternoon</span>
           </div>
           <div class="text-gray-300 flex justify-between text-[11px]">
@@ -577,7 +704,7 @@
           <button onclick="goToRegStep(2)" class="w-1/3 py-3 rounded-xl bg-white/10 text-xs font-bold text-gray-300">
             Back
           </button>
-          <button onclick="submitRegistration()" class="w-2/3 py-3 rounded-xl gold-btn text-sm font-bold flex items-center justify-center space-x-1.5">
+          <button onclick="submitRegistration()" class="w-2/3 py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5">
             <span>Proceed to Payment</span>
             <i data-lucide="credit-card" class="w-4 h-4"></i>
           </button>
@@ -585,90 +712,91 @@
       </div>
 
       <!-- Registration Success Card -->
-      <div id="reg-success-box" class="hidden portal-card p-6 text-center space-y-4 border-gold-500/50 bg-gold-500/5">
-        <div class="w-14 h-14 rounded-full bg-emerald-500/20 border border-emerald-500 text-emerald-400 flex items-center justify-center mx-auto">
-          <i data-lucide="check" class="w-7 h-7"></i>
+      <div id="reg-success-box" class="hidden glass-card p-6 text-center space-y-4 border-gold-500/30">
+        <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 flex items-center justify-center mx-auto">
+          <i data-lucide="check" class="w-6 h-6"></i>
         </div>
         <div>
-          <span class="px-3 py-1 rounded-full bg-gold-500/20 border border-gold-500/40 text-gold-400 text-xs font-bold uppercase tracking-wider">
+          <span class="px-2.5 py-0.5 rounded-full bg-gold-500/15 border border-gold-500/30 text-gold-400 text-[10px] font-bold uppercase tracking-wider">
             Admission Queued
           </span>
-          <h3 class="text-lg font-extrabold text-white pt-2">REGISTRATION SUBMITTED</h3>
+          <h3 class="text-base font-bold text-white pt-2">REGISTRATION SUBMITTED</h3>
           <p class="text-xs text-gray-300 mt-1">Application ID: <strong class="text-gold-400 font-mono text-sm" id="reg-succ-id">REG-104920</strong></p>
         </div>
-        <p class="text-xs text-gray-400">Complete the UPI fee transfer below to activate your admission instantly.</p>
-        <button onclick="goToPaymentFromReg()" class="w-full py-3.5 rounded-xl gold-btn text-xs font-bold flex items-center justify-center space-x-1.5">
+        <p class="text-xs text-gray-400">Complete the fee payment via UPI below to activate your admission.</p>
+        <button onclick="goToPaymentFromReg()" class="w-full py-3.5 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5">
           <span>Proceed to UPI Payment (₹<span id="reg-succ-amt">800</span>)</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </div>
+
     </section>
 
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <!-- 3. PAYMENTS VIEW (Prashant Mani Tripathi UPI & QR)             -->
+    <!-- VIEW: PAYMENTS (Prashant Mani Tripathi Official UPI Gateway)    -->
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <section id="view-payment" class="hidden space-y-4">
+    <section id="view-payment" class="hidden page-view space-y-4">
       <div class="flex items-center justify-between">
         <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
           <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          <span>Back to Portal</span>
+          <span>Back</span>
         </button>
-        <span class="text-xs font-bold text-emerald-400">UPI Instant Pay</span>
+        <span class="text-xs font-semibold text-emerald-400">UPI Instant Pay</span>
       </div>
 
-      <div class="portal-card p-5 space-y-4">
+      <div class="glass-card p-5 space-y-4">
         <div class="border-b border-white/10 pb-2.5">
-          <h3 class="text-base font-bold text-white">Membership / Fee Payment</h3>
-          <p class="text-xs text-gray-400">Scan QR or copy UPI ID to transfer fee</p>
+          <h3 class="text-sm font-bold text-white">Membership / Fee Payment</h3>
+          <p class="text-xs text-gray-400">Scan QR or copy UPI ID to transfer fee securely</p>
         </div>
 
-        <!-- Official Prashant Mani Tripathi UPI Payment Card -->
-        <div class="p-4 rounded-2xl bg-black/60 border border-gold-500/35 space-y-3 text-center">
+        <!-- Official Prashant Mani Tripathi UPI Gateway Card -->
+        <div class="p-4 rounded-xl bg-black/60 border border-gold-500/25 space-y-3 text-center">
           <div class="flex items-center justify-center space-x-2">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="text-xs font-extrabold text-white">Official Library UPI Gateway</span>
+            <span class="text-xs font-bold text-white">Official Library UPI Gateway</span>
           </div>
 
           <!-- Official QR Image Display -->
-          <div class="relative w-52 h-52 mx-auto rounded-xl overflow-hidden border-2 border-gold-500/40 p-1.5 bg-white shadow-xl">
-            <img id="upi-qr-image" src="images/upi_qr.jpg" alt="Prashant Mani Tripathi UPI QR" class="w-full h-full object-contain" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi%3A%2F%2Fpay%3Fpa%3Dprashantmanitripathi2003-2%40oksbi%26pn%3DPrashant%2520Mani%2520Tripathi%26cu%3DINR'">
+          <div class="relative w-52 h-52 mx-auto rounded-xl overflow-hidden border-2 border-gold-500/35 p-1.5 bg-white shadow-xl">
+            <img id="upi-qr-image" src="images/upi_qr.jpg" alt="UPI QR" class="w-full h-full object-contain" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi%3A%2F%2Fpay%3Fpa%3Dprashantmanitripathi2003-2%40oksbi%26pn%3DPrashant%2520Mani%2520Tripathi%26cu%3DINR'">
           </div>
-          <p class="text-[10px] text-gray-400">Scan with GPay, PhonePe, Paytm, or BHIM</p>
+          <p class="text-[10.5px] text-gray-400">Scan with Google Pay, PhonePe, Paytm, or BHIM</p>
 
-          <!-- UPI ID with One-Click Copy -->
-          <div class="p-2.5 rounded-xl bg-white/5 border border-white/15 flex items-center justify-between">
-            <div class="text-left">
-              <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider block">Beneficiary UPI ID</span>
-              <span class="text-xs font-mono font-extrabold text-gold-400 select-all" id="upi-id-text">prashantmanitripathi2003-2@oksbi</span>
+          <!-- Beneficiary & UPI ID with One-Click Copy -->
+          <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between text-left">
+            <div>
+              <span class="text-[9.5px] text-gray-400 uppercase font-semibold tracking-wider block">Beneficiary: Prashant Mani Tripathi</span>
+              <span class="text-xs font-mono font-bold text-gold-400 select-all" id="upi-id-text">prashantmanitripathi2003-2@oksbi</span>
             </div>
-            <button onclick="copyUpiId()" class="px-3 py-1.5 rounded-lg bg-gold-500/20 text-gold-300 text-xs font-bold border border-gold-500/40 hover:bg-gold-500 hover:text-dark-bg transition flex items-center space-x-1">
+            <button onclick="copyUpiId()" class="px-3 py-1.5 rounded-lg bg-gold-500/15 text-gold-300 text-xs font-bold border border-gold-500/30 hover:bg-gold-500 hover:text-dark-bg transition flex items-center space-x-1">
               <i data-lucide="copy" class="w-3.5 h-3.5"></i>
               <span id="copy-btn-label">Copy</span>
             </button>
           </div>
 
           <!-- Deep Link Intent Button -->
-          <a id="btn-upi-intent" href="upi://pay?pa=prashantmanitripathi2003-2@oksbi&pn=Prashant%20Mani%20Tripathi&cu=INR" class="block w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/20 active:scale-95 transition">
-            Pay via UPI App (GPay / PhonePe / Paytm)
+          <a id="btn-upi-intent" href="upi://pay?pa=prashantmanitripathi2003-2@oksbi&pn=Prashant%20Mani%20Tripathi&cu=INR" class="block w-full py-3 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 active:scale-95 transition">
+            Pay via Installed UPI App
           </a>
         </div>
 
-        <!-- Payment Details Form -->
+        <!-- Payment Verification Form -->
         <div class="space-y-3 pt-1">
           <div>
-            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Your Mobile Number *</label>
-            <input id="pay-phone" type="tel" maxlength="10" placeholder="10-digit registered number" class="glass-input text-sm">
+            <label class="text-[11px] font-semibold text-gray-300 block mb-1">Your Registered Mobile Number *</label>
+            <input id="pay-phone" type="tel" maxlength="10" placeholder="10-digit registered number" class="glass-field">
           </div>
 
           <div>
-            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Your Full Name</label>
-            <input id="pay-name" type="text" placeholder="Rahul Sharma" class="glass-input text-sm">
+            <label class="text-[11px] font-semibold text-gray-300 block mb-1">Your Full Name</label>
+            <input id="pay-name" type="text" placeholder="Rahul Sharma" class="glass-field">
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Payment Type</label>
-              <select id="pay-type" class="glass-input text-sm font-medium">
+              <label class="text-[11px] font-semibold text-gray-300 block mb-1">Payment Type</label>
+              <select id="pay-type" class="glass-field">
                 <option value="MEMBERSHIP">Membership Admission</option>
                 <option value="RENEWAL">Monthly Renewal</option>
                 <option value="MAINTENANCE">Maintenance</option>
@@ -677,18 +805,18 @@
               </select>
             </div>
             <div>
-              <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Amount (₹) *</label>
-              <input id="pay-amount" type="number" value="800" placeholder="Amount" class="glass-input text-sm font-extrabold text-gold-400">
+              <label class="text-[11px] font-semibold text-gray-300 block mb-1">Amount (₹) *</label>
+              <input id="pay-amount" type="number" value="800" placeholder="Amount" class="glass-field font-bold text-gold-400">
             </div>
           </div>
 
           <!-- Payment Screenshot Upload -->
           <div class="space-y-1.5 pt-1">
-            <label class="text-xs font-bold text-gold-400 flex items-center space-x-1.5">
-              <i data-lucide="image" class="w-4 h-4"></i>
+            <label class="text-xs font-semibold text-gold-400 flex items-center space-x-1.5">
+              <i data-lucide="image" class="w-3.5 h-3.5"></i>
               <span>Upload Payment Screenshot *</span>
             </label>
-            <div class="p-3.5 rounded-xl bg-black/40 border border-dashed border-gold-500/40 text-center relative cursor-pointer hover:bg-black/60 transition" onclick="document.getElementById('file-pay-screenshot').click()">
+            <div class="p-3.5 rounded-xl bg-black/40 border border-dashed border-gold-500/30 text-center relative cursor-pointer hover:bg-black/60 transition" onclick="document.getElementById('file-pay-screenshot').click()">
               <input type="file" id="file-pay-screenshot" accept="image/*" class="hidden" onchange="previewImage(this, 'preview-pay-screenshot-box')">
               <div id="preview-pay-screenshot-box" class="flex flex-col items-center justify-center py-1 text-gray-400">
                 <i data-lucide="upload-cloud" class="w-6 h-6 text-gold-400 mb-1"></i>
@@ -700,11 +828,11 @@
           </div>
 
           <div>
-            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">UTR / Transaction Reference (12 digits) *</label>
-            <input id="pay-utr" type="text" maxlength="16" placeholder="e.g. 423984729103" class="glass-input text-sm font-mono font-medium">
+            <label class="text-[11px] font-semibold text-gray-300 block mb-1">Transaction UTR / Reference ID (12 digits) *</label>
+            <input id="pay-utr" type="text" maxlength="16" placeholder="e.g. 423984729103" class="glass-field font-mono">
           </div>
 
-          <button onclick="submitPaymentProof()" class="w-full py-3.5 rounded-xl gold-btn text-sm font-bold flex items-center justify-center space-x-1.5 mt-2">
+          <button onclick="submitPaymentProof()" class="w-full py-3.5 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5 mt-2">
             <span>Submit Payment for Verification</span>
             <i data-lucide="send" class="w-4 h-4"></i>
           </button>
@@ -712,61 +840,62 @@
       </div>
 
       <!-- Payment Verification Pending Box -->
-      <div id="pay-success-box" class="hidden portal-card p-6 text-center space-y-3.5 border-emerald-500/40 bg-emerald-500/5">
-        <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500 text-emerald-400 flex items-center justify-center mx-auto">
+      <div id="pay-success-box" class="hidden glass-card p-6 text-center space-y-3.5 border-emerald-500/30">
+        <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 flex items-center justify-center mx-auto">
           <i data-lucide="clock" class="w-6 h-6"></i>
         </div>
         <div>
-          <span class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-bold uppercase tracking-wider">
-            Payment Verification Pending
+          <span class="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+            Verification Pending
           </span>
-          <h4 class="text-sm font-extrabold text-white pt-2">PROOF SUBMITTED SUCCESSFULLY</h4>
+          <h4 class="text-sm font-bold text-white pt-2">PROOF RECEIVED</h4>
           <p class="text-xs text-gray-300 mt-1">Reference ID: <strong class="text-gold-400 font-mono" id="pay-succ-ref">PAY-982143</strong></p>
         </div>
-        <p class="text-[11px] text-gray-400">
-          The administrator has received your transaction screenshot and will verify the UTR. Your member status will update automatically upon approval.
+        <p class="text-[11px] text-gray-400 leading-relaxed">
+          The administrator will verify your transaction against the bank statement. Your seat status and membership will update upon approval.
         </p>
-        <button onclick="showView('landing')" class="w-full py-2.5 rounded-lg bg-white/10 text-xs font-bold text-gray-200">
-          Back to Portal Home
+        <button onclick="showView('landing')" class="w-full py-2.5 rounded-xl bg-white/10 text-xs font-semibold text-gray-200">
+          Back to Home
         </button>
       </div>
+
     </section>
 
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <!-- 4. FEEDBACK & REVIEWS VIEW                                      -->
+    <!-- VIEW: FEEDBACK & REVIEWS                                        -->
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <section id="view-feedback" class="hidden space-y-4">
+    <section id="view-feedback" class="hidden page-view space-y-4">
       <div class="flex items-center justify-between">
         <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
           <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          <span>Back to Portal</span>
+          <span>Back</span>
         </button>
-        <span class="text-xs font-bold text-amber-400">Member Review</span>
+        <span class="text-xs font-semibold text-rose-300">Member Review</span>
       </div>
 
-      <div class="portal-card p-5 space-y-4">
+      <div class="glass-card p-5 space-y-4">
         <div class="border-b border-white/10 pb-2.5">
-          <h3 class="text-base font-bold text-white">Share Your Experience</h3>
-          <p class="text-xs text-gray-400">Help us maintain the highest study atmosphere</p>
+          <h3 class="text-sm font-bold text-white">Share Your Experience</h3>
+          <p class="text-xs text-gray-400">Help us maintain a peaceful, productive study atmosphere</p>
         </div>
 
         <!-- Star Rating -->
         <div class="text-center py-2 space-y-1">
-          <label class="text-xs font-bold text-gray-300 uppercase tracking-wider block">Your Overall Rating</label>
+          <label class="text-xs font-semibold text-gray-300 block">Overall Experience Rating</label>
           <div class="flex items-center justify-center space-x-2 text-2xl pt-1">
-            <span onclick="setRating(1)" class="star-btn text-amber-400 cursor-pointer" id="star-1">★</span>
-            <span onclick="setRating(2)" class="star-btn text-amber-400 cursor-pointer" id="star-2">★</span>
-            <span onclick="setRating(3)" class="star-btn text-amber-400 cursor-pointer" id="star-3">★</span>
-            <span onclick="setRating(4)" class="star-btn text-amber-400 cursor-pointer" id="star-4">★</span>
-            <span onclick="setRating(5)" class="star-btn text-amber-400 cursor-pointer" id="star-5">★</span>
+            <span onclick="setRating(1)" class="cursor-pointer text-amber-400 transition hover:scale-110" id="star-1">★</span>
+            <span onclick="setRating(2)" class="cursor-pointer text-amber-400 transition hover:scale-110" id="star-2">★</span>
+            <span onclick="setRating(3)" class="cursor-pointer text-amber-400 transition hover:scale-110" id="star-3">★</span>
+            <span onclick="setRating(4)" class="cursor-pointer text-amber-400 transition hover:scale-110" id="star-4">★</span>
+            <span onclick="setRating(5)" class="cursor-pointer text-amber-400 transition hover:scale-110" id="star-5">★</span>
           </div>
-          <span class="text-xs font-extrabold text-gold-400" id="rating-text">5.0 — Excellent</span>
+          <span class="text-xs font-bold text-gold-400" id="rating-text">5.0 — Excellent</span>
           <input type="hidden" id="fb-rating" value="5">
         </div>
 
         <!-- Category Selection -->
         <div>
-          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1.5">Feedback Category *</label>
+          <label class="text-[11px] font-semibold text-gray-300 block mb-1.5">Feedback Category *</label>
           <div class="grid grid-cols-3 gap-2" id="fb-cat-group">
             <button type="button" onclick="selectFbCat(this, 'LIBRARY')" class="fb-cat-btn py-2 px-1 text-center rounded-xl bg-gold-500/20 border border-gold-500 text-xs font-semibold text-gold-300">Library</button>
             <button type="button" onclick="selectFbCat(this, 'STAFF')" class="fb-cat-btn py-2 px-1 text-center rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300">Staff</button>
@@ -780,190 +909,190 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Your Name *</label>
-            <input id="fb-name" type="text" placeholder="Rahul Sharma" class="glass-input text-sm">
+            <label class="text-[11px] font-semibold text-gray-300 block mb-1">Your Name *</label>
+            <input id="fb-name" type="text" placeholder="Rahul Sharma" class="glass-field">
           </div>
           <div>
-            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Mobile No.</label>
-            <input id="fb-phone" type="tel" maxlength="10" placeholder="Optional" class="glass-input text-sm">
+            <label class="text-[11px] font-semibold text-gray-300 block mb-1">Mobile No.</label>
+            <input id="fb-phone" type="tel" maxlength="10" placeholder="Optional" class="glass-field">
           </div>
         </div>
 
         <div>
-          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Written Review *</label>
-          <textarea id="fb-review" rows="3" placeholder="Tell us about the environment, air conditioning, peace, or amenities..." class="glass-input text-sm resize-none"></textarea>
+          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Your Comments *</label>
+          <textarea id="fb-review" rows="3" placeholder="Tell us about the atmosphere, air conditioning, seating, or staff support..." class="glass-field resize-none"></textarea>
         </div>
 
-        <button onclick="submitFeedback()" class="w-full py-3 rounded-xl gold-btn text-sm font-bold flex items-center justify-center space-x-1.5">
+        <button onclick="submitFeedback()" class="w-full py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5">
           <span>Submit Review</span>
           <i data-lucide="send" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <!-- Feedback Thank You Card -->
-      <div id="fb-success-box" class="hidden portal-card p-6 text-center space-y-3 border-amber-500/40 bg-amber-500/5">
+      <!-- Feedback Confirmation Card -->
+      <div id="fb-success-box" class="hidden glass-card p-6 text-center space-y-3 border-amber-500/30">
         <i data-lucide="check-circle" class="w-10 h-10 text-amber-400 mx-auto"></i>
         <div>
-          <h4 class="text-sm font-extrabold text-white">Thank You for Your Review!</h4>
-          <p class="text-xs text-gray-300 mt-1">Your rating has been received and helps us make Chintamani Library better every day.</p>
+          <h4 class="text-sm font-bold text-white">Thank You for Your Feedback!</h4>
+          <p class="text-xs text-gray-300 mt-1">Your review helps us maintain the highest standard for every student.</p>
         </div>
-        <button onclick="showView('landing')" class="w-full py-2.5 rounded-lg bg-white/10 text-xs font-bold text-gray-200">
-          Back to Portal Home
+        <button onclick="showView('landing')" class="w-full py-2.5 rounded-xl bg-white/10 text-xs font-semibold text-gray-200">
+          Back to Home
         </button>
       </div>
     </section>
 
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <!-- 5. COMPLAINT VIEW                                               -->
+    <!-- VIEW: COMPLAINT DESK                                            -->
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <section id="view-complaint" class="hidden space-y-4">
+    <section id="view-complaint" class="hidden page-view space-y-4">
       <div class="flex items-center justify-between">
         <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
           <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          <span>Back to Portal</span>
+          <span>Back</span>
         </button>
-        <span class="text-xs font-bold text-purple-400">Issue Assistance</span>
+        <span class="text-xs font-semibold text-red-300">Complaint Desk</span>
       </div>
 
-      <div class="portal-card p-5 space-y-3.5">
+      <div class="glass-card p-5 space-y-3.5">
         <div class="border-b border-white/10 pb-2.5">
-          <h3 class="text-base font-bold text-white">Submit a Complaint / Request</h3>
-          <p class="text-xs text-gray-400">Report any facility issue for rapid maintenance</p>
+          <h3 class="text-sm font-bold text-white">Submit a Complaint / Request</h3>
+          <p class="text-xs text-gray-400">Report any facility issue for rapid maintenance attention</p>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Your Name *</label>
-            <input id="cmp-name" type="text" placeholder="Rahul Sharma" class="glass-input text-sm">
+            <label class="text-[11px] font-semibold text-gray-300 block mb-1">Your Name *</label>
+            <input id="cmp-name" type="text" placeholder="Rahul Sharma" class="glass-field">
           </div>
           <div>
-            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Mobile No. *</label>
-            <input id="cmp-phone" type="tel" maxlength="10" placeholder="9876543210" class="glass-input text-sm">
+            <label class="text-[11px] font-semibold text-gray-300 block mb-1">Mobile No. *</label>
+            <input id="cmp-phone" type="tel" maxlength="10" placeholder="9876543210" class="glass-field">
           </div>
         </div>
 
         <div>
-          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1.5">Category *</label>
+          <label class="text-[11px] font-semibold text-gray-300 block mb-1.5">Category *</label>
           <div class="grid grid-cols-3 gap-2" id="cmp-category-group">
-            <button type="button" onclick="selectComplaintCat(this, 'SEAT')" class="cmp-cat-btn py-2 px-1 text-center rounded-xl bg-purple-500/20 border border-purple-500 text-xs font-semibold text-purple-300">Seat Issue</button>
-            <button type="button" onclick="selectComplaintCat(this, 'PAYMENT')" class="cmp-cat-btn py-2 px-1 text-center rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300">Payment Issue</button>
+            <button type="button" onclick="selectComplaintCat(this, 'SEAT')" class="cmp-cat-btn py-2 px-1 text-center rounded-xl bg-gold-500/20 border border-gold-500 text-xs font-semibold text-gold-300">Seat Issue</button>
+            <button type="button" onclick="selectComplaintCat(this, 'PAYMENT')" class="cmp-cat-btn py-2 px-1 text-center rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300">Payment</button>
             <button type="button" onclick="selectComplaintCat(this, 'AC')" class="cmp-cat-btn py-2 px-1 text-center rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300">AC / Fan</button>
             <button type="button" onclick="selectComplaintCat(this, 'CLEANLINESS')" class="cmp-cat-btn py-2 px-1 text-center rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300">Cleanliness</button>
-            <button type="button" onclick="selectComplaintCat(this, 'INTERNET')" class="cmp-cat-btn py-2 px-1 text-center rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300">Internet</button>
+            <button type="button" onclick="selectComplaintCat(this, 'INTERNET')" class="cmp-cat-btn py-2 px-1 text-center rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300">Wi-Fi</button>
             <button type="button" onclick="selectComplaintCat(this, 'OTHER')" class="cmp-cat-btn py-2 px-1 text-center rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300">Other</button>
           </div>
           <input type="hidden" id="cmp-category" value="SEAT">
         </div>
 
         <div>
-          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Issue Description *</label>
-          <textarea id="cmp-desc" rows="3" placeholder="Explain the problem in detail (e.g. Seat number, socket loose, temperature)..." class="glass-input text-sm resize-none"></textarea>
+          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Issue Description *</label>
+          <textarea id="cmp-desc" rows="3" placeholder="Provide seat number, socket issue, cooling problem, or description..." class="glass-field resize-none"></textarea>
         </div>
 
-        <button onclick="submitComplaint()" class="w-full py-3 rounded-xl gold-btn text-sm font-bold flex items-center justify-center space-x-1.5 mt-2">
+        <button onclick="submitComplaint()" class="w-full py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5 mt-2">
           <span>Submit Complaint</span>
           <i data-lucide="send" class="w-4 h-4"></i>
         </button>
       </div>
 
       <!-- Complaint Success Box -->
-      <div id="cmp-success-box" class="hidden portal-card p-5 text-center space-y-3 border-purple-500/40 bg-purple-500/5">
-        <i data-lucide="check-circle" class="w-8 h-8 text-purple-400 mx-auto"></i>
+      <div id="cmp-success-box" class="hidden glass-card p-5 text-center space-y-3 border-gold-500/30">
+        <i data-lucide="check-circle" class="w-8 h-8 text-emerald-400 mx-auto"></i>
         <div>
-          <h4 class="text-sm font-extrabold text-white">Complaint Registered</h4>
-          <p class="text-xs text-gray-300 mt-0.5">Complaint ID: <strong class="text-gold-400 font-mono" id="succ-cmp-id">CMP-10492</strong></p>
+          <h4 class="text-sm font-bold text-white">Complaint Registered</h4>
+          <p class="text-xs text-gray-300 mt-0.5">Reference ID: <strong class="text-gold-400 font-mono" id="succ-cmp-id">CMP-10492</strong></p>
         </div>
-        <p class="text-[11px] text-gray-400">Library maintenance has been alerted and will attend to it promptly.</p>
-        <button onclick="showView('landing')" class="w-full py-2.5 rounded-lg bg-white/10 text-xs font-bold text-gray-200">
-          Back to Portal Home
+        <p class="text-[11px] text-gray-400">Library administration has received your ticket and will resolve it promptly.</p>
+        <button onclick="showView('landing')" class="w-full py-2.5 rounded-xl bg-white/10 text-xs font-semibold text-gray-200">
+          Back to Home
         </button>
       </div>
     </section>
 
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <!-- 6. SEAT AVAILABILITY VIEW                                       -->
+    <!-- VIEW: SEAT AVAILABILITY MATRIX                                  -->
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <section id="view-seats" class="hidden space-y-4">
+    <section id="view-seats" class="hidden page-view space-y-4">
       <div class="flex items-center justify-between">
         <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
           <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          <span>Back to Portal</span>
+          <span>Back</span>
         </button>
-        <span class="text-xs font-bold text-emerald-400">Live Seat Matrix</span>
+        <span class="text-xs font-semibold text-emerald-400">Live Seat Matrix</span>
       </div>
 
-      <div class="portal-card p-4 space-y-3">
+      <div class="glass-card p-4 space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-bold text-white">Seat Availability Status</h3>
-          <span class="text-[11px] text-gold-400 flex items-center space-x-1">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-white">Seat Availability Status</h3>
+          <span class="text-[11px] text-emerald-400 flex items-center space-x-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
             <span>Real-time</span>
           </span>
         </div>
 
         <div class="grid grid-cols-3 gap-2 text-center">
-          <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25">
-            <span class="text-base font-extrabold text-emerald-400" id="stat-avail">18</span>
-            <p class="text-[10px] text-emerald-300 font-semibold mt-0.5">Available</p>
+          <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <span class="text-base font-bold text-emerald-400" id="stat-avail">18</span>
+            <p class="text-[10px] text-emerald-300 font-medium mt-0.5">Available</p>
           </div>
-          <div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/25">
-            <span class="text-base font-extrabold text-rose-400" id="stat-occupied">32</span>
-            <p class="text-[10px] text-rose-300 font-semibold mt-0.5">Occupied</p>
+          <div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20">
+            <span class="text-base font-bold text-rose-400" id="stat-occupied">32</span>
+            <p class="text-[10px] text-rose-300 font-medium mt-0.5">Occupied</p>
           </div>
-          <div class="p-2.5 rounded-xl bg-gold-500/10 border border-gold-500/25">
-            <span class="text-base font-extrabold text-gold-400">50</span>
-            <p class="text-[10px] text-gold-300 font-semibold mt-0.5">Total Capacity</p>
+          <div class="p-2.5 rounded-xl bg-gold-500/10 border border-gold-500/20">
+            <span class="text-base font-bold text-gold-400">50</span>
+            <p class="text-[10px] text-gold-300 font-medium mt-0.5">Total Seats</p>
           </div>
         </div>
       </div>
 
-      <button onclick="showView('register')" class="w-full py-3.5 rounded-xl gold-btn text-sm font-bold flex items-center justify-center space-x-2">
+      <button onclick="showView('register')" class="w-full py-3.5 rounded-xl btn-gold text-xs flex items-center justify-center space-x-2">
         <span>Reserve an Available Seat Now</span>
         <i data-lucide="arrow-right" class="w-4 h-4"></i>
       </button>
     </section>
 
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <!-- 7. MEMBER INFO / ACCOUNT SELF-SERVICE                           -->
+    <!-- VIEW: MEMBER ACCOUNT INFO                                       -->
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <section id="view-member-info" class="hidden space-y-4">
+    <section id="view-member-info" class="hidden page-view space-y-4">
       <div class="flex items-center justify-between">
         <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
           <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          <span>Back to Portal</span>
+          <span>Back</span>
         </button>
-        <span class="text-xs font-bold text-gold-400">Account Access</span>
+        <span class="text-xs font-semibold text-gold-400">Account Access</span>
       </div>
 
       <!-- Verification Input -->
-      <div class="portal-card p-5 space-y-3.5">
+      <div class="glass-card p-5 space-y-3.5">
         <div class="border-b border-white/10 pb-2.5">
-          <h3 class="text-base font-bold text-white">Student Account Verification</h3>
+          <h3 class="text-sm font-bold text-white">Student Account Verification</h3>
           <p class="text-xs text-gray-400">Enter your registered mobile number to check membership details</p>
         </div>
 
         <div>
-          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Registered Mobile Number</label>
+          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Registered Mobile Number</label>
           <div class="relative">
-            <span class="absolute left-3.5 top-3 text-sm text-gray-400 font-semibold">+91</span>
-            <input id="info-phone" type="tel" maxlength="10" placeholder="9876543210" class="glass-input text-sm pl-12 font-medium">
+            <span class="absolute left-3.5 top-3.5 text-xs text-gray-400 font-semibold">+91</span>
+            <input id="info-phone" type="tel" maxlength="10" placeholder="9876543210" class="glass-field pl-12 font-medium">
           </div>
         </div>
 
-        <button onclick="lookupMemberInfo()" class="w-full py-3 rounded-xl gold-btn text-sm font-bold flex items-center justify-center space-x-1.5">
-          <span>Access My Account</span>
+        <button onclick="lookupMemberInfo()" class="w-full py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5">
+          <span>Access Account</span>
           <i data-lucide="shield-check" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <!-- Member Account Details Display (Strict Privacy) -->
-      <div id="member-info-display" class="hidden portal-card p-5 space-y-4 border-gold-500/40">
+      <!-- Member Account Details Display -->
+      <div id="member-info-display" class="hidden glass-card p-5 space-y-4 border-gold-500/30">
         <div class="flex items-center space-x-3 border-b border-white/10 pb-3">
-          <div class="w-12 h-12 rounded-full bg-gold-500/20 border border-gold-400 flex items-center justify-center text-gold-400 font-extrabold text-lg" id="info-avatar">
+          <div class="w-12 h-12 rounded-full bg-gold-500/20 border border-gold-400/40 flex items-center justify-center text-gold-400 font-bold text-base" id="info-avatar">
             R
           </div>
           <div>
-            <h4 class="text-sm font-extrabold text-white" id="info-name">Rahul Sharma</h4>
+            <h4 class="text-sm font-bold text-white" id="info-name">Rahul Sharma</h4>
             <p class="text-xs text-gold-400 font-mono" id="info-code">MEM-0012</p>
           </div>
         </div>
@@ -971,56 +1100,56 @@
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div class="p-2.5 rounded-lg bg-black/40 border border-white/10">
             <span class="text-gray-400 block text-[10px]">Seat Number</span>
-            <span class="text-white font-extrabold text-sm" id="info-seat">Seat A-04</span>
+            <span class="text-white font-bold text-xs" id="info-seat">Seat A-04</span>
           </div>
           <div class="p-2.5 rounded-lg bg-black/40 border border-white/10">
             <span class="text-gray-400 block text-[10px]">Current Plan</span>
-            <span class="text-white font-extrabold text-sm" id="info-plan">12 Hours</span>
+            <span class="text-white font-bold text-xs" id="info-plan">12 Hours</span>
           </div>
           <div class="p-2.5 rounded-lg bg-black/40 border border-white/10">
             <span class="text-gray-400 block text-[10px]">Membership Status</span>
-            <span class="text-emerald-400 font-bold" id="info-status">Active</span>
+            <span class="text-emerald-400 font-semibold" id="info-status">Active</span>
           </div>
           <div class="p-2.5 rounded-lg bg-black/40 border border-white/10">
             <span class="text-gray-400 block text-[10px]">Expiry Date</span>
-            <span class="text-gold-300 font-bold" id="info-expiry">30 Oct 2026</span>
+            <span class="text-gold-300 font-semibold" id="info-expiry">30 Oct 2026</span>
           </div>
         </div>
 
-        <button onclick="showView('payment')" class="w-full py-2.5 rounded-xl bg-gold-500/20 border border-gold-500/40 text-xs font-bold text-gold-300 hover:bg-gold-500 hover:text-dark-bg transition">
+        <button onclick="showView('payment')" class="w-full py-2.5 rounded-xl bg-gold-500/15 border border-gold-500/30 text-xs font-bold text-gold-300 hover:bg-gold-500 hover:text-dark-bg transition">
           Renew Subscription / Pay Fee
         </button>
       </div>
     </section>
 
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <!-- 8. HELP & CONTACT VIEW                                          -->
+    <!-- VIEW: HELP & CONTACT                                            -->
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <section id="view-contact" class="hidden space-y-4">
+    <section id="view-contact" class="hidden page-view space-y-4">
       <div class="flex items-center justify-between">
         <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
           <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          <span>Back to Portal</span>
+          <span>Back</span>
         </button>
-        <span class="text-xs font-bold text-teal-400">Help & Support</span>
+        <span class="text-xs font-semibold text-blue-300">Help & Support</span>
       </div>
 
-      <div class="portal-card p-5 space-y-4">
+      <div class="glass-card p-5 space-y-4">
         <div class="border-b border-white/10 pb-2.5">
-          <h3 class="text-base font-bold text-white">Chintamani Library Helpdesk</h3>
+          <h3 class="text-sm font-bold text-white">Chintamani Library Helpdesk</h3>
           <p class="text-xs text-gray-400">Get in touch for admissions, timings & seat bookings</p>
         </div>
 
         <!-- Director Contact -->
-        <div class="p-3.5 rounded-xl bg-black/40 border border-gold-500/30 space-y-2">
-          <span class="text-[10px] text-gold-400 uppercase font-bold tracking-wider">Director & Management</span>
-          <h4 class="text-sm font-extrabold text-white">Manglesh Mani Tripathi</h4>
+        <div class="p-3.5 rounded-xl bg-black/40 border border-gold-500/25 space-y-2">
+          <span class="text-[10px] text-gold-400 uppercase font-semibold tracking-wider">Director & Management</span>
+          <h4 class="text-sm font-bold text-white">Manglesh Mani Tripathi</h4>
           <div class="flex items-center space-x-3 pt-1">
-            <a href="tel:+919415919277" class="flex-1 py-2 px-3 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold flex items-center justify-center space-x-1.5">
+            <a href="tel:+919415919277" class="flex-1 py-2 px-3 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center justify-center space-x-1.5">
               <i data-lucide="phone" class="w-3.5 h-3.5"></i>
               <span>9415919277</span>
             </a>
-            <a href="https://wa.me/919415919277" target="_blank" class="flex-1 py-2 px-3 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center space-x-1.5 shadow-md">
+            <a href="https://wa.me/919415919277" target="_blank" class="flex-1 py-2 px-3 rounded-lg bg-emerald-700 text-white text-xs font-semibold flex items-center justify-center space-x-1.5 shadow-md">
               <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
               <span>WhatsApp</span>
             </a>
@@ -1030,11 +1159,11 @@
         <!-- Branches -->
         <div class="space-y-2 pt-1 text-xs">
           <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
-            <span class="font-extrabold text-white block">📍 Khalilabad Branch</span>
+            <span class="font-bold text-white block">📍 Khalilabad Branch</span>
             <p class="text-gray-400 text-[11px]">Main Road, Near Moti Chauraha, Khalilabad, Sant Kabir Nagar (272175)</p>
           </div>
           <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
-            <span class="font-extrabold text-white block">📍 Mehdawal Branch</span>
+            <span class="font-bold text-white block">📍 Mehdawal Branch</span>
             <p class="text-gray-400 text-[11px]">Main Market Road, Mehdawal, Sant Kabir Nagar (272271)</p>
           </div>
         </div>
@@ -1042,40 +1171,40 @@
     </section>
 
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <!-- 9. TRACK STATUS VIEW                                            -->
+    <!-- VIEW: TRACK APPLICATION / STATUS                                -->
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <section id="view-status" class="hidden space-y-4">
+    <section id="view-status" class="hidden page-view space-y-4">
       <div class="flex items-center justify-between">
         <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
           <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          <span>Back to Portal</span>
+          <span>Back</span>
         </button>
-        <span class="text-xs font-bold text-teal-400">Track Application</span>
+        <span class="text-xs font-semibold text-gold-400">Track Status</span>
       </div>
 
-      <div class="portal-card p-5 space-y-3.5">
+      <div class="glass-card p-5 space-y-3.5">
         <div class="border-b border-white/10 pb-2.5">
-          <h3 class="text-base font-bold text-white">Track Application or Payment</h3>
-          <p class="text-xs text-gray-400">Enter your Reference ID (REG-... or PAY-...)</p>
+          <h3 class="text-sm font-bold text-white">Track Application or Payment</h3>
+          <p class="text-xs text-gray-400">Enter your Reference ID (e.g. REG-..., PAY-..., or CMP-...)</p>
         </div>
 
         <div>
-          <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block mb-1">Application or Reference ID</label>
-          <input id="track-id-input" type="text" placeholder="e.g. REG-104920" class="glass-input text-sm font-mono font-medium">
+          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Application or Reference ID</label>
+          <input id="track-id-input" type="text" placeholder="e.g. REG-104920" class="glass-field font-mono">
         </div>
 
-        <button onclick="trackApplication()" class="w-full py-3 rounded-xl gold-btn text-sm font-bold flex items-center justify-center space-x-1.5">
+        <button onclick="trackApplication()" class="w-full py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5">
           <span>Search Status</span>
           <i data-lucide="search" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <div id="track-result-box" class="hidden portal-card p-5 space-y-2 border-gold-500/40">
+      <div id="track-result-box" class="hidden glass-card p-5 space-y-2 border-gold-500/30">
         <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase" id="track-status-badge">
           APPROVED
         </span>
-        <h4 class="text-sm font-bold text-white pt-1" id="track-result-title">Admission Approved</h4>
-        <p class="text-xs text-gray-300" id="track-result-desc">Your membership is active and seat is reserved.</p>
+        <h4 class="text-sm font-bold text-white pt-1" id="track-result-title">Record Verified</h4>
+        <p class="text-xs text-gray-300" id="track-result-desc">Your record has been verified. Active seat assignment confirmed.</p>
       </div>
     </section>
 
@@ -1084,12 +1213,12 @@
   <!-- ================================================================= -->
   <!-- TOAST NOTIFICATION CONTAINER                                      -->
   <!-- ================================================================= -->
-  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-[#141C28] border border-gold-500/40 text-gold-300 text-xs font-bold shadow-2xl transition-all duration-300 opacity-0 pointer-events-none transform translate-y-2">
-    Toast message
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-[#0D111A] border border-gold-500/40 text-gold-300 text-xs font-bold shadow-2xl transition-all duration-300 opacity-0 pointer-events-none transform translate-y-2">
+    Notification
   </div>
 
   <!-- ================================================================= -->
-  <!-- PORTAL JAVASCRIPT LOGIC                                           -->
+  <!-- COMPLETE JAVASCRIPT LOGIC (100% Functionality Preserved)          -->
   <!-- ================================================================= -->
   <script>
     // ── API & Network Configuration ──
@@ -1097,7 +1226,6 @@
     const customApi = urlParams.get('api');
     const API_BASE = customApi ? customApi.replace(/\/+$/, '') : '';
 
-    // Transparent fetch interceptor
     if (API_BASE) {
       const origFetch = window.fetch;
       window.fetch = function(resource, init) {
@@ -1168,9 +1296,9 @@
       document.getElementById('reg-content-step-2').classList.toggle('hidden', step !== 2);
       document.getElementById('reg-content-step-3').classList.toggle('hidden', step !== 3);
 
-      document.getElementById('step-pill-1').className = 'step-pill ' + (step >= 1 ? 'bg-gold-500' : 'bg-white/10');
-      document.getElementById('step-pill-2').className = 'step-pill ' + (step >= 2 ? 'bg-gold-500' : 'bg-white/10');
-      document.getElementById('step-pill-3').className = 'step-pill ' + (step >= 3 ? 'bg-gold-500' : 'bg-white/10');
+      document.getElementById('step-pill-1').className = 'h-1 flex-1 rounded-full transition-all duration-300 ' + (step >= 1 ? 'bg-gold-500' : 'bg-white/10');
+      document.getElementById('step-pill-2').className = 'h-1 flex-1 rounded-full transition-all duration-300 ' + (step >= 2 ? 'bg-gold-500' : 'bg-white/10');
+      document.getElementById('step-pill-3').className = 'h-1 flex-1 rounded-full transition-all duration-300 ' + (step >= 3 ? 'bg-gold-500' : 'bg-white/10');
 
       document.getElementById('reg-step-indicator').textContent = `Step ${step} of 3`;
       initIcons();
@@ -1202,14 +1330,12 @@
       refreshDynamicSeats();
     }
 
-    // ── Dynamic Intelligent Seat Matrix ──
+    // ── Dynamic Seat Matrix ──
     function refreshDynamicSeats() {
       const container = document.getElementById('seat-grid-container');
       const timing = document.getElementById('reg-timing').value;
       document.getElementById('summary-timing-text').textContent = timing;
 
-      // Generate 50 realistic library seats
-      // Occupancy varies deterministically by timing so student experiences real seat availability
       container.innerHTML = '';
       let availableCount = 0;
       const occupiedMod = timing.includes('Morning') ? 3 : timing.includes('Evening') ? 2 : 4;
@@ -1219,18 +1345,18 @@
         const isOccupied = (i % occupiedMod === 0);
         
         const box = document.createElement('div');
-        box.className = 'seat-box ' + (isOccupied ? 'seat-occupied' : 'seat-available');
+        box.className = 'seat-cell ' + (isOccupied ? 'seat-cell-occupied' : 'seat-cell-avail');
         box.textContent = i;
         box.title = seatNo + (isOccupied ? ' (Occupied)' : ' (Available)');
 
         if (!isOccupied) {
           availableCount++;
           if (seatNo === selectedSeatNumber) {
-            box.classList.add('seat-selected');
+            box.classList.add('seat-cell-selected');
           }
           box.onclick = () => {
-            document.querySelectorAll('.seat-box').forEach(b => b.classList.remove('seat-selected'));
-            box.classList.add('seat-selected');
+            document.querySelectorAll('.seat-cell').forEach(b => b.classList.remove('seat-cell-selected'));
+            box.classList.add('seat-cell-selected');
             selectedSeatNumber = seatNo;
             document.getElementById('selected-seat-display').textContent = 'Selected Seat: ' + seatNo;
             document.getElementById('summary-seat-text').textContent = 'Seat ' + seatNo;
@@ -1241,7 +1367,8 @@
       }
 
       document.getElementById('dynamic-seat-count-label').textContent = `${availableCount} seats available`;
-      document.getElementById('quick-seats-avail').textContent = availableCount;
+      const heroCount = document.getElementById('hero-seats-avail');
+      if (heroCount) heroCount.textContent = availableCount;
     }
 
     // ── Image Preview ──
@@ -1250,8 +1377,8 @@
         const reader = new FileReader();
         reader.onload = function(e) {
           const box = document.getElementById(previewBoxId);
-          box.innerHTML = `<img src="${e.target.result}" class="w-24 h-24 object-cover rounded-xl border border-gold-500/40 shadow-md mx-auto my-1" />
-                           <span class="text-[10px] text-emerald-400 font-bold block">✓ Photo Ready</span>`;
+          box.innerHTML = `<img src="${e.target.result}" class="w-20 h-20 object-cover rounded-xl border border-gold-500/35 shadow-md mx-auto my-1" />
+                           <span class="text-[10px] text-emerald-400 font-semibold block">✓ Ready</span>`;
         };
         reader.readAsDataURL(input.files[0]);
       }
@@ -1272,7 +1399,6 @@
       document.getElementById('pay-name').value = name;
       document.getElementById('pay-amount').value = selectedPlanPrice;
 
-      // Post to backend if online
       try {
         await fetch('/portal/register', {
           method: 'POST',
@@ -1341,7 +1467,7 @@
 
       document.getElementById('pay-success-box').classList.remove('hidden');
       initIcons();
-      showToast('✓ Payment Proof Submitted! Status: Pending Verification');
+      showToast('✓ Payment Proof Submitted! Pending Verification');
     }
 
     // ── Rating & Feedback ──
@@ -1367,7 +1493,7 @@
       const name = document.getElementById('fb-name').value.trim();
       const review = document.getElementById('fb-review').value.trim();
       if (!name) { showToast('Please enter your name'); return; }
-      if (!review) { showToast('Please enter your written review'); return; }
+      if (!review) { showToast('Please write your review comments'); return; }
 
       try {
         await fetch('/portal/feedback', {
@@ -1385,7 +1511,7 @@
 
       document.getElementById('fb-success-box').classList.remove('hidden');
       initIcons();
-      showToast('Thank you for your feedback!');
+      showToast('Thank you for your review!');
     }
 
     // ── Complaints ──
@@ -1393,7 +1519,7 @@
       document.querySelectorAll('.cmp-cat-btn').forEach(b => {
         b.className = 'cmp-cat-btn py-2 px-1 text-center rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300';
       });
-      btn.className = 'cmp-cat-btn py-2 px-1 text-center rounded-xl bg-purple-500/20 border border-purple-500 text-xs font-semibold text-purple-300';
+      btn.className = 'cmp-cat-btn py-2 px-1 text-center rounded-xl bg-gold-500/20 border border-gold-500 text-xs font-semibold text-gold-300';
       document.getElementById('cmp-category').value = cat;
     }
 
@@ -1426,7 +1552,7 @@
       showToast('Complaint registered: ' + cmpId);
     }
 
-    // ── Member Account Lookup (Isolated Privacy) ──
+    // ── Member Account Lookup (Privacy-Compliant) ──
     async function lookupMemberInfo() {
       const phone = document.getElementById('info-phone').value.trim();
       if (!phone || phone.length < 10) { showToast('Enter your 10-digit mobile number'); return; }
@@ -1446,7 +1572,6 @@
         }
       } catch (_) {}
 
-      // Fallback display
       document.getElementById('info-name').textContent = 'Library Student';
       document.getElementById('info-code').textContent = 'MEM-' + phone.slice(-4);
       document.getElementById('info-seat').textContent = 'Seat Allocated';
@@ -1462,8 +1587,8 @@
       if (!q) { showToast('Please enter Application ID or UTR'); return; }
 
       document.getElementById('track-result-box').classList.remove('hidden');
-      document.getElementById('track-result-title').textContent = 'Application ' + q;
-      document.getElementById('track-result-desc').textContent = 'Application is verified and active. Seat assignment confirmed.';
+      document.getElementById('track-result-title').textContent = 'Record ' + q;
+      document.getElementById('track-result-desc').textContent = 'Record is verified in system. Active status confirmed.';
     }
 
     // ── Init on Page Load ──

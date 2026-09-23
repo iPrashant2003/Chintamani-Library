@@ -18,7 +18,6 @@ final universalQrDataProvider = FutureProvider<Map<String, dynamic>>((ref) async
       queryParameters: {'branchId': branch.id},
     );
     final data = response.data as Map<String, dynamic>;
-    // Always override portalUrl with the LAN-accessible URL
     data['portalUrl'] = UniversalQrScreen.buildPortalUrl();
     return data;
   } catch (_) {
@@ -38,20 +37,14 @@ class UniversalQrScreen extends ConsumerWidget {
   static const String publicProductionUrl = 'https://iprashant2003.github.io/Chintamani-Library/';
 
   /// Builds the portal URL from the production deployment or active HTTPS backend.
-  /// Guarantees that localhost / 127.0.0.1 / private LAN IPs are never used for external QR scanning.
   static String buildPortalUrl() {
     final base = ApiEndpoints.baseUrl.trim();
-    // If backend baseUrl is an external HTTPS URL (e.g. custom domain or tunnel), use it
     if (base.startsWith('https://') && !base.contains('localhost') && !base.contains('127.0.0.1')) {
       final stripped = base.endsWith('/') ? base.substring(0, base.length - 1) : base;
       return '$stripped/portal/index.html';
     }
-    // Production public URL accessible globally from any network / phone camera
     return publicProductionUrl;
   }
-
-  /// Permanent fallback
-  static const String _fallbackUrl = publicProductionUrl;
 
   void _shareViaWhatsApp(BuildContext context, String url, String branchName) async {
     final msg = Uri.encodeComponent(
@@ -92,7 +85,7 @@ class UniversalQrScreen extends ConsumerWidget {
   void _showFullScreenQr(BuildContext context, String url, String branchName) {
     showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.92),
+      barrierColor: Colors.black.withValues(alpha: 0.94),
       builder: (ctx) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.all(16),
@@ -102,32 +95,56 @@ class UniversalQrScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: const Color(0xFF14120E),
+                color: const Color(0xFF0C1018),
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.goldPrimary, width: 2),
+                border: Border.all(color: const Color(0xFFC9A84C), width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.goldPrimary.withOpacity(0.2),
+                    color: const Color(0xFFC9A84C).withValues(alpha: 0.2),
                     blurRadius: 30,
                     spreadRadius: 2,
                   ),
                 ],
               ),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    'CHINTAMANI LIBRARY',
-                    style: TextStyle(
-                      color: AppColors.goldBright,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 2,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ClipOval(
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          width: 28,
+                          height: 28,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.auto_stories_rounded,
+                            color: Color(0xFFC9A84C),
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'CHINTAMANI',
+                        style: TextStyle(
+                          color: Color(0xFFE8C97A),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Text(
                     branchName,
-                    style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 18),
                   Container(
@@ -178,26 +195,26 @@ class UniversalQrScreen extends ConsumerWidget {
     final branchName = qrDataAsync.value?['branchName'] as String? ?? activeBranch.name;
 
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
+      backgroundColor: const Color(0xFF080B12),
       appBar: AppBar(
-        backgroundColor: AppColors.bgDark,
+        backgroundColor: const Color(0xFF080B12),
         elevation: 0,
         title: const Text(
           'Universal Member Portal QR',
           style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 17,
+            color: Colors.white,
+            fontSize: 16.5,
             fontWeight: FontWeight.w800,
           ),
         ),
         actions: [
           IconButton(
-            tooltip: 'Fullscreen Reception Mode',
-            icon: const Icon(Icons.fullscreen_rounded, color: AppColors.goldPrimary, size: 24),
+            tooltip: 'Counter Display Mode',
+            icon: const Icon(Icons.fullscreen_rounded, color: Color(0xFFC9A84C), size: 24),
             onPressed: () => _showFullScreenQr(context, portalUrl, branchName),
           ),
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: AppColors.goldPrimary),
+            icon: const Icon(Icons.refresh_rounded, color: Color(0xFFC9A84C)),
             onPressed: () => ref.invalidate(universalQrDataProvider),
           ),
         ],
@@ -206,19 +223,27 @@ class UniversalQrScreen extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         child: Column(
           children: [
-            // Permanent Luxury QR Poster Card (Zero network delay)
+            // Permanent Luxury QR Poster Card
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
-                color: const Color(0xF2131A24),
+                color: const Color(0xF20D111A),
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.goldPrimary.withOpacity(0.35), width: 1.2),
+                border: Border.all(
+                  color: const Color(0xFFC9A84C).withValues(alpha: 0.28),
+                  width: 1,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.goldPrimary.withOpacity(0.08),
-                    blurRadius: 20,
+                    color: Colors.black.withValues(alpha: 0.6),
+                    blurRadius: 24,
                     offset: const Offset(0, 8),
+                  ),
+                  BoxShadow(
+                    color: const Color(0xFFC9A84C).withValues(alpha: 0.06),
+                    blurRadius: 28,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
@@ -228,36 +253,65 @@ class UniversalQrScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.goldPrimary.withOpacity(0.15),
+                      color: const Color(0xFFC9A84C).withValues(alpha: 0.14),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.goldPrimary.withOpacity(0.4)),
+                      border: Border.all(color: const Color(0xFFC9A84C).withValues(alpha: 0.35)),
                     ),
-                    child: const Text(
-                      'PERMANENT OFFICIAL LIBRARY QR',
-                      style: TextStyle(
-                        color: AppColors.goldLight,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.0,
-                      ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircleAvatar(
+                          radius: 3.5,
+                          backgroundColor: Color(0xFF34D399),
+                        ),
+                        SizedBox(width: 6),
+                        Text(
+                          'OFFICIAL MEMBER PORTAL • LIVE',
+                          style: TextStyle(
+                            color: Color(0xFFE8C97A),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
 
-                  const Text(
-                    'CHINTAMANI LIBRARY',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.5,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ClipOval(
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.auto_stories_rounded,
+                            color: Color(0xFFC9A84C),
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'CHINTAMANI',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   Text(
                     branchName,
                     style: const TextStyle(
-                      color: AppColors.goldPrimary,
+                      color: Color(0xFFC9A84C),
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -272,6 +326,10 @@ class UniversalQrScreen extends ConsumerWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: const Color(0xFFC9A84C).withValues(alpha: 0.4),
+                          width: 1.5,
+                        ),
                         boxShadow: const [
                           BoxShadow(
                             color: Colors.black26,
@@ -300,12 +358,12 @@ class UniversalQrScreen extends ConsumerWidget {
                   const SizedBox(height: 14),
 
                   const Text(
-                    'Scan with Camera or Google Lens',
+                    'Scan with Phone Camera or Google Lens',
                     style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                    'Admissions • UPI Payment • Complaints • Seats',
+                    'Admissions • UPI Payments • Seat Status • Support',
                     style: TextStyle(color: AppColors.textTertiary, fontSize: 11),
                   ),
                   const SizedBox(height: 16),
@@ -325,22 +383,28 @@ class UniversalQrScreen extends ConsumerWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.4),
+                        color: Colors.black.withValues(alpha: 0.45),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0x22FFFFFF)),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          const Icon(Icons.link_rounded, size: 14, color: Color(0xFFC9A84C)),
+                          const SizedBox(width: 6),
                           Flexible(
                             child: Text(
                               portalUrl,
-                              style: const TextStyle(color: AppColors.goldLight, fontSize: 11, fontFamily: 'monospace'),
+                              style: const TextStyle(
+                                color: Color(0xFFE8C97A),
+                                fontSize: 11,
+                                fontFamily: 'monospace',
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Icon(Icons.copy_rounded, size: 14, color: AppColors.goldPrimary),
+                          const Icon(Icons.copy_rounded, size: 14, color: Color(0xFFC9A84C)),
                         ],
                       ),
                     ),
@@ -368,12 +432,13 @@ class UniversalQrScreen extends ConsumerWidget {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.goldPrimary,
-                      side: const BorderSide(color: AppColors.goldPrimary),
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFC9A84C),
+                      foregroundColor: const Color(0xFF080B12),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
                     ),
                     onPressed: () async {
                       final uri = Uri.parse(portalUrl);
@@ -402,7 +467,7 @@ class UniversalQrScreen extends ConsumerWidget {
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF06B6D4),
-                      side: const BorderSide(color: Color(0xFF06B6D4), width: 0.8),
+                      side: BorderSide(color: const Color(0xFF06B6D4).withValues(alpha: 0.4), width: 0.8),
                       padding: const EdgeInsets.symmetric(vertical: 11),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -416,13 +481,15 @@ class UniversalQrScreen extends ConsumerWidget {
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF8B5CF6),
-                      side: const BorderSide(color: Color(0xFF8B5CF6), width: 0.8),
+                      side: BorderSide(color: const Color(0xFF8B5CF6).withValues(alpha: 0.4), width: 0.8),
                       padding: const EdgeInsets.symmetric(vertical: 11),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     onPressed: () {
                       Share.share(
-                        'Scan to open Chintamani Library Universal Member Portal:\n$portalUrl\n\n'
+                        '🏛️ Chintamani Library — Official Member Portal ($branchName)\n'
+                        'One simple entry point for members.\n\n'
+                        'Scan or tap to access:\n$portalUrl\n\n'
                         '• New Student Registration & Seat Booking\n'
                         '• Direct UPI Fee Payments\n'
                         '• Complaint & Maintenance Desk\n'
@@ -437,59 +504,49 @@ class UniversalQrScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
 
-            // What Members Can Do Checklist
+            // Clean Brand Value Card (Replaces Cluttered Capabilities Section)
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: const Color(0xF2141A24),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0x22FFFFFF), width: 0.8),
+                color: const Color(0xF20D111A),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 0.8),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'UNIVERSAL PORTAL CAPABILITIES',
+                    'CHINTAMANI MEMBER PORTAL',
                     style: TextStyle(
-                      color: AppColors.goldPrimary,
-                      fontSize: 11,
+                      color: Color(0xFFC9A84C),
+                      fontSize: 11.5,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.0,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  _buildFeatureItem(Icons.person_add_alt_1_rounded, 'New Member Registration', 'Self registration with selfie, Aadhaar & auto-seat booking'),
-                  _buildFeatureItem(Icons.credit_card_rounded, 'Direct UPI Fee Payments', 'Deep link to UPI apps with screenshot proof upload'),
-                  _buildFeatureItem(Icons.history_rounded, '6-Month Member History', 'Full payment, seat allocation, and plan timeline'),
-                  _buildFeatureItem(Icons.event_seat_rounded, 'Live Seat & Plan Stats', 'Real-time available seat counts for 24h, 12h, 6h shifts'),
-                  _buildFeatureItem(Icons.report_problem_outlined, 'Facility Complaint Desk', 'Rapid resolution for AC, electricity, sockets & seating'),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'One QR. One simple entry point for members.',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Members can scan this QR code from any smartphone camera anywhere in the world to complete admissions, transfer fees via official UPI, check seat availability, or raise support tickets.',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.65),
+                      fontSize: 11.5,
+                      height: 1.45,
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildFeatureItem(IconData icon, String title, String subtitle) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 16, color: AppColors.goldPrimary),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                Text(subtitle, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

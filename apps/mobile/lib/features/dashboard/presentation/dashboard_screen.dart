@@ -12,6 +12,7 @@ import '../../../widgets/app_drawer.dart';
 import '../../../core/services/app_update_service.dart';
 import '../../../widgets/app_update_dialog.dart';
 import '../../branch/providers/branch_provider.dart';
+import '../../qr_code/presentation/widgets/universal_qr_dashboard_card.dart';
 import '../data/dashboard_repository.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -215,7 +216,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 // ── QUICK ACCESS (5 CARDS AS IN 4TH PHOTO WITH ANIMATIONS) ────
                 const SliverToBoxAdapter(child: MulticolorQuickAccessBar()),
 
-                const SliverToBoxAdapter(child: SizedBox(height: 14)),
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+                // ── DEDICATED UNIVERSAL QR MODULE ─────────────────────────
+                const SliverToBoxAdapter(child: UniversalQrDashboardCard()),
+
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
                 // ── OVERVIEW / EXPIRATIONS / FINANCES (3D GRAPHICS, MULTICOLOUR & MOTIONS)
                 SliverToBoxAdapter(

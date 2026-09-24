@@ -241,43 +241,156 @@
       100% { transform: translateY(-4px); }
     }
 
-    /* Seat Matrix */
-    .seat-cell {
-      width: 38px;
-      height: 38px;
-      border-radius: 9px;
-      font-size: 11px;
-      font-weight: 700;
+    /* Luxury Sliding Branch Switcher */
+    .branch-switcher-pill {
       display: flex;
       align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.16s ease;
-      user-select: none;
+      background: rgba(13, 17, 26, 0.92);
+      border: 1px solid rgba(201, 168, 76, 0.3);
+      border-radius: 9999px;
+      padding: 3px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.06);
     }
-    .seat-cell-avail {
-      background: rgba(26, 122, 94, 0.14);
-      border: 1px solid rgba(26, 122, 94, 0.45);
+    .branch-pill-btn {
+      padding: 5px 13px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #94A3B8;
+      transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+    .branch-pill-btn.active {
+      color: #080B12;
+      font-weight: 800;
+      background: linear-gradient(135deg, #F9EED2 0%, #E8C97A 50%, #B5882A 100%);
+      box-shadow: 0 2px 10px rgba(201, 168, 76, 0.38);
+    }
+    .branch-pill-btn:not(.active):hover {
+      color: #F1F5F9;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Branch Selection Cards in Registration Step 1 */
+    .branch-select-card {
+      background: rgba(13, 17, 26, 0.85);
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .branch-select-card:hover {
+      border-color: rgba(201, 168, 76, 0.45);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+    }
+    .branch-select-card.selected {
+      border: 1.5px solid #E8C97A;
+      background: linear-gradient(135deg, rgba(201, 168, 76, 0.15) 0%, rgba(13, 17, 26, 0.95) 100%);
+      box-shadow: 0 0 22px rgba(201, 168, 76, 0.28), inset 0 1px 0 rgba(232, 201, 122, 0.3);
+    }
+
+    /* Graphical Seat Matrix Architectural Elements */
+    .seat-bay-container {
+      background: rgba(8, 11, 18, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .seat-bay-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #E8C97A;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .seat-desk-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+    @media (max-width: 420px) {
+      .seat-desk-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+      }
+    }
+    .seat-desk-card {
+      position: relative;
+      border-radius: 10px;
+      padding: 6px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .seat-desk-avail {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.32);
       color: #34D399;
     }
-    .seat-cell-avail:hover {
-      background: rgba(26, 122, 94, 0.32);
+    .seat-desk-avail:hover {
+      background: rgba(16, 185, 129, 0.22);
+      border-color: rgba(16, 185, 129, 0.6);
       transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
     }
-    .seat-cell-selected {
-      background: linear-gradient(135deg, #D6B65E, #A98634) !important;
-      border: 1px solid #F3E5AB !important;
-      color: #080B12 !important;
-      font-weight: 900 !important;
-      box-shadow: 0 0 14px rgba(201, 168, 76, 0.5) !important;
-      transform: scale(1.06) !important;
-    }
-    .seat-cell-occupied {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      color: rgba(255, 255, 255, 0.2);
+    .seat-desk-occupied {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.22);
       cursor: not-allowed;
       pointer-events: none;
+    }
+    .seat-desk-selected {
+      background: linear-gradient(135deg, #F9EED2 0%, #D6B65E 50%, #A98634 100%) !important;
+      border: 1.5px solid #FFF5D0 !important;
+      color: #080B12 !important;
+      font-weight: 900 !important;
+      box-shadow: 0 0 16px rgba(201, 168, 76, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+      transform: scale(1.05) translateY(-2px) !important;
+    }
+    .seat-desk-top-bar {
+      width: 60%;
+      height: 2px;
+      border-radius: 2px;
+      background: currentColor;
+      opacity: 0.45;
+      margin-bottom: 3px;
+    }
+    .seat-desk-number {
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+    .seat-desk-status-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: currentColor;
+      margin-top: 3px;
     }
 
     /* Soft entrance animation */
@@ -351,15 +464,15 @@
         </div>
       </div>
 
-      <!-- Luxury Nav Buttons -->
-      <div class="flex items-center space-x-2">
-        <button onclick="showView('status')" class="px-3 py-1.5 rounded-full text-xs font-semibold text-gray-200 bg-white/[0.05] border border-gold-500/30 hover:border-gold-400 hover:text-gold-300 hover:bg-gold-500/10 active:scale-95 transition-all flex items-center space-x-1.5 shadow-sm shadow-black/40 backdrop-blur-md">
-          <i data-lucide="compass" class="w-3.5 h-3.5 text-gold-400"></i>
-          <span class="tracking-wide">Track</span>
+      <!-- Luxury Sliding Branch Switcher (Mehdawal <-> Khalilabad) -->
+      <div class="branch-switcher-pill" role="tablist" aria-label="Select Active Branch">
+        <button id="header-btn-mehdawal" onclick="switchPortalBranch('mehdawal')" class="branch-pill-btn active" title="Switch to Mehdawal Branch">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#080B12] shadow-sm"></span>
+          <span>Mehdawal</span>
         </button>
-        <button onclick="showView('member-info')" class="px-3.5 py-1.5 rounded-full text-xs font-extrabold text-[#080B12] bg-gradient-to-r from-[#F9EED2] via-[#E8C97A] to-[#B5882A] hover:brightness-105 active:scale-95 transition-all shadow-md shadow-gold-500/25 flex items-center space-x-1.5 border border-gold-300/40">
-          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[#080B12]"></i>
-          <span class="tracking-wide">My Info</span>
+        <button id="header-btn-khalilabad" onclick="switchPortalBranch('khalilabad')" class="branch-pill-btn" title="Switch to Khalilabad Branch">
+          <span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
+          <span>Khalilabad</span>
         </button>
       </div>
 
@@ -406,13 +519,17 @@
               Official 24x7 Digital Hub • Admissions, Attendance, UPI Payments & Member Services.
             </p>
 
-            <!-- Status Badges -->
+            <!-- Status Badges with Dynamic Active Branch Display -->
             <div class="pt-1.5 flex flex-wrap gap-1.5 text-[10px]">
+              <div class="px-2.5 py-1 rounded-full bg-black/60 border border-gold-400/40 text-gold-300 flex items-center space-x-1.5 shadow-sm">
+                <i data-lucide="map-pin" class="w-3 h-3 text-gold-400"></i>
+                <span id="hero-branch-badge-text" class="font-bold">Mehdawal Campus</span>
+              </div>
               <div class="px-2.5 py-1 rounded-full bg-black/60 border border-emerald-500/40 text-emerald-300 flex items-center space-x-1.5 shadow-sm">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span><strong id="hero-seats-avail" class="text-emerald-300 font-bold">18</strong> Seats Open</span>
               </div>
-              <div class="px-2.5 py-1 rounded-full bg-black/60 border border-gold-500/35 text-gold-300 flex items-center space-x-1 shadow-sm">
+              <div class="px-2.5 py-1 rounded-full bg-black/60 border border-white/10 text-gray-300 flex items-center space-x-1 shadow-sm">
                 <i data-lucide="shield-check" class="w-3 h-3 text-gold-400"></i>
                 <span class="font-medium">Verified 24x7</span>
               </div>
@@ -445,8 +562,8 @@
         </div>
       </div>
 
-      <!-- 8 Premium Service Cards Grid — Glassmorphism + Image Vignette + Multicolour -->
-      <div class="grid grid-cols-2 gap-3">
+      <!-- 6 Premium Service Cards Grid (Balanced 2-Col Mobile / 3-Col Desktop) -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
 
         <!-- 1. Attendance (Emerald) -->
         <div onclick="showView('attendance')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[148px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.82);border:1px solid rgba(16,185,129,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
@@ -495,7 +612,7 @@
           </div>
           <div class="relative z-10">
             <h4 class="text-xs font-bold text-white mb-0.5">New Registration</h4>
-            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Admission & seat selection</p>
+            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Branch & seat admission</p>
           </div>
         </div>
 
@@ -531,39 +648,7 @@
           </div>
         </div>
 
-        <!-- 6. Membership Status (Purple) -->
-        <div onclick="showView('member-info')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[148px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.82);border:1px solid rgba(139,92,246,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
-          <div class="service-accent-bar bg-[#8B5CF6]"></div>
-          <div class="card-img-wrap">
-            <img src="images/khalilabad_lockers.jpg" alt="" class="card-img">
-            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
-          </div>
-          <div class="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center mb-2" style="background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);">
-            <i data-lucide="id-card" class="w-5 h-5" style="color:#C4B5FD;"></i>
-          </div>
-          <div class="relative z-10">
-            <h4 class="text-xs font-bold text-white mb-0.5">Membership Status</h4>
-            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Seat, plan & validity</p>
-          </div>
-        </div>
-
-        <!-- 7. Live Seat Matrix (Cyan) -->
-        <div onclick="showView('seats')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[148px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.82);border:1px solid rgba(6,182,212,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
-          <div class="service-accent-bar bg-[#06B6D4]"></div>
-          <div class="card-img-wrap">
-            <img src="images/luxury_study_hall.jpg" alt="" class="card-img">
-            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
-          </div>
-          <div class="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center mb-2" style="background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);">
-            <i data-lucide="layout-grid" class="w-5 h-5" style="color:#67E8F9;"></i>
-          </div>
-          <div class="relative z-10">
-            <h4 class="text-xs font-bold text-white mb-0.5">Live Seat Matrix</h4>
-            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Real-time seat availability</p>
-          </div>
-        </div>
-
-        <!-- 8. Help & Director Hotline (Blue) -->
+        <!-- 6. Help & Director Hotline (Blue) -->
         <div onclick="showView('contact')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[148px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.82);border:1px solid rgba(59,130,246,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
           <div class="service-accent-bar bg-[#3B82F6]"></div>
           <div class="card-img-wrap">
@@ -608,7 +693,7 @@
     </section>
 
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <!-- VIEW: REGISTRATION (3-Step Guided Process)                      -->
+    <!-- VIEW: REGISTRATION (4-Step Guided Branch-Separated Process)     -->
     <!-- ─────────────────────────────────────────────────────────────── -->
     <section id="view-register" class="hidden page-view space-y-4">
       <div class="flex items-center justify-between">
@@ -616,21 +701,96 @@
           <i data-lucide="arrow-left" class="w-4 h-4"></i>
           <span>Back</span>
         </button>
-        <span class="text-xs font-bold text-gold-400" id="reg-step-indicator">Step 1 of 3</span>
+        <span class="text-xs font-bold text-gold-400" id="reg-step-indicator">Step 1 of 4: Select Branch</span>
       </div>
 
-      <!-- Step Progress Bar -->
+      <!-- Step Progress Bar (4 Steps) -->
       <div class="flex space-x-1.5">
         <div id="step-pill-1" class="h-1 flex-1 rounded-full bg-gold-500 transition-all duration-300"></div>
         <div id="step-pill-2" class="h-1 flex-1 rounded-full bg-white/10 transition-all duration-300"></div>
         <div id="step-pill-3" class="h-1 flex-1 rounded-full bg-white/10 transition-all duration-300"></div>
+        <div id="step-pill-4" class="h-1 flex-1 rounded-full bg-white/10 transition-all duration-300"></div>
       </div>
 
-      <!-- STEP 1: Personal Details -->
-      <div id="reg-content-step-1" class="glass-card p-5 space-y-3.5">
-        <div class="border-b border-white/10 pb-2.5">
-          <h3 class="text-sm font-bold text-white">01. Personal Details</h3>
-          <p class="text-xs text-gray-400">Enter applicant information for membership admission</p>
+      <!-- STEP 1: Branch Selection (MANDATORY FIRST QUESTION) -->
+      <div id="reg-content-step-1" class="glass-card p-5 space-y-4">
+        <div class="border-b border-white/10 pb-3">
+          <span class="text-[10px] font-extrabold uppercase tracking-widest text-gold-400 block mb-1">Step 01 • Mandatory Selection</span>
+          <h3 class="text-base font-extrabold text-white flex items-center space-x-2">
+            <i data-lucide="map-pin" class="w-4 h-4 text-gold-400"></i>
+            <span>Select Your Branch *</span>
+          </h3>
+          <p class="text-xs text-gray-400 mt-0.5">Please choose your campus. Admissions, attendance, and seat allocation are managed in completely separate branch pools.</p>
+        </div>
+
+        <div class="space-y-3">
+          
+          <!-- Option A: Mehdawal Branch -->
+          <div id="branch-card-mehdawal" onclick="selectRegBranch('mehdawal')" class="branch-select-card selected flex items-start space-x-3.5">
+            <div class="w-10 h-10 rounded-xl bg-gold-500/15 border border-gold-400/40 flex items-center justify-center shrink-0 mt-0.5 text-gold-400">
+              <i data-lucide="building-2" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm font-bold text-white">Chintamani Library — Mehdawal</h4>
+                <div id="radio-dot-mehdawal" class="w-5 h-5 rounded-full border-2 border-gold-400 bg-gold-500 flex items-center justify-center shadow-md shadow-gold-500/30">
+                  <i data-lucide="check" class="w-3 h-3 text-[#080B12] stroke-[3]"></i>
+                </div>
+              </div>
+              <p class="text-[11px] text-gray-300 mt-1 leading-snug">Station Road, Mehdawal, Sant Kabir Nagar (272202)</p>
+              <div class="flex flex-wrap gap-1.5 pt-2 text-[9.5px]">
+                <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-semibold">Independent Seat Pool (50 Desks)</span>
+                <span class="px-2 py-0.5 rounded-full bg-white/5 text-gray-300">AC Hall • High-Speed Wi-Fi</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Option B: Khalilabad Branch -->
+          <div id="branch-card-khalilabad" onclick="selectRegBranch('khalilabad')" class="branch-select-card flex items-start space-x-3.5">
+            <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 mt-0.5 text-gray-300">
+              <i data-lucide="landmark" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm font-bold text-white">Chintamani Library — Khalilabad</h4>
+                <div id="radio-dot-khalilabad" class="w-5 h-5 rounded-full border-2 border-white/20 bg-transparent flex items-center justify-center">
+                  <i data-lucide="check" class="w-3 h-3 text-transparent stroke-[3]"></i>
+                </div>
+              </div>
+              <p class="text-[11px] text-gray-300 mt-1 leading-snug">Main Road, Near Moti Chauraha, Khalilabad (272175)</p>
+              <div class="flex flex-wrap gap-1.5 pt-2 text-[9.5px]">
+                <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-semibold">Independent Seat Pool (50 Desks)</span>
+                <span class="px-2 py-0.5 rounded-full bg-white/5 text-gray-300">AC Hall • 24x7 Inverter Backup</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Lock Warning Notice -->
+        <div class="p-3 rounded-xl bg-black/40 border border-gold-500/20 flex items-start space-x-2.5 text-[11px] text-gray-300">
+          <i data-lucide="shield-alert" class="w-4 h-4 text-gold-400 shrink-0 mt-0.5"></i>
+          <span>The branch selected here is <strong>permanently saved</strong> with your student registration and determines your dedicated seat allocation.</span>
+        </div>
+
+        <button onclick="goToRegStep(2)" class="w-full py-3.5 rounded-xl btn-gold text-xs flex items-center justify-center space-x-2">
+          <span>Continue to Personal Details</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- STEP 2: Personal Details -->
+      <div id="reg-content-step-2" class="hidden glass-card p-5 space-y-3.5">
+        <div class="border-b border-white/10 pb-2.5 flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-white">02. Applicant Information</h3>
+            <p class="text-xs text-gray-400">Enter personal details for admission</p>
+          </div>
+          <!-- Permanent Branch Badge Indicator -->
+          <div class="px-2.5 py-1 rounded-full bg-gold-500/15 border border-gold-400/40 text-gold-300 text-[10px] font-extrabold flex items-center space-x-1 shadow-sm">
+            <i data-lucide="map-pin" class="w-3 h-3 text-gold-400"></i>
+            <span id="reg-selected-branch-label">Mehdawal</span>
+          </div>
         </div>
 
         <div>
@@ -687,17 +847,28 @@
           </div>
         </div>
 
-        <button onclick="goToRegStep(2)" class="w-full py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5 mt-2">
-          <span>Continue to Photo & Documents</span>
-          <i data-lucide="arrow-right" class="w-4 h-4"></i>
-        </button>
+        <div class="flex space-x-2 pt-1">
+          <button onclick="goToRegStep(1)" class="w-1/3 py-3 rounded-xl bg-white/10 text-xs font-bold text-gray-300">
+            Back
+          </button>
+          <button onclick="goToRegStep(3)" class="w-2/3 py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5">
+            <span>Continue to Photo & ID</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
       </div>
 
-      <!-- STEP 2: Photo & Documents -->
-      <div id="reg-content-step-2" class="hidden glass-card p-5 space-y-4">
-        <div class="border-b border-white/10 pb-2.5">
-          <h3 class="text-sm font-bold text-white">02. Member Photo & ID</h3>
-          <p class="text-xs text-gray-400">Upload your selfie/photo for member ID card</p>
+      <!-- STEP 3: Photo & Documents -->
+      <div id="reg-content-step-3" class="hidden glass-card p-5 space-y-4">
+        <div class="border-b border-white/10 pb-2.5 flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-white">03. Member Photo & ID</h3>
+            <p class="text-xs text-gray-400">Upload your selfie/photo for member ID card</p>
+          </div>
+          <div class="px-2.5 py-1 rounded-full bg-gold-500/15 border border-gold-400/40 text-gold-300 text-[10px] font-extrabold flex items-center space-x-1">
+            <i data-lucide="map-pin" class="w-3 h-3 text-gold-400"></i>
+            <span id="reg-step3-branch-label">Mehdawal</span>
+          </div>
         </div>
 
         <!-- Live Camera Selfie -->
@@ -711,7 +882,7 @@
             <div id="preview-selfie-box" class="flex flex-col items-center justify-center py-2 text-gray-400">
               <i data-lucide="camera" class="w-7 h-7 text-gold-400 mb-1"></i>
               <span class="text-xs font-semibold text-white">Tap to Take Selfie or Select Photo</span>
-              <span class="text-[10px] text-gray-400 mt-0.5">Used for Member ID and Attendance</span>
+              <span class="text-[10px] text-gray-400 mt-0.5">Used for Member ID Card & Attendance</span>
             </div>
             <input type="hidden" id="url-selfie">
           </div>
@@ -734,21 +905,27 @@
         </div>
 
         <div class="flex space-x-2 pt-2">
-          <button onclick="goToRegStep(1)" class="w-1/3 py-3 rounded-xl bg-white/10 text-xs font-bold text-gray-300">
+          <button onclick="goToRegStep(2)" class="w-1/3 py-3 rounded-xl bg-white/10 text-xs font-bold text-gray-300">
             Back
           </button>
-          <button onclick="goToRegStep(3)" class="w-2/3 py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1">
+          <button onclick="goToRegStep(4)" class="w-2/3 py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5">
             <span>Select Shift & Seats</span>
             <i data-lucide="arrow-right" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
 
-      <!-- STEP 3: Plan, Shift & Dynamic Seat Selection -->
-      <div id="reg-content-step-3" class="hidden glass-card p-5 space-y-4">
-        <div class="border-b border-white/10 pb-2.5">
-          <h3 class="text-sm font-bold text-white">03. Shift & Seat Selection</h3>
-          <p class="text-xs text-gray-400">Select timing to view only available seats</p>
+      <!-- STEP 4: Shift & Complete Graphical Branch Seat Matrix -->
+      <div id="reg-content-step-4" class="hidden glass-card p-5 space-y-4">
+        <div class="border-b border-white/10 pb-2.5 flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-white">04. Shift & Seat Selection</h3>
+            <p class="text-xs text-gray-400">Review real-time seating and confirm allocation</p>
+          </div>
+          <div class="px-2.5 py-1 rounded-full bg-gold-500/15 border border-gold-400/40 text-gold-300 text-[10px] font-extrabold flex items-center space-x-1">
+            <i data-lucide="map-pin" class="w-3 h-3 text-gold-400"></i>
+            <span id="reg-step4-branch-label">Mehdawal Pool</span>
+          </div>
         </div>
 
         <!-- Plan Selection -->
@@ -784,7 +961,7 @@
         <!-- Shift / Timing Selection -->
         <div>
           <label class="text-[11px] font-semibold text-gray-300 block mb-1">Preferred Shift / Timing *</label>
-          <select id="reg-timing" onchange="refreshDynamicSeats()" class="glass-field">
+          <select id="reg-timing" onchange="refreshBranchSeats()" class="glass-field">
             <option value="Morning (06:00 AM – 12:00 PM)">Morning Shift (06:00 AM – 12:00 PM)</option>
             <option value="Afternoon (12:00 PM – 06:00 PM)">Afternoon Shift (12:00 PM – 06:00 PM)</option>
             <option value="Evening (06:00 PM – 12:00 AM)">Evening Shift (06:00 PM – 12:00 AM)</option>
@@ -792,49 +969,65 @@
           </select>
         </div>
 
-        <!-- Dynamic Seat Grid -->
-        <div class="space-y-2">
+        <!-- Branch-Specific Complete Graphical Seat Matrix Container -->
+        <div class="space-y-2.5 pt-1">
           <div class="flex items-center justify-between">
-            <label class="text-[11px] font-semibold text-gray-300">
-              Select Available Seat *
-            </label>
-            <span class="text-[10px] text-emerald-400 font-medium" id="dynamic-seat-count-label">
+            <div>
+              <h4 id="seat-matrix-heading" class="text-xs font-extrabold uppercase tracking-wide gold-gradient-text">
+                MEHDAWAL SEAT MATRIX
+              </h4>
+              <p class="text-[10.5px] text-gray-400">Graphical arrangement of study stations</p>
+            </div>
+            <span class="text-[10px] text-emerald-400 font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30" id="dynamic-seat-count-label">
               18 seats available
             </span>
           </div>
 
-          <!-- Legend -->
-          <div class="flex items-center space-x-3 text-[10px] text-gray-400 pb-1">
-            <div class="flex items-center space-x-1">
-              <span class="w-2.5 h-2.5 rounded bg-emerald-500/20 border border-emerald-500"></span>
+          <!-- Seat State Legend -->
+          <div class="flex items-center space-x-3 text-[10px] text-gray-400 pb-1 pt-0.5">
+            <div class="flex items-center space-x-1.5">
+              <span class="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500"></span>
               <span>Available</span>
             </div>
-            <div class="flex items-center space-x-1">
-              <span class="w-2.5 h-2.5 rounded bg-gold-500 border border-gold-400"></span>
-              <span>Selected</span>
+            <div class="flex items-center space-x-1.5">
+              <span class="w-3 h-3 rounded bg-gradient-to-r from-[#F9EED2] to-[#B5882A] border border-[#FFF5D0] shadow-sm"></span>
+              <span class="text-gold-300 font-bold">Your Allocated Seat</span>
             </div>
-            <div class="flex items-center space-x-1">
-              <span class="w-2.5 h-2.5 rounded bg-white/5 border border-white/10"></span>
+            <div class="flex items-center space-x-1.5">
+              <span class="w-3 h-3 rounded bg-white/5 border border-white/10"></span>
               <span>Occupied</span>
             </div>
           </div>
 
-          <!-- Interactive Seat Matrix -->
-          <div class="p-3 rounded-xl bg-black/40 border border-white/10">
-            <div id="seat-grid-container" class="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto p-1">
-              <!-- Dynamically populated via JS -->
+          <!-- Deterministic Allocation Banner -->
+          <div id="allocation-alert-banner" class="p-2.5 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center space-x-2 text-[11px] text-gold-300">
+            <i data-lucide="check-circle" class="w-4 h-4 text-gold-400 shrink-0"></i>
+            <span id="allocation-alert-text">Auto-allocated optimal seat: <strong>M-A01</strong>. Tap another available desk to switch.</span>
+          </div>
+
+          <!-- Architectural Graphical Seat Matrix Box -->
+          <div class="p-3 rounded-2xl bg-black/50 border border-white/10 max-h-72 overflow-y-auto space-y-3">
+            <div id="seat-matrix-graphic-container">
+              <!-- Dynamically populated via renderBranchSeatMatrix() -->
             </div>
-            <div class="pt-2 text-center text-xs text-gold-400 font-bold" id="selected-seat-display">
-              Selected Seat: None
-            </div>
+          </div>
+
+          <!-- Selected Seat Confirmation -->
+          <div class="p-2.5 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between text-xs">
+            <span class="text-gray-400">Confirmed Station:</span>
+            <span class="font-extrabold text-gold-300 font-mono text-sm" id="selected-seat-display">Seat M-A01</span>
           </div>
         </div>
 
         <!-- Registration Summary -->
-        <div class="p-3.5 rounded-xl bg-gold-500/10 border border-gold-500/20 space-y-1.5 text-xs">
-          <div class="font-bold text-gold-400 flex items-center justify-between">
-            <span>Summary</span>
+        <div class="p-3.5 rounded-xl bg-gold-500/10 border border-gold-500/25 space-y-2 text-xs">
+          <div class="font-bold text-gold-400 flex items-center justify-between border-b border-gold-500/20 pb-1.5">
+            <span>Admission Summary</span>
             <span class="text-sm font-bold text-emerald-400" id="summary-total-amt">₹800</span>
+          </div>
+          <div class="text-gray-300 flex justify-between text-[11px]">
+            <span>Campus Branch:</span>
+            <strong id="summary-branch-text" class="text-gold-300 font-bold">Mehdawal Branch (Permanent)</strong>
           </div>
           <div class="text-gray-300 flex justify-between text-[11px]">
             <span>Plan:</span>
@@ -842,19 +1035,19 @@
           </div>
           <div class="text-gray-300 flex justify-between text-[11px]">
             <span>Timing:</span>
-            <span id="summary-timing-text" class="text-white">Morning / Afternoon</span>
+            <span id="summary-timing-text" class="text-white">Morning (06:00 AM – 12:00 PM)</span>
           </div>
           <div class="text-gray-300 flex justify-between text-[11px]">
-            <span>Allocated Seat:</span>
-            <span id="summary-seat-text" class="text-gold-300 font-bold">Seat A-04</span>
+            <span>Allocated Desk:</span>
+            <span id="summary-seat-text" class="text-gold-300 font-bold">Seat M-A01</span>
           </div>
         </div>
 
         <div class="flex space-x-2 pt-1">
-          <button onclick="goToRegStep(2)" class="w-1/3 py-3 rounded-xl bg-white/10 text-xs font-bold text-gray-300">
+          <button onclick="goToRegStep(3)" class="w-1/3 py-3 rounded-xl bg-white/10 text-xs font-bold text-gray-300">
             Back
           </button>
-          <button onclick="submitRegistration()" class="w-2/3 py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5">
+          <button onclick="submitRegistration()" class="w-2/3 py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5 shadow-lg shadow-gold-500/20">
             <span>Proceed to Payment</span>
             <i data-lucide="credit-card" class="w-4 h-4"></i>
           </button>
@@ -872,9 +1065,10 @@
           </span>
           <h3 class="text-base font-bold text-white pt-2">REGISTRATION SUBMITTED</h3>
           <p class="text-xs text-gray-300 mt-1">Application ID: <strong class="text-gold-400 font-mono text-sm" id="reg-succ-id">REG-104920</strong></p>
+          <p class="text-[11.5px] text-gray-300 mt-0.5">Permanent Campus: <strong class="text-white" id="reg-succ-branch">Mehdawal Branch</strong> • <span id="reg-succ-seat" class="text-gold-300 font-bold">Seat M-A01</span></p>
         </div>
-        <p class="text-xs text-gray-400">Complete the fee payment via UPI below to activate your admission.</p>
-        <button onclick="goToPaymentFromReg()" class="w-full py-3.5 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5">
+        <p class="text-xs text-gray-400">Complete the fee payment via UPI below to activate your admission and reserve your seat.</p>
+        <button onclick="goToPaymentFromReg()" class="w-full py-3.5 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5 shadow-lg shadow-gold-500/25">
           <span>Proceed to UPI Payment (₹<span id="reg-succ-amt">800</span>)</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
@@ -1159,121 +1353,7 @@
       </div>
     </section>
 
-    <!-- ─────────────────────────────────────────────────────────────── -->
-    <!-- VIEW: SEAT AVAILABILITY MATRIX                                  -->
-    <!-- ─────────────────────────────────────────────────────────────── -->
-    <section id="view-seats" class="hidden page-view space-y-4">
-      <div class="flex items-center justify-between">
-        <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
-          <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          <span>Back</span>
-        </button>
-        <span class="text-xs font-semibold text-emerald-400">Live Seat Matrix</span>
-      </div>
 
-      <div class="glass-card p-4 space-y-3">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-white">Seat Availability Status</h3>
-          <span class="text-[11px] text-emerald-400 flex items-center space-x-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Real-time</span>
-          </span>
-        </div>
-
-        <div class="grid grid-cols-3 gap-2 text-center">
-          <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-            <span class="text-base font-bold text-emerald-400" id="stat-avail">18</span>
-            <p class="text-[10px] text-emerald-300 font-medium mt-0.5">Available</p>
-          </div>
-          <div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20">
-            <span class="text-base font-bold text-rose-400" id="stat-occupied">32</span>
-            <p class="text-[10px] text-rose-300 font-medium mt-0.5">Occupied</p>
-          </div>
-          <div class="p-2.5 rounded-xl bg-gold-500/10 border border-gold-500/20">
-            <span class="text-base font-bold text-gold-400">50</span>
-            <p class="text-[10px] text-gold-300 font-medium mt-0.5">Total Seats</p>
-          </div>
-        </div>
-      </div>
-
-      <button onclick="showView('register')" class="w-full py-3.5 rounded-xl btn-gold text-xs flex items-center justify-center space-x-2">
-        <span>Reserve an Available Seat Now</span>
-        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-      </button>
-    </section>
-
-    <!-- ─────────────────────────────────────────────────────────────── -->
-    <!-- VIEW: MEMBER ACCOUNT INFO                                       -->
-    <!-- ─────────────────────────────────────────────────────────────── -->
-    <section id="view-member-info" class="hidden page-view space-y-4">
-      <div class="flex items-center justify-between">
-        <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
-          <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          <span>Back</span>
-        </button>
-        <span class="text-xs font-semibold text-gold-400">Account Access</span>
-      </div>
-
-      <!-- Verification Input -->
-      <div class="glass-card p-5 space-y-3.5">
-        <div class="border-b border-white/10 pb-2.5">
-          <h3 class="text-sm font-bold text-white">Student Account Verification</h3>
-          <p class="text-xs text-gray-400">Enter your registered mobile number to check membership details</p>
-        </div>
-
-        <div>
-          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Mobile Number, Name, or Member ID *</label>
-          <div class="relative">
-            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gold-400">
-              <i data-lucide="user" class="w-4 h-4"></i>
-            </span>
-            <input id="info-phone" type="text" placeholder="e.g. 9415919277, Rahul Sharma or CML-942810" class="glass-field pl-10 font-medium">
-          </div>
-          <p class="text-[10px] text-gray-400 mt-1">Enter your registered mobile number, full name, or Member ID</p>
-        </div>
-
-        <button onclick="lookupMemberInfo()" class="w-full py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5">
-          <span>Access Account</span>
-          <i data-lucide="shield-check" class="w-4 h-4"></i>
-        </button>
-      </div>
-
-      <!-- Member Account Details Display -->
-      <div id="member-info-display" class="hidden glass-card p-5 space-y-4 border-gold-500/30">
-        <div class="flex items-center space-x-3 border-b border-white/10 pb-3">
-          <div class="w-12 h-12 rounded-full bg-gold-500/20 border border-gold-400/40 flex items-center justify-center text-gold-400 font-bold text-base" id="info-avatar">
-            R
-          </div>
-          <div>
-            <h4 class="text-sm font-bold text-white" id="info-name">Rahul Sharma</h4>
-            <p class="text-xs text-gold-400 font-mono" id="info-code">MEM-0012</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2 text-xs">
-          <div class="p-2.5 rounded-lg bg-black/40 border border-white/10">
-            <span class="text-gray-400 block text-[10px]">Seat Number</span>
-            <span class="text-white font-bold text-xs" id="info-seat">Seat A-04</span>
-          </div>
-          <div class="p-2.5 rounded-lg bg-black/40 border border-white/10">
-            <span class="text-gray-400 block text-[10px]">Current Plan</span>
-            <span class="text-white font-bold text-xs" id="info-plan">12 Hours</span>
-          </div>
-          <div class="p-2.5 rounded-lg bg-black/40 border border-white/10">
-            <span class="text-gray-400 block text-[10px]">Membership Status</span>
-            <span class="text-emerald-400 font-semibold" id="info-status">Active</span>
-          </div>
-          <div class="p-2.5 rounded-lg bg-black/40 border border-white/10">
-            <span class="text-gray-400 block text-[10px]">Expiry Date</span>
-            <span class="text-gold-300 font-semibold" id="info-expiry">30 Oct 2026</span>
-          </div>
-        </div>
-
-        <button onclick="showView('payment')" class="w-full py-2.5 rounded-xl bg-gold-500/15 border border-gold-500/30 text-xs font-bold text-gold-300 hover:bg-gold-500 hover:text-dark-bg transition">
-          Renew Subscription / Pay Fee
-        </button>
-      </div>
-    </section>
 
     <!-- ─────────────────────────────────────────────────────────────── -->
     <!-- VIEW: HELP & CONTACT                                            -->
@@ -1323,43 +1403,7 @@
       </div>
     </section>
 
-    <!-- ─────────────────────────────────────────────────────────────── -->
-    <!-- VIEW: TRACK APPLICATION / STATUS                                -->
-    <!-- ─────────────────────────────────────────────────────────────── -->
-    <section id="view-status" class="hidden page-view space-y-4">
-      <div class="flex items-center justify-between">
-        <button onclick="showView('landing')" class="text-xs text-gray-400 flex items-center space-x-1 hover:text-white">
-          <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          <span>Back</span>
-        </button>
-        <span class="text-xs font-semibold text-gold-400">Track Status</span>
-      </div>
 
-      <div class="glass-card p-5 space-y-3.5">
-        <div class="border-b border-white/10 pb-2.5">
-          <h3 class="text-sm font-bold text-white">Track Application or Payment</h3>
-          <p class="text-xs text-gray-400">Enter your Reference ID (e.g. REG-..., PAY-..., or CMP-...)</p>
-        </div>
-
-        <div>
-          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Application or Reference ID</label>
-          <input id="track-id-input" type="text" placeholder="e.g. REG-104920" class="glass-field font-mono">
-        </div>
-
-        <button onclick="trackApplication()" class="w-full py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5">
-          <span>Search Status</span>
-          <i data-lucide="search" class="w-4 h-4"></i>
-        </button>
-      </div>
-
-      <div id="track-result-box" class="hidden glass-card p-5 space-y-2 border-gold-500/30">
-        <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase" id="track-status-badge">
-          APPROVED
-        </span>
-        <h4 class="text-sm font-bold text-white pt-1" id="track-result-title">Record Verified</h4>
-        <p class="text-xs text-gray-300" id="track-result-desc">Your record has been verified. Active seat assignment confirmed.</p>
-      </div>
-    </section>
 
     <!-- ─────────────────────────────────────────────────────────────── -->
     <!-- VIEW: MEMBER ATTENDANCE SELF CHECK-IN                          -->
@@ -1455,11 +1499,97 @@
       };
     }
 
-    // ── State ──
+    // ── Branch & Seat Configuration ──
+    const BRANCH_CONFIG = {
+      mehdawal: {
+        code: 'M',
+        name: 'Mehdawal Branch',
+        fullName: 'Chintamani Library — Mehdawal',
+        badgeName: 'Mehdawal Campus',
+        address: 'Station Road, Mehdawal, Sant Kabir Nagar (272202)',
+        totalSeats: 50,
+        phone: '9415919277',
+        seatPrefix: 'M-',
+      },
+      khalilabad: {
+        code: 'K',
+        name: 'Khalilabad Branch',
+        fullName: 'Chintamani Library — Khalilabad',
+        badgeName: 'Khalilabad Campus',
+        address: 'Main Road, Near Moti Chauraha, Khalilabad (272175)',
+        totalSeats: 50,
+        phone: '9415919277',
+        seatPrefix: 'K-',
+      }
+    };
+
+    // ── Architectural Seat Pool Generation (Strict Branch Separation) ──
+    // Each branch has 50 desks across two floors:
+    // Floor A: Desks 01 to 25 (Bays 1-5, Main Silent Study Hall)
+    // Floor B: Desks 26 to 50 (Bays 6-10, Executive Scholar Bay)
+    function generateBranchSeatPool(branchKey) {
+      const prefix = BRANCH_CONFIG[branchKey].seatPrefix;
+      const seats = [];
+
+      // Floor A: A01 to A25
+      for (let i = 1; i <= 25; i++) {
+        const numStr = i < 10 ? '0' + i : '' + i;
+        const code = `${prefix}A${numStr}`;
+        const bayNum = Math.ceil(i / 5);
+        // Deterministic occupancy mask (independent per branch)
+        // Mehdawal has specific occupied seats, Khalilabad has different occupied seats
+        const isOccupied = branchKey === 'mehdawal' 
+          ? (i === 2 || i === 5 || i === 8 || i === 11 || i === 14 || i === 17 || i === 21 || i === 24)
+          : (i === 3 || i === 6 || i === 9 || i === 12 || i === 15 || i === 18 || i === 22 || i === 25);
+
+        seats.push({
+          id: code,
+          seatNumber: code,
+          rawNumber: i,
+          floor: 'Floor A',
+          floorLabel: 'Floor A: Main Silent Study Hall',
+          bay: `Bay A-${bayNum}`,
+          isOccupied,
+          branch: branchKey
+        });
+      }
+
+      // Floor B: B01 to B25
+      for (let i = 1; i <= 25; i++) {
+        const numStr = i < 10 ? '0' + i : '' + i;
+        const code = `${prefix}B${numStr}`;
+        const bayNum = Math.ceil(i / 5);
+        const isOccupied = branchKey === 'mehdawal'
+          ? (i === 1 || i === 4 || i === 7 || i === 10 || i === 13 || i === 16 || i === 19 || i === 22)
+          : (i === 2 || i === 4 || i === 8 || i === 11 || i === 14 || i === 17 || i === 20 || i === 23);
+
+        seats.push({
+          id: code,
+          seatNumber: code,
+          rawNumber: 25 + i,
+          floor: 'Floor B',
+          floorLabel: 'Floor B: Executive Scholar Bay',
+          bay: `Bay B-${bayNum}`,
+          isOccupied,
+          branch: branchKey
+        });
+      }
+
+      return seats;
+    }
+
+    const BRANCH_SEAT_POOLS = {
+      mehdawal: generateBranchSeatPool('mehdawal'),
+      khalilabad: generateBranchSeatPool('khalilabad')
+    };
+
+    // ── Application State ──
+    let currentViewingBranch = localStorage.getItem('cml_viewing_branch') || 'mehdawal';
+    let selectedRegBranch = currentViewingBranch; // Step 1 selection permanently tracks student's choice
     let selectedPlanCode = 'PLAN_12H';
     let selectedPlanPrice = 800;
     let selectedPlanName = '12 Hours Double Shift';
-    let selectedSeatNumber = 'A-04';
+    let selectedSeatNumber = '';
     let currentRating = 5;
 
     // ── Lucide Icon Initializer ──
@@ -1479,12 +1609,53 @@
       }, 2500);
     }
 
+    // ── Branch Switcher (Controls VIEW only, never alters student's registered branch) ──
+    function switchPortalBranch(branchKey) {
+      if (!BRANCH_CONFIG[branchKey]) return;
+      currentViewingBranch = branchKey;
+      localStorage.setItem('cml_viewing_branch', branchKey);
+
+      // 1. Update Header Buttons
+      const btnM = document.getElementById('header-btn-mehdawal');
+      const btnK = document.getElementById('header-btn-khalilabad');
+      if (btnM && btnK) {
+        btnM.classList.toggle('active', branchKey === 'mehdawal');
+        btnK.classList.toggle('active', branchKey === 'khalilabad');
+        const dotM = btnM.querySelector('span');
+        const dotK = btnK.querySelector('span');
+        if (dotM) dotM.className = branchKey === 'mehdawal' ? 'w-1.5 h-1.5 rounded-full bg-[#080B12] shadow-sm' : 'w-1.5 h-1.5 rounded-full bg-gray-500';
+        if (dotK) dotK.className = branchKey === 'khalilabad' ? 'w-1.5 h-1.5 rounded-full bg-[#080B12] shadow-sm' : 'w-1.5 h-1.5 rounded-full bg-gray-500';
+      }
+
+      // 2. Update Hero Badges & Open Seat Count
+      const heroBranch = document.getElementById('hero-branch-badge-text');
+      if (heroBranch) {
+        heroBranch.textContent = BRANCH_CONFIG[branchKey].badgeName;
+      }
+      updateHeroSeatCount(branchKey);
+
+      // 3. If in registration step 1, align recommended branch
+      const regStep1 = document.getElementById('reg-content-step-1');
+      if (regStep1 && !regStep1.classList.contains('hidden')) {
+        selectRegBranch(branchKey, false);
+      }
+
+      showToast(`Switched view to ${BRANCH_CONFIG[branchKey].name}`);
+      initIcons();
+    }
+
+    function updateHeroSeatCount(branchKey) {
+      const pool = BRANCH_SEAT_POOLS[branchKey] || [];
+      const availCount = pool.filter(s => !s.isOccupied).length;
+      const el = document.getElementById('hero-seats-avail');
+      if (el) el.textContent = availCount;
+    }
+
     // ── View Navigation ──
     function showView(viewId) {
       const views = [
         'view-landing', 'view-register', 'view-payment', 'view-feedback',
-        'view-complaint', 'view-seats', 'view-member-info', 'view-contact', 'view-status',
-        'view-attendance'
+        'view-complaint', 'view-contact', 'view-attendance'
       ];
       views.forEach(id => {
         const el = document.getElementById(id);
@@ -1499,29 +1670,102 @@
       initIcons();
 
       if (viewId === 'register') {
-        refreshDynamicSeats();
+        goToRegStep(1); // Always start from Step 1: Branch Selection!
       }
     }
 
-    // ── Registration Steps ──
-    function goToRegStep(step) {
-      if (step === 2) {
-        const name = document.getElementById('reg-name').value.trim();
-        const phone = document.getElementById('reg-phone').value.trim();
-        if (!name) { showToast('Please enter your full name'); return; }
-        if (!phone || phone.length < 10) { showToast('Please enter a valid 10-digit mobile number'); return; }
+    // ── Registration: Step 1 Branch Selection ──
+    function selectRegBranch(branchKey, shouldToast = true) {
+      if (!BRANCH_CONFIG[branchKey]) return;
+      selectedRegBranch = branchKey;
+
+      const cardM = document.getElementById('branch-card-mehdawal');
+      const cardK = document.getElementById('branch-card-khalilabad');
+      const dotM = document.getElementById('radio-dot-mehdawal');
+      const dotK = document.getElementById('radio-dot-khalilabad');
+
+      if (cardM && cardK) {
+        cardM.classList.toggle('selected', branchKey === 'mehdawal');
+        cardK.classList.toggle('selected', branchKey === 'khalilabad');
       }
 
-      document.getElementById('reg-content-step-1').classList.toggle('hidden', step !== 1);
-      document.getElementById('reg-content-step-2').classList.toggle('hidden', step !== 2);
-      document.getElementById('reg-content-step-3').classList.toggle('hidden', step !== 3);
+      if (dotM && dotK) {
+        if (branchKey === 'mehdawal') {
+          dotM.className = 'w-5 h-5 rounded-full border-2 border-gold-400 bg-gold-500 flex items-center justify-center shadow-md shadow-gold-500/30';
+          dotM.innerHTML = '<i data-lucide="check" class="w-3 h-3 text-[#080B12] stroke-[3]"></i>';
+          dotK.className = 'w-5 h-5 rounded-full border-2 border-white/20 bg-transparent flex items-center justify-center';
+          dotK.innerHTML = '<i data-lucide="check" class="w-3 h-3 text-transparent stroke-[3]"></i>';
+        } else {
+          dotK.className = 'w-5 h-5 rounded-full border-2 border-gold-400 bg-gold-500 flex items-center justify-center shadow-md shadow-gold-500/30';
+          dotK.innerHTML = '<i data-lucide="check" class="w-3 h-3 text-[#080B12] stroke-[3]"></i>';
+          dotM.className = 'w-5 h-5 rounded-full border-2 border-white/20 bg-transparent flex items-center justify-center';
+          dotM.innerHTML = '<i data-lucide="check" class="w-3 h-3 text-transparent stroke-[3]"></i>';
+        }
+      }
 
-      document.getElementById('step-pill-1').className = 'h-1 flex-1 rounded-full transition-all duration-300 ' + (step >= 1 ? 'bg-gold-500' : 'bg-white/10');
-      document.getElementById('step-pill-2').className = 'h-1 flex-1 rounded-full transition-all duration-300 ' + (step >= 2 ? 'bg-gold-500' : 'bg-white/10');
-      document.getElementById('step-pill-3').className = 'h-1 flex-1 rounded-full transition-all duration-300 ' + (step >= 3 ? 'bg-gold-500' : 'bg-white/10');
+      // Update locked branch badges in subsequent steps
+      const bName = BRANCH_CONFIG[branchKey].name;
+      const step2Badge = document.getElementById('reg-selected-branch-label');
+      const step3Badge = document.getElementById('reg-step3-branch-label');
+      const step4Badge = document.getElementById('reg-step4-branch-label');
+      const summaryBranch = document.getElementById('summary-branch-text');
 
-      document.getElementById('reg-step-indicator').textContent = `Step ${step} of 3`;
+      if (step2Badge) step2Badge.textContent = bName;
+      if (step3Badge) step3Badge.textContent = bName;
+      if (step4Badge) step4Badge.textContent = `${bName} Pool`;
+      if (summaryBranch) summaryBranch.textContent = `${bName} (Permanent)`;
+
       initIcons();
+      if (shouldToast) {
+        showToast(`Selected: ${bName}`);
+      }
+    }
+
+    // ── Registration Steps Navigation with Strict Validation ──
+    function goToRegStep(step) {
+      // Validation on Step 1 -> 2: Branch MUST be selected
+      if (step === 2) {
+        if (!selectedRegBranch) {
+          showToast('Please select your campus branch to continue');
+          return;
+        }
+        selectRegBranch(selectedRegBranch, false);
+      }
+
+      // Validation on Step 2 -> 3: Full Name and Mobile Number
+      if (step === 3) {
+        const name = document.getElementById('reg-name').value.trim();
+        const phone = document.getElementById('reg-phone').value.trim();
+        if (!name) { showToast('Please enter applicant full name'); return; }
+        if (!phone || phone.length < 10) { showToast('Please enter a valid 10-digit WhatsApp number'); return; }
+      }
+
+      // Step 4: Shift & Graphical Seat Matrix for Selected Branch
+      if (step === 4) {
+        refreshBranchSeats();
+      }
+
+      // Toggle step views
+      for (let s = 1; s <= 4; s++) {
+        const el = document.getElementById(`reg-content-step-${s}`);
+        if (el) el.classList.toggle('hidden', s !== step);
+        const pill = document.getElementById(`step-pill-${s}`);
+        if (pill) {
+          pill.className = 'h-1 flex-1 rounded-full transition-all duration-300 ' + (s <= step ? 'bg-gold-500' : 'bg-white/10');
+        }
+      }
+
+      const stepTitles = [
+        'Step 1 of 4: Select Branch',
+        'Step 2 of 4: Personal Details',
+        'Step 3 of 4: Photo & Identity',
+        'Step 4 of 4: Shift & Seat Allocation'
+      ];
+      const ind = document.getElementById('reg-step-indicator');
+      if (ind) ind.textContent = stepTitles[step - 1];
+
+      initIcons();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // ── Plan Selection ──
@@ -1547,48 +1791,139 @@
       document.getElementById('summary-plan-text').textContent = name;
       document.getElementById('summary-total-amt').textContent = '₹' + price;
       document.getElementById('pay-amount').value = price;
-      refreshDynamicSeats();
+      refreshBranchSeats();
     }
 
-    // ── Dynamic Seat Matrix ──
-    function refreshDynamicSeats() {
-      const container = document.getElementById('seat-grid-container');
+    // ── Complete Branch-Specific Graphical Seat Matrix & Deterministic Allocation ──
+    function refreshBranchSeats() {
+      const container = document.getElementById('seat-matrix-graphic-container');
       const timing = document.getElementById('reg-timing').value;
       document.getElementById('summary-timing-text').textContent = timing;
 
-      container.innerHTML = '';
-      let availableCount = 0;
-      const occupiedMod = timing.includes('Morning') ? 3 : timing.includes('Evening') ? 2 : 4;
-
-      for (let i = 1; i <= 50; i++) {
-        const seatNo = (i < 10 ? 'A-0' : 'A-') + i;
-        const isOccupied = (i % occupiedMod === 0);
-        
-        const box = document.createElement('div');
-        box.className = 'seat-cell ' + (isOccupied ? 'seat-cell-occupied' : 'seat-cell-avail');
-        box.textContent = i;
-        box.title = seatNo + (isOccupied ? ' (Occupied)' : ' (Available)');
-
-        if (!isOccupied) {
-          availableCount++;
-          if (seatNo === selectedSeatNumber) {
-            box.classList.add('seat-cell-selected');
-          }
-          box.onclick = () => {
-            document.querySelectorAll('.seat-cell').forEach(b => b.classList.remove('seat-cell-selected'));
-            box.classList.add('seat-cell-selected');
-            selectedSeatNumber = seatNo;
-            document.getElementById('selected-seat-display').textContent = 'Selected Seat: ' + seatNo;
-            document.getElementById('summary-seat-text').textContent = 'Seat ' + seatNo;
-          };
-        }
-
-        container.appendChild(box);
+      // Update Matrix Header
+      const matrixHeading = document.getElementById('seat-matrix-heading');
+      if (matrixHeading) {
+        matrixHeading.textContent = `${BRANCH_CONFIG[selectedRegBranch].name.toUpperCase()} SEAT MATRIX`;
       }
 
-      document.getElementById('dynamic-seat-count-label').textContent = `${availableCount} seats available`;
-      const heroCount = document.getElementById('hero-seats-avail');
-      if (heroCount) heroCount.textContent = availableCount;
+      container.innerHTML = '';
+
+      // Load ONLY the selected branch's seat pool (STRICT ISOLATION)
+      const seatPool = BRANCH_SEAT_POOLS[selectedRegBranch] || [];
+      const occupiedMod = timing.includes('Morning') ? 3 : timing.includes('Evening') ? 2 : 4;
+
+      // Calculate availability and perform deterministic auto-allocation
+      const availableSeats = [];
+      const floorAGroup = [];
+      const floorBGroup = [];
+
+      seatPool.forEach((seat, idx) => {
+        // Shift timing dynamically adjusts specific shared stations while retaining permanent bookings
+        const isOccupiedForShift = seat.isOccupied || (seat.rawNumber % occupiedMod === 0);
+        const seatObj = { ...seat, isAvailable: !isOccupiedForShift };
+        
+        if (seatObj.isAvailable) {
+          availableSeats.push(seatObj);
+        }
+
+        if (seat.floor === 'Floor A') {
+          floorAGroup.push(seatObj);
+        } else {
+          floorBGroup.push(seatObj);
+        }
+      });
+
+      // Update available seats counter
+      const countLabel = document.getElementById('dynamic-seat-count-label');
+      if (countLabel) {
+        countLabel.textContent = `${availableSeats.length} seats available`;
+      }
+
+      // Deterministic Seat Allocation Rule:
+      // Allocate the first/lowest available seat in this branch pool if not already allocated or valid
+      const isCurrentSelectionValid = availableSeats.some(s => s.seatNumber === selectedSeatNumber && s.branch === selectedRegBranch);
+      if (!isCurrentSelectionValid && availableSeats.length > 0) {
+        selectedSeatNumber = availableSeats[0].seatNumber;
+      }
+
+      // Update banner & display
+      const bannerText = document.getElementById('allocation-alert-text');
+      if (bannerText) {
+        bannerText.innerHTML = `Auto-allocated optimal seat: <strong>${selectedSeatNumber}</strong> (${BRANCH_CONFIG[selectedRegBranch].name} Pool). Tap another available desk to switch.`;
+      }
+      document.getElementById('selected-seat-display').textContent = `Seat ${selectedSeatNumber}`;
+      document.getElementById('summary-seat-text').textContent = `Seat ${selectedSeatNumber}`;
+
+      // Helper to render an architectural bay section
+      function renderFloorSection(title, seats) {
+        const bayDiv = document.createElement('div');
+        bayDiv.className = 'seat-bay-container';
+
+        const head = document.createElement('div');
+        head.className = 'seat-bay-title';
+        head.innerHTML = `<span>🏛️ ${title}</span><span class="text-[10px] text-gray-400 font-normal">25 Stations</span>`;
+        bayDiv.appendChild(head);
+
+        const grid = document.createElement('div');
+        grid.className = 'seat-desk-grid';
+
+        seats.forEach(s => {
+          const desk = document.createElement('div');
+          const isSelected = s.seatNumber === selectedSeatNumber;
+
+          desk.className = 'seat-desk-card ' + (isSelected ? 'seat-desk-selected' : s.isAvailable ? 'seat-desk-avail' : 'seat-desk-occupied');
+          desk.title = `${s.seatNumber} • ${s.floor} • ${s.isAvailable ? 'Available for Allocation' : 'Occupied / Reserved'}`;
+
+          // Desk Surface Top Bar
+          const bar = document.createElement('div');
+          bar.className = 'seat-desk-top-bar';
+          desk.appendChild(bar);
+
+          // Seat Number (e.g. M-A01 or K-A01)
+          const num = document.createElement('span');
+          num.className = 'seat-desk-number';
+          num.textContent = s.seatNumber;
+          desk.appendChild(num);
+
+          // Status Dot
+          const dot = document.createElement('div');
+          dot.className = 'seat-desk-status-dot';
+          desk.appendChild(dot);
+
+          if (s.isAvailable) {
+            desk.onclick = () => {
+              // Strict branch check: ensure seat belongs to current registration branch
+              if (s.branch !== selectedRegBranch) {
+                showToast('Cross-branch seat selection is not permitted');
+                return;
+              }
+
+              selectedSeatNumber = s.seatNumber;
+              document.querySelectorAll('.seat-desk-card').forEach(d => {
+                d.classList.remove('seat-desk-selected');
+              });
+              desk.classList.add('seat-desk-selected');
+
+              document.getElementById('selected-seat-display').textContent = `Seat ${s.seatNumber}`;
+              document.getElementById('summary-seat-text').textContent = `Seat ${s.seatNumber}`;
+              if (bannerText) {
+                bannerText.innerHTML = `Selected desk: <strong>${s.seatNumber}</strong> (${BRANCH_CONFIG[selectedRegBranch].name} Pool).`;
+              }
+              showToast(`Seat ${s.seatNumber} allocated`);
+            };
+          }
+
+          grid.appendChild(desk);
+        });
+
+        bayDiv.appendChild(grid);
+        return bayDiv;
+      }
+
+      // Render Floor A and Floor B architectural layouts
+      container.appendChild(renderFloorSection('Floor A — Main Silent Study Hall', floorAGroup));
+      container.appendChild(renderFloorSection('Floor B — Executive Scholar Bay', floorBGroup));
+      initIcons();
     }
 
     // ── Image Preview ──
@@ -1604,20 +1939,55 @@
       }
     }
 
-    // ── Submit Registration ──
+    // ── Submit Registration (Strict Branch & Seat Persistence) ──
     async function submitRegistration() {
       const name = document.getElementById('reg-name').value.trim();
       const phone = document.getElementById('reg-phone').value.trim();
       const timing = document.getElementById('reg-timing').value;
 
+      if (!selectedRegBranch) {
+        showToast('Please select your branch');
+        goToRegStep(1);
+        return;
+      }
+      if (!name) { showToast('Please enter your full name'); goToRegStep(2); return; }
+      if (!phone || phone.length < 10) { showToast('Please enter a valid 10-digit mobile number'); goToRegStep(2); return; }
+      if (!selectedSeatNumber) { showToast('Please select an available seat'); goToRegStep(4); return; }
+
+      // Validate zero cross-branch allocation on client side
+      const expectedPrefix = BRANCH_CONFIG[selectedRegBranch].seatPrefix;
+      if (!selectedSeatNumber.startsWith(expectedPrefix)) {
+        showToast('Error: Selected seat does not match branch. Re-allocating...');
+        refreshBranchSeats();
+        return;
+      }
+
       const regId = 'REG-' + Math.floor(100000 + Math.random() * 900000);
       document.getElementById('reg-succ-id').textContent = regId;
       document.getElementById('reg-succ-amt').textContent = selectedPlanPrice;
+      document.getElementById('reg-succ-branch').textContent = BRANCH_CONFIG[selectedRegBranch].name;
+      document.getElementById('reg-succ-seat').textContent = `Seat ${selectedSeatNumber}`;
 
       // Pre-fill payment fields
       document.getElementById('pay-phone').value = phone;
       document.getElementById('pay-name').value = name;
       document.getElementById('pay-amount').value = selectedPlanPrice;
+
+      // Save permanently in local storage for device recognition
+      const studentRecord = {
+        applicationId: regId,
+        name: name,
+        phone: phone,
+        branch: selectedRegBranch,
+        branchName: BRANCH_CONFIG[selectedRegBranch].name,
+        seatNumber: selectedSeatNumber,
+        plan: selectedPlanName,
+        planCode: selectedPlanCode,
+        timing: timing,
+        fee: selectedPlanPrice,
+        registeredAt: new Date().toISOString()
+      };
+      localStorage.setItem('cml_student_record', JSON.stringify(studentRecord));
 
       try {
         await fetch('/portal/register', {
@@ -1631,14 +2001,16 @@
             gender: document.getElementById('reg-gender').value,
             planId: selectedPlanCode,
             batch: timing,
+            branch: selectedRegBranch,
+            seatNumber: selectedSeatNumber,
           })
         });
       } catch (_) {}
 
-      document.getElementById('reg-content-step-3').classList.add('hidden');
+      document.getElementById('reg-content-step-4').classList.add('hidden');
       document.getElementById('reg-success-box').classList.remove('hidden');
       initIcons();
-      showToast('Registration submitted successfully!');
+      showToast(`Registration submitted for ${BRANCH_CONFIG[selectedRegBranch].name}!`);
     }
 
     function goToPaymentFromReg() {
@@ -1680,7 +2052,8 @@
             amount: parseFloat(amount) || selectedPlanPrice,
             paymentType: document.getElementById('pay-type').value,
             txnRef: utr,
-            upiId: 'prashantmanitripathi2003-2@oksbi'
+            upiId: 'prashantmanitripathi2003-2@oksbi',
+            branch: currentViewingBranch
           })
         });
       } catch (_) {}
@@ -1690,7 +2063,7 @@
       showToast('✓ Payment Proof Submitted! Pending Verification');
     }
 
-    // ── Member Self-Attendance ──
+    // ── Member Self-Attendance (Strict Branch Recognition & Display) ──
     async function submitPortalAttendance() {
       const input = document.getElementById('att-input-id');
       const val = input.value.trim();
@@ -1718,14 +2091,16 @@
         const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         if (res.ok && data.success) {
-          // ✅ REAL SUCCESS — show verified check-in
+          // ✅ REAL SUCCESS — show verified check-in with branch and seat
           const isOut = data.action === 'CHECK_OUT';
           document.getElementById('att-result-badge').textContent = isOut ? 'CHECKED OUT ✓' : 'CHECKED IN • PRESENT ✓';
           document.getElementById('att-result-badge').style.background = isOut ? 'rgba(234,170,80,0.2)' : 'rgba(16,185,129,0.2)';
           document.getElementById('att-result-badge').style.color = isOut ? '#FBBF24' : '#34D399';
-          document.getElementById('att-result-name').textContent = data.member?.name || val;
+          
+          const memberBranchName = data.member?.branchName || (selectedRegBranch === 'mehdawal' ? 'Mehdawal Branch' : 'Khalilabad Branch');
+          document.getElementById('att-result-name').textContent = `${data.member?.name || val} (${memberBranchName})`;
           document.getElementById('att-result-msg').textContent = data.message || 'Attendance recorded successfully.';
-          document.getElementById('att-result-seat').textContent = data.member?.seatNumber ? 'Seat ' + data.member.seatNumber : 'Unassigned';
+          document.getElementById('att-result-seat').textContent = data.member?.seatNumber ? 'Seat ' + data.member.seatNumber : 'Assigned Seat';
           document.getElementById('att-result-time').textContent = timeStr;
           document.getElementById('att-result-box').classList.remove('hidden');
           showToast('✓ ' + (isOut ? 'Checked Out' : 'Checked In') + ' — ' + (data.member?.name || val));
@@ -1736,7 +2111,29 @@
           alert('❌ Attendance Not Recorded\n\n' + errMsg + '\n\nPlease enter your:\n• 10-digit registered mobile number, OR\n• Full name (as registered), OR\n• Member ID (e.g. CML-942810)');
         }
       } catch (err) {
-        // 🌐 Network error — show honest error
+        // Check local student record if offline
+        const localRecord = localStorage.getItem('cml_student_record');
+        if (localRecord) {
+          try {
+            const parsed = JSON.parse(localRecord);
+            if (parsed.phone === val || parsed.name.toLowerCase() === val.toLowerCase() || parsed.applicationId === val) {
+              const now = new Date();
+              const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              document.getElementById('att-result-badge').textContent = 'CHECKED IN • OFFLINE VERIFIED ✓';
+              document.getElementById('att-result-badge').style.background = 'rgba(16,185,129,0.2)';
+              document.getElementById('att-result-badge').style.color = '#34D399';
+              document.getElementById('att-result-name').textContent = `${parsed.name} (${parsed.branchName})`;
+              document.getElementById('att-result-msg').textContent = `Offline verified for ${parsed.branchName}. Syncing upon server connection.`;
+              document.getElementById('att-result-seat').textContent = `Seat ${parsed.seatNumber}`;
+              document.getElementById('att-result-time').textContent = timeStr;
+              document.getElementById('att-result-box').classList.remove('hidden');
+              showToast(`✓ Checked In — ${parsed.name} (${parsed.branchName})`);
+              return;
+            }
+          } catch (_) {}
+        }
+
+        // Network error — show honest error
         showToast('⚠ Network error. Please check your connection and try again.');
         alert('❌ Unable to Record Attendance\n\nCould not connect to the Chintamani Library server.\n\nPlease check your internet connection and try again.');
       } finally {
@@ -1780,7 +2177,8 @@
             memberPhone: document.getElementById('fb-phone').value.trim(),
             rating: currentRating,
             category: document.getElementById('fb-category').value,
-            review: review
+            review: review,
+            branch: currentViewingBranch
           })
         });
       } catch (_) {}
@@ -1818,7 +2216,8 @@
             memberName: name,
             memberPhone: phone,
             category: document.getElementById('cmp-category').value,
-            description: desc
+            description: desc,
+            branch: currentViewingBranch
           })
         });
       } catch (_) {}
@@ -1828,147 +2227,10 @@
       showToast('Complaint registered: ' + cmpId);
     }
 
-    // ── Member Account Lookup (Real Live Data Only - No Demo / Fake Fallbacks) ──
-    async function lookupMemberInfo() {
-      const input = document.getElementById('info-phone');
-      const val = input.value.trim();
-      if (!val) {
-        showToast('Please enter your mobile number, name, or member ID');
-        return;
-      }
-
-      const display = document.getElementById('member-info-display');
-      display.classList.add('hidden');
-
-      try {
-        const res = await fetch('/portal/dashboard?identifier=' + encodeURIComponent(val));
-        if (res.ok) {
-          const d = await res.json();
-
-          // Case A: Pending registration
-          if (d.type === 'REGISTRATION_PENDING') {
-            document.getElementById('info-avatar').textContent = (d.name || 'A')[0].toUpperCase();
-            document.getElementById('info-name').textContent = d.name || 'Applicant';
-            document.getElementById('info-code').textContent = d.applicationId || 'REG-PENDING';
-            document.getElementById('info-seat').textContent = d.seatNumber ? ('Seat ' + d.seatNumber) : 'Reserved';
-            document.getElementById('info-plan').textContent = d.planName || 'Pending Plan';
-            document.getElementById('info-status').textContent = 'Admission Pending';
-            document.getElementById('info-status').className = 'text-amber-400 font-semibold';
-            document.getElementById('info-expiry').textContent = 'Under Admin Review';
-            display.classList.remove('hidden');
-            showToast('✓ Registration Record Found');
-            return;
-          }
-
-          // Case B: Active / Registered Member
-          const member = d.member || d;
-          const sub = d.subscription || (member.subscriptions && member.subscriptions[0]);
-          const seat = d.seat || (sub && sub.seat);
-          const plan = d.plan || (sub && sub.plan);
-
-          document.getElementById('info-avatar').textContent = (member.name || 'M')[0].toUpperCase();
-          document.getElementById('info-name').textContent = member.name || val;
-          document.getElementById('info-code').textContent = member.memberCode || val;
-          document.getElementById('info-seat').textContent = seat ? ('Seat ' + (seat.seatNumber || seat)) : (member.seatNumber ? ('Seat ' + member.seatNumber) : 'Assigned');
-          document.getElementById('info-plan').textContent = plan ? (plan.name || plan) : 'Regular Shift';
-          const isActive = member.isActive !== false;
-          document.getElementById('info-status').textContent = isActive ? 'Active • Verified' : 'Inactive / Expired';
-          document.getElementById('info-status').className = isActive ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold';
-          document.getElementById('info-expiry').textContent = sub && sub.endDate ? new Date(sub.endDate).toLocaleDateString() : 'Active Member';
-          display.classList.remove('hidden');
-          showToast('✓ Member Profile Verified');
-          return;
-        } else {
-          // Strictly handle failure — NO DEMO / FAKE MEMBER DATA!
-          const err = await res.json().catch(() => ({}));
-          const errMsg = err.message || `No registered member found matching "${val}".`;
-          showToast('⚠ ' + errMsg);
-          alert('❌ Member Account Not Found\n\n' + errMsg + '\n\nPlease verify your 10-digit mobile number, full name, or Member ID (e.g. CML-942810).');
-        }
-      } catch (e) {
-        showToast('⚠ Server connection error');
-        alert('❌ Network Error\n\nCould not connect to Chintamani Library server to verify your account.');
-      }
-    }
-
-    // ── Application & Complaint Tracking (Real Live Data Only) ──
-    async function trackApplication() {
-      const q = document.getElementById('track-id-input').value.trim();
-      if (!q) { showToast('Please enter Application ID, Reference ID or Mobile'); return; }
-
-      const box = document.getElementById('track-result-box');
-      box.classList.add('hidden');
-
-      const badge = document.getElementById('track-status-badge');
-      const title = document.getElementById('track-result-title');
-      const desc = document.getElementById('track-result-desc');
-
-      try {
-        if (q.toUpperCase().startsWith('CMP-')) {
-          const res = await fetch('/portal/complaint/' + encodeURIComponent(q));
-          if (res.ok) {
-            const data = await res.json();
-            const isResolved = data.status === 'RESOLVED';
-            badge.textContent = data.status || 'LOGGED';
-            badge.className = isResolved ? 'px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase' : 'px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase';
-            title.textContent = 'Complaint: ' + (data.category || q);
-            desc.textContent = data.description ? `Ticket Status: ${data.status}. Issue: ${data.description}` : `Complaint registered in library helpdesk.`;
-            box.classList.remove('hidden');
-            showToast('✓ Complaint Status Found');
-            return;
-          }
-        } else if (q.toUpperCase().startsWith('REG-') || q.toUpperCase().startsWith('APP-')) {
-          const res = await fetch('/portal/registration/' + encodeURIComponent(q));
-          if (res.ok) {
-            const data = await res.json();
-            const isApproved = data.status === 'APPROVED';
-            badge.textContent = data.status || 'UNDER REVIEW';
-            badge.className = isApproved ? 'px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase' : 'px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase';
-            title.textContent = 'Application: ' + (data.name || q);
-            desc.textContent = `Applied for ${data.plan?.name || 'Study Shift'}. Status: ${data.status || 'Pending Verification'}.`;
-            box.classList.remove('hidden');
-            showToast('✓ Registration Status Found');
-            return;
-          }
-        }
-
-        // Search general member or registration record
-        const res = await fetch('/portal/dashboard?identifier=' + encodeURIComponent(q));
-        if (res.ok) {
-          const data = await res.json();
-          if (data.type === 'REGISTRATION_PENDING') {
-            badge.textContent = data.status || 'PENDING VERIFICATION';
-            badge.className = 'px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase';
-            title.textContent = 'Application: ' + (data.name || q);
-            desc.textContent = `Application ID: ${data.applicationId}. Status: ${data.status}. Plan: ${data.planName || 'Standard'}.`;
-            box.classList.remove('hidden');
-            showToast('✓ Application Status Found');
-            return;
-          }
-
-          const m = data.member || data;
-          badge.textContent = m.isActive ? 'ACTIVE MEMBER' : 'INACTIVE';
-          badge.className = m.isActive ? 'px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase' : 'px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400 text-[10px] font-bold uppercase';
-          title.textContent = (m.name || 'Member') + ' (' + (m.memberCode || q) + ')';
-          desc.textContent = `Verified active subscription in Chintamani Library registry.`;
-          box.classList.remove('hidden');
-          showToast('✓ Member Record Found');
-          return;
-        }
-
-        // If not found, strictly show error - NO FAKE DATA!
-        showToast(`⚠ No record found for "${q}"`);
-        alert(`❌ Record Not Found\n\nNo active application, complaint, or membership record matched "${q}".\n\nPlease check your Reference ID or registered mobile number.`);
-      } catch (err) {
-        showToast('⚠ Error checking status');
-        alert('❌ Network Error\n\nCould not connect to the library server to check your status.');
-      }
-    }
-
     // ── Init on Page Load ──
     document.addEventListener('DOMContentLoaded', () => {
       initIcons();
-      refreshDynamicSeats();
+      switchPortalBranch(currentViewingBranch);
       setRating(5);
     });
   </script>

@@ -132,9 +132,26 @@ export class PortalService {
   // ── LIBRARY & PLAN INFO ───────────────────────────────────────────────────
 
   async getLibraryInfo(branchId?: string) {
-    let branch = branchId
-      ? await this.prisma.branch.findUnique({ where: { id: branchId }, include: { tenant: true } })
-      : await this.prisma.branch.findFirst({ include: { tenant: true } });
+    let branch: any = null;
+    if (branchId) {
+      const bLower = branchId.toLowerCase();
+      branch = await this.prisma.branch.findFirst({
+        where: {
+          OR: [
+            { id: branchId },
+            { name: { contains: bLower.includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
+          ],
+        },
+        include: { tenant: true },
+      });
+    }
+
+    if (!branch) {
+      branch = await this.prisma.branch.findFirst({
+        where: { name: { contains: 'Mehdawal', mode: 'insensitive' } },
+        include: { tenant: true },
+      }) || await this.prisma.branch.findFirst({ include: { tenant: true } });
+    }
 
     if (!branch) {
       const tenant = await this.prisma.tenant.findFirst({ include: { branches: true } });
@@ -144,21 +161,29 @@ export class PortalService {
     const seatStats = await this.getSeatStats(branch?.id);
 
     return {
-      libraryName: branch?.tenant.name || 'Chintamani Library',
-      branchName: branch?.name || 'Main Branch',
+      libraryName: branch?.tenant?.name || 'Chintamani Library',
+      branchName: branch?.name || 'Chintamani Library',
       branchId: branch?.id,
-      address: branch?.address || branch?.tenant.address || 'Main Road, Sant Kabir Nagar, UP',
-      phone: branch?.phone || branch?.tenant.phone || '9876543210',
-      email: branch?.tenant.email || 'info@chintamanilibrary.com',
-      upiId: '9876543210@upi', // Library UPI VPA for direct payments
-      upiName: 'Chintamani Library',
+      address: branch?.address || branch?.tenant?.address || 'Sant Kabir Nagar, UP',
+      phone: branch?.phone || branch?.tenant?.phone || '9415919277',
+      email: branch?.tenant?.email || 'contact@chintamanilibrary.com',
+      upiId: 'prashantmanitripathi2003-2@oksbi', // Official UPI VPA
+      upiName: 'Prashant Mani Tripathi',
       seatStats,
     };
   }
 
   async getPlans(branchId?: string) {
+    let targetBranchId = branchId;
+    if (branchId && (branchId.toLowerCase().includes('mehda') || branchId.toLowerCase().includes('khalil'))) {
+      const b = await this.prisma.branch.findFirst({
+        where: { name: { contains: branchId.toLowerCase().includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
+      });
+      if (b) targetBranchId = b.id;
+    }
+
     const where: any = { isActive: true };
-    if (branchId) where.branchId = branchId;
+    if (targetBranchId) where.branchId = targetBranchId;
 
     const plans = await this.prisma.membershipPlan.findMany({
       where,
@@ -186,8 +211,15 @@ export class PortalService {
   }
 
   async getSeatStats(branchId?: string) {
-    const where: any = {};
-    if (branchId) where.branchId = branchId;
+    let targetBranchId = branchId;
+    if (branchId && (branchId.toLowerCase().includes('mehda') || branchId.toLowerCase().includes('khalil'))) {
+      const b = await this.prisma.branch.findFirst({
+        where: { name: { contains: branchId.toLowerCase().includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
+      });
+      if (b) targetBranchId = b.id;
+    }
+
+    const where: any = targetBranchId ? { branchId: targetBranchId } : {};
 
     const [total, available, reserved, occupied, blocked] = await Promise.all([
       this.prisma.seat.count({ where }),
@@ -227,13 +259,31 @@ export class PortalService {
       );
     }
 
-    // Resolve Branch & Tenant
-    let branch = dto.branchId
-      ? await this.prisma.branch.findUnique({ where: { id: dto.branchId }, include: { tenant: true } })
-      : await this.prisma.branch.findFirst({ include: { tenant: true } });
+    // Resolve Branch & Tenant strictly (Mehdawal vs Khalilabad)
+    const branchQuery = (dto.branch || dto.branchId || '').toLowerCase();
+    let branch: any = null;
+    if (branchQuery) {
+      branch = await this.prisma.branch.findFirst({
+        where: {
+          OR: [
+            ...(dto.branchId ? [{ id: dto.branchId }] : []),
+            { name: { contains: branchQuery.includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
+          ],
+        },
+        include: { tenant: true },
+      });
+    }
 
     if (!branch) {
-      throw new NotFoundException('Library branch not found');
+      // Require explicit branch or resolve based on address
+      branch = await this.prisma.branch.findFirst({
+        where: { name: { contains: 'Mehdawal', mode: 'insensitive' } },
+        include: { tenant: true },
+      }) || await this.prisma.branch.findFirst({ include: { tenant: true } });
+    }
+
+    if (!branch) {
+      throw new NotFoundException('Selected library branch not found. Please choose Mehdawal or Khalilabad.');
     }
 
     // Resolve Plan
@@ -244,29 +294,77 @@ export class PortalService {
       throw new NotFoundException('Selected membership plan not found');
     }
 
-    const is24HrPlan = plan.seatAllocation === 'AUTO' || plan.name.toLowerCase().includes('24');
-
-    // 2. 24-Hour Plan Auto-Seat Reservation Logic
+    // 2. Strict Branch-Based Seat Allocation & Anti-Cross-Branch Validation
     let reservedSeat: any = null;
-    if (is24HrPlan) {
-      // Find an available seat
+    const requestedSeat = (dto.seatNumber || dto.seatId || '').trim();
+
+    if (requestedSeat) {
+      // Extract numeric or alphanumeric seat pattern (e.g. "M-A01", "A01", "14")
+      const cleanNum = requestedSeat.replace(/^(M|K|Seat)[\s-_]*/i, '');
+      const paddedNum = cleanNum.padStart(2, '0');
+
       reservedSeat = await this.prisma.seat.findFirst({
-        where: { branchId: branch.id, status: 'AVAILABLE' },
-        orderBy: { seatNumber: 'asc' },
+        where: {
+          branchId: branch.id,
+          OR: [
+            ...(dto.seatId ? [{ id: dto.seatId }] : []),
+            { seatNumber: requestedSeat },
+            { seatNumber: cleanNum },
+            { seatNumber: paddedNum },
+            { seatNumber: `A${paddedNum}` },
+            { seatNumber: `B${paddedNum}` },
+          ],
+        },
       });
 
+      // Cross-branch check: if seat was found in another branch, reject immediately!
       if (!reservedSeat) {
-        throw new BadRequestException(
-          'No seats are currently available for the 24-Hour plan. Please select another plan or contact reception.'
-        );
+        const foreignSeat = await this.prisma.seat.findFirst({
+          where: {
+            OR: [
+              ...(dto.seatId ? [{ id: dto.seatId }] : []),
+              { seatNumber: requestedSeat },
+              { seatNumber: cleanNum },
+            ],
+          },
+          include: { branch: true },
+        });
+
+        if (foreignSeat) {
+          throw new BadRequestException(
+            `Cross-Branch Seat Violation: Seat "${requestedSeat}" belongs to ${foreignSeat.branch.name}, but student is registering at ${branch.name}. Students cannot be assigned seats from another branch.`
+          );
+        }
+
+        // If seat doesn't exist at all, fall back to deterministic allocation in this branch
       }
 
-      // Mark seat as RESERVED immediately to lock it
-      await this.prisma.seat.update({
-        where: { id: reservedSeat.id },
-        data: { status: 'RESERVED' },
+      if (reservedSeat && reservedSeat.status !== 'AVAILABLE') {
+        throw new BadRequestException(
+          `Seat "${reservedSeat.seatNumber}" in ${branch.name} is currently ${reservedSeat.status.toLowerCase()}. Please select an available seat.`
+        );
+      }
+    }
+
+    // If no seat requested or requested seat wasn't found, perform deterministic allocation strictly within THIS branch
+    if (!reservedSeat) {
+      reservedSeat = await this.prisma.seat.findFirst({
+        where: { branchId: branch.id, status: 'AVAILABLE' },
+        orderBy: [{ floor: 'asc' }, { seatNumber: 'asc' }],
       });
     }
+
+    if (!reservedSeat) {
+      throw new BadRequestException(
+        `No seats are currently available at ${branch.name}. Please contact library administration.`
+      );
+    }
+
+    // Mark seat as RESERVED immediately to lock it in the branch's pool
+    await this.prisma.seat.update({
+      where: { id: reservedSeat.id },
+      data: { status: 'RESERVED' },
+    });
 
     // 3. Generate Application ID (e.g. REG-000123)
     const randomNum = Math.floor(100000 + Math.random() * 900000);
@@ -645,7 +743,7 @@ export class PortalService {
       const reg = await this.prisma.memberRegistration.findFirst({
         where: { OR: regOr },
         orderBy: { submittedAt: 'desc' },
-        include: { plan: true, reservedSeat: true },
+        include: { plan: true, reservedSeat: true, branch: true },
       });
 
       if (reg) {
@@ -655,6 +753,7 @@ export class PortalService {
           name: reg.name,
           status: reg.status,
           planName: reg.plan?.name,
+          branchName: reg.branch?.name || 'Chintamani Library',
           seatNumber: reg.reservedSeat?.seatNumber,
           submittedAt: reg.submittedAt,
         };
@@ -875,9 +974,24 @@ export class PortalService {
   }
 
   async getSeatsByBatch(batch?: string, timing?: string, branchId?: string) {
-    let branch = branchId
-      ? await this.prisma.branch.findUnique({ where: { id: branchId } })
-      : await this.prisma.branch.findFirst();
+    let branch: any = null;
+    if (branchId) {
+      const bLower = branchId.toLowerCase();
+      branch = await this.prisma.branch.findFirst({
+        where: {
+          OR: [
+            { id: branchId },
+            { name: { contains: bLower.includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
+          ],
+        },
+      });
+    }
+
+    if (!branch) {
+      branch = await this.prisma.branch.findFirst({
+        where: { name: { contains: 'Mehdawal', mode: 'insensitive' } },
+      }) || await this.prisma.branch.findFirst();
+    }
 
     const where: any = branch ? { branchId: branch.id } : {};
 
@@ -889,6 +1003,7 @@ export class PortalService {
         seatNumber: true,
         floor: true,
         status: true,
+        branchId: true,
       },
     });
 
@@ -898,6 +1013,8 @@ export class PortalService {
       floor: s.floor,
       status: s.status,
       isAvailable: s.status === 'AVAILABLE',
+      branchId: s.branchId,
+      branchName: branch?.name || 'Chintamani Library',
     }));
   }
 

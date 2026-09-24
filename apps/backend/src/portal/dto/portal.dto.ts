@@ -88,6 +88,18 @@ export class PortalRegisterDto {
   @IsOptional()
   @IsString()
   branchId?: string;
+
+  @IsOptional()
+  @IsString()
+  branch?: string;
+
+  @IsOptional()
+  @IsString()
+  seatNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  seatId?: string;
 }
 
 export class PortalPaymentDto {

@@ -51,16 +51,53 @@
     }
 
     body {
-      background-color: var(--bg-base);
-      background-image: 
-        radial-gradient(circle at 50% 0%, rgba(201, 168, 76, 0.08) 0%, transparent 55%),
-        radial-gradient(circle at 100% 40%, rgba(16, 185, 129, 0.03) 0%, transparent 40%),
-        radial-gradient(circle at 0% 80%, rgba(201, 168, 76, 0.03) 0%, transparent 40%);
+      background-color: #06080E;
       color: #E6E9F0;
       font-family: 'Inter', sans-serif;
       -webkit-tap-highlight-color: transparent;
       overflow-x: hidden;
       min-height: 100vh;
+      position: relative;
+    }
+
+    /* Ambient Branch Background Layer */
+    .portal-ambient-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -10;
+      overflow: hidden;
+      pointer-events: none;
+      background-color: #05070B;
+    }
+    .bg-photo-layer {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center 30%;
+      opacity: 0;
+      transform: scale(1.05);
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+      filter: saturate(1.15) brightness(0.9);
+      will-change: opacity, transform;
+    }
+    .bg-photo-layer.active {
+      opacity: 0.34;
+      transform: scale(1.0);
+    }
+    .bg-overlay-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, 
+        rgba(5, 7, 12, 0.88) 0%, 
+        rgba(7, 10, 18, 0.70) 40%, 
+        rgba(6, 8, 14, 0.85) 75%, 
+        rgba(4, 5, 8, 0.98) 100%
+      );
+    }
+    .bg-overlay-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 30%, transparent 20%, rgba(4, 5, 8, 0.85) 90%);
     }
 
     /* Typography */
@@ -136,7 +173,7 @@
       box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
     }
 
-    /* GLOBAL 3D SLIDING BRANCH SWITCHER */
+    /* GLOBAL 3D SLIDING BRANCH SWITCHER — ULTRA-LUXURY GLASS */
     .global-branch-toggle-wrap {
       display: flex;
       justify-content: center;
@@ -144,25 +181,29 @@
     }
     .global-branch-toggle {
       position: relative;
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       align-items: center;
-      background: rgba(10, 14, 22, 0.94);
+      background: rgba(10, 14, 24, 0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       border: 1.5px solid rgba(201, 168, 76, 0.35);
       border-radius: 9999px;
-      padding: 3px;
-      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.65), inset 0 1px 2px rgba(255, 255, 255, 0.08);
+      padding: 4px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.08);
       width: 100%;
+      user-select: none;
     }
     .branch-slider-thumb {
       position: absolute;
-      top: 3px;
-      left: 3px;
-      width: calc(50% - 3px);
-      height: calc(100% - 6px);
+      top: 4px;
+      bottom: 4px;
+      left: 4px;
+      width: calc(50% - 4px);
       border-radius: 9999px;
-      background: linear-gradient(135deg, #F9EED2 0%, #E8C97A 50%, #C9A84C 100%);
-      box-shadow: 0 3px 14px rgba(201, 168, 76, 0.45), 0 1px 3px rgba(0, 0, 0, 0.5);
-      transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+      background: linear-gradient(135deg, #FFF1D2 0%, #E8C97A 45%, #B88928 100%);
+      box-shadow: 0 4px 18px rgba(201, 168, 76, 0.5), 0 1px 4px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+      transition: transform 0.36s cubic-bezier(0.2, 0.9, 0.3, 1.15);
       z-index: 1;
       pointer-events: none;
     }
@@ -172,26 +213,51 @@
     .branch-toggle-btn {
       position: relative;
       z-index: 2;
-      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      padding: 8px 12px;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.04em;
+      gap: 7px;
+      padding: 9px 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
       border: none;
       background: transparent;
       color: #94A3B8;
       cursor: pointer;
       border-radius: 9999px;
-      transition: color 0.25s ease;
+      transition: all 0.25s ease;
       white-space: nowrap;
+      outline: none;
+    }
+    .branch-toggle-btn:hover {
+      color: #F1F5F9;
     }
     .branch-toggle-btn.active {
-      color: #070A0F !important;
+      color: #07090E !important;
       font-weight: 900;
+    }
+    .branch-toggle-btn.active i {
+      color: #07090E !important;
+    }
+    .branch-btn-name {
+      text-transform: uppercase;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+    }
+    .branch-btn-badge {
+      font-size: 9.5px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #94A3B8;
+      transition: all 0.25s ease;
+    }
+    .branch-toggle-btn.active .branch-btn-badge {
+      background: rgba(7, 9, 14, 0.22);
+      color: #07090E;
     }
 
     /* Architectural Single-Hall Graphical Matrix */
@@ -325,13 +391,14 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Service Card Styling */
+    /* Service Card Styling — Deep Glassmorphism with Zero Overlap */
     .svc-card {
-      transition: transform 0.22s cubic-bezier(0.16,1,0.3,1), box-shadow 0.22s cubic-bezier(0.16,1,0.3,1);
+      transition: transform 0.22s cubic-bezier(0.16,1,0.3,1), box-shadow 0.22s cubic-bezier(0.16,1,0.3,1), border-color 0.22s ease;
     }
     .svc-card:hover {
       transform: translateY(-3px) scale(1.01);
-      box-shadow: 0 14px 40px rgba(0,0,0,0.65) !important;
+      box-shadow: 0 16px 42px rgba(0,0,0,0.7) !important;
+      border-color: rgba(201, 168, 76, 0.45) !important;
     }
     .svc-card:active {
       transform: scale(0.98);
@@ -347,12 +414,12 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      opacity: 0.22;
+      opacity: 0.16;
       transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1);
     }
     .svc-card:hover .card-img {
-      opacity: 0.32;
-      transform: scale(1.04);
+      opacity: 0.26;
+      transform: scale(1.05);
     }
     .card-img-vignette {
       position: absolute;
@@ -370,12 +437,22 @@
     }
   </style>
 </head>
-<body class="flex flex-col justify-between">
+<body class="flex flex-col justify-between min-h-screen relative overflow-x-hidden">
+
+  <!-- ================================================================= -->
+  <!-- DYNAMIC AMBIENT BRANCH PHOTO BACKGROUND (Synced with Switcher)   -->
+  <!-- ================================================================= -->
+  <div id="portal-ambient-bg" class="portal-ambient-bg" aria-hidden="true">
+    <div id="bg-photo-mehdawal" class="bg-photo-layer active" style="background-image: url('images/mehdawal_study_hall.jpg');"></div>
+    <div id="bg-photo-khalilabad" class="bg-photo-layer" style="background-image: url('images/khalilabad_study_hall.jpg');"></div>
+    <div class="bg-overlay-gradient"></div>
+    <div class="bg-overlay-vignette"></div>
+  </div>
 
   <!-- ================================================================= -->
   <!-- 1. STICKY TOP HEADER WITH ONE GLOBAL BRANCH SWITCHER               -->
   <!-- ================================================================= -->
-  <header class="sticky top-0 z-40 bg-[#080B12]/95 backdrop-blur-xl border-b border-gold-500/15 px-4 py-2.5">
+  <header class="sticky top-0 z-40 bg-[#070A11]/90 backdrop-blur-2xl border-b border-gold-500/20 px-4 py-2.5 shadow-lg shadow-black/50">
     <div class="max-w-lg mx-auto space-y-2">
       
       <!-- Top Brand Row -->
@@ -386,13 +463,13 @@
           </div>
           <div class="flex flex-col">
             <span class="brand-title text-base font-bold tracking-wide text-white leading-tight">Chintamani Library</span>
-            <span class="text-[9.5px] font-semibold tracking-wider text-gold-400/80 uppercase">Universal QR Portal</span>
+            <span class="text-[9.5px] font-semibold tracking-wider text-gold-400/80 uppercase">Universal Member Portal</span>
           </div>
         </div>
 
         <div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-black/60 border border-gold-500/25 text-gold-300 text-[10px] font-bold">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Verified 24x7</span>
+          <span>Verified 24×7</span>
         </div>
       </div>
 
@@ -400,13 +477,15 @@
       <div class="global-branch-toggle-wrap">
         <div class="global-branch-toggle" role="tablist" aria-label="Select Active Global Branch">
           <div id="branch-slider-thumb" class="branch-slider-thumb"></div>
-          <button id="global-btn-mehdawal" onclick="switchPortalBranch('mehdawal')" class="branch-toggle-btn active" role="tab" aria-selected="true" title="Switch all modules to Mehdawal Branch (65 Seats)">
-            <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
-            <span>MEHDAWAL (65)</span>
+          <button id="global-btn-mehdawal" onclick="switchPortalBranch('mehdawal')" class="branch-toggle-btn active" role="tab" aria-selected="true" title="Switch to Mehdawal Branch (65 Seats)">
+            <i data-lucide="building-2" class="w-3.5 h-3.5 shrink-0"></i>
+            <span class="branch-btn-name">Mehdawal</span>
+            <span class="branch-btn-badge">65</span>
           </button>
-          <button id="global-btn-khalilabad" onclick="switchPortalBranch('khalilabad')" class="branch-toggle-btn" role="tab" aria-selected="false" title="Switch all modules to Khalilabad Branch (72 Seats)">
-            <i data-lucide="landmark" class="w-3.5 h-3.5"></i>
-            <span>KHALILABAD (72)</span>
+          <button id="global-btn-khalilabad" onclick="switchPortalBranch('khalilabad')" class="branch-toggle-btn" role="tab" aria-selected="false" title="Switch to Khalilabad Branch (72 Seats)">
+            <i data-lucide="landmark" class="w-3.5 h-3.5 shrink-0"></i>
+            <span class="branch-btn-name">Khalilabad</span>
+            <span class="branch-btn-badge">72</span>
           </button>
         </div>
       </div>
@@ -424,43 +503,38 @@
     <!-- ─────────────────────────────────────────────────────────────── -->
     <section id="view-landing" class="page-view space-y-3.5">
       
-      <!-- Compact Premium Official Identity Badge (Replaces oversized hero card) -->
-      <div class="relative overflow-hidden rounded-2xl p-3.5 border border-gold-500/30 shadow-xl shadow-black/80 flex items-center justify-between gap-3" style="background: radial-gradient(circle at 90% 10%, rgba(201, 168, 76, 0.12) 0%, transparent 60%), rgba(13, 17, 26, 0.9); backdrop-filter: blur(20px);">
+      <!-- Compact Premium Identity Badge (Glassmorphic, Zero Clutter, Zero Overlap) -->
+      <div class="relative overflow-hidden rounded-2xl p-4 border border-gold-500/30 shadow-2xl shadow-black/80 flex items-center justify-between gap-3" style="background: rgba(12, 17, 28, 0.72); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 12px 36px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.08);">
         <!-- Top subtle gold hairline -->
-        <div class="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#E8C97A] to-transparent opacity-70"></div>
+        <div class="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#E8C97A] to-transparent opacity-80"></div>
         
-        <div class="flex items-center space-x-3 min-w-0">
+        <div class="flex items-center space-x-3.5 min-w-0">
           <!-- 3D Luxury Crest Logo with Subtle Ambient Glow -->
-          <div class="relative w-11 h-11 rounded-xl p-1 bg-black/60 border border-gold-400/40 flex items-center justify-center shrink-0 shadow-md shadow-gold-500/15 float-slow">
+          <div class="relative w-12 h-12 rounded-2xl p-1.5 bg-black/60 border border-gold-400/40 flex items-center justify-center shrink-0 shadow-lg shadow-gold-500/20 float-slow">
             <img src="images/chintamani_logo.png" alt="Chintamani Logo" class="w-full h-full object-contain" onerror="this.src='images/logo.png'">
-            <div class="absolute inset-0 rounded-xl bg-gold-400/10 pointer-events-none"></div>
+            <div class="absolute inset-0 rounded-2xl bg-gold-400/10 pointer-events-none"></div>
           </div>
 
-          <!-- Typography -->
+          <!-- Typography: Clean, Uncrowded, Luxury Serif Brand -->
           <div class="min-w-0">
-            <div class="flex items-center space-x-1.5">
-              <span class="text-[9px] font-extrabold tracking-widest uppercase bg-gradient-to-r from-gold-300 to-gold-500 bg-clip-text text-transparent">OFFICIAL PORTAL</span>
-              <span class="w-1 h-1 rounded-full bg-gold-400/50"></span>
-              <span class="text-[9.5px] text-gray-400 font-medium">Digital Hub</span>
+            <div class="flex items-center space-x-1.5 mb-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="hero-branch-badge-text" class="text-[10.5px] font-bold tracking-wider uppercase text-gold-300">Mehdawal Campus</span>
             </div>
-            <h2 class="brand-title text-lg sm:text-xl font-extrabold tracking-wide leading-tight gold-gradient-text drop-shadow-[0_1px_8px_rgba(201,168,76,0.3)] truncate">
+            <h2 class="brand-title text-xl sm:text-2xl font-extrabold tracking-wide leading-none gold-gradient-text drop-shadow-[0_2px_10px_rgba(201,168,76,0.35)]">
               CHINTAMANI LIBRARY
             </h2>
-            <p class="text-[10px] text-[#A6B4C9] truncate">
-              Admissions • QR Attendance • UPI Fees • Single Hall Seats
+            <p class="text-[11px] text-[#A6B4C9] font-medium tracking-wide mt-1.5 truncate">
+              Self-Service Student & Member Access
             </p>
           </div>
         </div>
 
-        <!-- Dynamic Live Branch & Seat Status Pill -->
-        <div class="shrink-0 flex flex-col items-end space-y-1">
-          <div class="px-2.5 py-0.5 rounded-full bg-black/70 border border-gold-400/35 text-gold-300 text-[9.5px] font-bold flex items-center space-x-1.5 shadow-sm">
-            <i data-lucide="map-pin" class="w-3 h-3 text-gold-400"></i>
-            <span id="hero-branch-badge-text">Mehdawal Campus</span>
-          </div>
-          <div class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/35 text-emerald-300 text-[9px] font-bold flex items-center space-x-1.5 shadow-sm">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span><strong id="hero-seats-avail" class="text-emerald-300">65</strong> Desks Open</span>
+        <!-- Right Side: Clean 24x7 Badge -->
+        <div class="shrink-0 flex items-center">
+          <div class="px-2.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[10px] font-extrabold flex items-center space-x-1.5 shadow-sm">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>Open 24×7</span>
           </div>
         </div>
       </div>
@@ -473,105 +547,129 @@
         </div>
       </div>
 
-      <!-- 6 Premium Service Cards Grid (Balanced 2-Col Mobile / 3-Col Desktop) -->
+      <!-- 6 Premium Service Cards Grid (Balanced 2-Col Mobile / 3-Col Desktop — Zero Overlap) -->
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
 
         <!-- 1. Attendance (Emerald) -->
-        <div onclick="showView('attendance')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[142px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.85);border:1px solid rgba(16,185,129,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
+        <div onclick="showView('attendance')" class="svc-card cursor-pointer relative overflow-hidden rounded-[20px] min-h-[156px] flex flex-col justify-between p-4" style="background:rgba(12,17,28,0.72);border:1px solid rgba(16,185,129,0.3);box-shadow:0 10px 30px rgba(0,0,0,0.5),inset 0 1px 1px rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);">
           <div class="service-accent-bar bg-[#10B981]"></div>
           <div class="card-img-wrap">
             <img src="images/attendance_biometric.jpg" alt="" class="card-img">
-            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
+            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 10%, rgba(7,10,18,0.92) 80%),linear-gradient(to bottom,rgba(7,10,18,0.2),rgba(7,10,18,0.98));"></div>
           </div>
-          <div class="relative z-10 w-9 h-9 rounded-xl flex items-center justify-center mb-2" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);">
-            <i data-lucide="user-check" class="w-5 h-5" style="color:#34D399;"></i>
-          </div>
-          <div class="relative z-10">
-            <div class="flex items-center space-x-1.5 mb-0.5">
-              <h4 class="text-xs font-bold text-white">Attendance</h4>
-              <span class="px-1 py-px rounded text-[8px] font-extrabold" style="background:rgba(16,185,129,0.2);color:#34D399;border:1px solid rgba(16,185,129,0.4);">LIVE</span>
+          <!-- Top Row: Icon + Corner Badge -->
+          <div class="relative z-10 flex items-start justify-between">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);box-shadow:0 0 16px rgba(16,185,129,0.15);">
+              <i data-lucide="user-check" class="w-5 h-5" style="color:#34D399;"></i>
             </div>
-            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Daily check-in & check-out</p>
+            <span class="px-1.5 py-0.5 rounded-full text-[8.5px] font-extrabold tracking-wider" style="background:rgba(16,185,129,0.2);color:#34D399;border:1px solid rgba(16,185,129,0.45);">LIVE</span>
+          </div>
+          <!-- Bottom Text: Dedicated Bounding Box, No Overlap -->
+          <div class="relative z-10 pt-3">
+            <h4 class="text-[13.5px] font-bold text-white leading-tight mb-1">Attendance</h4>
+            <p class="text-[10.5px] leading-snug" style="color:rgba(226,232,240,0.68);">Daily check-in & out</p>
           </div>
         </div>
 
         <!-- 2. UPI Payments (Gold) -->
-        <div onclick="showView('payment')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[142px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.85);border:1px solid rgba(201,168,76,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
+        <div onclick="showView('payment')" class="svc-card cursor-pointer relative overflow-hidden rounded-[20px] min-h-[156px] flex flex-col justify-between p-4" style="background:rgba(12,17,28,0.72);border:1px solid rgba(201,168,76,0.3);box-shadow:0 10px 30px rgba(0,0,0,0.5),inset 0 1px 1px rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);">
           <div class="service-accent-bar bg-[#C9A84C]"></div>
           <div class="card-img-wrap">
             <img src="images/gold_coins.jpg" alt="" class="card-img">
-            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
+            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 10%, rgba(7,10,18,0.92) 80%),linear-gradient(to bottom,rgba(7,10,18,0.2),rgba(7,10,18,0.98));"></div>
           </div>
-          <div class="relative z-10 w-9 h-9 rounded-xl flex items-center justify-center mb-2" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);">
-            <i data-lucide="credit-card" class="w-5 h-5" style="color:#E8C97A;"></i>
+          <!-- Top Row: Icon + Corner Badge -->
+          <div class="relative z-10 flex items-start justify-between">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.35);box-shadow:0 0 16px rgba(201,168,76,0.15);">
+              <i data-lucide="credit-card" class="w-5 h-5" style="color:#E8C97A;"></i>
+            </div>
+            <span class="px-1.5 py-0.5 rounded-full text-[8.5px] font-extrabold tracking-wider" style="background:rgba(201,168,76,0.18);color:#FDE68A;border:1px solid rgba(201,168,76,0.4);">UPI</span>
           </div>
-          <div class="relative z-10">
-            <h4 class="text-xs font-bold text-white mb-0.5">UPI Payments</h4>
-            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Fee transfer & verification</p>
+          <!-- Bottom Text: Dedicated Bounding Box, No Overlap -->
+          <div class="relative z-10 pt-3">
+            <h4 class="text-[13.5px] font-bold text-white leading-tight mb-1">Fee Payment</h4>
+            <p class="text-[10.5px] leading-snug" style="color:rgba(226,232,240,0.68);">Transfer & verification</p>
           </div>
         </div>
 
-        <!-- 3. New Registration (Warm Amber) -->
-        <div onclick="showView('register')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[142px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.85);border:1px solid rgba(234,170,80,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
+        <!-- 3. New Admission (Warm Amber) -->
+        <div onclick="showView('register')" class="svc-card cursor-pointer relative overflow-hidden rounded-[20px] min-h-[156px] flex flex-col justify-between p-4" style="background:rgba(12,17,28,0.72);border:1px solid rgba(234,170,80,0.3);box-shadow:0 10px 30px rgba(0,0,0,0.5),inset 0 1px 1px rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);">
           <div class="service-accent-bar bg-[#EAA050]"></div>
           <div class="card-img-wrap">
             <img src="images/luxury_reception.jpg" alt="" class="card-img">
-            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
+            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 10%, rgba(7,10,18,0.92) 80%),linear-gradient(to bottom,rgba(7,10,18,0.2),rgba(7,10,18,0.98));"></div>
           </div>
-          <div class="relative z-10 w-9 h-9 rounded-xl flex items-center justify-center mb-2" style="background:rgba(234,170,80,0.15);border:1px solid rgba(234,170,80,0.3);">
-            <i data-lucide="user-plus" class="w-5 h-5" style="color:#FBBF24;"></i>
+          <!-- Top Row: Icon + Corner Badge -->
+          <div class="relative z-10 flex items-start justify-between">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(234,170,80,0.15);border:1px solid rgba(234,170,80,0.35);box-shadow:0 0 16px rgba(234,170,80,0.15);">
+              <i data-lucide="user-plus" class="w-5 h-5" style="color:#FBBF24;"></i>
+            </div>
+            <span class="px-1.5 py-0.5 rounded-full text-[8.5px] font-extrabold tracking-wider" style="background:rgba(234,170,80,0.18);color:#FBBF24;border:1px solid rgba(234,170,80,0.4);">NEW</span>
           </div>
-          <div class="relative z-10">
-            <h4 class="text-xs font-bold text-white mb-0.5">New Admission</h4>
-            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Branch & seat registration</p>
+          <!-- Bottom Text: Dedicated Bounding Box, No Overlap -->
+          <div class="relative z-10 pt-3">
+            <h4 class="text-[13.5px] font-bold text-white leading-tight mb-1">New Admission</h4>
+            <p class="text-[10.5px] leading-snug" style="color:rgba(226,232,240,0.68);">Seat & plan registration</p>
           </div>
         </div>
 
         <!-- 4. Feedback & Reviews (Rose) -->
-        <div onclick="showView('feedback')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[142px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.85);border:1px solid rgba(232,121,160,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
+        <div onclick="showView('feedback')" class="svc-card cursor-pointer relative overflow-hidden rounded-[20px] min-h-[156px] flex flex-col justify-between p-4" style="background:rgba(12,17,28,0.72);border:1px solid rgba(232,121,160,0.3);box-shadow:0 10px 30px rgba(0,0,0,0.5),inset 0 1px 1px rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);">
           <div class="service-accent-bar bg-[#E879A0]"></div>
           <div class="card-img-wrap">
             <img src="images/luxury_books.jpg" alt="" class="card-img">
-            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
+            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 10%, rgba(7,10,18,0.92) 80%),linear-gradient(to bottom,rgba(7,10,18,0.2),rgba(7,10,18,0.98));"></div>
           </div>
-          <div class="relative z-10 w-9 h-9 rounded-xl flex items-center justify-center mb-2" style="background:rgba(232,121,160,0.15);border:1px solid rgba(232,121,160,0.3);">
-            <i data-lucide="star" class="w-5 h-5" style="color:#F472B6;"></i>
+          <!-- Top Row: Icon + Corner Badge -->
+          <div class="relative z-10 flex items-start justify-between">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(232,121,160,0.15);border:1px solid rgba(232,121,160,0.35);box-shadow:0 0 16px rgba(232,121,160,0.15);">
+              <i data-lucide="star" class="w-5 h-5" style="color:#F472B6;"></i>
+            </div>
           </div>
-          <div class="relative z-10">
-            <h4 class="text-xs font-bold text-white mb-0.5">Feedback & Reviews</h4>
-            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Rate your experience</p>
+          <!-- Bottom Text: Dedicated Bounding Box, No Overlap -->
+          <div class="relative z-10 pt-3">
+            <h4 class="text-[13.5px] font-bold text-white leading-tight mb-1">Feedback</h4>
+            <p class="text-[10.5px] leading-snug" style="color:rgba(226,232,240,0.68);">Rate your experience</p>
           </div>
         </div>
 
         <!-- 5. Complaint & Support (Ruby) -->
-        <div onclick="showView('complaint')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[142px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.85);border:1px solid rgba(239,68,68,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
+        <div onclick="showView('complaint')" class="svc-card cursor-pointer relative overflow-hidden rounded-[20px] min-h-[156px] flex flex-col justify-between p-4" style="background:rgba(12,17,28,0.72);border:1px solid rgba(239,68,68,0.3);box-shadow:0 10px 30px rgba(0,0,0,0.5),inset 0 1px 1px rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);">
           <div class="service-accent-bar bg-[#EF4444]"></div>
           <div class="card-img-wrap">
             <img src="images/luxury_wifi.jpg" alt="" class="card-img">
-            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
+            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 10%, rgba(7,10,18,0.92) 80%),linear-gradient(to bottom,rgba(7,10,18,0.2),rgba(7,10,18,0.98));"></div>
           </div>
-          <div class="relative z-10 w-9 h-9 rounded-xl flex items-center justify-center mb-2" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);">
-            <i data-lucide="alert-triangle" class="w-5 h-5" style="color:#FCA5A5;"></i>
+          <!-- Top Row: Icon + Corner Badge -->
+          <div class="relative z-10 flex items-start justify-between">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.35);box-shadow:0 0 16px rgba(239,68,68,0.15);">
+              <i data-lucide="alert-triangle" class="w-5 h-5" style="color:#FCA5A5;"></i>
+            </div>
           </div>
-          <div class="relative z-10">
-            <h4 class="text-xs font-bold text-white mb-0.5">Complaint & Support</h4>
-            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Report facility issues</p>
+          <!-- Bottom Text: Dedicated Bounding Box, No Overlap -->
+          <div class="relative z-10 pt-3">
+            <h4 class="text-[13.5px] font-bold text-white leading-tight mb-1">Support Help</h4>
+            <p class="text-[10.5px] leading-snug" style="color:rgba(226,232,240,0.68);">Facility complaints</p>
           </div>
         </div>
 
-        <!-- 6. Help & Director Hotline (Blue) -->
-        <div onclick="showView('contact')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[142px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.85);border:1px solid rgba(59,130,246,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
+        <!-- 6. Help & Director Helpline (Blue) -->
+        <div onclick="showView('contact')" class="svc-card cursor-pointer relative overflow-hidden rounded-[20px] min-h-[156px] flex flex-col justify-between p-4" style="background:rgba(12,17,28,0.72);border:1px solid rgba(59,130,246,0.3);box-shadow:0 10px 30px rgba(0,0,0,0.5),inset 0 1px 1px rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);">
           <div class="service-accent-bar bg-[#3B82F6]"></div>
           <div class="card-img-wrap">
             <img src="images/luxury_building.jpg" alt="" class="card-img">
-            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
+            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 10%, rgba(7,10,18,0.92) 80%),linear-gradient(to bottom,rgba(7,10,18,0.2),rgba(7,10,18,0.98));"></div>
           </div>
-          <div class="relative z-10 w-9 h-9 rounded-xl flex items-center justify-center mb-2" style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);">
-            <i data-lucide="phone-call" class="w-5 h-5" style="color:#93C5FD;"></i>
+          <!-- Top Row: Icon + Corner Badge -->
+          <div class="relative z-10 flex items-start justify-between">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.35);box-shadow:0 0 16px rgba(59,130,246,0.15);">
+              <i data-lucide="phone-call" class="w-5 h-5" style="color:#93C5FD;"></i>
+            </div>
           </div>
-          <div class="relative z-10">
-            <h4 class="text-xs font-bold text-white mb-0.5">Help & Helpdesk</h4>
-            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Director hotline & info</p>
+          <!-- Bottom Text: Dedicated Bounding Box, No Overlap -->
+          <div class="relative z-10 pt-3">
+            <h4 class="text-[13.5px] font-bold text-white leading-tight mb-1">Director Desk</h4>
+            <p class="text-[10.5px] leading-snug" style="color:rgba(226,232,240,0.68);">Helpline & inquiries</p>
           </div>
         </div>
 
@@ -632,7 +730,7 @@
           <!-- Permanent Global Branch Badge Indicator -->
           <div class="px-2.5 py-1 rounded-full bg-gold-500/15 border border-gold-400/40 text-gold-300 text-[10px] font-extrabold flex items-center space-x-1 shadow-sm">
             <i data-lucide="map-pin" class="w-3 h-3 text-gold-400"></i>
-            <span id="reg-selected-branch-label">Mehdawal Branch (65 Desks)</span>
+            <span id="reg-selected-branch-label">Mehdawal Branch (65 Seats)</span>
           </div>
         </div>
 
@@ -1427,20 +1525,33 @@
         btnK.setAttribute('aria-selected', branchKey === 'khalilabad');
       }
 
-      // 2. Update Compact Hero Badge & Open Seat Count
+      // 2. Crossfade Ambient Background Photos
+      const bgM = document.getElementById('bg-photo-mehdawal');
+      const bgK = document.getElementById('bg-photo-khalilabad');
+      if (bgM && bgK) {
+        if (branchKey === 'khalilabad') {
+          bgM.classList.remove('active');
+          bgK.classList.add('active');
+        } else {
+          bgK.classList.remove('active');
+          bgM.classList.add('active');
+        }
+      }
+
+      // 3. Update Compact Hero Badge
       const heroBranch = document.getElementById('hero-branch-badge-text');
       if (heroBranch) {
         heroBranch.textContent = BRANCH_CONFIG[branchKey].badgeName;
       }
       fetchAndUpdateSeatStats(branchKey);
 
-      // 3. Update Attendance Tag
+      // 4. Update Attendance Tag
       const attBranch = document.getElementById('att-branch-tag');
       if (attBranch) {
         attBranch.textContent = BRANCH_CONFIG[branchKey].badgeName;
       }
 
-      // 4. Update Registration Locked Campus Badges
+      // 5. Update Registration Locked Campus Badges
       const regCampusBadge = document.getElementById('reg-selected-branch-label');
       const regStep2Badge = document.getElementById('reg-step2-branch-label');
       const regStep3Badge = document.getElementById('reg-step3-branch-label');
@@ -1448,7 +1559,7 @@
       const bName = BRANCH_CONFIG[branchKey].name;
       const bTotal = BRANCH_CONFIG[branchKey].totalSeats;
 
-      if (regCampusBadge) regCampusBadge.textContent = `${bName} (${bTotal} Desks)`;
+      if (regCampusBadge) regCampusBadge.textContent = `${bName} (${bTotal} Seats)`;
       if (regStep2Badge) regStep2Badge.textContent = bName;
       if (regStep3Badge) regStep3Badge.textContent = `${bName} Single Hall (${bTotal})`;
       if (summaryBranch) summaryBranch.textContent = `${bName} (Single Hall)`;

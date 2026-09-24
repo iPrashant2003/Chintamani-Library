@@ -2,18 +2,18 @@
   "version": "2.3.1",
   "buildNumber": 35,
   "releaseDate": "24 Sep 2026",
-  "title": "Chintamani Library v2.3.1 (Build 35) — No-More Update Loops & Branch-Aware Portal",
+  "title": "Chintamani Library v2.3.1 (Build 35) — Universal Architecture & Branch-Aware Portal",
   "releaseNotes": [
-    "Fixed Update Loop: App no longer repeatedly shows 'Update Available' after installing an update — native versionCode (Build 35) is now read directly from Android PackageManager",
+    "Fixed Installation Error: Replaced split architecture with full Universal APK containing complete native libraries for all architectures (resolves 'App not installed as package appears to be invalid')",
+    "Fixed Update Loop: App no longer repeatedly shows 'Update Available' after installing an update — native versionCode (Build 35) is read directly from Android PackageManager",
     "Stacked Dialog Fix: Only one update dialog can appear per session — SplashScreen and DashboardScreen can no longer race and show duplicate prompts",
     "Session Guard: Update check runs exactly once per cold launch regardless of which screen triggers it",
     "Branch-Aware Universal QR Portal: Mehdawal and Khalilabad now operate as completely separate datasets from one global branch switcher",
     "Real Seat Counts: Khalilabad = 72 single-hall seats (K01–K72), Mehdawal = 65 single-hall seats (M01–M65)",
-    "Anti-Cross-Branch Enforcement: Backend blocks cross-branch seat assignments and attendance check-ins with a clear error message",
-    "Compact Hero Badge: Identity badge shows real-time open desk count per branch"
+    "Anti-Cross-Branch Enforcement: Backend blocks cross-branch seat assignments and attendance check-ins with a clear error message"
   ],
   "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.1/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.1/Chintamani-Library-arm64.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.1/Chintamani-Library-Release.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

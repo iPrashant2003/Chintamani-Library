@@ -37,15 +37,32 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
 
     final service = AppUpdateService();
 
+    int lastReceived = 0;
+    DateTime lastTime = DateTime.now();
+    double currentSpeedMbS = 0.0;
+
     final success = await service.downloadAndInstall(
       info: widget.updateInfo,
       onProgress: (p, received, total) {
         if (!mounted) return;
+        final now = DateTime.now();
+        final elapsedMs = now.difference(lastTime).inMilliseconds;
+        if (elapsedMs >= 400) {
+          final bytesDelta = received - lastReceived;
+          if (bytesDelta >= 0) {
+            currentSpeedMbS = (bytesDelta / 1048576) / (elapsedMs / 1000);
+          }
+          lastReceived = received;
+          lastTime = now;
+        }
+
+        final recMb = (received / 1048576).toStringAsFixed(1);
+        final totMb = total > 0 ? (total / 1048576).toStringAsFixed(1) : '--';
+        final speedStr = currentSpeedMbS > 0.05 ? ' • ${currentSpeedMbS.toStringAsFixed(1)} MB/s' : '';
+
         setState(() {
           _progress = p;
-          final recMb = (received / 1048576).toStringAsFixed(1);
-          final totMb = (total / 1048576).toStringAsFixed(1);
-          _statusText = 'Downloading: ${(p * 100).toInt()}% ($recMb / $totMb MB)';
+          _statusText = 'Downloading: ${(p * 100).toInt()}% ($recMb / $totMb MB$speedStr)';
         });
       },
     );

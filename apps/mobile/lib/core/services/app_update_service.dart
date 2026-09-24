@@ -15,6 +15,7 @@ class AppUpdateInfo {
   final String title;
   final List<String> releaseNotes;
   final String apkUrl;
+  final String? arm64ApkUrl;
   final String fallbackUrl;
   final bool forceUpdate;
 
@@ -25,6 +26,7 @@ class AppUpdateInfo {
     required this.title,
     required this.releaseNotes,
     required this.apkUrl,
+    this.arm64ApkUrl,
     required this.fallbackUrl,
     this.forceUpdate = false,
   });
@@ -40,6 +42,7 @@ class AppUpdateInfo {
               .toList() ??
           [],
       apkUrl: json['apkUrl'] as String? ?? '',
+      arm64ApkUrl: json['arm64ApkUrl'] as String?,
       fallbackUrl: json['fallbackUrl'] as String? ?? '',
       forceUpdate: json['forceUpdate'] as bool? ?? false,
     );
@@ -56,9 +59,26 @@ class AppUpdateService {
   static const _settingAutoCheckKey = 'app_update_auto_check';
   static const _settingManifestUrlKey = 'app_update_manifest_url';
 
+  // Fast lightweight Dio instance for manifest checks
   final Dio _dio = Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 8),
-    receiveTimeout: const Duration(seconds: 45),
+    connectTimeout: const Duration(seconds: 12),
+    receiveTimeout: const Duration(seconds: 20),
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+    },
+  ));
+
+  // Dedicated high-speed Dio instance for large APK downloads (NO 45s cutoff!)
+  final Dio _downloadDio = Dio(BaseOptions(
+    connectTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(minutes: 30),
+    sendTimeout: const Duration(minutes: 10),
+    followRedirects: true,
+    maxRedirects: 10,
+    headers: {
+      'User-Agent': 'ChintamaniLibraryApp-Updater',
+    },
   ));
 
   // ── Settings persistence ──────────────────────────────────────────────────
@@ -104,17 +124,24 @@ class AppUpdateService {
     } catch (_) {}
   }
 
+  // ── Device Architecture Detection ─────────────────────────────────────────
+  Future<String?> getDeviceAbi() async {
+    try {
+      if (!kIsWeb && Platform.isAndroid) {
+        final abi = await _platformChannel.invokeMethod<String>('getDeviceAbi');
+        return abi;
+      }
+    } catch (_) {}
+    return null;
+  }
+
   // ── Check for update with intelligent multi-host resolution ──────────────
   Future<AppUpdateInfo?> checkForUpdate() async {
     final savedUrl = await getManifestUrl();
-    // Cache-bust the GitHub URL so CDN always serves fresh content
     final cacheBust = DateTime.now().millisecondsSinceEpoch;
     final candidateUrls = <String>[
-      // 1. Primary Global Cloud URL with cache-bust (always fresh)
       'https://raw.githubusercontent.com/iPrashant2003/Chintamani-Library/main/version.json?t=$cacheBust',
-      // 2. Primary without cache-bust (fallback)
       'https://raw.githubusercontent.com/iPrashant2003/Chintamani-Library/main/version.json',
-      // 3. Custom URL configured in Settings (if valid)
       if (savedUrl.isNotEmpty &&
           !savedUrl.contains('172.21.232.210') &&
           savedUrl != _defaultManifestUrl)
@@ -126,11 +153,7 @@ class AppUpdateService {
         final response = await _dio.get(
           url,
           options: Options(
-            responseType: ResponseType.plain, // Always get raw text, parse manually
-            headers: {
-              'Cache-Control': 'no-cache',
-              'Pragma': 'no-cache',
-            },
+            responseType: ResponseType.plain,
           ),
         );
         if (response.statusCode == 200 && response.data != null) {
@@ -138,7 +161,6 @@ class AppUpdateService {
           if (response.data is Map) {
             json = Map<String, dynamic>.from(response.data as Map);
           } else {
-            // Force parse as JSON string (handles Dio returning String for plain text)
             final decoded = jsonDecode(response.data.toString());
             if (decoded is! Map) continue;
             json = Map<String, dynamic>.from(decoded);
@@ -148,12 +170,10 @@ class AppUpdateService {
           if (info.buildNumber > currentBuildNumber) {
             return info;
           }
-          // No update needed — stop trying further URLs
           return null;
         }
       } catch (e) {
-        debugPrint('[UpdateService] Failed: $url — $e');
-        // Continue trying next candidate
+        debugPrint('[UpdateService] Manifest check failed on $url: $e');
       }
     }
     return null;
@@ -164,7 +184,6 @@ class AppUpdateService {
     required AppUpdateInfo info,
     required void Function(double progress, int receivedBytes, int totalBytes) onProgress,
   }) async {
-    // If Web platform, redirect to fallback URL
     if (kIsWeb) {
       if (info.fallbackUrl.isNotEmpty) {
         final uri = Uri.parse(info.fallbackUrl);
@@ -177,48 +196,50 @@ class AppUpdateService {
     }
 
     try {
-      // Save in cache directory (maps to cache-path in FileProvider)
       final dir = await getTemporaryDirectory();
       final apkFile = File('${dir.path}/Chintamani_Update_v${info.version}.apk');
 
-      if (await apkFile.exists()) {
-        await apkFile.delete();
-      }
+      // Detect ABI: If arm64-v8a, prioritize the smaller 35 MB package (2.5x faster!)
+      final deviceAbi = await getDeviceAbi();
+      final isArm64 = deviceAbi == null || deviceAbi.contains('arm64');
 
-      // Build candidate download URLs (Cloud primary, followed by local fallbacks)
-      final downloadCandidates = <String>{
+      final downloadCandidates = <String>[
+        // 1. If device is arm64, try arm64 build first (35 MB vs 85 MB)
+        if (isArm64) ...[
+          if (info.arm64ApkUrl != null && info.arm64ApkUrl!.isNotEmpty)
+            info.arm64ApkUrl!,
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-arm64.apk',
+        ],
+        // 2. Primary release APK (Universal 85 MB)
         if (info.apkUrl.isNotEmpty) info.apkUrl,
         'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-Release.apk',
-        'http://192.168.1.35:8090/Chintamani-Library-Release.apk',
-        'http://localhost:8090/Chintamani-Library-Release.apk',
+        // 3. Fallback URL if pointing to an APK
         if (info.fallbackUrl.isNotEmpty && info.fallbackUrl.endsWith('.apk')) info.fallbackUrl,
-      };
+      ];
 
       bool downloaded = false;
+
       for (final downloadUrl in downloadCandidates) {
+        debugPrint('[UpdateService] Attempting download from: $downloadUrl');
         try {
-          await _dio.download(
-            downloadUrl,
-            apkFile.path,
-            onReceiveProgress: (received, total) {
-              if (total > 0) {
-                final p = received / total;
-                onProgress(p.clamp(0.0, 1.0), received, total);
-              }
-            },
+          final success = await _downloadFileWithResume(
+            url: downloadUrl,
+            targetFile: apkFile,
+            onProgress: onProgress,
           );
 
-          if (await apkFile.exists() && await apkFile.length() > 5000000) {
+          if (success && await apkFile.exists() && await apkFile.length() > 5000000) {
             downloaded = true;
             break;
           }
-        } catch (_) {
-          // Try next download URL
+        } catch (err) {
+          debugPrint('[UpdateService] Failed candidate $downloadUrl: $err');
+          // Try next candidate
         }
       }
 
       if (!downloaded) {
-        throw Exception('Could not download APK from any endpoint.');
+        throw Exception('Could not complete download from any candidate mirror.');
       }
 
       // Invoke Android Package Installer via MethodChannel
@@ -241,6 +262,115 @@ class AppUpdateService {
       }
       return false;
     }
+  }
+
+  // ── High-Speed Resumable Stream Download Engine ───────────────────────────
+  Future<bool> _downloadFileWithResume({
+    required String url,
+    required File targetFile,
+    required void Function(double progress, int receivedBytes, int totalBytes) onProgress,
+  }) async {
+    final partFile = File('${targetFile.path}.part');
+    int retryCount = 0;
+    const maxRetries = 5;
+
+    while (retryCount < maxRetries) {
+      IOSink? sink;
+      try {
+        int existingBytes = 0;
+        if (await partFile.exists()) {
+          existingBytes = await partFile.length();
+        }
+
+        // Set Range header if partial download exists
+        final headers = <String, dynamic>{};
+        if (existingBytes > 0) {
+          headers['Range'] = 'bytes=$existingBytes-';
+        }
+
+        final response = await _downloadDio.get<ResponseBody>(
+          url,
+          options: Options(
+            responseType: ResponseType.stream,
+            headers: headers,
+          ),
+        );
+
+        final statusCode = response.statusCode ?? 200;
+        final isPartial = statusCode == 206;
+        
+        int totalBytes = -1;
+        if (isPartial) {
+          final contentRange = response.headers.value('content-range');
+          if (contentRange != null && contentRange.contains('/')) {
+            totalBytes = int.tryParse(contentRange.split('/').last) ?? -1;
+          }
+        }
+        
+        if (totalBytes <= 0) {
+          final cl = response.headers.value('content-length');
+          if (cl != null) {
+            final len = int.tryParse(cl) ?? -1;
+            totalBytes = isPartial ? (existingBytes + len) : len;
+          }
+        }
+
+        if (!isPartial && existingBytes > 0) {
+          // Server returned full file (200), reset part file
+          existingBytes = 0;
+          sink = partFile.openWrite(mode: FileMode.write);
+        } else {
+          sink = partFile.openWrite(mode: FileMode.append);
+        }
+
+        int currentReceived = existingBytes;
+
+        await for (final chunk in response.data!.stream) {
+          sink.add(chunk);
+          currentReceived += chunk.length;
+          if (totalBytes > 0) {
+            final p = (currentReceived / totalBytes).clamp(0.0, 1.0);
+            onProgress(p, currentReceived, totalBytes);
+          } else {
+            onProgress(0.5, currentReceived, 0);
+          }
+        }
+
+        await sink.flush();
+        await sink.close();
+        sink = null;
+
+        final finalPartLength = await partFile.length();
+        if (totalBytes > 0 && finalPartLength < totalBytes) {
+          throw Exception('Incomplete chunk stream: got $finalPartLength of $totalBytes');
+        }
+
+        if (finalPartLength > 5000000) {
+          if (await targetFile.exists()) {
+            await targetFile.delete();
+          }
+          await partFile.rename(targetFile.path);
+          return true;
+        } else {
+          throw Exception('Downloaded file unexpectedly small ($finalPartLength bytes)');
+        }
+      } catch (e) {
+        debugPrint('[UpdateService] Stream interrupted on attempt $retryCount: $e');
+        if (sink != null) {
+          try {
+            await sink.flush();
+            await sink.close();
+          } catch (_) {}
+        }
+        retryCount++;
+        if (retryCount >= maxRetries) {
+          rethrow;
+        }
+        // Exponential backoff before resuming
+        await Future.delayed(Duration(milliseconds: 500 * retryCount));
+      }
+    }
+    return false;
   }
 }
 

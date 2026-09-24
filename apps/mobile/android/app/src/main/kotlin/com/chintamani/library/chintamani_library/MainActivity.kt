@@ -18,6 +18,15 @@ class MainActivity : FlutterFragmentActivity() {
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
+                "getDeviceAbi" -> {
+                    val abi = if (Build.SUPPORTED_ABIS.isNotEmpty()) {
+                        Build.SUPPORTED_ABIS[0]
+                    } else {
+                        @Suppress("DEPRECATION")
+                        Build.CPU_ABI
+                    }
+                    result.success(abi)
+                }
                 "canInstallPackages" -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         result.success(packageManager.canRequestPackageInstalls())

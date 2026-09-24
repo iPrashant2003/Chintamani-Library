@@ -131,6 +131,45 @@ export class PortalService {
 
   // ── LIBRARY & PLAN INFO ───────────────────────────────────────────────────
 
+  private async ensureRealBranchSeats(branch: any) {
+    if (!branch) return;
+    const isMehdawal = branch.name?.toLowerCase().includes('mehda') ?? true;
+    const totalRequired = isMehdawal ? 65 : 72;
+    const prefix = isMehdawal ? 'M' : 'K';
+
+    const existingSeats = await this.prisma.seat.findMany({
+      where: {
+        branchId: branch.id,
+        seatNumber: { startsWith: prefix },
+      },
+      select: { seatNumber: true },
+    });
+
+    const existingNumbers = new Set(existingSeats.map((s) => s.seatNumber));
+
+    const newSeats: any[] = [];
+    for (let i = 1; i <= totalRequired; i++) {
+      const numStr = i < 10 ? '0' + i : '' + i;
+      const seatNumber = `${prefix}${numStr}`;
+      if (!existingNumbers.has(seatNumber)) {
+        newSeats.push({
+          tenantId: branch.tenantId,
+          branchId: branch.id,
+          seatNumber,
+          floor: 'Single Hall',
+          status: 'AVAILABLE',
+        });
+      }
+    }
+
+    if (newSeats.length > 0) {
+      await this.prisma.seat.createMany({
+        data: newSeats,
+        skipDuplicates: true,
+      });
+    }
+  }
+
   async getLibraryInfo(branchId?: string) {
     let branch: any = null;
     if (branchId) {
@@ -158,17 +197,25 @@ export class PortalService {
       branch = tenant?.branches[0] ? { ...tenant.branches[0], tenant } : null;
     }
 
+    if (branch) {
+      await this.ensureRealBranchSeats(branch);
+    }
+
+    const isMehdawal = branch?.name?.toLowerCase().includes('mehda') ?? true;
+    const totalSeats = isMehdawal ? 65 : 72;
     const seatStats = await this.getSeatStats(branch?.id);
 
     return {
       libraryName: branch?.tenant?.name || 'Chintamani Library',
-      branchName: branch?.name || 'Chintamani Library',
+      branchName: branch?.name || (isMehdawal ? 'Chintamani Library – Mehdawal' : 'Chintamani Library – Khalilabad'),
       branchId: branch?.id,
-      address: branch?.address || branch?.tenant?.address || 'Sant Kabir Nagar, UP',
+      address: branch?.address || (isMehdawal ? 'Station Road, Mehdawal, Sant Kabir Nagar (272202)' : 'Main Road, Near Moti Chauraha, Khalilabad (272175)'),
       phone: branch?.phone || branch?.tenant?.phone || '9415919277',
       email: branch?.tenant?.email || 'contact@chintamanilibrary.com',
       upiId: 'prashantmanitripathi2003-2@oksbi', // Official UPI VPA
       upiName: 'Prashant Mani Tripathi',
+      totalSeats,
+      hallName: 'Single Hall',
       seatStats,
     };
   }
@@ -211,17 +258,40 @@ export class PortalService {
   }
 
   async getSeatStats(branchId?: string) {
-    let targetBranchId = branchId;
-    if (branchId && (branchId.toLowerCase().includes('mehda') || branchId.toLowerCase().includes('khalil'))) {
-      const b = await this.prisma.branch.findFirst({
-        where: { name: { contains: branchId.toLowerCase().includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
+    let branch: any = null;
+    if (branchId) {
+      const bLower = branchId.toLowerCase();
+      branch = await this.prisma.branch.findFirst({
+        where: {
+          OR: [
+            { id: branchId },
+            { name: { contains: bLower.includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
+          ],
+        },
+        include: { tenant: true },
       });
-      if (b) targetBranchId = b.id;
     }
 
-    const where: any = targetBranchId ? { branchId: targetBranchId } : {};
+    if (!branch) {
+      branch = await this.prisma.branch.findFirst({
+        where: { name: { contains: 'Mehdawal', mode: 'insensitive' } },
+        include: { tenant: true },
+      }) || await this.prisma.branch.findFirst({ include: { tenant: true } });
+    }
 
-    const [total, available, reserved, occupied, blocked] = await Promise.all([
+    if (branch) {
+      await this.ensureRealBranchSeats(branch);
+    }
+
+    const isMehdawal = branch?.name?.toLowerCase().includes('mehda') ?? true;
+    const prefix = isMehdawal ? 'M' : 'K';
+    const totalRequired = isMehdawal ? 65 : 72;
+
+    const where: any = branch
+      ? { branchId: branch.id, seatNumber: { startsWith: prefix } }
+      : { seatNumber: { startsWith: prefix } };
+
+    const [dbTotal, available, reserved, occupied, blocked] = await Promise.all([
       this.prisma.seat.count({ where }),
       this.prisma.seat.count({ where: { ...where, status: 'AVAILABLE' } }),
       this.prisma.seat.count({ where: { ...where, status: 'RESERVED' } }),
@@ -229,7 +299,17 @@ export class PortalService {
       this.prisma.seat.count({ where: { ...where, status: 'BLOCKED' } }),
     ]);
 
-    return { total, available, reserved, occupied, blocked };
+    const total = dbTotal > 0 ? dbTotal : totalRequired;
+
+    return {
+      branchId: branch?.id,
+      branchName: branch?.name,
+      total,
+      available: available > 0 ? available : (total - reserved - occupied - blocked),
+      reserved,
+      occupied,
+      blocked,
+    };
   }
 
   // ── NEW MEMBER REGISTRATION ───────────────────────────────────────────────
@@ -275,7 +355,6 @@ export class PortalService {
     }
 
     if (!branch) {
-      // Require explicit branch or resolve based on address
       branch = await this.prisma.branch.findFirst({
         where: { name: { contains: 'Mehdawal', mode: 'insensitive' } },
         include: { tenant: true },
@@ -285,6 +364,11 @@ export class PortalService {
     if (!branch) {
       throw new NotFoundException('Selected library branch not found. Please choose Mehdawal or Khalilabad.');
     }
+
+    // Ensure Single Hall real seats exist for this branch (65 for Mehdawal, 72 for Khalilabad)
+    await this.ensureRealBranchSeats(branch);
+    const isMehdawal = branch.name?.toLowerCase().includes('mehda') ?? true;
+    const expectedPrefix = isMehdawal ? 'M' : 'K';
 
     // Resolve Plan
     const plan = await this.prisma.membershipPlan.findUnique({
@@ -299,9 +383,22 @@ export class PortalService {
     const requestedSeat = (dto.seatNumber || dto.seatId || '').trim();
 
     if (requestedSeat) {
-      // Extract numeric or alphanumeric seat pattern (e.g. "M-A01", "A01", "14")
+      // Cross-branch prefix verification
+      const upperReq = requestedSeat.toUpperCase();
+      if (isMehdawal && upperReq.startsWith('K')) {
+        throw new BadRequestException(
+          `Cross-Branch Seat Violation: Seat "${requestedSeat}" belongs to Khalilabad Branch, but registration is for Mehdawal Branch. Cross-branch seat allocation is strictly forbidden.`
+        );
+      }
+      if (!isMehdawal && upperReq.startsWith('M')) {
+        throw new BadRequestException(
+          `Cross-Branch Seat Violation: Seat "${requestedSeat}" belongs to Mehdawal Branch, but registration is for Khalilabad Branch. Cross-branch seat allocation is strictly forbidden.`
+        );
+      }
+
       const cleanNum = requestedSeat.replace(/^(M|K|Seat)[\s-_]*/i, '');
       const paddedNum = cleanNum.padStart(2, '0');
+      const normalizedSeatNumber = `${expectedPrefix}${paddedNum}`;
 
       reservedSeat = await this.prisma.seat.findFirst({
         where: {
@@ -309,35 +406,12 @@ export class PortalService {
           OR: [
             ...(dto.seatId ? [{ id: dto.seatId }] : []),
             { seatNumber: requestedSeat },
+            { seatNumber: normalizedSeatNumber },
             { seatNumber: cleanNum },
             { seatNumber: paddedNum },
-            { seatNumber: `A${paddedNum}` },
-            { seatNumber: `B${paddedNum}` },
           ],
         },
       });
-
-      // Cross-branch check: if seat was found in another branch, reject immediately!
-      if (!reservedSeat) {
-        const foreignSeat = await this.prisma.seat.findFirst({
-          where: {
-            OR: [
-              ...(dto.seatId ? [{ id: dto.seatId }] : []),
-              { seatNumber: requestedSeat },
-              { seatNumber: cleanNum },
-            ],
-          },
-          include: { branch: true },
-        });
-
-        if (foreignSeat) {
-          throw new BadRequestException(
-            `Cross-Branch Seat Violation: Seat "${requestedSeat}" belongs to ${foreignSeat.branch.name}, but student is registering at ${branch.name}. Students cannot be assigned seats from another branch.`
-          );
-        }
-
-        // If seat doesn't exist at all, fall back to deterministic allocation in this branch
-      }
 
       if (reservedSeat && reservedSeat.status !== 'AVAILABLE') {
         throw new BadRequestException(
@@ -349,18 +423,22 @@ export class PortalService {
     // If no seat requested or requested seat wasn't found, perform deterministic allocation strictly within THIS branch
     if (!reservedSeat) {
       reservedSeat = await this.prisma.seat.findFirst({
-        where: { branchId: branch.id, status: 'AVAILABLE' },
-        orderBy: [{ floor: 'asc' }, { seatNumber: 'asc' }],
+        where: {
+          branchId: branch.id,
+          seatNumber: { startsWith: expectedPrefix },
+          status: 'AVAILABLE',
+        },
+        orderBy: { seatNumber: 'asc' },
       });
     }
 
     if (!reservedSeat) {
       throw new BadRequestException(
-        `No seats are currently available at ${branch.name}. Please contact library administration.`
+        `No seats are currently available in the single hall at ${branch.name}. Please contact library administration.`
       );
     }
 
-    // Mark seat as RESERVED immediately to lock it in the branch's pool
+    // Mark seat as RESERVED immediately in DB
     await this.prisma.seat.update({
       where: { id: reservedSeat.id },
       data: { status: 'RESERVED' },
@@ -984,20 +1062,30 @@ export class PortalService {
             { name: { contains: bLower.includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
           ],
         },
+        include: { tenant: true },
       });
     }
 
     if (!branch) {
       branch = await this.prisma.branch.findFirst({
         where: { name: { contains: 'Mehdawal', mode: 'insensitive' } },
-      }) || await this.prisma.branch.findFirst();
+        include: { tenant: true },
+      }) || await this.prisma.branch.findFirst({ include: { tenant: true } });
     }
 
-    const where: any = branch ? { branchId: branch.id } : {};
+    if (branch) {
+      await this.ensureRealBranchSeats(branch);
+    }
+
+    const isMehdawal = branch?.name?.toLowerCase().includes('mehda') ?? true;
+    const prefix = isMehdawal ? 'M' : 'K';
 
     const seats = await this.prisma.seat.findMany({
-      where,
-      orderBy: [{ floor: 'asc' }, { seatNumber: 'asc' }],
+      where: {
+        branchId: branch?.id,
+        seatNumber: { startsWith: prefix },
+      },
+      orderBy: { seatNumber: 'asc' },
       select: {
         id: true,
         seatNumber: true,
@@ -1010,11 +1098,11 @@ export class PortalService {
     return seats.map((s) => ({
       id: s.id,
       seatNumber: s.seatNumber,
-      floor: s.floor,
+      floor: 'Single Hall',
       status: s.status,
       isAvailable: s.status === 'AVAILABLE',
       branchId: s.branchId,
-      branchName: branch?.name || 'Chintamani Library',
+      branchName: branch?.name || (isMehdawal ? 'Chintamani Library – Mehdawal' : 'Chintamani Library – Khalilabad'),
     }));
   }
 
@@ -1024,6 +1112,20 @@ export class PortalService {
     const raw = dto.identifier ? dto.identifier.trim() : '';
     if (!raw) {
       throw new BadRequestException('Please enter your Mobile Number, Name, or Member ID');
+    }
+
+    // Resolve branch context strictly
+    let targetBranch: any = null;
+    if (dto.branchId) {
+      const bLower = dto.branchId.toLowerCase();
+      targetBranch = await this.prisma.branch.findFirst({
+        where: {
+          OR: [
+            { id: dto.branchId },
+            { name: { contains: bLower.includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
+          ],
+        },
+      });
     }
 
     const digits = raw.replace(/[^\d]/g, '');
@@ -1040,11 +1142,12 @@ export class PortalService {
       orConditions.push({ phone: { contains: searchPhone } });
     }
 
-    // First search for an active member matching the query
+    // First search for an active member strictly within target branch
     let member = await this.prisma.member.findFirst({
       where: {
         OR: orConditions,
         isActive: true,
+        ...(targetBranch ? { branchId: targetBranch.id } : {}),
       },
       include: {
         branch: true,
@@ -1057,11 +1160,28 @@ export class PortalService {
       },
     });
 
-    // If not found as active, fallback to any matching member
+    // If not found in targetBranch, check if member exists in the other branch
+    if (!member && targetBranch) {
+      const foreignMember = await this.prisma.member.findFirst({
+        where: {
+          OR: orConditions,
+          isActive: true,
+        },
+        include: { branch: true },
+      });
+
+      if (foreignMember && foreignMember.branchId !== targetBranch.id) {
+        throw new BadRequestException(
+          `Branch Mismatch: "${foreignMember.name}" is registered at ${foreignMember.branch.name}. You cannot record attendance at ${targetBranch.name}. Please switch the branch at the top to ${foreignMember.branch.name}.`
+        );
+      }
+    }
+
     if (!member) {
       member = await this.prisma.member.findFirst({
         where: {
           OR: orConditions,
+          ...(targetBranch ? { branchId: targetBranch.id } : {}),
         },
         include: {
           branch: true,
@@ -1075,8 +1195,9 @@ export class PortalService {
     }
 
     if (!member) {
+      const branchNotice = targetBranch ? ` in ${targetBranch.name}` : '';
       throw new NotFoundException(
-        `Member not found with "${raw}". Please enter your registered 10-digit mobile number, full name, or Member ID (e.g. CML-942810).`,
+        `Member not found${branchNotice} with "${raw}". Please enter your registered 10-digit mobile number, full name, or Member ID (e.g. CML-942810).`,
       );
     }
 

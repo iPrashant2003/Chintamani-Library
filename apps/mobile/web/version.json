@@ -1,20 +1,19 @@
 {
-  "version": "2.3.0",
-  "buildNumber": 34,
+  "version": "2.3.1",
+  "buildNumber": 35,
   "releaseDate": "24 Sep 2026",
-  "title": "Chintamani Library v2.3.0 (Build 34) — Instant Update Detection on Every App Launch",
+  "title": "Chintamani Library v2.3.1 (Build 35) — No-More Update Loops & Branch-Aware Portal",
   "releaseNotes": [
-    "Fixed Update Detection: Update dialog now appears immediately on every cold launch (from splash screen) — no longer requires navigating to Dashboard first",
-    "Force Update on Splash: For critical releases with forceUpdate enabled, the install prompt appears within 1 second of app opening regardless of auto-check settings",
-    "Ultra-Fast Resumable Downloads: HTTP Range requests and stream resuming — downloads never stall or get interrupted at 45 MB",
-    "High-Speed Architecture-Specific Downloads: Automatic arm64-v8a detection cuts download size from 85 MB to 35 MB (2.5x faster!)",
-    "Rebranded Universal QR Portal: Standardized all branding to 'Chintamani Library' across headers, titles, cards, and modals",
-    "8-Card Luxury Portal Grid: Glassmorphism + multicolour 3D styling with emerald, gold, amber, rose, ruby, purple, cyan and blue accents",
-    "Multi-Identifier Attendance: Check in using Mobile Number, Full Name, OR Member ID — any of the three works",
-    "Fixed Attendance Fetching: Portal now strictly shows verified real-time records with no fake placeholder data"
+    "Fixed Update Loop: App no longer repeatedly shows 'Update Available' after installing an update — native versionCode (Build 35) is now read directly from Android PackageManager",
+    "Stacked Dialog Fix: Only one update dialog can appear per session — SplashScreen and DashboardScreen can no longer race and show duplicate prompts",
+    "Session Guard: Update check runs exactly once per cold launch regardless of which screen triggers it",
+    "Branch-Aware Universal QR Portal: Mehdawal and Khalilabad now operate as completely separate datasets from one global branch switcher",
+    "Real Seat Counts: Khalilabad = 72 single-hall seats (K01–K72), Mehdawal = 65 single-hall seats (M01–M65)",
+    "Anti-Cross-Branch Enforcement: Backend blocks cross-branch seat assignments and attendance check-ins with a clear error message",
+    "Compact Hero Badge: Identity badge shows real-time open desk count per branch"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.0/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.0/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.1/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.1/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

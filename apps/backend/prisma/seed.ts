@@ -168,23 +168,35 @@ async function main() {
     }
   }
 
-  // Seats for Tenant 1 (50 per branch)
+  // Production Seats for Tenant 1: Khalilabad (72 seats) & Mehdawal (65 seats) in a Single Hall
   const seats1: Record<string, any[]> = { [khalilabad.id]: [], [mehdawal.id]: [] };
-  for (const branch of [khalilabad, mehdawal]) {
-    for (const floor of ['A', 'B']) {
-      for (let i = 1; i <= 25; i++) {
-        const seat = await prisma.seat.create({
-          data: {
-            tenantId: tenant1.id,
-            seatNumber: `${floor}${i.toString().padStart(2, '0')}`,
-            floor,
-            branchId: branch.id,
-            status: 'AVAILABLE',
-          },
-        });
-        seats1[branch.id].push(seat);
-      }
-    }
+  
+  // Khalilabad: Single Hall, 72 seats (K01 to K72)
+  for (let i = 1; i <= 72; i++) {
+    const seat = await prisma.seat.create({
+      data: {
+        tenantId: tenant1.id,
+        seatNumber: `K${i.toString().padStart(2, '0')}`,
+        floor: 'Single Hall',
+        branchId: khalilabad.id,
+        status: 'AVAILABLE',
+      },
+    });
+    seats1[khalilabad.id].push(seat);
+  }
+
+  // Mehdawal: Single Hall, 65 seats (M01 to M65)
+  for (let i = 1; i <= 65; i++) {
+    const seat = await prisma.seat.create({
+      data: {
+        tenantId: tenant1.id,
+        seatNumber: `M${i.toString().padStart(2, '0')}`,
+        floor: 'Single Hall',
+        branchId: mehdawal.id,
+        status: 'AVAILABLE',
+      },
+    });
+    seats1[mehdawal.id].push(seat);
   }
 
   // Lockers for Tenant 1 (20 per branch)

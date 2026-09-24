@@ -27,6 +27,29 @@ class MainActivity : FlutterFragmentActivity() {
                     }
                     result.success(abi)
                 }
+                "getAppVersionInfo" -> {
+                    try {
+                        val pInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            packageManager.getPackageInfo(packageName, android.content.pm.PackageManager.PackageInfoFlags.of(0))
+                        } else {
+                            @Suppress("DEPRECATION")
+                            packageManager.getPackageInfo(packageName, 0)
+                        }
+                        val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            pInfo.longVersionCode
+                        } else {
+                            @Suppress("DEPRECATION")
+                            pInfo.versionCode.toLong()
+                        }
+                        val map = mapOf(
+                            "versionName" to (pInfo.versionName ?: ""),
+                            "versionCode" to versionCode
+                        )
+                        result.success(map)
+                    } catch (e: Exception) {
+                        result.error("VERSION_INFO_FAILED", e.localizedMessage, null)
+                    }
+                }
                 "canInstallPackages" -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         result.success(packageManager.canRequestPackageInstalls())

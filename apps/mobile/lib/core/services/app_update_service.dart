@@ -33,8 +33,8 @@ class AppUpdateInfo {
 
   factory AppUpdateInfo.fromJson(Map<String, dynamic> json) {
     return AppUpdateInfo(
-      version: json['version'] as String? ?? '2.3.0',
-      buildNumber: (json['buildNumber'] as num?)?.toInt() ?? 17,
+      version: json['version'] as String? ?? '2.3.1',
+      buildNumber: (json['buildNumber'] as num?)?.toInt() ?? 35,
       releaseDate: json['releaseDate'] as String? ?? '',
       title: json['title'] as String? ?? 'New Update Available',
       releaseNotes: (json['releaseNotes'] as List<dynamic>?)
@@ -50,9 +50,31 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.3.0';
-  static const currentBuildNumber = 34;
+  static const currentVersion = '2.3.1';
+  static const currentBuildNumber = 35;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
+
+  /// Set to true once we have checked in this process lifetime so that
+  /// both SplashScreen and DashboardScreen cannot stack duplicate dialogs.
+  static bool hasCheckedThisSession = false;
+
+  /// Query the native Android PackageManager for the real installed versionCode.
+  /// Falls back to [currentBuildNumber] on any error.
+  static Future<int> getInstalledBuildNumber() async {
+    try {
+      if (!kIsWeb && Platform.isAndroid) {
+        final info = await _platformChannel.invokeMethod<Map>('getAppVersionInfo');
+        if (info != null && info.containsKey('versionCode')) {
+          final raw = info['versionCode'];
+          if (raw is int) return raw;
+          if (raw is num) return raw.toInt();
+        }
+      }
+    } catch (e) {
+      debugPrint('[UpdateService] getInstalledBuildNumber failed: $e');
+    }
+    return currentBuildNumber;
+  }
 
   static const _defaultManifestUrl =
       'https://raw.githubusercontent.com/iPrashant2003/Chintamani-Library/main/version.json';
@@ -137,6 +159,15 @@ class AppUpdateService {
 
   // ── Check for update with intelligent multi-host resolution ──────────────
   Future<AppUpdateInfo?> checkForUpdate() async {
+    // Only one check per app session — prevents stacked duplicate dialogs from
+    // SplashScreen (1.2 s delay) and DashboardScreen (5 s post-frame callback).
+    if (hasCheckedThisSession) return null;
+    hasCheckedThisSession = true;
+
+    // Prefer native versionCode (immune to build-config drift) over the
+    // hard-coded constant — falls back to currentBuildNumber on non-Android.
+    final installedBuildNumber = await AppUpdateService.getInstalledBuildNumber();
+
     final savedUrl = await getManifestUrl();
     final cacheBust = DateTime.now().millisecondsSinceEpoch;
     final candidateUrls = <String>[
@@ -166,11 +197,11 @@ class AppUpdateService {
             json = Map<String, dynamic>.from(decoded);
           }
           final info = AppUpdateInfo.fromJson(json);
-          debugPrint('[UpdateService] Remote build: ${info.buildNumber}, Local: $currentBuildNumber');
-          if (info.buildNumber > currentBuildNumber) {
+          debugPrint('[UpdateService] Remote build: ${info.buildNumber}, Installed: $installedBuildNumber (constant: $currentBuildNumber)');
+          if (info.buildNumber > installedBuildNumber) {
             return info;
           }
-          return null;
+          return null; // up to date
         }
       } catch (e) {
         debugPrint('[UpdateService] Manifest check failed on $url: $e');
@@ -178,6 +209,7 @@ class AppUpdateService {
     }
     return null;
   }
+
 
   // ── In-App Download & Native Install ──────────────────────────────────────
   Future<bool> downloadAndInstall({

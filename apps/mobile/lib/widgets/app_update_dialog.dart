@@ -8,12 +8,17 @@ class AppUpdateDialog extends StatefulWidget {
 
   const AppUpdateDialog({super.key, required this.updateInfo});
 
+  static bool _isShowing = false;
+
   static Future<void> show(BuildContext context, AppUpdateInfo info) {
+    // Mutex: never stack two update dialogs
+    if (_isShowing) return Future.value();
+    _isShowing = true;
     return showDialog(
       context: context,
       barrierDismissible: !info.forceUpdate,
       builder: (ctx) => AppUpdateDialog(updateInfo: info),
-    );
+    ).whenComplete(() => _isShowing = false);
   }
 
   @override

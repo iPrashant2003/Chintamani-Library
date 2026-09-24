@@ -145,61 +145,100 @@
       color: rgba(255, 255, 255, 0.32);
     }
 
-    /* 3D Floating Crystal Emblem */
+    /* 3D Floating Crystal & Orbital System */
     .scene-3d {
-      width: 110px;
-      height: 110px;
-      perspective: 700px;
+      width: 120px;
+      height: 120px;
+      perspective: 800px;
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
     .crystal-3d {
-      width: 64px;
-      height: 64px;
+      width: 58px;
+      height: 58px;
       position: relative;
       transform-style: preserve-3d;
-      animation: rotateCrystal 18s linear infinite;
+      animation: rotateCrystal 16s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
     @keyframes rotateCrystal {
       0% {
-        transform: rotateX(15deg) rotateY(0deg) rotateZ(5deg);
+        transform: rotateX(20deg) rotateY(0deg) rotateZ(10deg);
       }
       50% {
-        transform: rotateX(-15deg) rotateY(180deg) rotateZ(-5deg);
+        transform: rotateX(-20deg) rotateY(180deg) rotateZ(-10deg);
       }
       100% {
-        transform: rotateX(15deg) rotateY(360deg) rotateZ(5deg);
+        transform: rotateX(20deg) rotateY(360deg) rotateZ(10deg);
       }
+    }
+    .crystal-core {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      top: 17px;
+      left: 17px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #FFE79A 0%, #C9A84C 50%, transparent 70%);
+      box-shadow: 0 0 20px #E8C97A, 0 0 35px rgba(201, 168, 76, 0.5);
+      animation: coreGlow 3s ease-in-out infinite alternate;
+    }
+    @keyframes coreGlow {
+      from { transform: scale(0.85); opacity: 0.7; }
+      to { transform: scale(1.15); opacity: 1; }
     }
     .facet {
       position: absolute;
-      width: 64px;
-      height: 64px;
-      background: linear-gradient(135deg, rgba(201, 168, 76, 0.18) 0%, rgba(13, 17, 26, 0.85) 100%);
-      border: 1px solid rgba(201, 168, 76, 0.4);
-      backdrop-filter: blur(6px);
-      box-shadow: inset 0 0 14px rgba(201, 168, 76, 0.18);
+      width: 58px;
+      height: 58px;
+      background: linear-gradient(135deg, rgba(232, 201, 122, 0.22) 0%, rgba(13, 17, 26, 0.88) 100%);
+      border: 1px solid rgba(232, 201, 122, 0.5);
+      backdrop-filter: blur(8px);
+      box-shadow: inset 0 0 16px rgba(201, 168, 76, 0.25), 0 0 8px rgba(201, 168, 76, 0.15);
     }
-    .facet-1 { transform: rotateY(0deg) translateZ(32px); }
-    .facet-2 { transform: rotateY(90deg) translateZ(32px); }
-    .facet-3 { transform: rotateY(180deg) translateZ(32px); }
-    .facet-4 { transform: rotateY(270deg) translateZ(32px); }
-    .facet-5 { transform: rotateX(90deg) translateZ(32px); }
-    .facet-6 { transform: rotateX(-90deg) translateZ(32px); }
+    .facet-1 { transform: rotateY(0deg) translateZ(29px); }
+    .facet-2 { transform: rotateY(90deg) translateZ(29px); }
+    .facet-3 { transform: rotateY(180deg) translateZ(29px); }
+    .facet-4 { transform: rotateY(270deg) translateZ(29px); }
+    .facet-5 { transform: rotateX(90deg) translateZ(29px); }
+    .facet-6 { transform: rotateX(-90deg) translateZ(29px); }
 
-    .glow-ring {
+    .glow-ring-inner {
       position: absolute;
-      width: 100px;
-      height: 100px;
+      width: 90px;
+      height: 90px;
       border-radius: 50%;
-      border: 1px dashed rgba(201, 168, 76, 0.22);
-      animation: pulseRing 5s ease-in-out infinite;
+      border: 1.2px dashed rgba(201, 168, 76, 0.4);
+      animation: pulseRing 6s linear infinite;
+      pointer-events: none;
+    }
+    .glow-ring-outer {
+      position: absolute;
+      width: 114px;
+      height: 114px;
+      border-radius: 50%;
+      border: 1px solid rgba(201, 168, 76, 0.18);
+      border-top-color: rgba(232, 201, 122, 0.6);
+      border-bottom-color: rgba(232, 201, 122, 0.6);
+      animation: spinRingReverse 9s linear infinite;
       pointer-events: none;
     }
     @keyframes pulseRing {
-      0%, 100% { transform: scale(0.92) rotate(0deg); opacity: 0.4; }
-      50% { transform: scale(1.08) rotate(180deg); opacity: 0.8; }
+      0% { transform: rotate(0deg) scale(0.95); opacity: 0.5; }
+      50% { transform: rotate(180deg) scale(1.05); opacity: 0.85; }
+      100% { transform: rotate(360deg) scale(0.95); opacity: 0.5; }
+    }
+    @keyframes spinRingReverse {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+    .float-slow {
+      animation: floatSlow 4s ease-in-out infinite alternate;
+    }
+    @keyframes floatSlow {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-4px); }
     }
 
     /* Seat Matrix */
@@ -312,15 +351,15 @@
         </div>
       </div>
 
-      <!-- Quick Nav Buttons -->
+      <!-- Luxury Nav Buttons -->
       <div class="flex items-center space-x-2">
-        <button onclick="showView('status')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-300 bg-white/5 border border-white/10 hover:bg-white/10 active:scale-95 transition flex items-center space-x-1.5">
-          <i data-lucide="search" class="w-3.5 h-3.5 text-gold-400"></i>
-          <span>Track</span>
+        <button onclick="showView('status')" class="px-3 py-1.5 rounded-full text-xs font-semibold text-gray-200 bg-white/[0.05] border border-gold-500/30 hover:border-gold-400 hover:text-gold-300 hover:bg-gold-500/10 active:scale-95 transition-all flex items-center space-x-1.5 shadow-sm shadow-black/40 backdrop-blur-md">
+          <i data-lucide="compass" class="w-3.5 h-3.5 text-gold-400"></i>
+          <span class="tracking-wide">Track</span>
         </button>
-        <button onclick="showView('member-info')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-dark-bg btn-gold flex items-center space-x-1.5 active:scale-95 transition">
-          <i data-lucide="user" class="w-3.5 h-3.5 text-dark-bg"></i>
-          <span>My Info</span>
+        <button onclick="showView('member-info')" class="px-3.5 py-1.5 rounded-full text-xs font-extrabold text-[#080B12] bg-gradient-to-r from-[#F9EED2] via-[#E8C97A] to-[#B5882A] hover:brightness-105 active:scale-95 transition-all shadow-md shadow-gold-500/25 flex items-center space-x-1.5 border border-gold-300/40">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[#080B12]"></i>
+          <span class="tracking-wide">My Info</span>
         </button>
       </div>
 
@@ -333,38 +372,60 @@
   <main class="flex-1 max-w-lg w-full mx-auto px-4 py-4 space-y-4">
 
     <!-- ─────────────────────────────────────────────────────────────── -->
-    <!-- VIEW: LANDING / HOME (Luxury Hero + 6 Service Cards)             -->
+    <!-- VIEW: LANDING / HOME (Luxury Rebuilt Hero + 8 Service Cards)    -->
     <!-- ─────────────────────────────────────────────────────────────── -->
     <section id="view-landing" class="page-view space-y-4">
       
-      <!-- Luxury Hero Section with 3D Graphic -->
-      <div class="relative overflow-hidden rounded-2xl glass-card p-5 border border-gold-500/20">
-        <div class="relative z-10 flex items-center justify-between">
-          <div class="space-y-1.5 max-w-[220px]">
-            <span class="text-[10px] font-semibold tracking-widest text-gold-400 uppercase">Welcome to</span>
-            <h2 class="brand-title text-2xl font-bold text-white tracking-wide leading-tight">
-              CHINTAMANI<br><span class="text-lg text-gold-400/80">LIBRARY</span>
-            </h2>
-            <p class="text-xs text-gray-300 leading-relaxed pt-0.5">
-              Your membership, payments and services in one secure place.
+      <!-- Luxury Rebuilt Hero Section with Logo + 3D Crystal & Dynamic Status -->
+      <div class="relative overflow-hidden rounded-2xl p-5 border border-gold-500/30 shadow-2xl shadow-black/80" style="background: radial-gradient(circle at 85% 15%, rgba(201, 168, 76, 0.15) 0%, transparent 55%), radial-gradient(circle at 10% 90%, rgba(16, 185, 129, 0.08) 0%, transparent 45%), rgba(13, 17, 26, 0.88); backdrop-filter: blur(24px);">
+        <!-- Top Ambient Gold Glow Edge -->
+        <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#E8C97A] to-transparent opacity-80"></div>
+        
+        <div class="relative z-10 flex items-center justify-between gap-3">
+          <div class="space-y-2 max-w-[230px] sm:max-w-[260px]">
+            
+            <!-- Logo Crest + Portal Tag -->
+            <div class="flex items-center space-x-2.5">
+              <div class="w-8 h-8 rounded-xl p-1 bg-black/60 border border-gold-400/40 flex items-center justify-center shadow-md shadow-gold-500/10 float-slow">
+                <img src="images/chintamani_logo.png" alt="Chintamani Logo" class="w-full h-full object-contain" onerror="this.src='images/logo.png'">
+              </div>
+              <span class="text-[9.5px] font-extrabold tracking-widest uppercase bg-gradient-to-r from-gold-300 via-gold-400 to-gold-500 bg-clip-text text-transparent">
+                OFFICIAL PORTAL
+              </span>
+            </div>
+
+            <!-- Golden Main Heading -->
+            <div>
+              <h2 class="brand-title text-2xl sm:text-[26px] font-extrabold tracking-wide leading-tight gold-gradient-text drop-shadow-[0_2px_12px_rgba(201,168,76,0.35)]">
+                CHINTAMANI<br><span class="text-xl sm:text-2xl text-[#E8C97A]">LIBRARY</span>
+              </h2>
+            </div>
+
+            <!-- Light Grey Subheading -->
+            <p class="text-[11.5px] sm:text-xs text-[#B8C0D0] leading-relaxed font-normal">
+              Official 24x7 Digital Hub • Admissions, Attendance, UPI Payments & Member Services.
             </p>
 
-            <div class="pt-2 flex items-center space-x-2 text-[10.5px]">
-              <div class="px-2.5 py-1 rounded-full bg-black/40 border border-emerald-500/30 text-emerald-400 flex items-center space-x-1.5">
+            <!-- Status Badges -->
+            <div class="pt-1.5 flex flex-wrap gap-1.5 text-[10px]">
+              <div class="px-2.5 py-1 rounded-full bg-black/60 border border-emerald-500/40 text-emerald-300 flex items-center space-x-1.5 shadow-sm">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span><strong id="hero-seats-avail">18</strong> Seats Open</span>
+                <span><strong id="hero-seats-avail" class="text-emerald-300 font-bold">18</strong> Seats Open</span>
               </div>
-              <div class="px-2.5 py-1 rounded-full bg-black/40 border border-gold-500/25 text-gold-400/90 flex items-center space-x-1">
+              <div class="px-2.5 py-1 rounded-full bg-black/60 border border-gold-500/35 text-gold-300 flex items-center space-x-1 shadow-sm">
                 <i data-lucide="shield-check" class="w-3 h-3 text-gold-400"></i>
-                <span>Verified</span>
+                <span class="font-medium">Verified 24x7</span>
               </div>
             </div>
+
           </div>
 
-          <!-- 3D Geometric Crystal Element -->
-          <div class="scene-3d select-none pointer-events-none">
-            <div class="glow-ring"></div>
+          <!-- 3D Geometric Crystal & Orbital Ring Element -->
+          <div class="scene-3d select-none pointer-events-none flex-shrink-0">
+            <div class="glow-ring-outer"></div>
+            <div class="glow-ring-inner"></div>
             <div class="crystal-3d">
+              <div class="crystal-core"></div>
               <div class="facet facet-1"></div>
               <div class="facet facet-2"></div>
               <div class="facet facet-3"></div>
@@ -533,6 +594,15 @@
           <span>📍 Khalilabad & Mehdawal, Sant Kabir Nagar</span>
           <span class="text-gold-400 font-medium">Open 24x7</span>
         </div>
+      </div>
+
+      <!-- Luxury Developer Signature Footer -->
+      <div class="py-4 text-center space-y-1 select-none border-t border-white/5 mt-2">
+        <p class="text-xs font-medium tracking-wide">
+          <span class="text-gray-400">Developed by </span>
+          <span class="font-extrabold gold-gradient-text tracking-wider">Prashant Mani Tripathi</span>
+        </p>
+        <p class="text-[9.5px] text-gray-500 uppercase tracking-widest font-semibold">Chintamani Library Digital Ecosystem</p>
       </div>
 
     </section>
@@ -1152,11 +1222,14 @@
         </div>
 
         <div>
-          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Registered Mobile Number</label>
+          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Mobile Number, Name, or Member ID *</label>
           <div class="relative">
-            <span class="absolute left-3.5 top-3.5 text-xs text-gray-400 font-semibold">+91</span>
-            <input id="info-phone" type="tel" maxlength="10" placeholder="9876543210" class="glass-field pl-12 font-medium">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gold-400">
+              <i data-lucide="user" class="w-4 h-4"></i>
+            </span>
+            <input id="info-phone" type="text" placeholder="e.g. 9415919277, Rahul Sharma or CML-942810" class="glass-field pl-10 font-medium">
           </div>
+          <p class="text-[10px] text-gray-400 mt-1">Enter your registered mobile number, full name, or Member ID</p>
         </div>
 
         <button onclick="lookupMemberInfo()" class="w-full py-3 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5">
@@ -1755,43 +1828,141 @@
       showToast('Complaint registered: ' + cmpId);
     }
 
-    // ── Member Account Lookup (Privacy-Compliant) ──
+    // ── Member Account Lookup (Real Live Data Only - No Demo / Fake Fallbacks) ──
     async function lookupMemberInfo() {
-      const phone = document.getElementById('info-phone').value.trim();
-      if (!phone || phone.length < 10) { showToast('Enter your 10-digit mobile number'); return; }
+      const input = document.getElementById('info-phone');
+      const val = input.value.trim();
+      if (!val) {
+        showToast('Please enter your mobile number, name, or member ID');
+        return;
+      }
+
+      const display = document.getElementById('member-info-display');
+      display.classList.add('hidden');
 
       try {
-        const res = await fetch('/portal/dashboard?identifier=' + phone);
+        const res = await fetch('/portal/dashboard?identifier=' + encodeURIComponent(val));
         if (res.ok) {
           const d = await res.json();
-          document.getElementById('info-name').textContent = d.member?.name || 'Library Student';
-          document.getElementById('info-code').textContent = d.member?.memberCode || 'MEM-ONLINE';
-          document.getElementById('info-seat').textContent = d.seat ? 'Seat ' + d.seat.seatNumber : 'Seat Assigned';
-          document.getElementById('info-plan').textContent = d.subscription?.plan?.name || '12 Hours';
-          document.getElementById('info-status').textContent = d.member?.isActive ? 'Active' : 'Verification Pending';
-          document.getElementById('info-expiry').textContent = d.subscription?.endDate ? new Date(d.subscription.endDate).toLocaleDateString() : 'Active';
-          document.getElementById('member-info-display').classList.remove('hidden');
-          return;
-        }
-      } catch (_) {}
 
-      document.getElementById('info-name').textContent = 'Library Student';
-      document.getElementById('info-code').textContent = 'MEM-' + phone.slice(-4);
-      document.getElementById('info-seat').textContent = 'Seat Allocated';
-      document.getElementById('info-plan').textContent = '12 Hours Batch';
-      document.getElementById('info-status').textContent = 'Active';
-      document.getElementById('info-expiry').textContent = '30 Days Remaining';
-      document.getElementById('member-info-display').classList.remove('hidden');
+          // Case A: Pending registration
+          if (d.type === 'REGISTRATION_PENDING') {
+            document.getElementById('info-avatar').textContent = (d.name || 'A')[0].toUpperCase();
+            document.getElementById('info-name').textContent = d.name || 'Applicant';
+            document.getElementById('info-code').textContent = d.applicationId || 'REG-PENDING';
+            document.getElementById('info-seat').textContent = d.seatNumber ? ('Seat ' + d.seatNumber) : 'Reserved';
+            document.getElementById('info-plan').textContent = d.planName || 'Pending Plan';
+            document.getElementById('info-status').textContent = 'Admission Pending';
+            document.getElementById('info-status').className = 'text-amber-400 font-semibold';
+            document.getElementById('info-expiry').textContent = 'Under Admin Review';
+            display.classList.remove('hidden');
+            showToast('✓ Registration Record Found');
+            return;
+          }
+
+          // Case B: Active / Registered Member
+          const member = d.member || d;
+          const sub = d.subscription || (member.subscriptions && member.subscriptions[0]);
+          const seat = d.seat || (sub && sub.seat);
+          const plan = d.plan || (sub && sub.plan);
+
+          document.getElementById('info-avatar').textContent = (member.name || 'M')[0].toUpperCase();
+          document.getElementById('info-name').textContent = member.name || val;
+          document.getElementById('info-code').textContent = member.memberCode || val;
+          document.getElementById('info-seat').textContent = seat ? ('Seat ' + (seat.seatNumber || seat)) : (member.seatNumber ? ('Seat ' + member.seatNumber) : 'Assigned');
+          document.getElementById('info-plan').textContent = plan ? (plan.name || plan) : 'Regular Shift';
+          const isActive = member.isActive !== false;
+          document.getElementById('info-status').textContent = isActive ? 'Active • Verified' : 'Inactive / Expired';
+          document.getElementById('info-status').className = isActive ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold';
+          document.getElementById('info-expiry').textContent = sub && sub.endDate ? new Date(sub.endDate).toLocaleDateString() : 'Active Member';
+          display.classList.remove('hidden');
+          showToast('✓ Member Profile Verified');
+          return;
+        } else {
+          // Strictly handle failure — NO DEMO / FAKE MEMBER DATA!
+          const err = await res.json().catch(() => ({}));
+          const errMsg = err.message || `No registered member found matching "${val}".`;
+          showToast('⚠ ' + errMsg);
+          alert('❌ Member Account Not Found\n\n' + errMsg + '\n\nPlease verify your 10-digit mobile number, full name, or Member ID (e.g. CML-942810).');
+        }
+      } catch (e) {
+        showToast('⚠ Server connection error');
+        alert('❌ Network Error\n\nCould not connect to Chintamani Library server to verify your account.');
+      }
     }
 
-    // ── Application Tracking ──
-    function trackApplication() {
+    // ── Application & Complaint Tracking (Real Live Data Only) ──
+    async function trackApplication() {
       const q = document.getElementById('track-id-input').value.trim();
-      if (!q) { showToast('Please enter Application ID or UTR'); return; }
+      if (!q) { showToast('Please enter Application ID, Reference ID or Mobile'); return; }
 
-      document.getElementById('track-result-box').classList.remove('hidden');
-      document.getElementById('track-result-title').textContent = 'Record ' + q;
-      document.getElementById('track-result-desc').textContent = 'Record is verified in system. Active status confirmed.';
+      const box = document.getElementById('track-result-box');
+      box.classList.add('hidden');
+
+      const badge = document.getElementById('track-status-badge');
+      const title = document.getElementById('track-result-title');
+      const desc = document.getElementById('track-result-desc');
+
+      try {
+        if (q.toUpperCase().startsWith('CMP-')) {
+          const res = await fetch('/portal/complaint/' + encodeURIComponent(q));
+          if (res.ok) {
+            const data = await res.json();
+            const isResolved = data.status === 'RESOLVED';
+            badge.textContent = data.status || 'LOGGED';
+            badge.className = isResolved ? 'px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase' : 'px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase';
+            title.textContent = 'Complaint: ' + (data.category || q);
+            desc.textContent = data.description ? `Ticket Status: ${data.status}. Issue: ${data.description}` : `Complaint registered in library helpdesk.`;
+            box.classList.remove('hidden');
+            showToast('✓ Complaint Status Found');
+            return;
+          }
+        } else if (q.toUpperCase().startsWith('REG-') || q.toUpperCase().startsWith('APP-')) {
+          const res = await fetch('/portal/registration/' + encodeURIComponent(q));
+          if (res.ok) {
+            const data = await res.json();
+            const isApproved = data.status === 'APPROVED';
+            badge.textContent = data.status || 'UNDER REVIEW';
+            badge.className = isApproved ? 'px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase' : 'px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase';
+            title.textContent = 'Application: ' + (data.name || q);
+            desc.textContent = `Applied for ${data.plan?.name || 'Study Shift'}. Status: ${data.status || 'Pending Verification'}.`;
+            box.classList.remove('hidden');
+            showToast('✓ Registration Status Found');
+            return;
+          }
+        }
+
+        // Search general member or registration record
+        const res = await fetch('/portal/dashboard?identifier=' + encodeURIComponent(q));
+        if (res.ok) {
+          const data = await res.json();
+          if (data.type === 'REGISTRATION_PENDING') {
+            badge.textContent = data.status || 'PENDING VERIFICATION';
+            badge.className = 'px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase';
+            title.textContent = 'Application: ' + (data.name || q);
+            desc.textContent = `Application ID: ${data.applicationId}. Status: ${data.status}. Plan: ${data.planName || 'Standard'}.`;
+            box.classList.remove('hidden');
+            showToast('✓ Application Status Found');
+            return;
+          }
+
+          const m = data.member || data;
+          badge.textContent = m.isActive ? 'ACTIVE MEMBER' : 'INACTIVE';
+          badge.className = m.isActive ? 'px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase' : 'px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400 text-[10px] font-bold uppercase';
+          title.textContent = (m.name || 'Member') + ' (' + (m.memberCode || q) + ')';
+          desc.textContent = `Verified active subscription in Chintamani Library registry.`;
+          box.classList.remove('hidden');
+          showToast('✓ Member Record Found');
+          return;
+        }
+
+        // If not found, strictly show error - NO FAKE DATA!
+        showToast(`⚠ No record found for "${q}"`);
+        alert(`❌ Record Not Found\n\nNo active application, complaint, or membership record matched "${q}".\n\nPlease check your Reference ID or registered mobile number.`);
+      } catch (err) {
+        showToast('⚠ Error checking status');
+        alert('❌ Network Error\n\nCould not connect to the library server to check your status.');
+      }
     }
 
     // ── Init on Page Load ──

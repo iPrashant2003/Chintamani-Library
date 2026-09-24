@@ -583,22 +583,40 @@ export class PortalService {
   // ── MEMBER DASHBOARD & HISTORY ────────────────────────────────────────────
 
   async getMemberDashboard(identifier: string) {
-    // Identifier can be token or phone
-    let phone = this.cleanPhone(identifier);
+    const raw = identifier ? identifier.trim() : '';
+    if (!raw) {
+      throw new BadRequestException('Please enter a valid Mobile Number, Member ID, or Name');
+    }
 
-    if (identifier.includes('-')) {
-      // It's a token
+    let phone = this.cleanPhone(raw);
+
+    if (raw.includes('-') && raw.length > 20) {
+      // It's a portal session token
       const session = await this.prisma.memberPortalSession.findFirst({
-        where: { token: identifier, verified: true },
+        where: { token: raw, verified: true },
       });
       if (session) phone = session.phone;
     }
 
+    const digits = raw.replace(/[^\d]/g, '');
+
+    const orConditions: any[] = [
+      { memberCode: { equals: raw, mode: 'insensitive' } },
+      { memberCode: { contains: raw, mode: 'insensitive' } },
+      { name: { contains: raw, mode: 'insensitive' } },
+    ];
+
+    if (digits.length >= 6) {
+      orConditions.push({ phone: { contains: digits.length >= 10 ? digits.slice(-10) : digits } });
+    }
+
     const member = await this.prisma.member.findFirst({
-      where: { phone: { contains: phone.slice(-10) } },
+      where: {
+        OR: orConditions,
+      },
       include: {
         subscriptions: {
-          where: { status: 'ACTIVE' },
+          orderBy: { endDate: 'desc' },
           include: { plan: true, seat: true, locker: true },
           take: 1,
         },
@@ -616,8 +634,16 @@ export class PortalService {
 
     if (!member) {
       // Check for pending application
+      const regOr: any[] = [
+        { applicationId: { equals: raw, mode: 'insensitive' } },
+        { name: { contains: raw, mode: 'insensitive' } },
+      ];
+      if (digits.length >= 6) {
+        regOr.push({ phone: { contains: digits.length >= 10 ? digits.slice(-10) : digits } });
+      }
+
       const reg = await this.prisma.memberRegistration.findFirst({
-        where: { phone: { contains: phone.slice(-10) } },
+        where: { OR: regOr },
         orderBy: { submittedAt: 'desc' },
         include: { plan: true, reservedSeat: true },
       });
@@ -634,7 +660,7 @@ export class PortalService {
         };
       }
 
-      throw new NotFoundException('Member profile not found');
+      throw new NotFoundException(`Member profile not found for "${raw}"`);
     }
 
     const sub = member.subscriptions[0];

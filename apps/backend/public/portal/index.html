@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Chintamani — Official Member Portal</title>
+  <title>Chintamani Library — Official Member Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -255,6 +255,41 @@
         transform: translateY(0);
       }
     }
+    /* Service Card Image Vignette */
+    .card-img-wrap {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      border-radius: inherit;
+    }
+    .card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.22;
+      transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .svc-card:hover .card-img {
+      opacity: 0.32;
+      transform: scale(1.04);
+    }
+    .card-img-vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border-radius: inherit;
+    }
+    .svc-card {
+      transition: transform 0.22s cubic-bezier(0.16,1,0.3,1), box-shadow 0.22s cubic-bezier(0.16,1,0.3,1);
+    }
+    .svc-card:hover {
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.65) !important;
+    }
+    .svc-card:active {
+      transform: scale(0.978);
+    }
   </style>
 </head>
 <body class="flex flex-col justify-between">
@@ -272,7 +307,7 @@
           <div id="logo-fallback-initial" class="hidden w-full h-full items-center justify-center text-gold-400 font-serif font-bold text-lg">C</div>
         </div>
         <div class="flex flex-col">
-          <span class="brand-title text-base font-bold tracking-wide text-white leading-tight">Chintamani</span>
+          <span class="brand-title text-base font-bold tracking-wide text-white leading-tight">Chintamani Library</span>
           <span class="text-[10px] font-semibold tracking-wider text-gold-400/80 uppercase">Member Portal</span>
         </div>
       </div>
@@ -308,7 +343,7 @@
           <div class="space-y-1.5 max-w-[220px]">
             <span class="text-[10px] font-semibold tracking-widest text-gold-400 uppercase">Welcome to</span>
             <h2 class="brand-title text-2xl font-bold text-white tracking-wide leading-tight">
-              CHINTAMANI
+              CHINTAMANI<br><span class="text-lg text-gold-400/80">LIBRARY</span>
             </h2>
             <p class="text-xs text-gray-300 leading-relaxed pt-0.5">
               Your membership, payments and services in one secure place.
@@ -349,116 +384,140 @@
         </div>
       </div>
 
-      <!-- Direct Attendance Check-In Card (1-Tap Fast Member Access) -->
-      <div onclick="showView('attendance')" class="glass-card p-3.5 flex items-center justify-between cursor-pointer hover:bg-white/[0.04] transition group relative overflow-hidden">
-        <div class="service-accent-bar bg-[#10B981]"></div>
-        <div class="flex items-center space-x-3">
-          <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition">
-            <i data-lucide="user-check" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <div class="flex items-center space-x-2">
-              <span class="text-xs font-bold text-white group-hover:text-emerald-300 transition">Member Attendance Check-In</span>
-              <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">1-TAP LIVE</span>
-            </div>
-            <span class="text-[10px] text-gray-400 block mt-0.5">Submit daily study shift check-in or check-out</span>
-          </div>
-        </div>
-        <div class="flex items-center text-emerald-400 text-xs font-semibold space-x-1">
-          <span>Check In</span>
-          <i data-lucide="chevron-right" class="w-4 h-4"></i>
-        </div>
-      </div>
-
-      <!-- 6 Service Cards Grid (NO colored borders; subtle accent lines + unique icons) -->
+      <!-- 8 Premium Service Cards Grid — Glassmorphism + Image Vignette + Multicolour -->
       <div class="grid grid-cols-2 gap-3">
-        
-        <!-- 1. New Registration (Warm Amber Accent) -->
-        <div onclick="showView('register')" class="glass-card p-4 cursor-pointer group flex flex-col justify-between min-h-[126px]">
-          <div class="service-accent-bar bg-[#B5882A]"></div>
-          <div class="w-10 h-10 rounded-xl bg-[#B5882A]/15 border border-[#B5882A]/25 flex items-center justify-center text-gold-400 mb-2.5 group-hover:scale-105 transition">
-            <i data-lucide="user-plus" class="w-5 h-5 text-gold-400"></i>
+
+        <!-- 1. Attendance (Emerald) -->
+        <div onclick="showView('attendance')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[148px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.82);border:1px solid rgba(16,185,129,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
+          <div class="service-accent-bar bg-[#10B981]"></div>
+          <div class="card-img-wrap">
+            <img src="images/attendance_biometric.jpg" alt="" class="card-img">
+            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
           </div>
-          <div>
-            <h4 class="text-xs font-bold text-white group-hover:text-gold-300 transition">New Registration</h4>
-            <p class="text-[10px] text-gray-400 mt-0.5 leading-snug">Admission, photo & seat selection</p>
+          <div class="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center mb-2" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);">
+            <i data-lucide="user-check" class="w-5 h-5" style="color:#34D399;"></i>
+          </div>
+          <div class="relative z-10">
+            <div class="flex items-center space-x-1.5 mb-0.5">
+              <h4 class="text-xs font-bold text-white">Attendance</h4>
+              <span class="px-1 py-px rounded text-[8px] font-extrabold" style="background:rgba(16,185,129,0.2);color:#34D399;border:1px solid rgba(16,185,129,0.4);">LIVE</span>
+            </div>
+            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Daily check-in & check-out</p>
           </div>
         </div>
 
-        <!-- 2. Payments (Deep Emerald Accent) -->
-        <div onclick="showView('payment')" class="glass-card p-4 cursor-pointer group flex flex-col justify-between min-h-[126px]">
-          <div class="service-accent-bar bg-[#1A7A5E]"></div>
-          <div class="w-10 h-10 rounded-xl bg-[#1A7A5E]/15 border border-[#1A7A5E]/25 flex items-center justify-center text-emerald-400 mb-2.5 group-hover:scale-105 transition">
-            <i data-lucide="credit-card" class="w-5 h-5 text-emerald-400"></i>
+        <!-- 2. UPI Payments (Gold) -->
+        <div onclick="showView('payment')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[148px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.82);border:1px solid rgba(201,168,76,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
+          <div class="service-accent-bar bg-[#C9A84C]"></div>
+          <div class="card-img-wrap">
+            <img src="images/gold_coins.jpg" alt="" class="card-img">
+            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
           </div>
-          <div>
-            <h4 class="text-xs font-bold text-white group-hover:text-gold-300 transition">Payments</h4>
-            <p class="text-[10px] text-gray-400 mt-0.5 leading-snug">UPI transfer & verification proof</p>
+          <div class="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center mb-2" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);">
+            <i data-lucide="credit-card" class="w-5 h-5" style="color:#E8C97A;"></i>
           </div>
-        </div>
-
-        <!-- 3. Feedback & Reviews (Dusty Rose Accent) -->
-        <div onclick="showView('feedback')" class="glass-card p-4 cursor-pointer group flex flex-col justify-between min-h-[126px]">
-          <div class="service-accent-bar bg-[#A0546B]"></div>
-          <div class="w-10 h-10 rounded-xl bg-[#A0546B]/15 border border-[#A0546B]/25 flex items-center justify-center text-rose-300 mb-2.5 group-hover:scale-105 transition">
-            <i data-lucide="star" class="w-5 h-5 text-rose-300"></i>
-          </div>
-          <div>
-            <h4 class="text-xs font-bold text-white group-hover:text-gold-300 transition">Feedback & Reviews</h4>
-            <p class="text-[10px] text-gray-400 mt-0.5 leading-snug">Rate your study experience</p>
+          <div class="relative z-10">
+            <h4 class="text-xs font-bold text-white mb-0.5">UPI Payments</h4>
+            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Fee transfer & verification</p>
           </div>
         </div>
 
-        <!-- 4. Complaint (Muted Burgundy Accent) -->
-        <div onclick="showView('complaint')" class="glass-card p-4 cursor-pointer group flex flex-col justify-between min-h-[126px]">
-          <div class="service-accent-bar bg-[#8B2635]"></div>
-          <div class="w-10 h-10 rounded-xl bg-[#8B2635]/15 border border-[#8B2635]/25 flex items-center justify-center text-red-300 mb-2.5 group-hover:scale-105 transition">
-            <i data-lucide="alert-circle" class="w-5 h-5 text-red-300"></i>
+        <!-- 3. New Registration (Warm Amber) -->
+        <div onclick="showView('register')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[148px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.82);border:1px solid rgba(234,170,80,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
+          <div class="service-accent-bar bg-[#EAA050]"></div>
+          <div class="card-img-wrap">
+            <img src="images/luxury_reception.jpg" alt="" class="card-img">
+            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
           </div>
-          <div>
-            <h4 class="text-xs font-bold text-white group-hover:text-gold-300 transition">Complaint</h4>
-            <p class="text-[10px] text-gray-400 mt-0.5 leading-snug">Report AC, seating, or noise issues</p>
+          <div class="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center mb-2" style="background:rgba(234,170,80,0.15);border:1px solid rgba(234,170,80,0.3);">
+            <i data-lucide="user-plus" class="w-5 h-5" style="color:#FBBF24;"></i>
           </div>
-        </div>
-
-        <!-- 5. Membership (Royal Purple Accent) -->
-        <div onclick="showView('member-info')" class="glass-card p-4 cursor-pointer group flex flex-col justify-between min-h-[126px]">
-          <div class="service-accent-bar bg-[#5B3FA6]"></div>
-          <div class="w-10 h-10 rounded-xl bg-[#5B3FA6]/15 border border-[#5B3FA6]/25 flex items-center justify-center text-purple-300 mb-2.5 group-hover:scale-105 transition">
-            <i data-lucide="id-card" class="w-5 h-5 text-purple-300"></i>
-          </div>
-          <div>
-            <h4 class="text-xs font-bold text-white group-hover:text-gold-300 transition">Membership</h4>
-            <p class="text-[10px] text-gray-400 mt-0.5 leading-snug">Check allocated seat & validity</p>
+          <div class="relative z-10">
+            <h4 class="text-xs font-bold text-white mb-0.5">New Registration</h4>
+            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Admission & seat selection</p>
           </div>
         </div>
 
-        <!-- 6. Help & Support (Deep Blue Accent) -->
-        <div onclick="showView('contact')" class="glass-card p-4 cursor-pointer group flex flex-col justify-between min-h-[126px]">
-          <div class="service-accent-bar bg-[#2A5FA0]"></div>
-          <div class="w-10 h-10 rounded-xl bg-[#2A5FA0]/15 border border-[#2A5FA0]/25 flex items-center justify-center text-blue-300 mb-2.5 group-hover:scale-105 transition">
-            <i data-lucide="help-circle" class="w-5 h-5 text-blue-300"></i>
+        <!-- 4. Feedback & Reviews (Rose) -->
+        <div onclick="showView('feedback')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[148px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.82);border:1px solid rgba(232,121,160,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
+          <div class="service-accent-bar bg-[#E879A0]"></div>
+          <div class="card-img-wrap">
+            <img src="images/luxury_cafe.jpg" alt="" class="card-img">
+            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
           </div>
-          <div>
-            <h4 class="text-xs font-bold text-white group-hover:text-gold-300 transition">Help & Support</h4>
-            <p class="text-[10px] text-gray-400 mt-0.5 leading-snug">Director helpline & branches</p>
+          <div class="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center mb-2" style="background:rgba(232,121,160,0.15);border:1px solid rgba(232,121,160,0.3);">
+            <i data-lucide="star" class="w-5 h-5" style="color:#F9A8D4;"></i>
+          </div>
+          <div class="relative z-10">
+            <h4 class="text-xs font-bold text-white mb-0.5">Feedback & Reviews</h4>
+            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Rate your experience</p>
           </div>
         </div>
 
-      </div>
-
-      <!-- Quick Seat Matrix Shortcut Card -->
-      <div onclick="showView('seats')" class="glass-card p-3.5 flex items-center justify-between cursor-pointer hover:bg-white/[0.04] transition">
-        <div class="flex items-center space-x-3">
-          <div class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
-            <i data-lucide="armchair" class="w-4 h-4"></i>
+        <!-- 5. Complaint & Support (Ruby) -->
+        <div onclick="showView('complaint')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[148px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.82);border:1px solid rgba(239,68,68,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
+          <div class="service-accent-bar bg-[#EF4444]"></div>
+          <div class="card-img-wrap">
+            <img src="images/luxury_wifi.jpg" alt="" class="card-img">
+            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
           </div>
-          <div>
-            <span class="text-xs font-bold text-white block">View Live Seat Matrix</span>
-            <span class="text-[10px] text-gray-400">Real-time occupancy across all shifts</span>
+          <div class="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center mb-2" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);">
+            <i data-lucide="alert-triangle" class="w-5 h-5" style="color:#FCA5A5;"></i>
+          </div>
+          <div class="relative z-10">
+            <h4 class="text-xs font-bold text-white mb-0.5">Complaint & Support</h4>
+            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Report facility issues</p>
           </div>
         </div>
-        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+
+        <!-- 6. Membership Status (Purple) -->
+        <div onclick="showView('member-info')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[148px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.82);border:1px solid rgba(139,92,246,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
+          <div class="service-accent-bar bg-[#8B5CF6]"></div>
+          <div class="card-img-wrap">
+            <img src="images/khalilabad_lockers.jpg" alt="" class="card-img">
+            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
+          </div>
+          <div class="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center mb-2" style="background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);">
+            <i data-lucide="id-card" class="w-5 h-5" style="color:#C4B5FD;"></i>
+          </div>
+          <div class="relative z-10">
+            <h4 class="text-xs font-bold text-white mb-0.5">Membership Status</h4>
+            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Seat, plan & validity</p>
+          </div>
+        </div>
+
+        <!-- 7. Live Seat Matrix (Cyan) -->
+        <div onclick="showView('seats')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[148px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.82);border:1px solid rgba(6,182,212,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
+          <div class="service-accent-bar bg-[#06B6D4]"></div>
+          <div class="card-img-wrap">
+            <img src="images/luxury_study_hall.jpg" alt="" class="card-img">
+            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
+          </div>
+          <div class="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center mb-2" style="background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);">
+            <i data-lucide="layout-grid" class="w-5 h-5" style="color:#67E8F9;"></i>
+          </div>
+          <div class="relative z-10">
+            <h4 class="text-xs font-bold text-white mb-0.5">Live Seat Matrix</h4>
+            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Real-time seat availability</p>
+          </div>
+        </div>
+
+        <!-- 8. Help & Director Hotline (Blue) -->
+        <div onclick="showView('contact')" class="svc-card cursor-pointer relative overflow-hidden rounded-[18px] min-h-[148px] flex flex-col justify-between p-4" style="background:rgba(13,17,26,0.82);border:1px solid rgba(59,130,246,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.5);">
+          <div class="service-accent-bar bg-[#3B82F6]"></div>
+          <div class="card-img-wrap">
+            <img src="images/luxury_building.jpg" alt="" class="card-img">
+            <div class="card-img-vignette" style="background:radial-gradient(circle at 50% 20%, transparent 15%, rgba(8,11,18,0.9) 80%),linear-gradient(to bottom,rgba(8,11,18,0.2),rgba(8,11,18,0.96));"></div>
+          </div>
+          <div class="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center mb-2" style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);">
+            <i data-lucide="phone-call" class="w-5 h-5" style="color:#93C5FD;"></i>
+          </div>
+          <div class="relative z-10">
+            <h4 class="text-xs font-bold text-white mb-0.5">Help & Helpdesk</h4>
+            <p class="text-[10px] leading-snug" style="color:rgba(255,255,255,0.5);">Director hotline & branches</p>
+          </div>
+        </div>
+
       </div>
 
       <!-- Director & Location Footer Card -->
@@ -1257,14 +1316,14 @@
         </div>
 
         <div>
-          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Registered Mobile Number or Member ID *</label>
+          <label class="text-[11px] font-semibold text-gray-300 block mb-1">Mobile Number, Name, or Member ID *</label>
           <div class="relative">
             <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-400">
               <i data-lucide="badge" class="w-4 h-4"></i>
             </span>
-            <input id="att-input-id" type="text" placeholder="e.g. 9415919277 or CML-942810" class="glass-field pl-10 font-medium">
+            <input id="att-input-id" type="text" placeholder="e.g. 9415919277, Rahul Sharma or CML-942810" class="glass-field pl-10 font-medium">
           </div>
-          <p class="text-[10px] text-gray-400 mt-1">Enter your 10-digit mobile number or member ID printed on your pass</p>
+          <p class="text-[10px] text-gray-400 mt-1">Enter your mobile number, full name, or member ID printed on your pass</p>
         </div>
 
         <button id="btn-submit-att" onclick="submitPortalAttendance()" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-extrabold text-xs flex items-center justify-center space-x-2 transition shadow-lg shadow-emerald-500/20">
@@ -1563,13 +1622,16 @@
       const input = document.getElementById('att-input-id');
       const val = input.value.trim();
       if (!val) {
-        showToast('Please enter your mobile number or member ID');
+        showToast('Please enter your mobile number, name, or member ID');
         return;
       }
 
       const btn = document.getElementById('btn-submit-att');
       btn.disabled = true;
       btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Recording Attendance...';
+
+      // Hide any previous result
+      document.getElementById('att-result-box').classList.add('hidden');
 
       try {
         const res = await fetch('/portal/attendance', {
@@ -1583,33 +1645,27 @@
         const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         if (res.ok && data.success) {
-          document.getElementById('att-result-badge').textContent = data.action === 'CHECK_OUT' ? 'CHECKED OUT' : 'CHECKED IN • PRESENT';
-          document.getElementById('att-result-name').textContent = data.member?.name || ('Member (' + val + ')');
+          // ✅ REAL SUCCESS — show verified check-in
+          const isOut = data.action === 'CHECK_OUT';
+          document.getElementById('att-result-badge').textContent = isOut ? 'CHECKED OUT ✓' : 'CHECKED IN • PRESENT ✓';
+          document.getElementById('att-result-badge').style.background = isOut ? 'rgba(234,170,80,0.2)' : 'rgba(16,185,129,0.2)';
+          document.getElementById('att-result-badge').style.color = isOut ? '#FBBF24' : '#34D399';
+          document.getElementById('att-result-name').textContent = data.member?.name || val;
           document.getElementById('att-result-msg').textContent = data.message || 'Attendance recorded successfully.';
-          document.getElementById('att-result-seat').textContent = 'Seat ' + (data.member?.seatNumber || 'Assigned');
+          document.getElementById('att-result-seat').textContent = data.member?.seatNumber ? 'Seat ' + data.member.seatNumber : 'Unassigned';
           document.getElementById('att-result-time').textContent = timeStr;
           document.getElementById('att-result-box').classList.remove('hidden');
-          showToast('✓ ' + (data.action === 'CHECK_OUT' ? 'Checked Out' : 'Checked In') + ' Successfully!');
+          showToast('✓ ' + (isOut ? 'Checked Out' : 'Checked In') + ' — ' + (data.member?.name || val));
         } else {
-          const msg = data.message || 'Attendance recorded for today.';
-          document.getElementById('att-result-badge').textContent = 'CHECKED IN • PRESENT';
-          document.getElementById('att-result-name').textContent = 'Member (' + val + ')';
-          document.getElementById('att-result-msg').textContent = msg;
-          document.getElementById('att-result-seat').textContent = 'Active Shift';
-          document.getElementById('att-result-time').textContent = timeStr;
-          document.getElementById('att-result-box').classList.remove('hidden');
-          showToast('✓ Attendance Confirmed');
+          // ❌ API returned error — show real error, not fake success
+          const errMsg = data.message || 'Member not found. Please check your mobile number, name, or Member ID and try again.';
+          showToast('⚠ ' + errMsg);
+          alert('❌ Attendance Not Recorded\n\n' + errMsg + '\n\nPlease enter your:\n• 10-digit registered mobile number, OR\n• Full name (as registered), OR\n• Member ID (e.g. CML-942810)');
         }
-      } catch (_) {
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        document.getElementById('att-result-badge').textContent = 'CHECKED IN • PRESENT';
-        document.getElementById('att-result-name').textContent = val.toUpperCase().startsWith('CML-') ? 'Member (' + val + ')' : 'Member (' + val + ')';
-        document.getElementById('att-result-msg').textContent = 'Attendance check-in logged and synced with library registry.';
-        document.getElementById('att-result-seat').textContent = 'Active Seat';
-        document.getElementById('att-result-time').textContent = timeStr;
-        document.getElementById('att-result-box').classList.remove('hidden');
-        showToast('✓ Attendance Check-In Confirmed!');
+      } catch (err) {
+        // 🌐 Network error — show honest error
+        showToast('⚠ Network error. Please check your connection and try again.');
+        alert('❌ Unable to Record Attendance\n\nCould not connect to the Chintamani Library server.\n\nPlease check your internet connection and try again.');
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 text-black"></i><span>Submit Attendance Check-In</span>';

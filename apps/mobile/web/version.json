@@ -1,16 +1,16 @@
 {
   "version": "2.3.0",
-  "buildNumber": 32,
+  "buildNumber": 33,
   "releaseDate": "24 Sep 2026",
-  "title": "Chinta Mani Library v2.3.0 (Build 32) — Multicolour 3D Bottom Bar, Reorganized Scan QR & Everyday Live Attendance Checker",
+  "title": "Chintamani Library v2.3.0 (Build 33) — Portal 8-Card Luxury Redesign, Vignette Art & Multi-Identifier Attendance",
   "releaseNotes": [
-    "Reorganized Bottom Navigation Bar: Brand new animated 3D graphics & icons in original multicolours (Sky Blue, Emerald, Amber, WhatsApp Green, Royal Violet — NO golden styling) with spring scale interactions and ambient color glows",
-    "Streamlined Dashboard Quick Access: Reconfigured to 4 primary cards (Add Member, Record Fee, Universal QR, Insights) for balanced and ergonomic access",
-    "Removed Universal QR Card from Main Dashboard: Cleaned dashboard view per operational preferences",
-    "Reorganized Scan QR Hub: Removed legacy tabs (Admission Poster, Scholar Pass QR, Scanner Simulation); now features the permanent Universal QR portal card alongside the new Member Self-Attendance Check-In card",
-    "Member Self-Attendance Submission: Members can submit attendance via mobile number or Member ID, immediately reflecting across the admin dashboard and live attendance stream",
-    "Everyday Live Attendance Checker: New dedicated screen in More menu displaying real-time Present vs Absent status for all active members with check-in timestamps, filters, and 1-tap attendance marking",
-    "Public Portal Self Check-In: Added 1-Tap Attendance Check-In directly on the public web portal with instant verification feedback"
+    "Rebranded Universal QR Portal: Standardized all branding from 'Chintamani' to 'Chintamani Library' across headers, titles, cards, and modal sheets",
+    "Reorganized Universal QR Portal Services: Replaced old layout with an 8-card luxury grid (Attendance, UPI Payments, New Registration, Feedback & Reviews, Complaint & Support, Membership Status, Live Seat Matrix, Help & Director Hotline)",
+    "Glassmorphism + Multicolour 3D Styling: Every service card is themed with distinct vibrant accents (Emerald, Gold, Amber, Rose, Ruby, Purple, Cyan, Blue) and smooth hover/press scale animations",
+    "Card Image Vignette & Opacity: Incorporated authentic high-resolution library images into every single portal card with radial and linear dark gradient vignettes",
+    "Multi-Identifier Attendance: Member attendance can now be verified and checked in using Mobile Number, Full Name, OR Member ID (any of these three)",
+    "Fixed Attendance Detail Fetching: Resolved issue where unverified or failed lookups previously generated placeholder check-in cards; portal now strictly displays verified real-time records and actionable alert feedback",
+    "Streamlined Mobile Universal QR Screen: Removed the redundant attendance card from below the Universal QR code card in the app, standardizing all screens to 'CHINTAMANI LIBRARY'"
   ],
   "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.0/Chintamani-Library-Release.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",

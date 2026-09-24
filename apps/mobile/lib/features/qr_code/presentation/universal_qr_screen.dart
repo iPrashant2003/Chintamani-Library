@@ -8,7 +8,6 @@ import '../../../theme/app_colors.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../branch/providers/branch_provider.dart';
-import 'widgets/member_self_attendance_card.dart';
 
 final universalQrDataProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   try {
@@ -128,12 +127,12 @@ class UniversalQrScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       const Text(
-                        'CHINTAMANI',
+                        'CHINTAMANI LIBRARY',
                         style: TextStyle(
                           color: Color(0xFFE8C97A),
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.w900,
-                          letterSpacing: 2,
+                          letterSpacing: 1.5,
                         ),
                       ),
                     ],
@@ -298,12 +297,12 @@ class UniversalQrScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       const Text(
-                        'CHINTAMANI',
+                        'CHINTAMANI LIBRARY',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.w900,
-                          letterSpacing: 1.5,
+                          letterSpacing: 1.2,
                         ),
                       ),
                     ],
@@ -505,11 +504,6 @@ class UniversalQrScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
 
-            // ── MEMBER ATTENDANCE CARD ───────────────────────────────────────
-            const MemberSelfAttendanceCard(),
-
-            const SizedBox(height: 16),
-
             // Clean Brand Value Card (Replaces Cluttered Capabilities Section)
             Container(
               padding: const EdgeInsets.all(18),
@@ -522,7 +516,7 @@ class UniversalQrScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'CHINTAMANI MEMBER PORTAL',
+                    'CHINTAMANI LIBRARY MEMBER PORTAL',
                     style: TextStyle(
                       color: Color(0xFFC9A84C),
                       fontSize: 11.5,

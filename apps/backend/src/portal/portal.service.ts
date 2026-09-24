@@ -878,34 +878,62 @@ export class PortalService {
   // ── SELF ATTENDANCE (PORTAL / QR PASS) ───────────────────────────────────────
 
   async submitAttendance(dto: PortalAttendanceDto) {
-    const raw = dto.identifier.trim();
+    const raw = dto.identifier ? dto.identifier.trim() : '';
     if (!raw) {
-      throw new BadRequestException('Please enter your Mobile Number or Member ID');
+      throw new BadRequestException('Please enter your Mobile Number, Name, or Member ID');
     }
 
     const digits = raw.replace(/[^\d]/g, '');
 
-    // Search for member by memberCode (exact/case-insensitive) or phone (last 10 digits)
-    const member = await this.prisma.member.findFirst({
+    // Search conditions: Member Code, Name, or Phone
+    const orConditions: any[] = [
+      { memberCode: { equals: raw, mode: 'insensitive' } },
+      { memberCode: { contains: raw, mode: 'insensitive' } },
+      { name: { contains: raw, mode: 'insensitive' } },
+    ];
+
+    if (digits.length >= 6) {
+      const searchPhone = digits.length >= 10 ? digits.slice(-10) : digits;
+      orConditions.push({ phone: { contains: searchPhone } });
+    }
+
+    // First search for an active member matching the query
+    let member = await this.prisma.member.findFirst({
       where: {
-        OR: [
-          { memberCode: { equals: raw, mode: 'insensitive' } },
-          ...(digits.length >= 10 ? [{ phone: { contains: digits.slice(-10) } }] : []),
-        ],
+        OR: orConditions,
+        isActive: true,
       },
       include: {
         branch: true,
         subscriptions: {
           where: { status: 'ACTIVE' },
           include: { seat: true, plan: true },
+          orderBy: { endDate: 'desc' },
           take: 1,
         },
       },
     });
 
+    // If not found as active, fallback to any matching member
+    if (!member) {
+      member = await this.prisma.member.findFirst({
+        where: {
+          OR: orConditions,
+        },
+        include: {
+          branch: true,
+          subscriptions: {
+            include: { seat: true, plan: true },
+            orderBy: { endDate: 'desc' },
+            take: 1,
+          },
+        },
+      });
+    }
+
     if (!member) {
       throw new NotFoundException(
-        `Member not found with "${raw}". Please enter your registered 10-digit mobile number or Member ID (e.g. CML-942810).`,
+        `Member not found with "${raw}". Please enter your registered 10-digit mobile number, full name, or Member ID (e.g. CML-942810).`,
       );
     }
 
@@ -957,7 +985,7 @@ export class PortalService {
     return {
       success: true,
       action: 'CHECK_IN',
-      message: `Checked in successfully! Welcome to Chinta Mani Library, ${member.name}.`,
+      message: `Checked in successfully! Welcome to Chintamani Library, ${member.name}.`,
       member: {
         id: member.id,
         name: member.name,

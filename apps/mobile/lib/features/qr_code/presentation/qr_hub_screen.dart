@@ -8,7 +8,6 @@ import '../../../theme/app_colors.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../branch/providers/branch_provider.dart';
 import 'universal_qr_screen.dart';
-import 'widgets/member_self_attendance_card.dart';
 
 class QrHubScreen extends ConsumerWidget {
   const QrHubScreen({super.key});
@@ -94,12 +93,12 @@ class QrHubScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       const Text(
-                        'CHINTAMANI',
+                        'CHINTAMANI LIBRARY',
                         style: TextStyle(
                           color: Color(0xFFE8C97A),
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.w900,
-                          letterSpacing: 2,
+                          letterSpacing: 1.5,
                         ),
                       ),
                     ],
@@ -262,12 +261,12 @@ class QrHubScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       const Text(
-                        'CHINTAMANI',
+                        'CHINTAMANI LIBRARY',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.w900,
-                          letterSpacing: 1.5,
+                          letterSpacing: 1.2,
                         ),
                       ),
                     ],
@@ -471,11 +470,6 @@ class QrHubScreen extends ConsumerWidget {
 
             const SizedBox(height: 16),
 
-            // ── 2. NEW MEMBER ATTENDANCE SUBMISSION CARD ─────────────────────
-            const MemberSelfAttendanceCard(),
-
-            const SizedBox(height: 16),
-
             // Brand statement info card
             Container(
               padding: const EdgeInsets.all(16),
@@ -488,7 +482,7 @@ class QrHubScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'CHINTAMANI UNIVERSAL QR ECOSYSTEM',
+                    'CHINTAMANI LIBRARY UNIVERSAL QR ECOSYSTEM',
                     style: TextStyle(
                       color: Color(0xFFC9A84C),
                       fontSize: 11,

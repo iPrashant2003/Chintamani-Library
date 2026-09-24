@@ -1,19 +1,19 @@
 {
   "version": "2.3.1",
-  "buildNumber": 35,
+  "buildNumber": 2035,
   "releaseDate": "24 Sep 2026",
-  "title": "Chintamani Library v2.3.1 (Build 35) — Universal Architecture & Branch-Aware Portal",
+  "title": "Chintamani Library v2.3.1 (Build 2035) — Native Version Fix & Branch-Aware Portal",
   "releaseNotes": [
-    "Fixed Installation Error: Replaced split architecture with full Universal APK containing complete native libraries for all architectures (resolves 'App not installed as package appears to be invalid')",
-    "Fixed Update Loop: App no longer repeatedly shows 'Update Available' after installing an update — native versionCode (Build 35) is read directly from Android PackageManager",
-    "Stacked Dialog Fix: Only one update dialog can appear per session — SplashScreen and DashboardScreen can no longer race and show duplicate prompts",
-    "Session Guard: Update check runs exactly once per cold launch regardless of which screen triggers it",
-    "Branch-Aware Universal QR Portal: Mehdawal and Khalilabad now operate as completely separate datasets from one global branch switcher",
+    "Fixed Installation Error: Bumped versionCode to 2035 to ensure Android OS recognizes it as a legitimate upgrade over split builds (resolves 'App not installed as package is invalid')",
+    "Pure 34MB arm64 Standalone Package: Excluded unused architectures to reduce file size from 85 MB to 34 MB, completely resolving mid-download stalls",
+    "Dual v1 + v2 Signatures: Verified with META-INF/MANIFEST.MF for full compatibility with all Android device package installers",
+    "Direct CDN Storage Resumption: Resolves redirect directly to avoid header drops during Range downloads",
+    "Branch-Aware Universal QR Portal: Mehdawal and Khalilabad operate as completely separate datasets from one global branch switcher",
     "Real Seat Counts: Khalilabad = 72 single-hall seats (K01–K72), Mehdawal = 65 single-hall seats (M01–M65)",
-    "Anti-Cross-Branch Enforcement: Backend blocks cross-branch seat assignments and attendance check-ins with a clear error message"
+    "Anti-Cross-Branch Enforcement: Backend blocks cross-branch seat assignments and attendance check-ins"
   ],
   "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.1/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.1/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.1/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

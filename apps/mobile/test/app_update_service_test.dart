@@ -6,7 +6,7 @@ void main() {
     test('AppUpdateInfo correctly parses manifest JSON', () {
       final json = {
         'version': '2.3.1',
-        'buildNumber': 35,
+        'buildNumber': 2035,
         'releaseDate': '24 Sep 2026',
         'title': 'Feature Update',
         'releaseNotes': ['Update loop fix', 'Branch-aware portal'],
@@ -19,7 +19,7 @@ void main() {
       final info = AppUpdateInfo.fromJson(json);
 
       expect(info.version, '2.3.1');
-      expect(info.buildNumber, 35);
+      expect(info.buildNumber, 2035);
       expect(info.releaseDate, '24 Sep 2026');
       expect(info.releaseNotes.length, 2);
       expect(info.apkUrl, contains('Chintamani-Library-Release.apk'));
@@ -28,18 +28,18 @@ void main() {
     });
 
     test('Higher build number triggers update, lower or equal does not', () {
-      const currentBuild = AppUpdateService.currentBuildNumber; // 35
+      const currentBuild = AppUpdateService.currentBuildNumber; // 2035
 
-      // Remote has 36 -> update available
-      const newerRemoteBuild = 36;
+      // Remote has 2036 -> update available
+      const newerRemoteBuild = 2036;
       expect(newerRemoteBuild > currentBuild, true);
 
-      // Remote has 35 -> up to date
-      const sameRemoteBuild = 35;
+      // Remote has 2035 -> up to date
+      const sameRemoteBuild = 2035;
       expect(sameRemoteBuild > currentBuild, false);
 
-      // Remote has 34 -> up to date (older)
-      const olderRemoteBuild = 34;
+      // Remote has 2034 -> up to date (older)
+      const olderRemoteBuild = 2034;
       expect(olderRemoteBuild > currentBuild, false);
     });
 

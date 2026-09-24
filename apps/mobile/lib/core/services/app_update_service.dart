@@ -34,7 +34,7 @@ class AppUpdateInfo {
   factory AppUpdateInfo.fromJson(Map<String, dynamic> json) {
     return AppUpdateInfo(
       version: json['version'] as String? ?? '2.3.1',
-      buildNumber: (json['buildNumber'] as num?)?.toInt() ?? 35,
+      buildNumber: (json['buildNumber'] as num?)?.toInt() ?? 2035,
       releaseDate: json['releaseDate'] as String? ?? '',
       title: json['title'] as String? ?? 'New Update Available',
       releaseNotes: (json['releaseNotes'] as List<dynamic>?)
@@ -51,7 +51,7 @@ class AppUpdateInfo {
 
 class AppUpdateService {
   static const currentVersion = '2.3.1';
-  static const currentBuildNumber = 35;
+  static const currentBuildNumber = 2035;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   /// Set to true once we have checked in this process lifetime so that

@@ -320,8 +320,24 @@ class AppUpdateService {
           headers['Range'] = 'bytes=$existingBytes-';
         }
 
+        // Resolve direct CDN storage URL (GitHub 302 -> storage CDN) so Range headers are never dropped
+        String directUrl = url;
+        try {
+          final headRes = await _dio.head(
+            url,
+            options: Options(
+              followRedirects: false,
+              validateStatus: (s) => s != null && s < 400,
+            ),
+          );
+          final loc = headRes.headers.value('location');
+          if (loc != null && loc.isNotEmpty) {
+            directUrl = loc;
+          }
+        } catch (_) {}
+
         final response = await _downloadDio.get<ResponseBody>(
-          url,
+          directUrl,
           options: Options(
             responseType: ResponseType.stream,
             headers: headers,

@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import '../../../routing/route_names.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/chintamani_logo.dart';
+import '../../../core/services/app_update_service.dart';
+import '../../../widgets/app_update_dialog.dart';
 import '../providers/auth_provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -21,6 +23,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   late final AnimationController _pulseController;
   late final AnimationController _rayController;
   late final AnimationController _progressController;
+
+  /// Update info fetched during splash; shown after navigation completes.
+  AppUpdateInfo? _pendingUpdate;
 
   @override
   void initState() {
@@ -44,6 +49,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       duration: const Duration(milliseconds: 3000),
     )..forward();
 
+    // Start silent update check in background (parallel with animation)
+    _silentUpdateCheck();
+
     // Automatically transition after exactly 3 seconds
     Timer(const Duration(milliseconds: 3000), () {
       if (!mounted) return;
@@ -55,7 +63,33 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         // User explicitly signed out: request login password!
         context.go(RouteNames.login);
       }
+      // Show update dialog shortly after landing on the next screen
+      if (_pendingUpdate != null) {
+        final update = _pendingUpdate!;
+        Timer(const Duration(milliseconds: 1200), () {
+          if (mounted) AppUpdateDialog.show(context, update);
+        });
+      }
     });
+  }
+
+  /// Silently fetches version.json in parallel with the splash animation.
+  /// For forceUpdate builds: always shows the dialog, bypassing auto-check setting.
+  Future<void> _silentUpdateCheck() async {
+    try {
+      final service = ref.read(appUpdateServiceProvider);
+      final update = await service.checkForUpdate();
+      if (update == null || !mounted) return;
+      if (update.forceUpdate) {
+        // forceUpdate always prompts — ignore auto-check preference
+        _pendingUpdate = update;
+      } else {
+        final autoCheck = await service.isAutoCheckEnabled();
+        if (autoCheck) _pendingUpdate = update;
+      }
+    } catch (_) {
+      // Silent fail — never block splash
+    }
   }
 
   @override

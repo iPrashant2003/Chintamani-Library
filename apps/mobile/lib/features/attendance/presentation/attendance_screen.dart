@@ -389,17 +389,6 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
           ),
         ),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 70),
-        child: FloatingActionButton.extended(
-          backgroundColor: const Color(0xFFFACC15),
-          foregroundColor: Colors.black,
-          elevation: 4,
-          onPressed: () => _showManualMarkDialog(context),
-          icon: const Icon(Icons.how_to_reg_rounded),
-          label: const Text('Mark Attendance', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-      ),
     );
   }
 

@@ -10,8 +10,11 @@ import '../../../widgets/multicolor_quick_access_bar.dart';
 import '../../../widgets/segmented_metrics_section.dart';
 import '../../../widgets/app_drawer.dart';
 import '../../../core/services/app_update_service.dart';
+import '../../../core/services/system_notification_service.dart';
 import '../../../widgets/app_update_dialog.dart';
 import '../../branch/providers/branch_provider.dart';
+import '../../complaints/data/complaint_repository.dart';
+import '../../enquiries/data/enquiries_repository.dart';
 import '../data/dashboard_repository.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -25,7 +28,44 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkUpdate());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initSystemNotifications();
+      _checkUpdate();
+      _checkAlerts();
+    });
+  }
+
+  Future<void> _initSystemNotifications() async {
+    await SystemNotificationService.instance.requestPermission();
+  }
+
+  Future<void> _checkAlerts() async {
+    try {
+      await Future.delayed(const Duration(seconds: 4));
+      if (!mounted) return;
+
+      final compRepo = ref.read(complaintRepositoryProvider);
+      final complaints = await compRepo.getComplaints(status: 'OPEN', limit: 3);
+      for (final c in complaints) {
+        await SystemNotificationService.instance.notifyComplaint(
+          id: c.id,
+          memberName: c.memberName.isNotEmpty ? c.memberName : 'Library Member',
+          complaintText: '[${c.category}] ${c.description}',
+        );
+      }
+
+      final enqRepo = ref.read(enquiriesRepositoryProvider);
+      final enquiries = await enqRepo.getEnquiries(branchId: 'ALL', status: 'NEW');
+      for (final enq in enquiries.take(2)) {
+        await SystemNotificationService.instance.notifyEnquiry(
+          id: enq.id,
+          name: enq.name,
+          courseOrPhone: enq.phone,
+        );
+      }
+    } catch (e) {
+      debugPrint('[DashboardScreen] _checkAlerts error: $e');
+    }
   }
 
   Future<void> _checkUpdate() async {

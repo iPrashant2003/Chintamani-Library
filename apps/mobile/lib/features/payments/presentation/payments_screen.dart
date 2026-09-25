@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../routing/route_names.dart';
 import '../../../theme/app_colors.dart';
@@ -108,7 +107,15 @@ class PaymentsScreen extends ConsumerWidget {
                     ),
                     const Spacer(),
                     const BranchSwitcher(),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 4),
+                    IconButton(
+                      icon: const Icon(Icons.add_circle_rounded, color: AppColors.goldPrimary, size: 24),
+                      tooltip: 'Record Fee Payment',
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        context.push(RouteNames.recordPayment);
+                      },
+                    ),
                     IconButton(
                       icon: const Icon(Icons.refresh_rounded, color: AppColors.textSecondary, size: 22),
                       onPressed: () {
@@ -449,20 +456,6 @@ class PaymentsScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 70),
-        child: FloatingActionButton.extended(
-          backgroundColor: AppColors.goldPrimary,
-          foregroundColor: Colors.black,
-          elevation: 4,
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            context.push(RouteNames.recordPayment);
-          },
-          icon: const Icon(Icons.add_rounded),
-          label: const Text('Record Fee Payment', style: TextStyle(fontWeight: FontWeight.w900)),
         ),
       ),
     );

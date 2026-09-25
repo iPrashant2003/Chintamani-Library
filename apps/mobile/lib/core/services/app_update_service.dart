@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'database_backup_service.dart';
+import 'system_notification_service.dart';
 
 class AppUpdateInfo {
   final String version;
@@ -50,8 +51,8 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.4.2';
-  static const currentBuildNumber = 2042;
+  static const currentVersion = '2.4.3';
+  static const currentBuildNumber = 2043;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   /// The update info discovered from cloud manifest, if any.
@@ -213,6 +214,10 @@ class AppUpdateService {
           debugPrint('[UpdateService] Remote build: ${info.buildNumber}, Installed: $installedBuildNumber (constant: $currentBuildNumber)');
           if (info.buildNumber > installedBuildNumber) {
             discoveredUpdate = info;
+            SystemNotificationService.instance.notifyUpdateAvailable(
+              version: info.version,
+              title: info.title,
+            );
             return info;
           } else {
             discoveredUpdate = null;

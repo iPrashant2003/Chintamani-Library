@@ -1080,47 +1080,7 @@ class _MemberCardState extends ConsumerState<MemberCard> {
                   ),
                 ),
 
-                const Divider(color: Color(0x1AFFFFFF), height: 1),
 
-                // ── PROMINENT 6 MONTHS HISTORY BUTTON ──
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 2),
-                  child: InkWell(
-                    onTap: _showSixMonthHistoryDialog,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            const Color(0xFFD4AF37).withOpacity(0.22),
-                            const Color(0xFFB89223).withOpacity(0.08),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.45)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.history_toggle_off_rounded, color: Color(0xFFE6CA65), size: 16),
-                          SizedBox(width: 8),
-                          Text(
-                            '6 Months History',
-                            style: TextStyle(
-                              color: Color(0xFFF3E5AB),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                          SizedBox(width: 6),
-                          Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFE6CA65), size: 11),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
 
                 // ── ZONE 3: Dedicated Action Buttons Row (Completely decoupled from parent tap) ──
                 Container(

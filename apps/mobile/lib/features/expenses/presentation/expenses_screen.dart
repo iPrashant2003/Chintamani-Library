@@ -96,17 +96,15 @@ class ExpensesScreen extends ConsumerWidget {
         title: const BranchSwitcher(),
         actions: [
           IconButton(
+            icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.goldPrimary),
+            tooltip: 'Add Expense',
+            onPressed: () => _showAddExpenseDialog(context, ref),
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh, color: AppColors.textPrimary),
             onPressed: () => ref.invalidate(expensesListProvider),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.primaryGreen,
-        foregroundColor: Colors.white,
-        onPressed: () => _showAddExpenseDialog(context, ref),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Expense', style: TextStyle(fontWeight: FontWeight.w600)),
       ),
       body: RefreshIndicator(
         color: AppColors.accentNeon,

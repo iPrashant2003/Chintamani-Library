@@ -1,18 +1,19 @@
 {
-  "version": "2.4.2",
-  "buildNumber": 2042,
+  "version": "2.4.3",
+  "buildNumber": 2043,
   "releaseDate": "26 Sep 2026",
-  "title": "Chintamani Library v2.4.2 — Automated In-App Updates & Cloud Connectivity",
+  "title": "Chintamani Library v2.4.3 — Real-Time Phone Alerts, 4D Graphical Nav & Automated QR Attendance",
   "releaseNotes": [
-    "FEATURE: Seamless In-App Updates — Detects new cloud releases on launch or dashboard and updates in 1-tap",
-    "FEATURE: Added 'Check for Updates' button in main navigation menu",
-    "FIX: Instant sign in with mobile number (9415919277 / 7388389944) or email",
-    "FIX: Eliminated Android Keystore deadlock causing buffering on sign in",
-    "FIX: Multi-CDN update manifest mirrors (JSDelivr + GitHub + Cloud Backend)",
-    "Live Production Cloud Database synchronization with Neon & Render"
+    "FEATURE: Real-Time Phone Status Bar Notifications for Updates, Complaints, Enquiries & Service Requests",
+    "FEATURE: 4D Graphical Bottom Navigation Bar with rich volumetric depth & pinkish-red Members tab",
+    "FEATURE: Automated Student QR Self-Attendance (Students scan branch QR directly; manual admin attendance removed)",
+    "FIX: Corrected Mehdawal branch capacity to 65 seats",
+    "FIX: Removed redundant 6-month history button from member cards (clean action chip preserved)",
+    "FIX: Fixed card text overflow in Library Operations section",
+    "FIX: Removed floating action buttons across More section screens (clean header actions)"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.4.2/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.4.2/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.4.3/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.4.3/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

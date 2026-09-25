@@ -1,4 +1,4 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -126,8 +126,8 @@ class BranchComparisonScreen extends ConsumerWidget {
                       title: 'Today Check-ins',
                       khlValue: '94',
                       khlFraction: 94 / 120,
-                      mhdValue: '68',
-                      mhdFraction: 68 / 120,
+                      mhdValue: '48',
+                      mhdFraction: 48 / 65,
                       accentColor: const Color(0xFF38BDF8),
                     ),
                     _buildCompareBar(

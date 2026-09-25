@@ -512,13 +512,6 @@ class _MaintenanceScreenState extends ConsumerState<MaintenanceScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddTicketDialog(context),
-        backgroundColor: const Color(0xFF00E5BC),
-        foregroundColor: const Color(0xFF06140D),
-        icon: const Icon(Icons.add_rounded, size: 20),
-        label: const Text('Log Issue', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
-      ),
     );
   }
 

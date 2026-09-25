@@ -207,14 +207,6 @@ class PlansScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFFD4AF37),
-        foregroundColor: Colors.black,
-        elevation: 4,
-        onPressed: () => _showAddOrEditPlanDialog(context, ref),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Add Batch / Timing', style: TextStyle(fontWeight: FontWeight.bold)),
-      ),
       body: RefreshIndicator(
         color: const Color(0xFFD4AF37),
         onRefresh: () async => ref.invalidate(plansListProvider),

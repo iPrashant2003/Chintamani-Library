@@ -201,13 +201,13 @@ class MoreScreen extends ConsumerWidget {
               accentColor: const Color(0xFF10B981),
               items: [
                 _MoreItem(
-                  title: 'Everyday Live Attendance Checker',
-                  subtitle: 'Real-time present vs absent roster for all active members',
-                  icon: Icons.fact_check_rounded,
+                  title: 'Student QR Self-Attendance',
+                  subtitle: 'Students scan branch QR pass to self-mark attendance',
+                  icon: Icons.qr_code_scanner_rounded,
                   icon3d: Icon3DType.attendance,
-                  badge: 'LIVE ROSTER',
+                  badge: 'SELF-SCAN',
                   color: const Color(0xFF10B981),
-                  route: RouteNames.attendanceChecker,
+                  route: RouteNames.universalQr,
                 ),
                 _MoreItem(
                   title: '9 Lockers Vault',
@@ -225,14 +225,6 @@ class MoreScreen extends ConsumerWidget {
                   badge: 'EDITABLE',
                   color: const Color(0xFF3B82F6),
                   route: RouteNames.plans,
-                ),
-                _MoreItem(
-                  title: 'Smart Attendance Hub',
-                  subtitle: 'Biometric & QR pass scanning for check-ins',
-                  icon: Icons.how_to_reg_rounded,
-                  icon3d: Icon3DType.attendance,
-                  color: const Color(0xFF06B6D4),
-                  route: RouteNames.attendance,
                 ),
               ],
             ),
@@ -447,18 +439,6 @@ class MoreScreen extends ConsumerWidget {
                         },
                         leading: Builder(
                           builder: (context) {
-                            if (item.customIcon != null) {
-                              return Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: item.color.withValues(alpha: 0.14),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: item.color.withValues(alpha: 0.35), width: 0.8),
-                                ),
-                                child: Center(child: item.customIcon),
-                              );
-                            }
                             if (item.icon3d != null) {
                               return Icon3D(type: item.icon3d!, size: 36);
                             }
@@ -476,12 +456,16 @@ class MoreScreen extends ConsumerWidget {
                         ),
                         title: Row(
                           children: [
-                            Text(
-                              item.title,
-                              style: const TextStyle(
-                                color: AppColors.textPrimary,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
+                            Expanded(
+                              child: Text(
+                                item.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                             if (item.badge != null) ...[
@@ -532,7 +516,6 @@ class _MoreItem {
   final String title;
   final String subtitle;
   final IconData icon;
-  final Widget? customIcon;
   final Icon3DType? icon3d;
   final String? badge;
   final Color color;
@@ -542,7 +525,6 @@ class _MoreItem {
     required this.title,
     required this.subtitle,
     required this.icon,
-    this.customIcon,
     this.icon3d,
     this.badge,
     required this.color,

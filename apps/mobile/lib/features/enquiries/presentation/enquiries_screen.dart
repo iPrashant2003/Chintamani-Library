@@ -74,17 +74,15 @@ class EnquiriesScreen extends ConsumerWidget {
         title: const BranchSwitcher(),
         actions: [
           IconButton(
+            icon: const Icon(Icons.person_add_alt_1_rounded, color: AppColors.goldPrimary),
+            tooltip: 'New Enquiry',
+            onPressed: () => _showAddEnquiryDialog(context, ref),
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh, color: AppColors.textPrimary),
             onPressed: () => ref.invalidate(enquiriesListProvider),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.primaryGreen,
-        foregroundColor: Colors.white,
-        onPressed: () => _showAddEnquiryDialog(context, ref),
-        icon: const Icon(Icons.person_add_alt),
-        label: const Text('New Enquiry', style: TextStyle(fontWeight: FontWeight.w600)),
       ),
       body: RefreshIndicator(
         color: AppColors.accentNeon,

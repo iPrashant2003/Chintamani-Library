@@ -142,9 +142,9 @@ class Branch {
     phone: '+91 9415919277',
     email: 'mehdawal@chintamanilibrary.com',
     openingHours: '06:00 AM – 11:00 PM (Daily)',
-    totalSeats: 120,
-    availableSeats: 34,
-    occupiedSeats: 86,
+    totalSeats: 65,
+    availableSeats: 18,
+    occupiedSeats: 47,
     status: 'Open',
   );
 

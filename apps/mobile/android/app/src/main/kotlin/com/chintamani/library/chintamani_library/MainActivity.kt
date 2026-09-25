@@ -1,9 +1,15 @@
 package com.chintamani.library.chintamani_library
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -12,9 +18,26 @@ import java.io.File
 
 class MainActivity : FlutterFragmentActivity() {
     private val CHANNEL = "com.chintamani.library/app_updater"
+    private val CHANNEL_ID = "cml_alerts"
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelName = "Chintamani Library Alerts"
+            val channelDesc = "Alerts for new updates, complaints, enquiries, and member requests"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel(CHANNEL_ID, channelName, importance).apply {
+                description = channelDesc
+                enableVibration(true)
+                enableLights(true)
+            }
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        createNotificationChannel()
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
@@ -113,6 +136,57 @@ class MainActivity : FlutterFragmentActivity() {
                         }
                     } else {
                         result.error("INVALID_ARGUMENT", "filePath is null", null)
+                    }
+                }
+                "requestNotificationPermission" -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        val hasPerm = checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                        if (!hasPerm) {
+                            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 101)
+                            result.success(false)
+                        } else {
+                            result.success(true)
+                        }
+                    } else {
+                        result.success(true)
+                    }
+                }
+                "showNotification" -> {
+                    try {
+                        val title = call.argument<String>("title") ?: "Chintamani Library"
+                        val body = call.argument<String>("body") ?: ""
+                        val id = call.argument<Int>("id") ?: ((System.currentTimeMillis() % 100000).toInt())
+
+                        val launchIntent = Intent(this, MainActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        }
+                        val pendingFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                        } else {
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                        }
+                        val pendingIntent = PendingIntent.getActivity(this, id, launchIntent, pendingFlags)
+
+                        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setContentTitle(title)
+                            .setContentText(body)
+                            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+                            .setPriority(NotificationCompat.PRIORITY_HIGH)
+                            .setAutoCancel(true)
+                            .setContentIntent(pendingIntent)
+
+                        val notificationManager = NotificationManagerCompat.from(this)
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                            notificationManager.notify(id, builder.build())
+                            result.success(true)
+                        } else {
+                            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 101)
+                            notificationManager.notify(id, builder.build())
+                            result.success(true)
+                        }
+                    } catch (e: Exception) {
+                        result.error("NOTIFICATION_FAILED", e.localizedMessage, null)
                     }
                 }
                 else -> {

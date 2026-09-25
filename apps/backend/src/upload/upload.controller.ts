@@ -32,7 +32,7 @@ export class UploadController {
       },
     }),
   )
-  async uploadProfilePhoto(@UploadedFile() file: Express.Multer.File) {
+  async uploadProfilePhoto(@UploadedFile() file: any) {
     if (!file) throw new BadRequestException('No file provided');
     const url = await this.uploadService.uploadFile(
       file.buffer,
@@ -49,7 +49,7 @@ export class UploadController {
       limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB max
     }),
   )
-  async uploadDocument(@UploadedFile() file: Express.Multer.File) {
+  async uploadDocument(@UploadedFile() file: any) {
     if (!file) throw new BadRequestException('No file provided');
     const url = await this.uploadService.uploadFile(
       file.buffer,
@@ -72,7 +72,7 @@ export class UploadController {
       },
     }),
   )
-  async uploadPaymentScreenshot(@UploadedFile() file: Express.Multer.File) {
+  async uploadPaymentScreenshot(@UploadedFile() file: any) {
     if (!file) throw new BadRequestException('No file provided');
     const url = await this.uploadService.uploadFile(
       file.buffer,

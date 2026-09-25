@@ -151,7 +151,7 @@ export class PortalController {
     }),
   )
   @ApiOperation({ summary: 'Public file upload for registration docs, selfies & payment screenshots' })
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
+  uploadFile(@UploadedFile() file: any) {
     return { url: `/uploads/${file.filename}` };
   }
 }

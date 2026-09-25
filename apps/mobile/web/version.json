@@ -1,19 +1,17 @@
 {
-  "version": "2.3.1",
-  "buildNumber": 2035,
-  "releaseDate": "24 Sep 2026",
-  "title": "Chintamani Library v2.3.1 (Build 2035) — Native Version Fix & Branch-Aware Portal",
+  "version": "2.3.2",
+  "buildNumber": 2036,
+  "releaseDate": "25 Sep 2026",
+  "title": "Chintamani Library v2.3.2 (Build 2036) — Multi-Branch Separation & Portal Sync",
   "releaseNotes": [
-    "Fixed Installation Error: Bumped versionCode to 2035 to ensure Android OS recognizes it as a legitimate upgrade over split builds (resolves 'App not installed as package is invalid')",
-    "Pure 34MB arm64 Standalone Package: Excluded unused architectures to reduce file size from 85 MB to 34 MB, completely resolving mid-download stalls",
-    "Dual v1 + v2 Signatures: Verified with META-INF/MANIFEST.MF for full compatibility with all Android device package installers",
-    "Direct CDN Storage Resumption: Resolves redirect directly to avoid header drops during Range downloads",
-    "Branch-Aware Universal QR Portal: Mehdawal and Khalilabad operate as completely separate datasets from one global branch switcher",
-    "Real Seat Counts: Khalilabad = 72 single-hall seats (K01–K72), Mehdawal = 65 single-hall seats (M01–M65)",
-    "Anti-Cross-Branch Enforcement: Backend blocks cross-branch seat assignments and attendance check-ins"
+    "Branch-Separated Complaints: Dedicated 3-way toggle (All Branches, Khalilabad, Mehdawal) in Complaints screen. Mehdawal complaints show strictly in Mehdawal; Khalilabad in Khalilabad",
+    "Branch-Separated Registrations: Registrations strictly compartmentalized by branch context with dedicated filter badges",
+    "Branch-Aware Members Directory: Active branch switcher and indicators in directory header",
+    "Universal Portal Sync: Fixed branch resolution in backend so student complaints, admissions, and payments cleanly route to the correct branch",
+    "Pure 35MB arm64 Package: Fast, smooth update delivery directly within the app"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.1/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.1/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.2/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.2/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
-  "forceUpdate": true
+  "forceUpdate": false
 }

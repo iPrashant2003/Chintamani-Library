@@ -8,6 +8,7 @@ class ComplaintModel {
   final String description;
   final String status; // OPEN, IN_PROGRESS, RESOLVED, CLOSED
   final String? resolution;
+  final String? assignedTo;
   final String? branchId;
   final String? branchName;
   final String? attachmentUrls;

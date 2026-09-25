@@ -35,11 +35,9 @@ final registrationsListProvider = FutureProvider.family<List<RegistrationModel>,
   },
 );
 
-final pendingRegistrationsCountProvider = FutureProvider.family<int, String?>((ref, branchId) async {
+final pendingRegistrationsCountProvider = FutureProvider<int>((ref) async {
   final repo = ref.read(registrationRepositoryProvider);
-  return repo.getPendingCount(
-    branchId: (branchId == null || branchId == 'ALL' || branchId == 'all') ? null : branchId,
-  );
+  return repo.getPendingCount();
 });
 
 final paymentVerificationsListProvider = FutureProvider.family<List<PaymentVerificationModel>, String>(

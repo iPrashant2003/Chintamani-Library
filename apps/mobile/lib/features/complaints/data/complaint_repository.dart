@@ -34,11 +34,9 @@ final complaintsListProvider = FutureProvider.family<List<ComplaintModel>, Compl
   },
 );
 
-final openComplaintsCountProvider = FutureProvider.family<int, String?>((ref, branchId) async {
+final openComplaintsCountProvider = FutureProvider<int>((ref) async {
   final repo = ref.read(complaintRepositoryProvider);
-  return repo.getOpenCount(
-    branchId: (branchId == null || branchId == 'ALL' || branchId == 'all') ? null : branchId,
-  );
+  return repo.getOpenCount();
 });
 
 class ComplaintRepository {

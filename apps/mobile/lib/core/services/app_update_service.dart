@@ -50,8 +50,8 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.3.1';
-  static const currentBuildNumber = 2035;
+  static const currentVersion = '2.3.2';
+  static const currentBuildNumber = 2036;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   /// Set to true once we have checked in this process lifetime so that

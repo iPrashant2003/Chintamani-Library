@@ -73,7 +73,7 @@ class _DesktopLayout extends StatelessWidget {
   }
 }
 
-// ── Mobile layout: 3D multicolour animated bottom bar ─────────────────────────
+// ── Mobile layout: 3D luxury gold-active bottom bar ─────────────────────────
 class _MobileLayout extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
   final int currentIndex;
@@ -85,42 +85,44 @@ class _MobileLayout extends StatelessWidget {
     required this.onTap,
   });
 
+  // ── Nav items: each with its distinct muted-luxury color ──
+  // Active state: always transitions to luxury gold (per spec §15)
   static const _navItems = [
     _NavItem(
       icon: Icons.grid_view_outlined,
       activeIcon: Icons.grid_view_rounded,
       label: 'Home',
-      color: Color(0xFF38BDF8), // Electric Sky Blue
-      gradient: [Color(0xFF0284C7), Color(0xFF38BDF8)],
+      color: Color(0xFFA78BFA), // Soft Purple
+      gradient: [Color(0xFF7C3AED), Color(0xFFA78BFA)],
     ),
     _NavItem(
       icon: Icons.group_outlined,
       activeIcon: Icons.group_rounded,
       label: 'Members',
-      color: Color(0xFF10B981), // Emerald Green
-      gradient: [Color(0xFF059669), Color(0xFF10B981)],
+      color: Color(0xFF2DD4BF), // Sea Green / Teal
+      gradient: [Color(0xFF0D9488), Color(0xFF2DD4BF)],
     ),
     _NavItem(
       icon: Icons.chair_outlined,
       activeIcon: Icons.chair_rounded,
       label: 'Seats',
-      color: Color(0xFFF59E0B), // Warm Amber
-      gradient: [Color(0xFFD97706), Color(0xFFF59E0B)],
+      color: Color(0xFF60A5FA), // Royal Blue
+      gradient: [Color(0xFF2563EB), Color(0xFF60A5FA)],
     ),
     _NavItem(
       icon: Icons.chat_outlined,
       activeIcon: Icons.chat_rounded,
       label: 'WhatsApp',
-      color: Color(0xFF25D366), // Official WhatsApp Green
-      gradient: [Color(0xFF128C7E), Color(0xFF25D366)],
+      color: Color(0xFF34D399), // Emerald Green
+      gradient: [Color(0xFF059669), Color(0xFF34D399)],
       isWhatsApp: true,
     ),
     _NavItem(
       icon: Icons.apps_outlined,
       activeIcon: Icons.apps_rounded,
       label: 'More',
-      color: Color(0xFFA855F7), // Royal Violet
-      gradient: [Color(0xFF7C3AED), Color(0xFFA855F7)],
+      color: Color(0xFFE8C97A), // Luxury Gold
+      gradient: [Color(0xFFC9A84C), Color(0xFFE8C97A)],
     ),
   ];
 
@@ -133,25 +135,30 @@ class _MobileLayout extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: const Color(0xF7090C14),
+          color: const Color(0xF4060810),
           border: Border(
             top: BorderSide(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: const Color(0xFFC9A84C).withValues(alpha: 0.14),
               width: 0.8,
             ),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.90),
-              blurRadius: 20,
-              offset: const Offset(0, -4),
+              color: Colors.black.withValues(alpha: 0.92),
+              blurRadius: 24,
+              offset: const Offset(0, -6),
+            ),
+            BoxShadow(
+              color: const Color(0xFFC9A84C).withValues(alpha: 0.06),
+              blurRadius: 16,
+              offset: const Offset(0, -2),
             ),
           ],
         ),
         child: SafeArea(
           top: false,
           child: SizedBox(
-            height: 66,
+            height: 68,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: List.generate(_navItems.length, (index) {
@@ -197,7 +204,11 @@ class _BottomNav3DItemState extends State<_BottomNav3DItem> {
     final item = widget.item;
     final isSelected = widget.isSelected;
 
-    final scale = _isPressed ? 0.90 : (isSelected ? 1.05 : 1.0);
+    // Active color is always luxury gold; inactive keeps item's own color
+    const goldActive = Color(0xFFE8C97A);
+    const goldGlow = Color(0xFFC9A84C);
+
+    final scale = _isPressed ? 0.88 : (isSelected ? 1.06 : 1.0);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -209,14 +220,14 @@ class _BottomNav3DItemState extends State<_BottomNav3DItem> {
       onTapCancel: () => setState(() => _isPressed = false),
       child: AnimatedScale(
         scale: scale,
-        duration: const Duration(milliseconds: 180),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutBack,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // 3D Elevated Tile Container with Specular Highlight & Ambient Glow
+            // ── 3D Elevated Container: Gold when active, neutral when inactive ──
             AnimatedContainer(
-              duration: const Duration(milliseconds: 240),
+              duration: const Duration(milliseconds: 260),
               curve: Curves.easeOutCubic,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
               decoration: BoxDecoration(
@@ -226,32 +237,32 @@ class _BottomNav3DItemState extends State<_BottomNav3DItem> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          item.color.withValues(alpha: 0.28),
-                          item.color.withValues(alpha: 0.08),
-                          Colors.black.withValues(alpha: 0.40),
+                          goldGlow.withValues(alpha: 0.32),
+                          goldGlow.withValues(alpha: 0.10),
+                          Colors.black.withValues(alpha: 0.50),
                         ],
                       )
                     : null,
                 border: isSelected
                     ? Border.all(
-                        color: item.color.withValues(alpha: 0.55),
-                        width: 1.2,
+                        color: goldActive.withValues(alpha: 0.60),
+                        width: 1.3,
                       )
                     : null,
                 boxShadow: isSelected
                     ? [
-                        // Ambient multi-colour glow in item's natural colour
+                        // Luxury gold ambient glow (top layer)
                         BoxShadow(
-                          color: item.color.withValues(alpha: 0.35),
-                          blurRadius: 14,
+                          color: goldGlow.withValues(alpha: 0.45),
+                          blurRadius: 18,
                           spreadRadius: 1,
                           offset: const Offset(0, 2),
                         ),
-                        // Bottom drop shadow for 3D elevation
+                        // 3D depth drop shadow (bottom layer)
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.7),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
+                          color: Colors.black.withValues(alpha: 0.75),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
                         ),
                       ]
                     : null,
@@ -260,27 +271,27 @@ class _BottomNav3DItemState extends State<_BottomNav3DItem> {
                   ? WhatsAppLogo(
                       size: 21,
                       color: isSelected
-                          ? const Color(0xFF25D366)
-                          : const Color(0xFF25D366).withValues(alpha: 0.55),
+                          ? goldActive
+                          : item.color.withValues(alpha: 0.55),
                     )
                   : Icon(
                       isSelected ? item.activeIcon : item.icon,
-                      size: 21,
+                      size: 22,
                       color: isSelected
-                          ? item.color
-                          : Colors.white.withValues(alpha: 0.48),
+                          ? goldActive  // ← luxury gold when active
+                          : item.color.withValues(alpha: 0.60),
                     ),
             ),
             const SizedBox(height: 3),
             AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 220),
               style: TextStyle(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
+                fontSize: 9.5,
+                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w500,
                 color: isSelected
-                    ? item.color
-                    : Colors.white.withValues(alpha: 0.55),
-                letterSpacing: isSelected ? 0.2 : 0,
+                    ? goldActive  // ← luxury gold label when active
+                    : Colors.white.withValues(alpha: 0.45),
+                letterSpacing: isSelected ? 0.3 : 0,
               ),
               child: Text(item.label),
             ),
@@ -289,6 +300,7 @@ class _BottomNav3DItemState extends State<_BottomNav3DItem> {
       ),
     );
   }
+
 }
 
 class _NavItem {

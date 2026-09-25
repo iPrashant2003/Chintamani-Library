@@ -15,5 +15,5 @@
   "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.1/Chintamani-Library-Release.apk",
   "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.3.1/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
-  "forceUpdate": true
+  "forceUpdate": false
 }

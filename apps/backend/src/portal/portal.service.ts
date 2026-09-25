@@ -690,15 +690,27 @@ export class PortalService {
       ? await this.prisma.member.findUnique({ where: { id: dto.memberId } })
       : await this.prisma.member.findFirst({ where: { phone: { contains: phone.slice(-10) } } });
 
-    let branchId = dto.branchId || member?.branchId;
-    let tenantId = member?.tenantId;
-
-    if (!branchId || !tenantId) {
-      const defaultBranch = await this.prisma.branch.findFirst();
-      if (!defaultBranch) throw new NotFoundException('Branch not found');
-      branchId = defaultBranch.id;
-      tenantId = defaultBranch.tenantId;
+    // Resolve branch properly (handles stable IDs like 'mehdawal'/'khalilabad' AND db UUIDs)
+    let branchRecord: any = null;
+    const rawBranchId = (dto.branchId || member?.branchId || '').toLowerCase();
+    if (rawBranchId) {
+      branchRecord = await this.prisma.branch.findFirst({
+        where: {
+          OR: [
+            { id: rawBranchId },
+            { name: { contains: rawBranchId.includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
+          ],
+        },
+        include: { tenant: true },
+      });
     }
+    if (!branchRecord) {
+      branchRecord = await this.prisma.branch.findFirst({ include: { tenant: true } });
+    }
+    if (!branchRecord) throw new NotFoundException('Branch not found');
+
+    const branchId = branchRecord.id;
+    const tenantId = member?.tenantId || branchRecord.tenantId;
 
     const complaintId = `CMP-${Math.floor(1000 + Math.random() * 9000)}`;
 
@@ -989,9 +1001,19 @@ export class PortalService {
   }
 
   async submitFeedback(dto: PortalFeedbackDto) {
-    let branch = dto.branchId
-      ? await this.prisma.branch.findUnique({ where: { id: dto.branchId } })
-      : await this.prisma.branch.findFirst();
+    let branch: any = null;
+    if (dto.branchId) {
+      const bLower = dto.branchId.toLowerCase();
+      branch = await this.prisma.branch.findFirst({
+        where: {
+          OR: [
+            { id: dto.branchId },
+            { name: { contains: bLower.includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
+          ],
+        },
+      });
+    }
+    if (!branch) branch = await this.prisma.branch.findFirst();
 
     if (!branch) {
       throw new NotFoundException('Library branch not found');

@@ -6,8 +6,12 @@ import '../data/complaint_repository.dart';
 import '../domain/complaint_model.dart';
 import 'complaint_detail_screen.dart';
 
+import 'package:flutter/services.dart';
+import '../../branch/providers/branch_provider.dart';
+
 final selectedComplaintStatusProvider = StateProvider<String>((ref) => 'OPEN');
 final selectedComplaintCategoryProvider = StateProvider<String>((ref) => 'ALL');
+final selectedComplaintBranchProvider = StateProvider<String>((ref) => 'ALL');
 
 class ComplaintsScreen extends ConsumerStatefulWidget {
   const ComplaintsScreen({super.key});
@@ -21,6 +25,16 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
   String _searchQuery = '';
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final active = ref.read(activeBranchProvider);
+      final key = active.shortName.toLowerCase();
+      ref.read(selectedComplaintBranchProvider.notifier).state = key;
+    });
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
@@ -30,7 +44,10 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
   Widget build(BuildContext context) {
     final status = ref.watch(selectedComplaintStatusProvider);
     final category = ref.watch(selectedComplaintCategoryProvider);
-    final complaintsAsync = ref.watch(complaintsListProvider(status));
+    final branchFilter = ref.watch(selectedComplaintBranchProvider);
+    final complaintsAsync = ref.watch(complaintsListProvider(
+      ComplaintFilterArgs(status: status, branchId: branchFilter),
+    ));
 
     return Scaffold(
       backgroundColor: AppColors.bgDark,
@@ -55,9 +72,22 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(135),
+          preferredSize: const Size.fromHeight(175),
           child: Column(
             children: [
+              // Branch Filter Bar (All / Khalilabad / Mehdawal)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+                child: Row(
+                  children: [
+                    _buildBranchButton('ALL', '🏛️ All Branches', const Color(0xFFA855F7)),
+                    const SizedBox(width: 8),
+                    _buildBranchButton('khalilabad', '📍 Khalilabad', const Color(0xFFD4AF37)),
+                    const SizedBox(width: 8),
+                    _buildBranchButton('mehdawal', '📍 Mehdawal', const Color(0xFF14B8A6)),
+                  ],
+                ),
+              ),
               // Search input
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
@@ -202,6 +232,41 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
     );
   }
 
+  Widget _buildBranchButton(String key, String label, Color color) {
+    final current = ref.watch(selectedComplaintBranchProvider);
+    final isSelected = current == key;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          ref.read(selectedComplaintBranchProvider.notifier).state = key;
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? color.withOpacity(0.20) : AppColors.bgCard,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected ? color : const Color(0x22FFFFFF),
+              width: isSelected ? 1.4 : 0.8,
+            ),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? color : AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildTabButton(String tabValue, String label, Color accentColor) {
     final currentStatus = ref.watch(selectedComplaintStatusProvider);
     final isSelected = currentStatus == tabValue;
@@ -278,6 +343,10 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
         statusColor = const Color(0xFFDC2626);
     }
 
+    final isMehdawal = (item.branchName?.toLowerCase().contains('mehda') ?? false) ||
+                       (item.branchId?.toLowerCase().contains('mehda') ?? false);
+    final branchDisplayName = item.branchName ?? (isMehdawal ? 'Mehdawal' : 'Khalilabad');
+
     final dateStr = DateFormat('dd MMM yyyy, hh:mm a').format(item.createdAt);
 
     return GestureDetector(
@@ -325,7 +394,27 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: isMehdawal ? const Color(0x2214B8A6) : const Color(0x22D4AF37),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: isMehdawal ? const Color(0xFF14B8A6) : const Color(0xFFD4AF37),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        branchDisplayName,
+                        style: TextStyle(
+                          color: isMehdawal ? const Color(0xFF2DD4BF) : const Color(0xFFFDE68A),
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                       decoration: BoxDecoration(

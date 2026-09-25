@@ -8,16 +8,38 @@ final registrationRepositoryProvider = Provider<RegistrationRepository>((ref) {
   return RegistrationRepository(ref.read(apiClientProvider));
 });
 
-final registrationsListProvider = FutureProvider.family<List<RegistrationModel>, String>(
-  (ref, status) async {
+class RegistrationFilterArgs {
+  final String status;
+  final String? branchId;
+  const RegistrationFilterArgs({required this.status, this.branchId});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RegistrationFilterArgs &&
+          runtimeType == other.runtimeType &&
+          status == other.status &&
+          branchId == other.branchId;
+
+  @override
+  int get hashCode => status.hashCode ^ (branchId?.hashCode ?? 0);
+}
+
+final registrationsListProvider = FutureProvider.family<List<RegistrationModel>, RegistrationFilterArgs>(
+  (ref, args) async {
     final repo = ref.read(registrationRepositoryProvider);
-    return repo.getRegistrations(status: status);
+    return repo.getRegistrations(
+      status: args.status,
+      branchId: (args.branchId == null || args.branchId == 'ALL' || args.branchId == 'all') ? null : args.branchId,
+    );
   },
 );
 
-final pendingRegistrationsCountProvider = FutureProvider<int>((ref) async {
+final pendingRegistrationsCountProvider = FutureProvider.family<int, String?>((ref, branchId) async {
   final repo = ref.read(registrationRepositoryProvider);
-  return repo.getPendingCount();
+  return repo.getPendingCount(
+    branchId: (branchId == null || branchId == 'ALL' || branchId == 'all') ? null : branchId,
+  );
 });
 
 final paymentVerificationsListProvider = FutureProvider.family<List<PaymentVerificationModel>, String>(
@@ -63,9 +85,14 @@ class RegistrationRepository {
     }
   }
 
-  Future<int> getPendingCount() async {
+  Future<int> getPendingCount({String? branchId}) async {
     try {
-      final response = await _apiClient.dio.get('${ApiEndpoints.registrations}/pending-count');
+      final response = await _apiClient.dio.get(
+        '${ApiEndpoints.registrations}/pending-count',
+        queryParameters: {
+          if (branchId != null) 'branchId': branchId,
+        },
+      );
       final data = response.data;
       if (data is int) return data;
       if (data is Map) return (data['count'] as int? ?? data as int? ?? 0);

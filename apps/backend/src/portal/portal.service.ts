@@ -10,6 +10,7 @@ import {
   PortalAttendanceDto,
 } from './dto/portal.dto';
 import * as crypto from 'crypto';
+import { resolveBranchInfo } from '../common/utils/branch-resolver.util';
 
 @Injectable()
 export class PortalService {
@@ -172,15 +173,10 @@ export class PortalService {
 
   async getLibraryInfo(branchId?: string) {
     let branch: any = null;
-    if (branchId) {
-      const bLower = branchId.toLowerCase();
-      branch = await this.prisma.branch.findFirst({
-        where: {
-          OR: [
-            { id: branchId },
-            { name: { contains: bLower.includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
-          ],
-        },
+    const branchInfo = await resolveBranchInfo(this.prisma, branchId);
+    if (branchInfo) {
+      branch = await this.prisma.branch.findUnique({
+        where: { id: branchInfo.id },
         include: { tenant: true },
       });
     }
@@ -222,11 +218,9 @@ export class PortalService {
 
   async getPlans(branchId?: string) {
     let targetBranchId = branchId;
-    if (branchId && (branchId.toLowerCase().includes('mehda') || branchId.toLowerCase().includes('khalil'))) {
-      const b = await this.prisma.branch.findFirst({
-        where: { name: { contains: branchId.toLowerCase().includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
-      });
-      if (b) targetBranchId = b.id;
+    if (branchId) {
+      const branchInfo = await resolveBranchInfo(this.prisma, branchId);
+      if (branchInfo) targetBranchId = branchInfo.id;
     }
 
     const where: any = { isActive: true };
@@ -259,15 +253,10 @@ export class PortalService {
 
   async getSeatStats(branchId?: string) {
     let branch: any = null;
-    if (branchId) {
-      const bLower = branchId.toLowerCase();
-      branch = await this.prisma.branch.findFirst({
-        where: {
-          OR: [
-            { id: branchId },
-            { name: { contains: bLower.includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
-          ],
-        },
+    const branchInfo = await resolveBranchInfo(this.prisma, branchId);
+    if (branchInfo) {
+      branch = await this.prisma.branch.findUnique({
+        where: { id: branchInfo.id },
         include: { tenant: true },
       });
     }
@@ -340,16 +329,11 @@ export class PortalService {
     }
 
     // Resolve Branch & Tenant strictly (Mehdawal vs Khalilabad)
-    const branchQuery = (dto.branch || dto.branchId || '').toLowerCase();
+    const branchInfo = await resolveBranchInfo(this.prisma, dto.branch || dto.branchId);
     let branch: any = null;
-    if (branchQuery) {
-      branch = await this.prisma.branch.findFirst({
-        where: {
-          OR: [
-            ...(dto.branchId ? [{ id: dto.branchId }] : []),
-            { name: { contains: branchQuery.includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
-          ],
-        },
+    if (branchInfo) {
+      branch = await this.prisma.branch.findUnique({
+        where: { id: branchInfo.id },
         include: { tenant: true },
       });
     }
@@ -606,8 +590,14 @@ export class PortalService {
           include: { branch: true },
         });
 
-    let branchId = member?.branchId || dto.branchId;
-    let tenantId = member?.tenantId;
+    let targetBranch: any = null;
+    const branchInfo = await resolveBranchInfo(this.prisma, dto.branchId || member?.branchId);
+    if (branchInfo) {
+      targetBranch = await this.prisma.branch.findUnique({ where: { id: branchInfo.id } });
+    }
+
+    let branchId = targetBranch?.id || member?.branchId;
+    let tenantId = targetBranch?.tenantId || member?.tenantId;
 
     if (!branchId || !tenantId) {
       const defaultBranch = await this.prisma.branch.findFirst();
@@ -692,15 +682,10 @@ export class PortalService {
 
     // Resolve branch properly (handles stable IDs like 'mehdawal'/'khalilabad' AND db UUIDs)
     let branchRecord: any = null;
-    const rawBranchId = (dto.branchId || member?.branchId || '').toLowerCase();
-    if (rawBranchId) {
-      branchRecord = await this.prisma.branch.findFirst({
-        where: {
-          OR: [
-            { id: rawBranchId },
-            { name: { contains: rawBranchId.includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
-          ],
-        },
+    const branchInfo = await resolveBranchInfo(this.prisma, dto.branchId || member?.branchId);
+    if (branchInfo) {
+      branchRecord = await this.prisma.branch.findUnique({
+        where: { id: branchInfo.id },
         include: { tenant: true },
       });
     }
@@ -1002,16 +987,9 @@ export class PortalService {
 
   async submitFeedback(dto: PortalFeedbackDto) {
     let branch: any = null;
-    if (dto.branchId) {
-      const bLower = dto.branchId.toLowerCase();
-      branch = await this.prisma.branch.findFirst({
-        where: {
-          OR: [
-            { id: dto.branchId },
-            { name: { contains: bLower.includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
-          ],
-        },
-      });
+    const branchInfo = await resolveBranchInfo(this.prisma, dto.branchId);
+    if (branchInfo) {
+      branch = await this.prisma.branch.findUnique({ where: { id: branchInfo.id } });
     }
     if (!branch) branch = await this.prisma.branch.findFirst();
 
@@ -1075,15 +1053,10 @@ export class PortalService {
 
   async getSeatsByBatch(batch?: string, timing?: string, branchId?: string) {
     let branch: any = null;
-    if (branchId) {
-      const bLower = branchId.toLowerCase();
-      branch = await this.prisma.branch.findFirst({
-        where: {
-          OR: [
-            { id: branchId },
-            { name: { contains: bLower.includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
-          ],
-        },
+    const branchInfo = await resolveBranchInfo(this.prisma, branchId);
+    if (branchInfo) {
+      branch = await this.prisma.branch.findUnique({
+        where: { id: branchInfo.id },
         include: { tenant: true },
       });
     }
@@ -1139,15 +1112,12 @@ export class PortalService {
     // Resolve branch context strictly
     let targetBranch: any = null;
     if (dto.branchId) {
-      const bLower = dto.branchId.toLowerCase();
-      targetBranch = await this.prisma.branch.findFirst({
-        where: {
-          OR: [
-            { id: dto.branchId },
-            { name: { contains: bLower.includes('mehda') ? 'Mehdawal' : 'Khalilabad', mode: 'insensitive' } },
-          ],
-        },
-      });
+      const branchInfo = await resolveBranchInfo(this.prisma, dto.branchId);
+      if (branchInfo) {
+        targetBranch = await this.prisma.branch.findUnique({
+          where: { id: branchInfo.id },
+        });
+      }
     }
 
     const digits = raw.replace(/[^\d]/g, '');

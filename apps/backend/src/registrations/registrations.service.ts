@@ -6,6 +6,7 @@ import {
   RejectRegistrationDto,
   AssignSeatDto,
 } from './dto/registrations.dto';
+import { resolveBranchInfo } from '../common/utils/branch-resolver.util';
 
 @Injectable()
 export class RegistrationsService {
@@ -25,8 +26,13 @@ export class RegistrationsService {
     if (status && status !== 'ALL') {
       where.status = status;
     }
-    if (branchId) {
-      where.branchId = branchId;
+    if (branchId && branchId !== 'ALL' && branchId !== 'all') {
+      const branchInfo = await resolveBranchInfo(this.prisma, branchId);
+      if (branchInfo) {
+        where.branchId = { in: branchInfo.allIds };
+      } else {
+        where.branchId = branchId;
+      }
     }
     if (search) {
       where.OR = [
@@ -354,7 +360,14 @@ export class RegistrationsService {
 
   async getPendingCount(branchId?: string) {
     const where: any = { status: 'PENDING' };
-    if (branchId) where.branchId = branchId;
+    if (branchId && branchId !== 'ALL' && branchId !== 'all') {
+      const branchInfo = await resolveBranchInfo(this.prisma, branchId);
+      if (branchInfo) {
+        where.branchId = { in: branchInfo.allIds };
+      } else {
+        where.branchId = branchId;
+      }
+    }
     return this.prisma.memberRegistration.count({ where });
   }
 }

@@ -58,8 +58,10 @@ class _SwipeableBranchCardState extends ConsumerState<SwipeableBranchCard>
     super.dispose();
   }
 
-  int _branchIndex(Branch b) =>
-      b.id == Branch.khalilabadBranch.id ? 0 : 1;
+  int _branchIndex(Branch b) {
+    final name = '${b.shortName} ${b.name} ${b.id}'.toLowerCase();
+    return (name.contains('khalil') || name.contains('khl')) ? 0 : 1;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,8 +77,20 @@ class _SwipeableBranchCardState extends ConsumerState<SwipeableBranchCard>
             controller: _pageController,
             onPageChanged: (idx) {
               HapticFeedback.mediumImpact();
-              final newBranch = _branches[idx].branch;
-              ref.read(activeBranchProvider.notifier).state = newBranch;
+              final isMehdawal = idx == 1;
+              final userBranches = ref.read(userBranchesProvider).value ?? [];
+              Branch target = _branches[idx].branch;
+
+              if (userBranches.isNotEmpty) {
+                target = userBranches.firstWhere(
+                  (b) {
+                    final bName = '${b.shortName} ${b.name}'.toLowerCase();
+                    return isMehdawal ? bName.contains('mehda') : bName.contains('khalil');
+                  },
+                  orElse: () => _branches[idx].branch,
+                );
+              }
+              ref.read(activeBranchProvider.notifier).state = target;
 
               // Light mode toast notification
               ScaffoldMessenger.of(context).hideCurrentSnackBar();

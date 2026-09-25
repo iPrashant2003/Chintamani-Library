@@ -7,16 +7,38 @@ final complaintRepositoryProvider = Provider<ComplaintRepository>((ref) {
   return ComplaintRepository(ref.read(apiClientProvider));
 });
 
-final complaintsListProvider = FutureProvider.family<List<ComplaintModel>, String>(
-  (ref, status) async {
+class ComplaintFilterArgs {
+  final String status;
+  final String? branchId;
+  const ComplaintFilterArgs({required this.status, this.branchId});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ComplaintFilterArgs &&
+          runtimeType == other.runtimeType &&
+          status == other.status &&
+          branchId == other.branchId;
+
+  @override
+  int get hashCode => status.hashCode ^ (branchId?.hashCode ?? 0);
+}
+
+final complaintsListProvider = FutureProvider.family<List<ComplaintModel>, ComplaintFilterArgs>(
+  (ref, args) async {
     final repo = ref.read(complaintRepositoryProvider);
-    return repo.getComplaints(status: status);
+    return repo.getComplaints(
+      status: args.status,
+      branchId: (args.branchId == null || args.branchId == 'ALL' || args.branchId == 'all') ? null : args.branchId,
+    );
   },
 );
 
-final openComplaintsCountProvider = FutureProvider<int>((ref) async {
+final openComplaintsCountProvider = FutureProvider.family<int, String?>((ref, branchId) async {
   final repo = ref.read(complaintRepositoryProvider);
-  return repo.getOpenCount();
+  return repo.getOpenCount(
+    branchId: (branchId == null || branchId == 'ALL' || branchId == 'all') ? null : branchId,
+  );
 });
 
 class ComplaintRepository {
@@ -52,9 +74,14 @@ class ComplaintRepository {
     }
   }
 
-  Future<int> getOpenCount() async {
+  Future<int> getOpenCount({String? branchId}) async {
     try {
-      final response = await _apiClient.dio.get('${ApiEndpoints.complaints}/open-count');
+      final response = await _apiClient.dio.get(
+        '${ApiEndpoints.complaints}/open-count',
+        queryParameters: {
+          if (branchId != null) 'branchId': branchId,
+        },
+      );
       final data = response.data;
       if (data is int) return data;
       if (data is Map) return data['count'] as int? ?? 0;

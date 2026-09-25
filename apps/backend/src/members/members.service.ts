@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { QueryMembersDto } from './dto/query-members.dto';
+import { resolveBranchInfo } from '../common/utils/branch-resolver.util';
 
 @Injectable()
 export class MembersService {
@@ -15,15 +16,20 @@ export class MembersService {
   async create(user: any, createMemberDto: CreateMemberDto) {
     let tenantId = user?.tenantId;
     let tenantCode = 'LIB';
+    let resolvedBranchId = createMemberDto.branchId;
 
     if (createMemberDto.branchId) {
-      const branch = await this.prisma.branch.findUnique({
-        where: { id: createMemberDto.branchId },
-        include: { tenant: true },
-      });
-      if (branch) {
-        tenantId = branch.tenantId;
-        tenantCode = branch.tenant?.code || 'LIB';
+      const branchInfo = await resolveBranchInfo(this.prisma, createMemberDto.branchId, tenantId);
+      if (branchInfo) {
+        resolvedBranchId = branchInfo.id;
+        const branch = await this.prisma.branch.findUnique({
+          where: { id: branchInfo.id },
+          include: { tenant: true },
+        });
+        if (branch) {
+          tenantId = branch.tenantId;
+          tenantCode = branch.tenant?.code || 'LIB';
+        }
       }
     }
 
@@ -54,7 +60,7 @@ export class MembersService {
         dob: createMemberDto.dob ? new Date(createMemberDto.dob) : null,
         address: createMemberDto.address,
         academicInfo: JSON.stringify(academicData),
-        branchId: createMemberDto.branchId,
+        branchId: resolvedBranchId,
         isActive: true,
       },
     });
@@ -68,7 +74,14 @@ export class MembersService {
 
     const where: any = {};
     if (user?.tenantId) where.tenantId = user.tenantId;
-    if (branchId) where.branchId = branchId;
+    if (branchId && branchId !== 'ALL' && branchId !== 'all') {
+      const branchInfo = await resolveBranchInfo(this.prisma, branchId, user?.tenantId);
+      if (branchInfo) {
+        where.branchId = { in: branchInfo.allIds };
+      } else {
+        where.branchId = branchId;
+      }
+    }
     if (status === 'active') where.isActive = true;
     if (status === 'inactive') where.isActive = false;
     if (search) {

@@ -13,6 +13,7 @@ class RegistrationModel {
   final String status; // PENDING, APPROVED, REJECTED
   final String? rejectionReason;
   final String? reservedSeatNumber;
+  final String? branchId;
   final String? branchName;
   final DateTime submittedAt;
   final DateTime? reviewedAt;
@@ -32,6 +33,7 @@ class RegistrationModel {
     required this.status,
     this.rejectionReason,
     this.reservedSeatNumber,
+    this.branchId,
     this.branchName,
     required this.submittedAt,
     this.reviewedAt,
@@ -53,6 +55,7 @@ class RegistrationModel {
       status: json['status'] as String? ?? 'PENDING',
       rejectionReason: json['rejectionReason'] as String?,
       reservedSeatNumber: json['reservedSeat']?['seatNumber'] as String?,
+      branchId: json['branchId'] as String? ?? json['branch']?['id'] as String?,
       branchName: json['branch']?['name'] as String?,
       submittedAt: DateTime.tryParse(json['submittedAt'] as String? ?? '') ?? DateTime.now(),
       reviewedAt: json['reviewedAt'] != null ? DateTime.tryParse(json['reviewedAt'] as String) : null,

@@ -12,6 +12,9 @@ import '../../../widgets/error_state.dart';
 import '../data/member_repository.dart';
 import 'widgets/member_card.dart';
 
+import '../../branch/domain/branch_model.dart';
+import '../../branch/providers/branch_provider.dart';
+
 // Sort options
 enum MemberSortOption { nameAZ, nameZA, newest, expiringSoon }
 
@@ -59,6 +62,8 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final activeBranch = ref.watch(activeBranchProvider);
+    final isMehdawal = activeBranch.shortName.toLowerCase().contains('mehda');
     final filter = ref.watch(memberFilterProvider);
     final membersAsync = ref.watch(membersListProvider);
     final statsAsync = ref.watch(memberStatsProvider);
@@ -95,14 +100,48 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
                       },
                     ),
                     const SizedBox(width: 4),
-                    const Text(
-                      'Members',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.3,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Members',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            HapticFeedback.mediumImpact();
+                            final isKhl = activeBranch.shortName.toLowerCase().contains('khalil');
+                            ref.read(activeBranchProvider.notifier).state =
+                                isKhl ? Branch.mehdawalBranch : Branch.khalilabadBranch;
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.location_on_rounded,
+                                size: 11,
+                                color: isMehdawal ? const Color(0xFF2DD4BF) : AppColors.goldPrimary,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                '${activeBranch.shortName} Campus',
+                                style: TextStyle(
+                                  color: isMehdawal ? const Color(0xFF2DD4BF) : AppColors.goldLight,
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(width: 3),
+                              const Icon(Icons.swap_horiz_rounded, size: 12, color: AppColors.textTertiary),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const Spacer(),
                     // Sort Icon

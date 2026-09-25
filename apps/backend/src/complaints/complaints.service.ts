@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { QueryComplaintsDto, UpdateComplaintStatusDto } from './dto/complaints.dto';
+import { resolveBranchInfo } from '../common/utils/branch-resolver.util';
 
 @Injectable()
 export class ComplaintsService {
@@ -19,8 +20,13 @@ export class ComplaintsService {
     if (category) {
       where.category = category.toUpperCase();
     }
-    if (branchId) {
-      where.branchId = branchId;
+    if (branchId && branchId !== 'ALL' && branchId !== 'all') {
+      const branchInfo = await resolveBranchInfo(this.prisma, branchId);
+      if (branchInfo) {
+        where.branchId = { in: branchInfo.allIds };
+      } else {
+        where.branchId = branchId;
+      }
     }
     if (search) {
       where.OR = [
@@ -119,7 +125,14 @@ export class ComplaintsService {
 
   async getOpenCount(branchId?: string) {
     const where: any = { status: { in: ['OPEN', 'IN_PROGRESS'] } };
-    if (branchId) where.branchId = branchId;
+    if (branchId && branchId !== 'ALL' && branchId !== 'all') {
+      const branchInfo = await resolveBranchInfo(this.prisma, branchId);
+      if (branchInfo) {
+        where.branchId = { in: branchInfo.allIds };
+      } else {
+        where.branchId = branchId;
+      }
+    }
     return this.prisma.complaint.count({ where });
   }
 }

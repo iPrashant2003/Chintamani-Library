@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
-import '../../../routing/route_names.dart';
 import '../data/registration_repository.dart';
 import '../domain/registration_model.dart';
 import 'registration_detail_screen.dart';
 
+import 'package:flutter/services.dart';
+import '../../branch/providers/branch_provider.dart';
+
 final selectedRegistrationStatusProvider = StateProvider<String>((ref) => 'PENDING');
+final selectedRegistrationBranchProvider = StateProvider<String>((ref) => 'ALL');
 
 class RegistrationsScreen extends ConsumerStatefulWidget {
   const RegistrationsScreen({super.key});
@@ -22,6 +24,16 @@ class _RegistrationsScreenState extends ConsumerState<RegistrationsScreen> {
   String _searchQuery = '';
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final active = ref.read(activeBranchProvider);
+      final key = active.shortName.toLowerCase();
+      ref.read(selectedRegistrationBranchProvider.notifier).state = key;
+    });
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
@@ -30,7 +42,10 @@ class _RegistrationsScreenState extends ConsumerState<RegistrationsScreen> {
   @override
   Widget build(BuildContext context) {
     final status = ref.watch(selectedRegistrationStatusProvider);
-    final registrationsAsync = ref.watch(registrationsListProvider(status));
+    final branchFilter = ref.watch(selectedRegistrationBranchProvider);
+    final registrationsAsync = ref.watch(registrationsListProvider(
+      RegistrationFilterArgs(status: status, branchId: branchFilter),
+    ));
 
     return Scaffold(
       backgroundColor: AppColors.bgDark,
@@ -55,9 +70,22 @@ class _RegistrationsScreenState extends ConsumerState<RegistrationsScreen> {
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(105),
+          preferredSize: const Size.fromHeight(148),
           child: Column(
             children: [
+              // Branch Filter Bar (All / Khalilabad / Mehdawal)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+                child: Row(
+                  children: [
+                    _buildBranchButton('ALL', '🏛️ All Branches', const Color(0xFFA855F7)),
+                    const SizedBox(width: 8),
+                    _buildBranchButton('khalilabad', '📍 Khalilabad', const Color(0xFFD4AF37)),
+                    const SizedBox(width: 8),
+                    _buildBranchButton('mehdawal', '📍 Mehdawal', const Color(0xFF14B8A6)),
+                  ],
+                ),
+              ),
               // Search Bar
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -187,6 +215,41 @@ class _RegistrationsScreenState extends ConsumerState<RegistrationsScreen> {
     );
   }
 
+  Widget _buildBranchButton(String key, String label, Color color) {
+    final current = ref.watch(selectedRegistrationBranchProvider);
+    final isSelected = current == key;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          ref.read(selectedRegistrationBranchProvider.notifier).state = key;
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? color.withOpacity(0.20) : AppColors.bgCard,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected ? color : const Color(0x22FFFFFF),
+              width: isSelected ? 1.4 : 0.8,
+            ),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? color : AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildTabButton(String tabValue, String label, Color accentColor) {
     final currentStatus = ref.watch(selectedRegistrationStatusProvider);
     final isSelected = currentStatus == tabValue;
@@ -233,6 +296,10 @@ class _RegistrationsScreenState extends ConsumerState<RegistrationsScreen> {
         statusColor = const Color(0xFFD97706);
     }
 
+    final isMehdawal = (item.branchName?.toLowerCase().contains('mehda') ?? false) ||
+                       (item.branchId?.toLowerCase().contains('mehda') ?? false);
+    final branchDisplayName = item.branchName ?? (isMehdawal ? 'Mehdawal' : 'Khalilabad');
+
     final dateStr = DateFormat('dd MMM yyyy, hh:mm a').format(item.submittedAt);
 
     return GestureDetector(
@@ -258,26 +325,50 @@ class _RegistrationsScreenState extends ConsumerState<RegistrationsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Row: App ID + Status Badge
+            // Top Row: App ID + Branch Badge + Status Badge
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppColors.goldPrimary.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: AppColors.goldPrimary.withOpacity(0.3), width: 0.8),
-                  ),
-                  child: Text(
-                    item.applicationId,
-                    style: const TextStyle(
-                      color: AppColors.goldLight,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      fontFamily: 'monospace',
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.goldPrimary.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: AppColors.goldPrimary.withOpacity(0.3), width: 0.8),
+                      ),
+                      child: Text(
+                        item.applicationId,
+                        style: const TextStyle(
+                          color: AppColors.goldLight,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: isMehdawal ? const Color(0x2214B8A6) : const Color(0x22D4AF37),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: isMehdawal ? const Color(0xFF14B8A6) : const Color(0xFFD4AF37),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        branchDisplayName,
+                        style: TextStyle(
+                          color: isMehdawal ? const Color(0xFF2DD4BF) : const Color(0xFFFDE68A),
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

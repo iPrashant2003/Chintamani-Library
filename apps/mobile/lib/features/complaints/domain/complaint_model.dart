@@ -8,7 +8,7 @@ class ComplaintModel {
   final String description;
   final String status; // OPEN, IN_PROGRESS, RESOLVED, CLOSED
   final String? resolution;
-  final String? assignedTo;
+  final String? branchId;
   final String? branchName;
   final String? attachmentUrls;
   final DateTime createdAt;
@@ -25,6 +25,7 @@ class ComplaintModel {
     required this.status,
     this.resolution,
     this.assignedTo,
+    this.branchId,
     this.branchName,
     this.attachmentUrls,
     required this.createdAt,
@@ -43,6 +44,7 @@ class ComplaintModel {
       status: json['status'] as String? ?? 'OPEN',
       resolution: json['resolution'] as String?,
       assignedTo: json['assignedTo'] as String?,
+      branchId: json['branchId'] as String? ?? json['branch']?['id'] as String?,
       branchName: json['branch']?['name'] as String?,
       attachmentUrls: json['attachmentUrls'] as String?,
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),

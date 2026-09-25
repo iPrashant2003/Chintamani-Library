@@ -1,22 +1,4 @@
 import 'dotenv/config';
-import { execSync } from 'child_process';
-import * as os from 'os';
-
-// Auto-resolve WSL PostgreSQL IP on Windows if 127.0.0.1 is specified
-if (
-  os.platform() === 'win32' &&
-  process.env.DATABASE_URL &&
-  (process.env.DATABASE_URL.includes('127.0.0.1') || process.env.DATABASE_URL.includes('localhost'))
-) {
-  try {
-    const wslIp = execSync('wsl hostname -I', { encoding: 'utf8', timeout: 3000 }).trim().split(/\s+/)[0];
-    if (wslIp && /^(\d{1,3}\.){3}\d{1,3}$/.test(wslIp)) {
-      process.env.DATABASE_URL = process.env.DATABASE_URL.replace('127.0.0.1', wslIp).replace('localhost', wslIp);
-      console.log(`[Database] Auto-resolved WSL PostgreSQL on Windows: ${wslIp}:5432`);
-    }
-  } catch (_) {}
-}
-
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
@@ -50,13 +32,9 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(new TransformInterceptor());
 
-  // Serve static assets from public folder
+  // Serve static assets from public folder (portal HTML, QR images etc.)
   const publicPath = join(process.cwd(), 'public');
   app.useStaticAssets(publicPath);
-
-  // Serve uploaded files (photos, documents, payment screenshots)
-  const uploadsPath = join(process.cwd(), 'uploads');
-  app.useStaticAssets(uploadsPath, { prefix: '/uploads/' });
 
   // Swagger setup
   const config = new DocumentBuilder()
@@ -69,9 +47,8 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   const port = configService.get<number>('PORT') || 3000;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   console.log(`Application is running on: http://localhost:${port}`);
   console.log(`Swagger documentation: http://localhost:${port}/api/docs`);
 }
 bootstrap();
-

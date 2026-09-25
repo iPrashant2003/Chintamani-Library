@@ -68,7 +68,11 @@ export class QrService {
       branch = tenant?.branches[0] ? { ...tenant.branches[0], tenant } : null;
     }
 
-    const base = hostOrigin || process.env.BASE_URL || 'https://chintamani-library.in';
+    // Use production BASE_URL from environment (set in Railway dashboard)
+    // This ensures QR codes always point to the cloud URL, never localhost
+    const base = process.env.BASE_URL
+      || hostOrigin
+      || 'https://chintamani-backend.up.railway.app';
     const portalUrl = `${base}/portal/index.html?branch=${branch?.id || 'default'}`;
 
     // Import qrcode

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
+import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { DashboardModule } from './dashboard/dashboard.module';
@@ -32,6 +33,7 @@ import { ComplaintsModule } from './complaints/complaints.module';
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     PrismaModule,
+    HealthModule,
     AuthModule,
     TenantsModule,
     DashboardModule,

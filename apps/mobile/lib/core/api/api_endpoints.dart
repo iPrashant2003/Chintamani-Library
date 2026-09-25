@@ -1,8 +1,7 @@
 class ApiEndpoints {
-  /// Production cloud backend URL.
-  /// Once Railway is deployed, update this to the Railway URL.
-  /// Format: https://YOUR_APP_NAME.up.railway.app
-  static const String productionUrl = 'https://chintamani-backend.up.railway.app';
+  /// Production cloud backend — hosted on Render.com
+  /// Live at: https://chintamani-backend.onrender.com
+  static const String productionUrl = 'https://chintamani-backend.onrender.com';
 
   /// Development / local URL (only for developer testing on local machine)
   static const String developmentUrl = 'http://10.0.2.2:3000'; // Android emulator

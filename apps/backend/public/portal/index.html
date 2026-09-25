@@ -1729,17 +1729,27 @@
           aadhaarFrontUrl: aadhaarFrontData,
           aadhaarBackUrl: aadhaarBackData,
         };
-        await fetch('/portal/register', {
+        const res = await fetch('/portal/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(regPayload)
         });
-      } catch (_) {}
-
-      document.getElementById('reg-content-step-3').classList.add('hidden');
-      document.getElementById('reg-success-box').classList.remove('hidden');
-      initIcons();
-      showToast(`Registration submitted for ${branchConfig.name}!`);
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          showToast(errData.message || 'Registration submission failed. Please try again.');
+          return;
+        }
+        const resJson = await res.json().catch(() => ({}));
+        if (resJson.applicationId) {
+          document.getElementById('reg-succ-id').textContent = resJson.applicationId;
+        }
+        document.getElementById('reg-content-step-3').classList.add('hidden');
+        document.getElementById('reg-success-box').classList.remove('hidden');
+        initIcons();
+        showToast(`Registration submitted for ${branchConfig.name}!`);
+      } catch (e) {
+        showToast(e.message || 'Network error submitting registration');
+      }
     }
 
     function goToPaymentFromReg() {
@@ -1853,7 +1863,7 @@
       document.getElementById('pay-succ-ref').textContent = refId;
 
       try {
-        await fetch('/portal/payment', {
+        const res = await fetch('/portal/payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1866,11 +1876,21 @@
             branch: currentViewingBranch
           })
         });
-      } catch (_) {}
-
-      document.getElementById('pay-success-box').classList.remove('hidden');
-      initIcons();
-      showToast('✓ Payment Proof Submitted! Pending Verification');
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          showToast(errData.message || 'Payment proof submission failed');
+          return;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (data.referenceId || data.paymentId) {
+          document.getElementById('pay-succ-ref').textContent = data.referenceId || data.paymentId;
+        }
+        document.getElementById('pay-success-box').classList.remove('hidden');
+        initIcons();
+        showToast('✓ Payment Proof Submitted! Pending Verification');
+      } catch (e) {
+        showToast(e.message || 'Network error submitting payment');
+      }
     }
 
     // ── Rating & Feedback ──
@@ -1899,7 +1919,7 @@
       if (!review) { showToast('Please write your review comments'); return; }
 
       try {
-        await fetch('/portal/feedback', {
+        const res = await fetch('/portal/feedback', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1912,11 +1932,17 @@
             branch: currentViewingBranch
           })
         });
-      } catch (_) {}
-
-      document.getElementById('fb-success-box').classList.remove('hidden');
-      initIcons();
-      showToast('Thank you for your review!');
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          showToast(errData.message || 'Feedback submission failed');
+          return;
+        }
+        document.getElementById('fb-success-box').classList.remove('hidden');
+        initIcons();
+        showToast('Thank you for your review!');
+      } catch (e) {
+        showToast(e.message || 'Network error submitting review');
+      }
     }
 
     // ── Complaints ──
@@ -1940,7 +1966,7 @@
       document.getElementById('cmp-succ-id').textContent = refId;
 
       try {
-        await fetch('/portal/complaint', {
+        const res = await fetch('/portal/complaint', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1952,11 +1978,21 @@
             branch: currentViewingBranch
           })
         });
-      } catch (_) {}
-
-      document.getElementById('cmp-success-box').classList.remove('hidden');
-      initIcons();
-      showToast('Complaint ticket registered successfully');
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          showToast(errData.message || 'Failed to register complaint');
+          return;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (data.complaintId) {
+          document.getElementById('cmp-succ-id').textContent = data.complaintId;
+        }
+        document.getElementById('cmp-success-box').classList.remove('hidden');
+        initIcons();
+        showToast('Complaint ticket registered successfully');
+      } catch (e) {
+        showToast(e.message || 'Network error submitting complaint ticket');
+      }
     }
 
     // ── Image Preview Helper ──

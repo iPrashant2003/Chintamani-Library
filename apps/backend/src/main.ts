@@ -1,3 +1,22 @@
+import 'dotenv/config';
+import { execSync } from 'child_process';
+import * as os from 'os';
+
+// Auto-resolve WSL PostgreSQL IP on Windows if 127.0.0.1 is specified
+if (
+  os.platform() === 'win32' &&
+  process.env.DATABASE_URL &&
+  (process.env.DATABASE_URL.includes('127.0.0.1') || process.env.DATABASE_URL.includes('localhost'))
+) {
+  try {
+    const wslIp = execSync('wsl hostname -I', { encoding: 'utf8', timeout: 3000 }).trim().split(/\s+/)[0];
+    if (wslIp && /^(\d{1,3}\.){3}\d{1,3}$/.test(wslIp)) {
+      process.env.DATABASE_URL = process.env.DATABASE_URL.replace('127.0.0.1', wslIp).replace('localhost', wslIp);
+      console.log(`[Database] Auto-resolved WSL PostgreSQL on Windows: ${wslIp}:5432`);
+    }
+  } catch (_) {}
+}
+
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';

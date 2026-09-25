@@ -166,12 +166,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         // Login ID Field
                         TextField(
                           controller: _loginIdController,
-                          keyboardType: TextInputType.phone,
+                          keyboardType: TextInputType.emailAddress,
                           style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
                           decoration: InputDecoration(
-                            labelText: 'Mobile Number',
+                            labelText: 'Mobile Number or Email',
+                            hintText: 'e.g. 9415919277 or owner@chintamani.com',
+                            hintStyle: const TextStyle(color: AppColors.textTertiary, fontSize: 12),
                             labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                            prefixIcon: const Icon(Icons.phone_android_rounded, color: Color(0xFF00E5BC), size: 18),
+                            prefixIcon: const Icon(Icons.person_rounded, color: Color(0xFF00E5BC), size: 18),
                             filled: true,
                             fillColor: Colors.white.withValues(alpha: 0.04),
                             border: OutlineInputBorder(

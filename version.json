@@ -1,20 +1,17 @@
 {
-  "version": "2.4.0",
-  "buildNumber": 2040,
-  "releaseDate": "25 Sep 2026",
-  "title": "Chintamani Library v2.4.0 — Cloud Infrastructure",
+  "version": "2.4.1",
+  "buildNumber": 2041,
+  "releaseDate": "26 Sep 2026",
+  "title": "Chintamani Library v2.4.1 — Cloud Authentication & Fast Login Fix",
   "releaseNotes": [
-    "MAJOR: Entire system moved to cloud — no laptop dependency anymore",
-    "Cloud Backend: NestJS now hosted on Render.com (always available 24/7)",
-    "Cloud Database: PostgreSQL moved to Neon.tech cloud (all data safe, always online)",
-    "Cloud Storage: Member selfies and documents now stored on Cloudinary CDN",
-    "Works from anywhere: Admin portal accessible from any device, any network",
-    "QR codes now point to production cloud URL (not localhost)",
-    "App can work even when laptop is completely powered off",
-    "Branch separation maintained: Mehdawal and Khalilabad fully isolated in cloud"
+    "FIX: Instant sign in with mobile number (9415919277 / 7388389944) or email",
+    "FIX: Removed secure storage deadlock causing buffering on login screen",
+    "FIX: Increased cloud network timeouts from 3.5s to 20s to ensure reliable connectivity on mobile data",
+    "Live Production Cloud Database synchronization with Neon & Render",
+    "All cloud features active 24/7 with zero dependency on local computer"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.4.0/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.4.0/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.4.1/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.4.1/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

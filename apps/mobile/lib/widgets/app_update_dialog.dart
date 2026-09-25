@@ -14,6 +14,7 @@ class AppUpdateDialog extends StatefulWidget {
     // Mutex: never stack two update dialogs
     if (_isShowing) return Future.value();
     _isShowing = true;
+    AppUpdateService.markPrompted();
     return showDialog(
       context: context,
       barrierDismissible: !info.forceUpdate,

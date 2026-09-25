@@ -8,6 +8,8 @@ import '../../../widgets/ambient_background.dart';
 import '../../../widgets/chintamani_logo.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/theme_provider.dart';
+import '../../../core/services/app_update_service.dart';
+import '../../../widgets/app_update_dialog.dart';
 import '../providers/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -23,6 +25,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkUpdate());
+  }
+
+  Future<void> _checkUpdate() async {
+    try {
+      final service = ref.read(appUpdateServiceProvider);
+      final update = await service.checkForUpdate();
+      if (update != null && mounted) {
+        AppUpdateDialog.show(context, update);
+      }
+    } catch (_) {}
+  }
 
   @override
   void dispose() {

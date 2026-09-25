@@ -50,13 +50,19 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.3.2';
-  static const currentBuildNumber = 2036;
+  static const currentVersion = '2.4.2';
+  static const currentBuildNumber = 2042;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
-  /// Set to true once we have checked in this process lifetime so that
-  /// both SplashScreen and DashboardScreen cannot stack duplicate dialogs.
-  static bool hasCheckedThisSession = false;
+  /// The update info discovered from cloud manifest, if any.
+  static AppUpdateInfo? discoveredUpdate;
+
+  /// Tracks whether the update dialog was shown to the user in this session.
+  static bool hasPromptedThisSession = false;
+
+  static void markPrompted() {
+    hasPromptedThisSession = true;
+  }
 
   /// Query the native Android PackageManager for the real installed versionCode.
   /// Falls back to [currentBuildNumber] on any error.
@@ -158,11 +164,15 @@ class AppUpdateService {
   }
 
   // ── Check for update with intelligent multi-host resolution ──────────────
-  Future<AppUpdateInfo?> checkForUpdate() async {
-    // Only one check per app session — prevents stacked duplicate dialogs from
-    // SplashScreen (1.2 s delay) and DashboardScreen (5 s post-frame callback).
-    if (hasCheckedThisSession) return null;
-    hasCheckedThisSession = true;
+  Future<AppUpdateInfo?> checkForUpdate({bool force = false}) async {
+    // If not forced and we already discovered an update:
+    // If already prompted and not a forceUpdate, don't nag user again this session.
+    if (!force && discoveredUpdate != null) {
+      if (hasPromptedThisSession && !discoveredUpdate!.forceUpdate) {
+        return null;
+      }
+      return discoveredUpdate;
+    }
 
     // Prefer native versionCode (immune to build-config drift) over the
     // hard-coded constant — falls back to currentBuildNumber on non-Android.
@@ -171,7 +181,10 @@ class AppUpdateService {
     final savedUrl = await getManifestUrl();
     final cacheBust = DateTime.now().millisecondsSinceEpoch;
     final candidateUrls = <String>[
+      'https://cdn.jsdelivr.net/gh/iPrashant2003/Chintamani-Library@main/version.json?t=$cacheBust',
       'https://raw.githubusercontent.com/iPrashant2003/Chintamani-Library/main/version.json?t=$cacheBust',
+      'https://chintamani-backend.onrender.com/version.json?t=$cacheBust',
+      'https://cdn.jsdelivr.net/gh/iPrashant2003/Chintamani-Library@main/version.json',
       'https://raw.githubusercontent.com/iPrashant2003/Chintamani-Library/main/version.json',
       if (savedUrl.isNotEmpty &&
           !savedUrl.contains('172.21.232.210') &&
@@ -199,15 +212,18 @@ class AppUpdateService {
           final info = AppUpdateInfo.fromJson(json);
           debugPrint('[UpdateService] Remote build: ${info.buildNumber}, Installed: $installedBuildNumber (constant: $currentBuildNumber)');
           if (info.buildNumber > installedBuildNumber) {
+            discoveredUpdate = info;
             return info;
+          } else {
+            discoveredUpdate = null;
+            return null; // up to date
           }
-          return null; // up to date
         }
       } catch (e) {
         debugPrint('[UpdateService] Manifest check failed on $url: $e');
       }
     }
-    return null;
+    return discoveredUpdate;
   }
 
 

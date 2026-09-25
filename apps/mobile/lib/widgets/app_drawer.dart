@@ -7,6 +7,8 @@ import '../features/branch/domain/branch_model.dart';
 import '../features/branch/providers/branch_provider.dart';
 import '../features/auth/providers/auth_provider.dart';
 import '../routing/route_names.dart';
+import '../core/services/app_update_service.dart';
+import 'app_update_dialog.dart';
 import 'chintamani_logo.dart';
 
 class AppDrawer extends ConsumerWidget {
@@ -237,6 +239,50 @@ class AppDrawer extends ConsumerWidget {
                     onTap: () {
                       Navigator.pop(context);
                       context.push(RouteNames.more);
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    title: 'Check for Updates',
+                    subtitle: 'v${AppUpdateService.currentVersion} • Scan cloud releases',
+                    icon: Icons.system_update_rounded,
+                    accentColor: const Color(0xFF38BDF8),
+                    badge: 'AUTO-UPDATE',
+                    onTap: () async {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Row(
+                            children: [
+                              SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              ),
+                              SizedBox(width: 12),
+                              Text('Checking for latest updates...'),
+                            ],
+                          ),
+                          duration: Duration(seconds: 2),
+                          backgroundColor: Color(0xFF1E293B),
+                        ),
+                      );
+
+                      final service = ref.read(appUpdateServiceProvider);
+                      final update = await service.checkForUpdate(force: true);
+
+                      if (!context.mounted) return;
+                      if (update != null) {
+                        AppUpdateDialog.show(context, update);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('App is up to date (v${AppUpdateService.currentVersion})!'),
+                            backgroundColor: AppColors.emeraldPrimary,
+                            duration: const Duration(seconds: 3),
+                          ),
+                        );
+                      }
                     },
                   ),
 

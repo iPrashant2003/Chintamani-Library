@@ -29,7 +29,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Future<void> _checkUpdate() async {
-    await Future.delayed(const Duration(seconds: 5));
+    await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
     final service = ref.read(appUpdateServiceProvider);
     final autoCheck = await service.isAutoCheckEnabled();

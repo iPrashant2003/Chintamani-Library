@@ -56,19 +56,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     Timer(const Duration(milliseconds: 3000), () {
       if (!mounted) return;
       HapticFeedback.lightImpact();
+
+      // If a critical mandatory update was discovered, block navigation and prompt immediately
+      if (_pendingUpdate != null && _pendingUpdate!.forceUpdate) {
+        AppUpdateDialog.show(context, _pendingUpdate!);
+        return;
+      }
+
       final authState = ref.read(authProvider).value;
       if (authState is AuthAuthenticated) {
         context.go(RouteNames.dashboard);
       } else {
-        // User explicitly signed out: request login password!
+        // User explicitly signed out: request login credentials
         context.go(RouteNames.login);
-      }
-      // Show update dialog shortly after landing on the next screen
-      if (_pendingUpdate != null) {
-        final update = _pendingUpdate!;
-        Timer(const Duration(milliseconds: 1200), () {
-          if (mounted) AppUpdateDialog.show(context, update);
-        });
       }
     });
   }

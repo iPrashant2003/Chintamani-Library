@@ -35,12 +35,41 @@ class MainActivity : FlutterFragmentActivity() {
         }
     }
 
+    private var flutterChannel: MethodChannel? = null
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val route = intent.getStringExtra("route")
+        val branch = intent.getStringExtra("branch")
+        val type = intent.getStringExtra("type")
+        if (route != null) {
+            flutterChannel?.invokeMethod("onNotificationTap", mapOf(
+                "route" to route,
+                "branch" to branch,
+                "type" to type
+            ))
+        }
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         createNotificationChannel()
 
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+        val channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+        flutterChannel = channel
+        channel.setMethodCallHandler { call, result ->
             when (call.method) {
+                "getInitialNotificationPayload" -> {
+                    val route = intent?.getStringExtra("route")
+                    val branch = intent?.getStringExtra("branch")
+                    val type = intent?.getStringExtra("type")
+                    if (route != null) {
+                        result.success(mapOf("route" to route, "branch" to branch, "type" to type))
+                    } else {
+                        result.success(null)
+                    }
+                }
                 "getDeviceAbi" -> {
                     val abi = if (Build.SUPPORTED_ABIS.isNotEmpty()) {
                         Build.SUPPORTED_ABIS[0]
@@ -156,9 +185,15 @@ class MainActivity : FlutterFragmentActivity() {
                         val title = call.argument<String>("title") ?: "Chintamani Library"
                         val body = call.argument<String>("body") ?: ""
                         val id = call.argument<Int>("id") ?: ((System.currentTimeMillis() % 100000).toInt())
+                        val route = call.argument<String>("route")
+                        val branch = call.argument<String>("branch")
+                        val type = call.argument<String>("type")
 
                         val launchIntent = Intent(this, MainActivity::class.java).apply {
                             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            putExtra("route", route)
+                            putExtra("branch", branch)
+                            putExtra("type", type)
                         }
                         val pendingFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE

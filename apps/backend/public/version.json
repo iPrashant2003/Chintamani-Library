@@ -1,17 +1,19 @@
 {
-  "version": "2.5.0",
-  "buildNumber": 2050,
+  "version": "2.6.0",
+  "buildNumber": 2060,
+  "minimumSupportedVersion": "2.5.0",
   "releaseDate": "27 Sep 2026",
-  "title": "Chintamani Library v2.5.0 — Premium Claymorphism Design & Cloud Selfie Upload Fix",
+  "title": "Chintamani Library v2.6.0 — Student Photo Upload, Real-Time Notifications & Smart In-App Updates",
   "releaseNotes": [
-    "REDESIGN: Premium Claymorphism More Screen — deep 3D card sections, gold glow avatar, tactile animated press states",
-    "FIX: Selfie upload 'Failed due to low memory' error completely resolved — images now stream to Cloudinary cloud storage via multipart upload instead of base64 JSON",
-    "FIX: Photos, Aadhaar & payment screenshots now stored permanently in Cloudinary (not ephemeral server disk)",
-    "FIX: Registration portal JSON body size limit increased to handle all portal data",
-    "IMPROVEMENT: Branch data isolation enforced at backend — Mehdawal (65 seats) & Khalilabad (72 seats) fully separated"
+    "REMOVED: Live selfie camera requirement completely removed from admission flow",
+    "FEATURE: New student photo upload (device storage, gallery, up to 5MB, strict branch-isolated Cloudinary storage)",
+    "FIX: Eliminated false low-memory errors permanently with zero-copy stream uploads",
+    "FEATURE: Real notification tracking & deduplication — no repeated old alerts on app launch",
+    "FEATURE: Notification tap routing — tapping an alert opens the exact screen and branch",
+    "FEATURE: Centralized In-App Auto-Updater with semantic versioning"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.5.0/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.5.0/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.6.0/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.6.0/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

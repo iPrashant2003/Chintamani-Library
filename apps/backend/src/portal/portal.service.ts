@@ -530,7 +530,7 @@ export class PortalService {
         data: {
           tenantId: branch.tenantId,
           type: 'NEW_REGISTRATION',
-          title: `New Registration: ${dto.name}`,
+          title: `[${branch.name}] New Registration: ${dto.name}`,
           body: `${dto.name} registered for ${plan.name}. Application ID: ${applicationId}${
             reservedSeat ? ` (Seat ${reservedSeat.seatNumber} allocated)` : ''
           }`,
@@ -1237,6 +1237,18 @@ export class PortalService {
         method: 'QR',
       },
     });
+
+    try {
+      const assignedSeat = member.subscriptions[0]?.seat?.seatNumber;
+      await this.prisma.notification.create({
+        data: {
+          tenantId: member.tenantId,
+          type: 'ATTENDANCE',
+          title: `[${member.branch.name}] Attendance: ${member.name}`,
+          body: `${member.name} checked in via QR${assignedSeat ? ` (Seat ${assignedSeat})` : ''}`,
+        },
+      });
+    } catch (_) {}
 
     return {
       success: true,

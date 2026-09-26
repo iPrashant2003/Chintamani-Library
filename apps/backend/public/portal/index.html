@@ -644,8 +644,8 @@
       <div id="reg-content-step-2" class="hidden glass-card p-5 space-y-4">
         <div class="border-b border-white/10 pb-2.5 flex items-center justify-between">
           <div>
-            <h3 class="text-sm font-bold text-white">02. Member Photo & ID</h3>
-            <p class="text-xs text-gray-400">Upload your selfie/photo for member ID card</p>
+            <h3 class="text-sm font-bold text-white">02. Student Photo & ID</h3>
+            <p class="text-xs text-gray-400">Upload student photo for ID card & verification</p>
           </div>
           <div class="px-2.5 py-1 rounded-full bg-gold-500/15 border border-gold-400/40 text-gold-300 text-[10px] font-extrabold flex items-center space-x-1">
             <i data-lucide="map-pin" class="w-3 h-3 text-gold-400"></i>
@@ -653,20 +653,56 @@
           </div>
         </div>
 
-        <!-- Live Camera Selfie -->
-        <div class="space-y-1.5">
-          <label class="text-xs font-semibold text-gold-400 flex items-center space-x-1.5">
-            <i data-lucide="camera" class="w-3.5 h-3.5"></i>
-            <span>Applicant Selfie / Photo *</span>
-          </label>
-          <div class="p-4 rounded-xl bg-black/40 border border-dashed border-gold-500/30 text-center relative cursor-pointer hover:bg-black/60 transition" onclick="document.getElementById('file-selfie').click()">
-            <input type="file" id="file-selfie" accept="image/*" capture="user" class="hidden" onchange="previewImage(this, 'preview-selfie-box')">
-            <div id="preview-selfie-box" class="flex flex-col items-center justify-center py-2 text-gray-400">
-              <i data-lucide="camera" class="w-7 h-7 text-gold-400 mb-1"></i>
-              <span class="text-xs font-semibold text-white">Tap to Take Selfie or Select Photo</span>
-              <span class="text-[10px] text-gray-400 mt-0.5">Used for Member ID Card & Attendance</span>
+        <!-- Student Photo Upload (Device storage / Gallery, Max 5MB, Branch-Scoped) -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-gold-400 flex items-center space-x-1.5">
+              <i data-lucide="image" class="w-3.5 h-3.5"></i>
+              <span>Student Photo *</span>
+            </label>
+            <span class="text-[10px] text-gray-400">Max 5 MB (JPG, PNG, WEBP)</span>
+          </div>
+
+          <div id="student-photo-container" class="relative rounded-2xl bg-black/50 border border-dashed border-gold-500/40 p-4 transition-all duration-200">
+            <!-- Hidden File Input (NO capture attribute — opens device file picker / gallery) -->
+            <input type="file" id="file-student-photo" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" class="hidden" onchange="handleStudentPhotoSelected(this)">
+
+            <!-- Empty / Selection State -->
+            <div id="student-photo-empty" class="flex flex-col items-center justify-center py-4 cursor-pointer hover:opacity-90 transition text-center" onclick="document.getElementById('file-student-photo').click()">
+              <div class="w-12 h-12 rounded-2xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center mb-2 shadow-inner">
+                <i data-lucide="upload-cloud" class="w-6 h-6 text-gold-400"></i>
+              </div>
+              <span class="text-xs font-bold text-white mb-0.5">Upload Student Photo</span>
+              <span class="text-[11px] text-gray-400">Select from Gallery or Device Storage</span>
+              <button type="button" class="mt-3 px-4 py-1.5 rounded-xl bg-gold-500/20 border border-gold-400/40 text-gold-300 text-xs font-bold hover:bg-gold-500/30 transition flex items-center space-x-1.5">
+                <i data-lucide="folder-open" class="w-3.5 h-3.5"></i>
+                <span>Choose Photo</span>
+              </button>
             </div>
-            <input type="hidden" id="url-selfie">
+
+            <!-- Preview / Active State (Hidden by default) -->
+            <div id="student-photo-preview-wrap" class="hidden flex flex-col items-center">
+              <div class="relative w-full max-w-[200px] aspect-[3/4] rounded-xl overflow-hidden border-2 border-gold-500/50 shadow-xl mb-3 bg-black">
+                <img id="student-photo-preview-img" src="" alt="Student Photo Preview" class="w-full h-full object-cover">
+              </div>
+              <div class="flex items-center space-x-2 w-full justify-center">
+                <button type="button" onclick="document.getElementById('file-student-photo').click()" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-semibold text-gray-200 flex items-center space-x-1">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-gold-400"></i>
+                  <span>Change Photo</span>
+                </button>
+                <button type="button" onclick="removeStudentPhoto()" class="px-3 py-1.5 rounded-lg bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-xs font-semibold text-red-300 flex items-center space-x-1">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  <span>Remove</span>
+                </button>
+              </div>
+              <p id="student-photo-filename" class="text-[10px] text-gray-400 mt-2 truncate max-w-[240px]"></p>
+            </div>
+
+            <!-- Error message container -->
+            <div id="student-photo-error" class="hidden mt-2 p-2.5 rounded-xl bg-red-500/15 border border-red-500/40 text-red-300 text-xs flex items-center space-x-1.5">
+              <i data-lucide="alert-circle" class="w-4 h-4 text-red-400 shrink-0"></i>
+              <span id="student-photo-error-text"></span>
+            </div>
           </div>
         </div>
 
@@ -1706,15 +1742,13 @@
       let aadhaarFrontUrl = null;
       let aadhaarBackUrl = null;
 
-      if (_fileStore['preview-selfie-box']) {
-        showToast('Uploading your selfie... ⏳');
-        photoUrl = await uploadPortalFile('preview-selfie-box');
+      const photoFile = _fileStore['file-student-photo'] || _fileStore['preview-selfie-box'];
+      if (photoFile) {
+        showToast('Uploading student photo to cloud... ⏳');
+        photoUrl = await uploadPortalFile('file-student-photo', 'photos');
       }
-      if (_fileStore['preview-aadhaar-front-box']) {
-        aadhaarFrontUrl = await uploadPortalFile('preview-aadhaar-front-box');
-      }
-      if (_fileStore['preview-aadhaar-back-box']) {
-        aadhaarBackUrl = await uploadPortalFile('preview-aadhaar-back-box');
+      if (_fileStore['preview-aadhaar-box'] || _fileStore['preview-aadhaar-front-box']) {
+        aadhaarFrontUrl = await uploadPortalFile(_fileStore['preview-aadhaar-box'] ? 'preview-aadhaar-box' : 'preview-aadhaar-front-box', 'documents');
       }
 
       try {
@@ -2006,65 +2040,125 @@
       }
     }
 
-    // ── Image Preview Helper ──
-    // Preview store (base64 for display), File store (for upload)
+    // ── Image Handling & Upload Helpers ──
     const _imgStore = {};
     const _fileStore = {};
+    const MAX_PHOTO_BYTES = 5 * 1024 * 1024; // 5 MB Strict Limit
+
+    function handleStudentPhotoSelected(input) {
+      const errBox = document.getElementById('student-photo-error');
+      const errText = document.getElementById('student-photo-error-text');
+      if (errBox) errBox.classList.add('hidden');
+
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+
+      // 1. Validate file size (Maximum 5MB)
+      if (file.size > MAX_PHOTO_BYTES) {
+        input.value = '';
+        if (errText) errText.textContent = 'Photo is larger than 5 MB. Please choose a smaller image.';
+        if (errBox) errBox.classList.remove('hidden');
+        initIcons();
+        showToast('Photo is larger than 5 MB. Please choose a smaller image.');
+        return;
+      }
+
+      // 2. Validate file type (JPG, PNG, WEBP, HEIC)
+      const allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
+      const ext = (file.name || '').split('.').pop().toLowerCase();
+      if (!file.type.startsWith('image/') && !allowedExts.includes(ext)) {
+        input.value = '';
+        if (errText) errText.textContent = 'Invalid file format. Please select a valid photo (JPG, PNG, WEBP).';
+        if (errBox) errBox.classList.remove('hidden');
+        initIcons();
+        showToast('Invalid file format. Please select JPG, PNG or WEBP.');
+        return;
+      }
+
+      // 3. Memory-Safe Zero-Copy Preview using URL.createObjectURL
+      const previewImg = document.getElementById('student-photo-preview-img');
+      const emptyBox = document.getElementById('student-photo-empty');
+      const previewWrap = document.getElementById('student-photo-preview-wrap');
+      const fnLabel = document.getElementById('student-photo-filename');
+
+      if (previewImg) {
+        if (previewImg.dataset.objectUrl) {
+          URL.revokeObjectURL(previewImg.dataset.objectUrl);
+        }
+        const objUrl = URL.createObjectURL(file);
+        previewImg.src = objUrl;
+        previewImg.dataset.objectUrl = objUrl;
+      }
+
+      if (emptyBox) emptyBox.classList.add('hidden');
+      if (previewWrap) previewWrap.classList.remove('hidden');
+      if (fnLabel) fnLabel.textContent = `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+
+      // Store in file store for upload
+      _fileStore['file-student-photo'] = file;
+      _fileStore['preview-selfie-box'] = file;
+      initIcons();
+    }
+
+    function removeStudentPhoto() {
+      const input = document.getElementById('file-student-photo');
+      if (input) input.value = '';
+      const previewImg = document.getElementById('student-photo-preview-img');
+      if (previewImg && previewImg.dataset.objectUrl) {
+        URL.revokeObjectURL(previewImg.dataset.objectUrl);
+        previewImg.src = '';
+        delete previewImg.dataset.objectUrl;
+      }
+      document.getElementById('student-photo-empty')?.classList.remove('hidden');
+      document.getElementById('student-photo-preview-wrap')?.classList.add('hidden');
+      document.getElementById('student-photo-error')?.classList.add('hidden');
+      delete _fileStore['file-student-photo'];
+      delete _fileStore['preview-selfie-box'];
+      initIcons();
+    }
 
     function previewImage(input, boxId) {
       if (!input.files || !input.files[0]) return;
       const file = input.files[0];
-      _fileStore[boxId] = file;  // Store raw File object for multipart upload
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const orig = e.target.result;
-        // Compress via canvas for preview: max 800px wide, JPEG quality 0.72
-        const img = new Image();
-        img.onload = function() {
-          try {
-            const MAX_W = 800;
-            const scale = img.width > MAX_W ? MAX_W / img.width : 1;
-            const w = Math.round(img.width * scale);
-            const h = Math.round(img.height * scale);
-            const canvas = document.createElement('canvas');
-            canvas.width = w; canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
-            const compressed = canvas.toDataURL('image/jpeg', 0.72);
-            _imgStore[boxId] = compressed;  // preview only — not sent in JSON
-            const box = document.getElementById(boxId);
-            if (box) box.innerHTML = `<img src="${compressed}" class="w-full h-28 object-cover rounded-lg border border-gold-500/40">`;
-          } catch (_) {
-            _imgStore[boxId] = orig.length < 500000 ? orig : null;
-            const box = document.getElementById(boxId);
-            if (box) box.innerHTML = `<img src="${orig}" class="w-full h-28 object-cover rounded-lg border border-gold-500/40">`;
-          }
-        };
-        img.src = orig;
-      };
-      reader.readAsDataURL(file);
+
+      // 5MB limit check
+      if (file.size > MAX_PHOTO_BYTES) {
+        input.value = '';
+        showToast('File is larger than 5 MB. Please choose a smaller image.');
+        return;
+      }
+
+      _fileStore[boxId] = file;
+      const box = document.getElementById(boxId);
+      if (box) {
+        const objUrl = URL.createObjectURL(file);
+        box.innerHTML = `<img src="${objUrl}" class="w-full h-28 object-cover rounded-lg border border-gold-500/40">`;
+      }
     }
 
-    // Upload a stored file to Cloudinary via the portal upload endpoint
-    async function uploadPortalFile(boxId) {
+    // Branch-isolated Cloudinary upload
+    async function uploadPortalFile(boxId, folderType = 'photos') {
       const file = _fileStore[boxId];
       if (!file) return null;
       try {
         const formData = new FormData();
         formData.append('file', file, file.name || 'photo.jpg');
-        const res = await fetch('/portal/upload', {
+
+        const branchKey = (currentViewingBranch || 'mehdawal').toLowerCase();
+        const res = await fetch(`/portal/upload?branchId=${encodeURIComponent(branchKey)}&folder=${encodeURIComponent(folderType)}`, {
           method: 'POST',
           body: formData,
         });
+
         if (!res.ok) {
           const errJson = await res.json().catch(() => ({}));
-          console.warn('Portal upload failed:', errJson.message || res.status);
-          return null;
+          throw new Error(errJson.message || `Upload failed with status ${res.status}`);
         }
         const data = await res.json();
         return data.url || null;
       } catch (e) {
         console.error('Portal upload error:', e);
+        showToast(e.message || 'File upload failed');
         return null;
       }
     }

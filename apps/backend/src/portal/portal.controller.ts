@@ -145,27 +145,40 @@ export class PortalController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
-      limits: { fileSize: 8 * 1024 * 1024 }, // 8MB limit
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
       fileFilter: (_req, file, cb) => {
         if (!file.mimetype.startsWith('image/')) {
-          return cb(new BadRequestException('Only image files are allowed') as any, false);
+          return cb(new BadRequestException('Only image files (JPG, PNG, WEBP, HEIC) are allowed') as any, false);
         }
         cb(null, true);
       },
     }),
   )
-  @ApiOperation({ summary: 'Public file upload for selfies, Aadhaar & payment screenshots — stores to Cloudinary' })
-  async uploadFile(@UploadedFile() file: any) {
+  @ApiOperation({ summary: 'Public branch-isolated upload for student photos, Aadhaar & payment screenshots (Max 5MB)' })
+  async uploadFile(
+    @UploadedFile() file: any,
+    @Query('branchId') branchId?: string,
+    @Query('folder') folderType?: string,
+  ) {
     if (!file || !file.buffer) {
       throw new BadRequestException('No file provided or file is empty');
     }
+    if (file.size > 5 * 1024 * 1024) {
+      throw new BadRequestException('Photo is larger than 5 MB. Please choose a smaller image.');
+    }
     try {
+      const bKey = (branchId || '').toLowerCase().includes('mehda') ? 'mehdawal' : 'khalilabad';
+      const subFolder = folderType === 'payment'
+        ? 'payments'
+        : (folderType === 'document' ? 'documents' : 'members/photos');
+      const folderPath = `chintamani/${bKey}/${subFolder}`;
+
       const url = await this.uploadService.uploadFile(
         file.buffer,
         file.originalname || 'photo.jpg',
-        'chintamani/portal',
+        folderPath,
       );
-      return { success: true, url };
+      return { success: true, url, branch: bKey, folder: folderPath };
     } catch (err: any) {
       throw new BadRequestException(`Upload failed: ${err?.message || 'Unknown error'}`);
     }

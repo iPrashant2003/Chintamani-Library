@@ -12,6 +12,7 @@ import 'system_notification_service.dart';
 class AppUpdateInfo {
   final String version;
   final int buildNumber;
+  final String minimumSupportedVersion;
   final String releaseDate;
   final String title;
   final List<String> releaseNotes;
@@ -23,6 +24,7 @@ class AppUpdateInfo {
   const AppUpdateInfo({
     required this.version,
     required this.buildNumber,
+    this.minimumSupportedVersion = '2.5.0',
     required this.releaseDate,
     required this.title,
     required this.releaseNotes,
@@ -32,10 +34,37 @@ class AppUpdateInfo {
     this.forceUpdate = false,
   });
 
+  AppUpdateInfo copyWith({
+    String? version,
+    int? buildNumber,
+    String? minimumSupportedVersion,
+    String? releaseDate,
+    String? title,
+    List<String>? releaseNotes,
+    String? apkUrl,
+    String? arm64ApkUrl,
+    String? fallbackUrl,
+    bool? forceUpdate,
+  }) {
+    return AppUpdateInfo(
+      version: version ?? this.version,
+      buildNumber: buildNumber ?? this.buildNumber,
+      minimumSupportedVersion: minimumSupportedVersion ?? this.minimumSupportedVersion,
+      releaseDate: releaseDate ?? this.releaseDate,
+      title: title ?? this.title,
+      releaseNotes: releaseNotes ?? this.releaseNotes,
+      apkUrl: apkUrl ?? this.apkUrl,
+      arm64ApkUrl: arm64ApkUrl ?? this.arm64ApkUrl,
+      fallbackUrl: fallbackUrl ?? this.fallbackUrl,
+      forceUpdate: forceUpdate ?? this.forceUpdate,
+    );
+  }
+
   factory AppUpdateInfo.fromJson(Map<String, dynamic> json) {
     return AppUpdateInfo(
-      version: json['version'] as String? ?? '2.3.1',
-      buildNumber: (json['buildNumber'] as num?)?.toInt() ?? 2035,
+      version: json['version'] as String? ?? '2.5.0',
+      buildNumber: (json['buildNumber'] as num?)?.toInt() ?? 2050,
+      minimumSupportedVersion: json['minimumSupportedVersion'] as String? ?? '2.5.0',
       releaseDate: json['releaseDate'] as String? ?? '',
       title: json['title'] as String? ?? 'New Update Available',
       releaseNotes: (json['releaseNotes'] as List<dynamic>?)
@@ -51,8 +80,8 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.5.0';
-  static const currentBuildNumber = 2050;
+  static const currentVersion = '2.6.0';
+  static const currentBuildNumber = 2060;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   /// The update info discovered from cloud manifest, if any.
@@ -63,6 +92,49 @@ class AppUpdateService {
 
   static void markPrompted() {
     hasPromptedThisSession = true;
+  }
+
+  /// Semantic version comparison: returns > 0 if a > b, < 0 if a < b, 0 if equal.
+  /// Handles numeric comparison: "2.10.0" > "2.9.0" correctly.
+  static int compareSemver(String a, String b) {
+    try {
+      final cleanA = a.replaceAll(RegExp(r'^[vV]'), '').split('+').first.trim();
+      final cleanB = b.replaceAll(RegExp(r'^[vV]'), '').split('+').first.trim();
+
+      final partsA = cleanA.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+      final partsB = cleanB.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+
+      while (partsA.length < 3) {
+        partsA.add(0);
+      }
+      while (partsB.length < 3) {
+        partsB.add(0);
+      }
+
+      for (int i = 0; i < 3; i++) {
+        if (partsA[i] > partsB[i]) return 1;
+        if (partsA[i] < partsB[i]) return -1;
+      }
+      return 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  /// Query the native Android PackageManager for the real installed versionName.
+  static Future<String> getInstalledVersionName() async {
+    try {
+      if (!kIsWeb && Platform.isAndroid) {
+        final info = await _platformChannel.invokeMethod<Map>('getAppVersionInfo');
+        if (info != null && info['versionName'] != null) {
+          final vn = info['versionName'].toString().trim();
+          if (vn.isNotEmpty) return vn;
+        }
+      }
+    } catch (e) {
+      debugPrint('[UpdateService] getInstalledVersionName failed: $e');
+    }
+    return currentVersion;
   }
 
   /// Query the native Android PackageManager for the real installed versionCode.
@@ -175,9 +247,9 @@ class AppUpdateService {
       return discoveredUpdate;
     }
 
-    // Prefer native versionCode (immune to build-config drift) over the
-    // hard-coded constant — falls back to currentBuildNumber on non-Android.
+    // Prefer native versionName and versionCode over hard-coded constants
     final installedBuildNumber = await AppUpdateService.getInstalledBuildNumber();
+    final installedVersionName = await AppUpdateService.getInstalledVersionName();
 
     final savedUrl = await getManifestUrl();
     final cacheBust = DateTime.now().millisecondsSinceEpoch;
@@ -211,17 +283,26 @@ class AppUpdateService {
             json = Map<String, dynamic>.from(decoded);
           }
           final info = AppUpdateInfo.fromJson(json);
-          debugPrint('[UpdateService] Remote build: ${info.buildNumber}, Installed: $installedBuildNumber (constant: $currentBuildNumber)');
-          if (info.buildNumber > installedBuildNumber) {
-            discoveredUpdate = info;
+
+          // Semantic versioning comparison: 2.6.0 > 2.5.0, 2.10.0 > 2.9.0
+          final semverDiff = compareSemver(info.version, installedVersionName);
+          final hasUpdate = semverDiff > 0 || (semverDiff == 0 && info.buildNumber > installedBuildNumber);
+
+          debugPrint('[UpdateService] Remote: v${info.version}+${info.buildNumber}, Installed: v$installedVersionName+$installedBuildNumber (hasUpdate: $hasUpdate)');
+
+          if (hasUpdate) {
+            final isBelowMin = compareSemver(info.minimumSupportedVersion, installedVersionName) > 0;
+            final resolvedInfo = info.copyWith(forceUpdate: info.forceUpdate || isBelowMin);
+
+            discoveredUpdate = resolvedInfo;
             SystemNotificationService.instance.notifyUpdateAvailable(
-              version: info.version,
-              title: info.title,
+              version: resolvedInfo.version,
+              title: resolvedInfo.title,
             );
-            return info;
+            return resolvedInfo;
           } else {
             discoveredUpdate = null;
-            return null; // up to date
+            return null; // up to date — prevents update loop!
           }
         }
       } catch (e) {

@@ -9,12 +9,13 @@ import {
   UploadedFile,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
 import { PortalService } from './portal.service';
+import { UploadService } from '../upload/upload.service';
 import {
   SendOtpDto,
   VerifyOtpDto,
@@ -28,7 +29,10 @@ import {
 @ApiTags('Member Portal (Public)')
 @Controller(['portal', 'api/portal'])
 export class PortalController {
-  constructor(private readonly portalService: PortalService) {}
+  constructor(
+    private readonly portalService: PortalService,
+    private readonly uploadService: UploadService,
+  ) {}
 
   @Post('otp/send')
   @HttpCode(HttpStatus.OK)
@@ -140,18 +144,30 @@ export class PortalController {
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, `portal-${uniqueSuffix}${extname(file.originalname || '.jpg')}`);
-        },
-      }),
-      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+      storage: memoryStorage(),
+      limits: { fileSize: 8 * 1024 * 1024 }, // 8MB limit
+      fileFilter: (_req, file, cb) => {
+        if (!file.mimetype.startsWith('image/')) {
+          return cb(new BadRequestException('Only image files are allowed') as any, false);
+        }
+        cb(null, true);
+      },
     }),
   )
-  @ApiOperation({ summary: 'Public file upload for registration docs, selfies & payment screenshots' })
-  uploadFile(@UploadedFile() file: any) {
-    return { url: `/uploads/${file.filename}` };
+  @ApiOperation({ summary: 'Public file upload for selfies, Aadhaar & payment screenshots — stores to Cloudinary' })
+  async uploadFile(@UploadedFile() file: any) {
+    if (!file || !file.buffer) {
+      throw new BadRequestException('No file provided or file is empty');
+    }
+    try {
+      const url = await this.uploadService.uploadFile(
+        file.buffer,
+        file.originalname || 'photo.jpg',
+        'chintamani/portal',
+      );
+      return { success: true, url };
+    } catch (err: any) {
+      throw new BadRequestException(`Upload failed: ${err?.message || 'Unknown error'}`);
+    }
   }
 }

@@ -1701,10 +1701,21 @@
         }));
       } catch (_) { /* localStorage quota exceeded — non-critical, skip */ }
 
-      // Gather compressed image data (stored by previewImage())
-      const photoData = _imgStore['preview-selfie-box'] || null;
-      const aadhaarFrontData = _imgStore['preview-aadhaar-front-box'] || null;
-      const aadhaarBackData = _imgStore['preview-aadhaar-back-box'] || null;
+      // Upload images to Cloudinary first via multipart (avoids base64 JSON body size issues)
+      let photoUrl = null;
+      let aadhaarFrontUrl = null;
+      let aadhaarBackUrl = null;
+
+      if (_fileStore['preview-selfie-box']) {
+        showToast('Uploading your selfie... ⏳');
+        photoUrl = await uploadPortalFile('preview-selfie-box');
+      }
+      if (_fileStore['preview-aadhaar-front-box']) {
+        aadhaarFrontUrl = await uploadPortalFile('preview-aadhaar-front-box');
+      }
+      if (_fileStore['preview-aadhaar-back-box']) {
+        aadhaarBackUrl = await uploadPortalFile('preview-aadhaar-back-box');
+      }
 
       try {
         const regPayload = {
@@ -1724,10 +1735,10 @@
           branch: currentViewingBranch,
           branchId: currentViewingBranch,
           seatNumber: selectedSeatNumber,
-          // Image data (compressed JPEG base64 or null)
-          photoUrl: photoData,
-          aadhaarFrontUrl: aadhaarFrontData,
-          aadhaarBackUrl: aadhaarBackData,
+          // Cloud storage URLs (uploaded separately, not base64 in JSON)
+          photoUrl: photoUrl,
+          aadhaarFrontUrl: aadhaarFrontUrl,
+          aadhaarBackUrl: aadhaarBackUrl,
         };
         const res = await fetch('/portal/register', {
           method: 'POST',
@@ -1996,16 +2007,18 @@
     }
 
     // ── Image Preview Helper ──
-    // Compressed image store (keyed by boxId)
+    // Preview store (base64 for display), File store (for upload)
     const _imgStore = {};
+    const _fileStore = {};
 
     function previewImage(input, boxId) {
       if (!input.files || !input.files[0]) return;
       const file = input.files[0];
+      _fileStore[boxId] = file;  // Store raw File object for multipart upload
       const reader = new FileReader();
       reader.onload = function(e) {
         const orig = e.target.result;
-        // Compress via canvas: max 800px wide, JPEG quality 0.72
+        // Compress via canvas for preview: max 800px wide, JPEG quality 0.72
         const img = new Image();
         img.onload = function() {
           try {
@@ -2018,11 +2031,10 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, w, h);
             const compressed = canvas.toDataURL('image/jpeg', 0.72);
-            _imgStore[boxId] = compressed;
+            _imgStore[boxId] = compressed;  // preview only — not sent in JSON
             const box = document.getElementById(boxId);
             if (box) box.innerHTML = `<img src="${compressed}" class="w-full h-28 object-cover rounded-lg border border-gold-500/40">`;
           } catch (_) {
-            // canvas fallback: use original but only for preview, not upload
             _imgStore[boxId] = orig.length < 500000 ? orig : null;
             const box = document.getElementById(boxId);
             if (box) box.innerHTML = `<img src="${orig}" class="w-full h-28 object-cover rounded-lg border border-gold-500/40">`;
@@ -2031,6 +2043,30 @@
         img.src = orig;
       };
       reader.readAsDataURL(file);
+    }
+
+    // Upload a stored file to Cloudinary via the portal upload endpoint
+    async function uploadPortalFile(boxId) {
+      const file = _fileStore[boxId];
+      if (!file) return null;
+      try {
+        const formData = new FormData();
+        formData.append('file', file, file.name || 'photo.jpg');
+        const res = await fetch('/portal/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        if (!res.ok) {
+          const errJson = await res.json().catch(() => ({}));
+          console.warn('Portal upload failed:', errJson.message || res.status);
+          return null;
+        }
+        const data = await res.json();
+        return data.url || null;
+      } catch (e) {
+        console.error('Portal upload error:', e);
+        return null;
+      }
     }
 
     // ── Icon Initializer ──

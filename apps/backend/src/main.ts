@@ -12,6 +12,12 @@ import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Increase JSON body size limit for portal requests containing base64 data
+  const { json, urlencoded } = await import('express');
+  app.use(json({ limit: '12mb' }));
+  app.use(urlencoded({ extended: true, limit: '12mb' }));
+
   const configService = app.get(ConfigService);
 
   // Security

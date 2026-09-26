@@ -19,7 +19,7 @@ class LoginScreen extends ConsumerStatefulWidget {
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> with WidgetsBindingObserver {
   final _loginIdController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -29,21 +29,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkUpdate());
   }
 
-  Future<void> _checkUpdate() async {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkUpdate();
+    }
+  }
+
+  Future<void> _checkUpdate({bool force = false}) async {
     try {
+      if (!mounted) return;
       final service = ref.read(appUpdateServiceProvider);
-      final update = await service.checkForUpdate();
+      final update = await service.checkForUpdate(force: force);
       if (update != null && mounted) {
-        AppUpdateDialog.show(context, update);
+        final autoCheck = await service.isAutoCheckEnabled();
+        if (update.forceUpdate || autoCheck) {
+          AppUpdateDialog.show(context, update);
+        }
       }
     } catch (_) {}
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _loginIdController.dispose();
     _passwordController.dispose();
     super.dispose();

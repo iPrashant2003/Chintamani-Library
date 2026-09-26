@@ -80,8 +80,8 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.6.0';
-  static const currentBuildNumber = 2060;
+  static const currentVersion = '2.6.1';
+  static const currentBuildNumber = 2061;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   /// The update info discovered from cloud manifest, if any.
@@ -156,17 +156,18 @@ class AppUpdateService {
   }
 
   static const _defaultManifestUrl =
-      'https://raw.githubusercontent.com/iPrashant2003/Chintamani-Library/main/version.json';
+      'https://chintamani-backend.onrender.com/version.json';
   static const _settingAutoCheckKey = 'app_update_auto_check';
   static const _settingManifestUrlKey = 'app_update_manifest_url';
 
   // Fast lightweight Dio instance for manifest checks
   final Dio _dio = Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 12),
-    receiveTimeout: const Duration(seconds: 20),
+    connectTimeout: const Duration(seconds: 10),
+    receiveTimeout: const Duration(seconds: 15),
     headers: {
-      'Cache-Control': 'no-cache',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
+      'Expires': '0',
     },
   ));
 
@@ -254,9 +255,10 @@ class AppUpdateService {
     final savedUrl = await getManifestUrl();
     final cacheBust = DateTime.now().millisecondsSinceEpoch;
     final candidateUrls = <String>[
+      'https://chintamani-backend.onrender.com/version.json?t=$cacheBust',
       'https://cdn.jsdelivr.net/gh/iPrashant2003/Chintamani-Library@main/version.json?t=$cacheBust',
       'https://raw.githubusercontent.com/iPrashant2003/Chintamani-Library/main/version.json?t=$cacheBust',
-      'https://chintamani-backend.onrender.com/version.json?t=$cacheBust',
+      'https://chintamani-backend.onrender.com/version.json',
       'https://cdn.jsdelivr.net/gh/iPrashant2003/Chintamani-Library@main/version.json',
       'https://raw.githubusercontent.com/iPrashant2003/Chintamani-Library/main/version.json',
       if (savedUrl.isNotEmpty &&
@@ -284,9 +286,9 @@ class AppUpdateService {
           }
           final info = AppUpdateInfo.fromJson(json);
 
-          // Semantic versioning comparison: 2.6.0 > 2.5.0, 2.10.0 > 2.9.0
+          // Canonical check: remote build number is higher OR remote semver is higher
           final semverDiff = compareSemver(info.version, installedVersionName);
-          final hasUpdate = semverDiff > 0 || (semverDiff == 0 && info.buildNumber > installedBuildNumber);
+          final hasUpdate = info.buildNumber > installedBuildNumber || semverDiff > 0;
 
           debugPrint('[UpdateService] Remote: v${info.version}+${info.buildNumber}, Installed: v$installedVersionName+$installedBuildNumber (hasUpdate: $hasUpdate)');
 

@@ -49,46 +49,52 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       duration: const Duration(milliseconds: 3000),
     )..forward();
 
-    // Start silent update check in background (parallel with animation)
-    _silentUpdateCheck();
-
-    // Automatically transition after exactly 3 seconds
-    Timer(const Duration(milliseconds: 3000), () {
-      if (!mounted) return;
-      HapticFeedback.lightImpact();
-
-      // If a critical mandatory update was discovered, block navigation and prompt immediately
-      if (_pendingUpdate != null && _pendingUpdate!.forceUpdate) {
-        AppUpdateDialog.show(context, _pendingUpdate!);
-        return;
-      }
-
-      final authState = ref.read(authProvider).value;
-      if (authState is AuthAuthenticated) {
-        context.go(RouteNames.dashboard);
-      } else {
-        // User explicitly signed out: request login credentials
-        context.go(RouteNames.login);
-      }
-    });
+    // Start synchronized splash sequence
+    _startSplashSequence();
   }
 
-  /// Silently fetches version.json in parallel with the splash animation.
-  /// For forceUpdate builds: always shows the dialog, bypassing auto-check setting.
-  Future<void> _silentUpdateCheck() async {
+  /// Synchronized splash sequence: ensures golden branding plays while awaiting
+  /// cloud update manifest, displaying update dialog immediately if available.
+  Future<void> _startSplashSequence() async {
+    final minSplashDuration = Future.delayed(const Duration(milliseconds: 2800));
+
+    AppUpdateInfo? update;
     try {
       final service = ref.read(appUpdateServiceProvider);
-      final update = await service.checkForUpdate();
-      if (update == null || !mounted) return;
-      if (update.forceUpdate) {
-        // forceUpdate always prompts — ignore auto-check preference
-        _pendingUpdate = update;
-      } else {
-        final autoCheck = await service.isAutoCheckEnabled();
-        if (autoCheck) _pendingUpdate = update;
+      // Actively await update check with a 3.5s timeout
+      update = await service.checkForUpdate().timeout(
+        const Duration(milliseconds: 3500),
+        onTimeout: () => null,
+      );
+    } catch (e) {
+      debugPrint('[SplashScreen] Update check error: $e');
+    }
+
+    // Ensure splash branding animation displays for at least 2.8 seconds
+    await minSplashDuration;
+    if (!mounted) return;
+
+    HapticFeedback.lightImpact();
+
+    // If an update was discovered:
+    if (update != null) {
+      final autoCheck = await ref.read(appUpdateServiceProvider).isAutoCheckEnabled();
+      if (update.forceUpdate || autoCheck) {
+        await AppUpdateDialog.show(context, update);
+        if (!mounted) return;
+        if (update.forceUpdate) {
+          // Mandatory update: user must complete update before continuing
+          return;
+        }
       }
-    } catch (_) {
-      // Silent fail — never block splash
+    }
+
+    final authState = ref.read(authProvider).value;
+    if (authState is AuthAuthenticated) {
+      context.go(RouteNames.dashboard);
+    } else {
+      // User explicitly signed out: request login credentials
+      context.go(RouteNames.login);
     }
   }
 

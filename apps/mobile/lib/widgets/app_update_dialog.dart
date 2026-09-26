@@ -10,16 +10,22 @@ class AppUpdateDialog extends StatefulWidget {
 
   static bool _isShowing = false;
 
-  static Future<void> show(BuildContext context, AppUpdateInfo info) {
+  static Future<void> show(BuildContext context, AppUpdateInfo info) async {
     // Mutex: never stack two update dialogs
-    if (_isShowing) return Future.value();
+    if (_isShowing) return;
     _isShowing = true;
     AppUpdateService.markPrompted();
-    return showDialog(
-      context: context,
-      barrierDismissible: !info.forceUpdate,
-      builder: (ctx) => AppUpdateDialog(updateInfo: info),
-    ).whenComplete(() => _isShowing = false);
+    try {
+      await showDialog(
+        context: context,
+        barrierDismissible: !info.forceUpdate,
+        builder: (ctx) => AppUpdateDialog(updateInfo: info),
+      );
+    } catch (e) {
+      debugPrint('[AppUpdateDialog] showDialog error: $e');
+    } finally {
+      _isShowing = false;
+    }
   }
 
   @override

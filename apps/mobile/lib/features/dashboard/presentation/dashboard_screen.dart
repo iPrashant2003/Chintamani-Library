@@ -22,15 +22,29 @@ class DashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+class _DashboardScreenState extends ConsumerState<DashboardScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initSystemNotifications();
       _checkUpdate();
       _syncServerNotifications();
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkUpdate();
+    }
   }
 
   Future<void> _initSystemNotifications() async {
@@ -50,16 +64,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     }
   }
 
-  Future<void> _checkUpdate() async {
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted) return;
-    final service = ref.read(appUpdateServiceProvider);
-    final autoCheck = await service.isAutoCheckEnabled();
-    if (!autoCheck || !mounted) return;
-
-    final update = await service.checkForUpdate();
-    if (update != null && mounted) {
-      AppUpdateDialog.show(context, update);
+  Future<void> _checkUpdate({bool force = false}) async {
+    try {
+      await Future.delayed(const Duration(milliseconds: 1500));
+      if (!mounted) return;
+      final service = ref.read(appUpdateServiceProvider);
+      final update = await service.checkForUpdate(force: force);
+      if (update != null && mounted) {
+        final autoCheck = await service.isAutoCheckEnabled();
+        if (update.forceUpdate || autoCheck) {
+          AppUpdateDialog.show(context, update);
+        }
+      }
+    } catch (e) {
+      debugPrint('[DashboardScreen] _checkUpdate error: $e');
     }
   }
 

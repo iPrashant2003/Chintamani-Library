@@ -28,25 +28,33 @@ void main() {
     });
 
     test('Higher build number triggers update, lower or equal does not', () {
-      const currentBuild = AppUpdateService.currentBuildNumber; // 2035
+      const currentBuild = AppUpdateService.currentBuildNumber;
 
-      // Remote has 2036 -> update available
-      const newerRemoteBuild = 2036;
+      // Remote has higher build -> update available
+      final newerRemoteBuild = currentBuild + 1;
       expect(newerRemoteBuild > currentBuild, true);
 
-      // Remote has 2035 -> up to date
-      const sameRemoteBuild = 2035;
+      // Remote has same build -> up to date
+      const sameRemoteBuild = currentBuild;
       expect(sameRemoteBuild > currentBuild, false);
 
-      // Remote has 2034 -> up to date (older)
-      const olderRemoteBuild = 2034;
+      // Remote has lower build -> up to date (older)
+      final olderRemoteBuild = currentBuild - 1;
       expect(olderRemoteBuild > currentBuild, false);
     });
 
-    test('hasCheckedThisSession starts as false', () {
-      // Reset for test isolation
-      AppUpdateService.hasCheckedThisSession = false;
-      expect(AppUpdateService.hasCheckedThisSession, false);
+    test('Semantic versioning comparison works correctly', () {
+      expect(AppUpdateService.compareSemver('2.6.1', '2.6.0') > 0, true);
+      expect(AppUpdateService.compareSemver('2.10.0', '2.9.0') > 0, true);
+      expect(AppUpdateService.compareSemver('2.6.0', '2.6.0') == 0, true);
+      expect(AppUpdateService.compareSemver('2.5.0', '2.6.0') < 0, true);
+    });
+
+    test('hasPromptedThisSession tracks prompt state', () {
+      AppUpdateService.hasPromptedThisSession = false;
+      expect(AppUpdateService.hasPromptedThisSession, false);
+      AppUpdateService.markPrompted();
+      expect(AppUpdateService.hasPromptedThisSession, true);
     });
   });
 }

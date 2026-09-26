@@ -450,7 +450,7 @@ class _AppUpdateSettingsSectionState extends ConsumerState<_AppUpdateSettingsSec
   Future<void> _checkUpdate() async {
     setState(() => _isChecking = true);
     final service = ref.read(appUpdateServiceProvider);
-    final update = await service.checkForUpdate();
+    final update = await service.checkForUpdate(force: true);
     if (!mounted) return;
     setState(() => _isChecking = false);
 

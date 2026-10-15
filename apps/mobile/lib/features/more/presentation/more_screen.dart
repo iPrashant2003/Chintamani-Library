@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../routing/route_names.dart';
 import '../../../theme/app_colors.dart';
+import '../../../widgets/ambient_background.dart';
 import '../../../widgets/chintamani_logo.dart';
 import '../../../widgets/icon_3d.dart';
 import '../../branch/providers/branch_provider.dart';
@@ -25,11 +26,12 @@ class MoreScreen extends ConsumerWidget {
     final openComplaints = ref.watch(openComplaintsCountProvider).value ?? 0;
 
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
-      body: SafeArea(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
+      backgroundColor: Colors.transparent,
+      body: AmbientBackground(
+        child: SafeArea(
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
             // ── Top Brand Header ──
             SliverToBoxAdapter(
               child: Padding(
@@ -267,6 +269,7 @@ class MoreScreen extends ConsumerWidget {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

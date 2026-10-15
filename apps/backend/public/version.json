@@ -1,21 +1,19 @@
 {
-  "version": "2.7.0",
-  "buildNumber": 2070,
+  "version": "2.7.1",
+  "buildNumber": 2071,
   "minimumSupportedVersion": "2.3.0",
   "releaseDate": "16 Oct 2026",
-  "title": "Chintamani Library v2.7.0 — 4D Multicolor UI Overhaul, Real-Time Animated Login & Enhanced Student Hub",
+  "title": "Chintamani Library v2.7.1 — Symmetrical 4D Member Action Controls, Luxury Executive Cards & Centered Brand Watermark",
   "releaseNotes": [
-    "REORGANIZED MEMBERS DIRECTORY: Premium 4D tactile cards with idle 3D perspective tilt, pulsing avatar aura, and smooth pull-to-refresh",
-    "NEW 4D MULTICOLOR ACTION CHIPS: All 15 member action buttons redesigned with 4D gradient depth, top specular sheen, and instant haptic feedback",
-    "WHATSAPP HUB 4D OVERHAUL: Multicolor jewel tabs (Auto Bot, Broadcast, Students) with illuminated active indicators",
-    "STUDENTS DIRECTORY CARDS: Personalized jewel-toned cards per student with branch seat badges and 1-tap WhatsApp chat pill",
-    "4D AUDIENCE FILTER SELECTOR: Structured multi-category selector with vertical accent glow and 3D icon tiles",
-    "REAL-TIME ANIMATED LOGIN SCREEN: Floating particle field, pulsating golden seal, shimmer sweep button, and staggered entrance",
-    "MORE SCREEN 4D ICONS: High-fidelity 4D isometric graphics across Universal QR, Lockers, Admissions, and System settings",
-    "SEAMLESS IN-APP OTA DELIVERY: Instant background detection and native 1-tap in-app package upgrade"
+    "SYMMETRICAL 4D MEMBER CONTROLS: All 15 member action buttons (WhatsApp, Edit, Renew, SMS, ID Card, Logs, Gift Days, etc.) redesigned with identical uniform dimensions",
+    "4D GRAPHIC BUTTONS: Tactile 3D embossed icon pods with jewel-tone glyphs and labels; button container surrounds streamlined to clean neutral dark obsidian glass without neon glare",
+    "CLEAN LUXURY MEMBER CARDS: Purged neon and bright glare from member ID cards, headers, and backgrounds; sleek dark titanium obsidian card surfaces with elegant gold trim",
+    "CENTERED WATERMARK BACKGROUND: Centered official ChintaMani insignia watermark rendered with calibrated transparency across app pages, keeping text and data 100% crisp and readable",
+    "OFFICIAL SCHOLAR ID PASS: Cleaned digital student ID pass modal with official library seal, QR code, and luxury gold styling",
+    "SEAMLESS OTA UPDATE: In-app instant auto-update delivery without manual APK installation"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.0/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.0/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.1/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.1/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

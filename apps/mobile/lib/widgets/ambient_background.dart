@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 
-/// Deep dark background with responsive full-screen luxury library photo layer.
-/// When [imagePath] is provided, it is rendered behind [child] with
-/// calibrated darkness and multi-stop gradient overlay so every card,
-/// metric, and text label maintains high contrast on both mobile and desktop.
+/// Deep dark background with responsive full-screen luxury library photo layer
+/// and centered transparent watermark brand logo.
+/// Every card, metric, and text label maintains high contrast and readability.
 class AmbientBackground extends StatelessWidget {
   final Widget child;
   final String? imagePath;
+  final bool showCenterLogo;
+  final double logoOpacity;
 
   const AmbientBackground({
     super.key,
     required this.child,
     this.imagePath,
+    this.showCenterLogo = true,
+    this.logoOpacity = 0.08,
   });
 
   @override
@@ -29,7 +32,6 @@ class AmbientBackground extends StatelessWidget {
               imagePath!,
               fit: BoxFit.cover,
               alignment: Alignment.topCenter,
-              // Darken base to ensure card & text readability
               color: Colors.black.withValues(alpha: 0.62),
               colorBlendMode: BlendMode.darken,
               errorBuilder: (_, __, ___) => const SizedBox.shrink(),
@@ -46,9 +48,9 @@ class AmbientBackground extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   stops: const [0.0, 0.45, 1.0],
                   colors: [
-                    Colors.black.withValues(alpha: 0.70), // Protect status bar & top branding
-                    Colors.black.withValues(alpha: 0.48), // Reveal artwork ambiance
-                    Colors.black.withValues(alpha: 0.78), // Smooth blend toward bottom navigation
+                    Colors.black.withValues(alpha: 0.70),
+                    Colors.black.withValues(alpha: 0.48),
+                    Colors.black.withValues(alpha: 0.78),
                   ],
                 ),
               ),
@@ -67,6 +69,25 @@ class AmbientBackground extends StatelessWidget {
                     Colors.transparent,
                     Colors.black.withValues(alpha: 0.40),
                   ],
+                ),
+              ),
+            ),
+          ),
+
+        // ── Centered Watermark Logo (Proper Opacity & Transparent) ─────
+        if (showCenterLogo)
+          Positioned.fill(
+            child: Center(
+              child: IgnorePointer(
+                child: Opacity(
+                  opacity: logoOpacity,
+                  child: Image.asset(
+                    'assets/images/app_bg_logo.png',
+                    width: 310,
+                    height: 310,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  ),
                 ),
               ),
             ),

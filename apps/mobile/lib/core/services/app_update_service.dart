@@ -80,8 +80,8 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.7.0';
-  static const currentBuildNumber = 2070;
+  static const currentVersion = '2.7.1';
+  static const currentBuildNumber = 2071;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   /// The update info discovered from cloud manifest, if any.

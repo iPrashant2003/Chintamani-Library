@@ -26,56 +26,29 @@ class MemberCard extends ConsumerStatefulWidget {
 }
 
 class _MemberCardState extends ConsumerState<MemberCard>
-    with TickerProviderStateMixin {
-  // ── Animation Controllers ──
-  late final AnimationController _glowController;
+    with SingleTickerProviderStateMixin {
+  // ── 4D Subtle Perspective Tilt Controller ──
   late final AnimationController _tiltController;
-  late final AnimationController _shimmerController;
-
-  late final Animation<double> _glowAnimation;
   late final Animation<double> _tiltAnimation;
-  late final Animation<double> _shimmerAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    // Glow controller: pulsates the avatar ring (0 → 1 → 0) every 1.8s
-    _glowController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    )..repeat(reverse: true);
-    _glowAnimation = CurvedAnimation(
-      parent: _glowController,
-      curve: Curves.easeInOut,
-    );
-
-    // Tilt controller: gentle idle floating tilt (0 → 1 → 0) every 3.5s
+    // Tilt controller: gentle idle floating tilt (0 → 1 → 0) every 4.0s
     _tiltController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3500),
+      duration: const Duration(milliseconds: 4000),
     )..repeat(reverse: true);
     _tiltAnimation = CurvedAnimation(
       parent: _tiltController,
       curve: Curves.easeInOut,
     );
-
-    // Shimmer controller: sweeps the seat badge shimmer
-    _shimmerController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2200),
-    )..repeat();
-    _shimmerAnimation = CurvedAnimation(
-      parent: _shimmerController,
-      curve: Curves.linear,
-    );
   }
 
   @override
   void dispose() {
-    _glowController.dispose();
     _tiltController.dispose();
-    _shimmerController.dispose();
     super.dispose();
   }
 
@@ -544,15 +517,16 @@ class _MemberCardState extends ConsumerState<MemberCard>
 
   void _showIdCardDialog() {
     final member = widget.member;
-    final cardAccent = _getCardAccent(member);
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF14120E),
+        backgroundColor: const Color(0xFF141318),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: cardAccent, width: 1.5),
+          side: BorderSide(
+              color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+              width: 1.2),
         ),
         title: const Text('Digital Student ID Card',
             style: TextStyle(
@@ -563,39 +537,61 @@ class _MemberCardState extends ConsumerState<MemberCard>
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [
-                  cardAccent.withOpacity(0.25),
-                  const Color(0xFF100C05)
-                ]),
+                color: const Color(0xFF0C0B10),
                 borderRadius: BorderRadius.circular(16),
-                border:
-                    Border.all(color: cardAccent.withOpacity(0.5), width: 1),
+                border: Border.all(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.30),
+                    width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.50),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
-                  const Text('CHINTAMANI LIBRARY',
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.school_rounded,
+                          color: Color(0xFFD4AF37), size: 18),
+                      SizedBox(width: 6),
+                      Text('CHINTAMANI LIBRARY',
+                          style: TextStyle(
+                              color: Color(0xFFD4AF37),
+                              fontWeight: FontWeight.w900,
+                              fontSize: 14,
+                              letterSpacing: 1.2)),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  const Text('OFFICIAL SCHOLAR PASS',
                       style: TextStyle(
-                          color: AppColors.goldPrimary,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 15,
-                          letterSpacing: 1.2)),
-                  const Text('Official Scholar Pass',
-                      style:
-                          TextStyle(color: Colors.white70, fontSize: 11)),
-                  const SizedBox(height: 12),
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: cardAccent.withOpacity(0.3),
-                    child: Text(
-                        member.name.isNotEmpty
-                            ? member.name.substring(0, 1).toUpperCase()
-                            : 'S',
-                        style: TextStyle(
-                            color: cardAccent,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold)),
+                          color: Color(0xFFA1A1AA),
+                          fontSize: 10.5,
+                          letterSpacing: 0.8)),
+                  const SizedBox(height: 14),
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                          color:
+                              const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                          width: 2),
+                    ),
+                    child: ClipOval(
+                      child: MemberImageHelper.buildAvatar(
+                        member: member,
+                        size: 64,
+                        accentColor: const Color(0xFFD4AF37),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Text(member.name,
@@ -603,17 +599,37 @@ class _MemberCardState extends ConsumerState<MemberCard>
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 16)),
-                  const SizedBox(height: 2),
-                  Text(
-                      'Seat: ${_getMemberNumber(member)} • Plan: ${member.currentPlanName}',
-                      style: const TextStyle(
-                          color: Color(0xFFFDE68A), fontSize: 12)),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.08)),
+                    ),
+                    child: Text(
+                        'Seat ${_getMemberNumber(member)}  •  ${member.currentPlanName}',
+                        style: const TextStyle(
+                            color: Color(0xFFFDE68A),
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600)),
+                  ),
+                  const SizedBox(height: 4),
                   Text('Phone: ${member.phone ?? "N/A"}',
                       style: const TextStyle(
-                          color: Colors.white60, fontSize: 11)),
-                  const SizedBox(height: 12),
-                  const Icon(Icons.qr_code_2_rounded,
-                      color: Colors.white, size: 64),
+                          color: Color(0xFFA1A1AA), fontSize: 11)),
+                  const SizedBox(height: 14),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.qr_code_2_rounded,
+                        color: Colors.black, size: 68),
+                  ),
                 ],
               ),
             ),
@@ -635,12 +651,15 @@ class _MemberCardState extends ConsumerState<MemberCard>
                 style: TextStyle(color: Color(0xFF10B981))),
           ),
           ElevatedButton(
-            style:
-                ElevatedButton.styleFrom(backgroundColor: cardAccent),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFD4AF37),
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Close',
-                style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+                style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -954,45 +973,32 @@ class _MemberCardState extends ConsumerState<MemberCard>
 
   // ── Enhanced Visual Helpers ──
 
-  /// Pulsing avatar with glow ring
+  /// Clean avatar with subtle status ring (no neon glow)
   Widget _buildGlowingAvatar(Member member, Color cardAccent) {
-    return AnimatedBuilder(
-      animation: _glowAnimation,
-      builder: (context, child) {
-        final glowColor =
-            member.isActive ? const Color(0xFF10B981) : const Color(0xFFDC2626);
-        final glowOpacity =
-            0.20 + (_glowAnimation.value * 0.55); // 0.20 → 0.75
-        final glowBlur = 6.0 + (_glowAnimation.value * 14.0); // 6 → 20
-        final ringWidth = 1.6 + (_glowAnimation.value * 1.4); // 1.6 → 3.0
-
-        return Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: cardAccent.withOpacity(0.15),
-            border: Border.all(color: glowColor, width: ringWidth),
-            boxShadow: [
-              BoxShadow(
-                color: glowColor.withOpacity(glowOpacity),
-                blurRadius: glowBlur,
-                spreadRadius: 1,
-              ),
-              BoxShadow(
-                color: cardAccent.withOpacity(0.18),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+    final statusColor =
+        member.isActive ? const Color(0xFF10B981) : const Color(0xFFDC2626);
+    return Container(
+      width: 52,
+      height: 52,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: const Color(0xFF1A1820),
+        border: Border.all(color: statusColor.withValues(alpha: 0.55), width: 1.8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
-          child: MemberImageHelper.buildAvatar(
-            member: member,
-            size: 50,
-            accentColor: cardAccent,
-          ),
-        );
-      },
+        ],
+      ),
+      child: ClipOval(
+        child: MemberImageHelper.buildAvatar(
+          member: member,
+          size: 52,
+          accentColor: cardAccent,
+        ),
+      ),
     );
   }
 
@@ -1018,87 +1024,47 @@ class _MemberCardState extends ConsumerState<MemberCard>
     );
   }
 
-  /// Seat badge with animated shimmer sweep
+  /// Clean seat badge with accent color — no shimmer animation
   Widget _buildShimmerSeatBadge(String seatNum, Color cardAccent) {
-    return AnimatedBuilder(
-      animation: _shimmerAnimation,
-      builder: (context, child) {
-        final shimmerPos = _shimmerAnimation.value; // 0.0 → 1.0
-
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: cardAccent.withOpacity(0.40),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      decoration: BoxDecoration(
+        color: cardAccent.withValues(alpha: 0.90),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.30),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Stack(
-              children: [
-                // Base badge
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: cardAccent,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.assignment_ind_rounded,
-                          color: Colors.white, size: 13),
-                      const SizedBox(width: 4),
-                      Text(
-                        seatNum,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Shimmer overlay sweep
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      gradient: LinearGradient(
-                        begin: Alignment(-1.5 + shimmerPos * 3.5, 0),
-                        end: Alignment(-0.5 + shimmerPos * 3.5, 0),
-                        colors: [
-                          Colors.white.withOpacity(0.0),
-                          Colors.white.withOpacity(0.28),
-                          Colors.white.withOpacity(0.0),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.chair_alt_rounded, color: Colors.white, size: 13),
+          const SizedBox(width: 4),
+          Text(
+            seatNum,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
-  /// Expiry date with optional pulsing amber warning dot
+  /// Expiry date with optional amber warning dot for near-expiry members
   Widget _buildExpiryWidget(
       Member member, String expiryDate, Color cardAccent) {
     final sub = member.activeSubscription;
     final daysRemaining = sub?.endDate != null
-        ? sub!.endDate!.difference(DateTime.now()).inDays
+        ? sub!.endDate.difference(DateTime.now()).inDays
         : 999;
-    final showPulse = member.isActive && daysRemaining < 7;
+    final showDot = member.isActive && daysRemaining < 7;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -1111,30 +1077,22 @@ class _MemberCardState extends ConsumerState<MemberCard>
             fontWeight: FontWeight.w700,
           ),
         ),
-        if (showPulse) ...[
+        if (showDot) ...[
           const SizedBox(width: 5),
-          AnimatedBuilder(
-            animation: _glowAnimation,
-            builder: (context, _) {
-              final opacity = 0.5 + _glowAnimation.value * 0.5;
-              final size = 6.0 + _glowAnimation.value * 2.5;
-              return Container(
-                width: size,
-                height: size,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFFF59E0B).withOpacity(opacity),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFF59E0B)
-                          .withOpacity(opacity * 0.7),
-                      blurRadius: 5,
-                      spreadRadius: 1,
-                    ),
-                  ],
+          Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFFF59E0B),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFF59E0B).withValues(alpha: 0.40),
+                  blurRadius: 4,
+                  spreadRadius: 1,
                 ),
-              );
-            },
+              ],
+            ),
           ),
         ],
       ],
@@ -1190,14 +1148,14 @@ class _MemberCardState extends ConsumerState<MemberCard>
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: cardAccent.withOpacity(0.18),
-              blurRadius: 22,
+              color: Colors.black.withValues(alpha: 0.55),
+              blurRadius: 18,
               offset: const Offset(0, 6),
-              spreadRadius: 1,
+              spreadRadius: 0,
             ),
             BoxShadow(
-              color: Colors.black.withOpacity(0.45),
-              blurRadius: 12,
+              color: cardAccent.withValues(alpha: 0.08),
+              blurRadius: 24,
               offset: const Offset(0, 4),
             ),
           ],
@@ -1205,24 +1163,15 @@ class _MemberCardState extends ConsumerState<MemberCard>
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
             child: Container(
               decoration: BoxDecoration(
-                // Frosted Glassmorphism gradient
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    cardAccent.withOpacity(0.18),
-                    const Color(0xEB131118),
-                    const Color(0xF20D0B10),
-                  ],
-                  stops: const [0.0, 0.35, 1.0],
-                ),
+                // Clean obsidian surface — no accent color tint
+                color: const Color(0xEE141318),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: cardAccent.withOpacity(0.35),
-                  width: 1.2,
+                  color: Colors.white.withValues(alpha: 0.07),
+                  width: 1.0,
                 ),
               ),
               child: Column(
@@ -1675,7 +1624,7 @@ class _MemberCardState extends ConsumerState<MemberCard>
     );
   }
 
-  // ── 4D Action Chip with press-scale, gradient bg, highlight line, glow shadow ──
+  // ── Uniform 4D Action Chip — color on icon & text only, clean neutral container ──
   Widget _buildActionChip({
     required IconData icon,
     required String label,
@@ -1684,33 +1633,34 @@ class _MemberCardState extends ConsumerState<MemberCard>
     bool isWhatsApp = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 3),
       child: _PressableChip(
         onTap: onTap,
         color: color,
         child: SizedBox(
-          height: 54,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                isWhatsApp
-                    ? const WhatsAppLogo(size: 20, color: Color(0xFF25D366))
-                    : Icon(icon, color: color, size: 20),
-                const SizedBox(height: 5),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.1,
-                  ),
+          width: 66,
+          height: 60,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              isWhatsApp
+                  ? const WhatsAppLogo(size: 22, color: Color(0xFF25D366))
+                  : Icon(icon, color: color, size: 22),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.05,
                 ),
-              ],
-            ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         ),
       ),
@@ -1785,38 +1735,17 @@ class _PressableChipState extends State<_PressableChip>
         },
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            // Gradient background: top 30% opacity → bottom 10% opacity
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                widget.color.withOpacity(0.30),
-                widget.color.withOpacity(0.10),
-              ],
-            ),
-            border: Border(
-              // Top highlight line: 1px white at 15% opacity
-              top: BorderSide(
-                  color: Colors.white.withOpacity(0.15), width: 1.0),
-              left: BorderSide(
-                  color: widget.color.withOpacity(0.22), width: 0.8),
-              right: BorderSide(
-                  color: widget.color.withOpacity(0.22), width: 0.8),
-              bottom: BorderSide(
-                  color: widget.color.withOpacity(0.18), width: 0.8),
+            // Neutral dark glass — NO color-fill surroundings
+            color: const Color(0xFF19171E),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.08),
+              width: 0.8,
             ),
             boxShadow: [
-              // Glow in chip color
               BoxShadow(
-                color: widget.color.withOpacity(0.28),
-                blurRadius: 10,
-                spreadRadius: 0,
-                offset: const Offset(0, 3),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.25),
-                blurRadius: 4,
+                color: Colors.black.withValues(alpha: 0.35),
+                blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
             ],

@@ -193,7 +193,8 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
                         count: stats['active'] ?? 0,
                         statusKey: 'active',
                         currentStatus: filter.status,
-                        accentColor: const Color(0xFF059669), // Sea Green
+                        accentColor: const Color(0xFF059669),
+                        icon: Icons.verified_rounded,
                       ),
                       const SizedBox(width: 8),
                       _buildCategoryCard(
@@ -202,7 +203,8 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
                         count: stats['expired'] ?? 0,
                         statusKey: 'expired',
                         currentStatus: filter.status,
-                        accentColor: const Color(0xFFDC2626), // Red
+                        accentColor: const Color(0xFFDC2626),
+                        icon: Icons.cancel_rounded,
                       ),
                       const SizedBox(width: 8),
                       _buildCategoryCard(
@@ -211,7 +213,8 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
                         count: stats['expiring1_3'] ?? 0,
                         statusKey: 'expiring1_3',
                         currentStatus: filter.status,
-                        accentColor: const Color(0xFFE11D48), // Pinkish Red
+                        accentColor: const Color(0xFFE11D48),
+                        icon: Icons.warning_rounded,
                       ),
                       const SizedBox(width: 8),
                       _buildCategoryCard(
@@ -220,7 +223,8 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
                         count: stats['expiring4_7'] ?? 0,
                         statusKey: 'expiring4_7',
                         currentStatus: filter.status,
-                        accentColor: const Color(0xFFD97706), // Dark Yellow
+                        accentColor: const Color(0xFFD97706),
+                        icon: Icons.hourglass_bottom_rounded,
                       ),
                       const SizedBox(width: 8),
                       _buildCategoryCard(
@@ -229,7 +233,8 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
                         count: stats['expiring8_15'] ?? 0,
                         statusKey: 'expiring8_15',
                         currentStatus: filter.status,
-                        accentColor: const Color(0xFF2563EB), // Blue
+                        accentColor: const Color(0xFF2563EB),
+                        icon: Icons.event_rounded,
                       ),
                       const SizedBox(width: 8),
                       _buildCategoryCard(
@@ -238,7 +243,8 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
                         count: stats['all'] ?? 0,
                         statusKey: 'all',
                         currentStatus: filter.status,
-                        accentColor: const Color(0xFF7C3AED), // Purple
+                        accentColor: const Color(0xFF7C3AED),
+                        icon: Icons.groups_rounded,
                       ),
                     ],
                   ),
@@ -345,6 +351,7 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
     required String statusKey,
     required String currentStatus,
     required Color accentColor,
+    required IconData icon,
   }) {
     final isSelected = currentStatus == statusKey;
 
@@ -354,69 +361,142 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
         ref.read(memberFilterProvider.notifier).state =
             ref.read(memberFilterProvider).copyWith(status: statusKey);
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 110,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? accentColor.withOpacity(0.25) : const Color(0xCC161412),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? accentColor : accentColor.withOpacity(0.35),
-            width: isSelected ? 1.6 : 1.0,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: isSelected ? 1.0 : 0.0, end: isSelected ? 1.0 : 0.0),
+        duration: const Duration(milliseconds: 250),
+        builder: (_, __, ___) => AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          width: 108,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isSelected
+                  ? [accentColor.withOpacity(0.35), accentColor.withOpacity(0.12), const Color(0xFF0D0B10)]
+                  : [const Color(0xFF1A1618), const Color(0xFF111115)],
+            ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isSelected ? accentColor : accentColor.withOpacity(0.28),
+              width: isSelected ? 1.8 : 1.0,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: isSelected ? accentColor.withOpacity(0.45) : Colors.black.withOpacity(0.35),
+                blurRadius: isSelected ? 18 : 6,
+                spreadRadius: isSelected ? 1 : 0,
+                offset: const Offset(0, 4),
+              ),
+              if (isSelected)
+                BoxShadow(
+                  color: accentColor.withOpacity(0.15),
+                  blurRadius: 32,
+                  spreadRadius: 4,
+                ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: isSelected ? accentColor.withOpacity(0.35) : Colors.black.withOpacity(0.3),
-              blurRadius: isSelected ? 12 : 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: isSelected ? Colors.white : const Color(0xFFA1A1AA),
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                height: 1.2,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.white : accentColor.withValues(alpha: 0.20),
-                shape: BoxShape.circle,
-                border: isSelected ? null : Border.all(color: accentColor.withValues(alpha: 0.6), width: 1),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    blurRadius: 4,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // 4D Icon Container
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isSelected
+                        ? [accentColor.withOpacity(0.5), accentColor.withOpacity(0.2)]
+                        : [accentColor.withOpacity(0.18), accentColor.withOpacity(0.06)],
                   ),
-                ],
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: accentColor.withOpacity(isSelected ? 0.7 : 0.35),
+                    width: isSelected ? 1.5 : 1.0,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: accentColor.withOpacity(0.5),
+                            blurRadius: 12,
+                            spreadRadius: 1,
+                          ),
+                        ]
+                      : [],
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Subtle inner highlight (top-left white sheen for 3D effect)
+                    Positioned(
+                      top: 4,
+                      left: 4,
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.25),
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      icon,
+                      color: isSelected ? Colors.white : accentColor,
+                      size: 20,
+                      shadows: isSelected
+                          ? [Shadow(color: accentColor, blurRadius: 8)]
+                          : [],
+                    ),
+                  ],
+                ),
               ),
-              child: Center(
+              const SizedBox(height: 8),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : const Color(0xFFA1A1AA),
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w700,
+                  height: 1.25,
+                ),
+              ),
+              const SizedBox(height: 6),
+              // Count badge with glow
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: isSelected ? accentColor : accentColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: accentColor.withOpacity(isSelected ? 0.9 : 0.5),
+                    width: 1,
+                  ),
+                  boxShadow: isSelected
+                      ? [BoxShadow(color: accentColor.withOpacity(0.5), blurRadius: 8, spreadRadius: 1)]
+                      : [],
+                ),
                 child: Text(
                   count.toString(),
                   style: TextStyle(
-                    color: isSelected ? accentColor : Colors.white,
-                    fontSize: 11.5,
+                    color: isSelected ? Colors.white : Colors.white70,
+                    fontSize: 11,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    );
+    ).animate().fadeIn(delay: 50.ms).scale(begin: const Offset(0.92, 0.92), end: const Offset(1, 1), duration: 300.ms, curve: Curves.easeOutBack);
   }
 }
 

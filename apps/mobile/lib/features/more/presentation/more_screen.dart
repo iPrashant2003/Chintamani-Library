@@ -478,31 +478,83 @@ class _ClayItemTileState extends State<_ClayItemTile>
           ),
           child: Row(
             children: [
-              // Icon
+              // 4D Icon Container
               Builder(
                 builder: (context) {
                   if (item.icon3d != null) {
-                    return Icon3D(type: item.icon3d!, size: 36);
+                    return Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: item.color.withValues(alpha: 0.25),
+                            blurRadius: 12,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                      child: Icon3D(type: item.icon3d!, size: 38),
+                    );
                   }
                   return Container(
-                    width: 38,
-                    height: 38,
+                    width: 42,
+                    height: 42,
                     decoration: BoxDecoration(
-                      color: item.color.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          item.color.withValues(alpha: 0.32),
+                          item.color.withValues(alpha: 0.10),
+                          const Color(0xFF0F0D16),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: item.color.withValues(alpha: 0.30),
-                        width: 0.8,
+                        color: item.color.withValues(alpha: 0.55),
+                        width: 1.2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: item.color.withValues(alpha: 0.18),
-                          blurRadius: 10,
+                          color: item.color.withValues(alpha: 0.35),
+                          blurRadius: 12,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 3),
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.5),
+                          blurRadius: 6,
                           offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    child: Icon(item.icon, color: item.color, size: 20),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Positioned(
+                          top: 4,
+                          left: 4,
+                          child: Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withValues(alpha: 0.25),
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          item.icon,
+                          color: item.color,
+                          size: 21,
+                          shadows: [
+                            Shadow(
+                              color: item.color.withValues(alpha: 0.7),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   );
                 },
               ),

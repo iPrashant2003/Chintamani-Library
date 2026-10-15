@@ -1,20 +1,21 @@
 {
-  "version": "2.6.1",
-  "buildNumber": 2061,
+  "version": "2.7.0",
+  "buildNumber": 2070,
   "minimumSupportedVersion": "2.3.0",
-  "releaseDate": "27 Sep 2026",
-  "title": "Chintamani Library v2.6.1 — Instant Auto-Updates, Lifecycle Resume Trigger & Student Photo Upload",
+  "releaseDate": "16 Oct 2026",
+  "title": "Chintamani Library v2.7.0 — 4D Multicolor UI Overhaul, Real-Time Animated Login & Enhanced Student Hub",
   "releaseNotes": [
-    "INSTANT AUTO-UPDATES: Background lifecycle resume listener — app checks for updates every time it is opened or resumed",
-    "FIXED: Splash screen update check race condition eliminated with synchronized sequence",
-    "NEW: Student photo upload (gallery/device storage, up to 5MB, strict branch-isolated Cloudinary storage)",
-    "REMOVED: Live selfie camera requirement completely removed from admission flow",
-    "FIXED: Eliminated low-memory errors permanently with zero-copy stream uploads",
-    "NEW: Notification tracking & deduplication — no repeated old alerts on app launch",
-    "NEW: Direct 1-Tap APK Updater download page"
+    "REORGANIZED MEMBERS DIRECTORY: Premium 4D tactile cards with idle 3D perspective tilt, pulsing avatar aura, and smooth pull-to-refresh",
+    "NEW 4D MULTICOLOR ACTION CHIPS: All 15 member action buttons redesigned with 4D gradient depth, top specular sheen, and instant haptic feedback",
+    "WHATSAPP HUB 4D OVERHAUL: Multicolor jewel tabs (Auto Bot, Broadcast, Students) with illuminated active indicators",
+    "STUDENTS DIRECTORY CARDS: Personalized jewel-toned cards per student with branch seat badges and 1-tap WhatsApp chat pill",
+    "4D AUDIENCE FILTER SELECTOR: Structured multi-category selector with vertical accent glow and 3D icon tiles",
+    "REAL-TIME ANIMATED LOGIN SCREEN: Floating particle field, pulsating golden seal, shimmer sweep button, and staggered entrance",
+    "MORE SCREEN 4D ICONS: High-fidelity 4D isometric graphics across Universal QR, Lockers, Admissions, and System settings",
+    "SEAMLESS IN-APP OTA DELIVERY: Instant background detection and native 1-tap in-app package upgrade"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.6.1/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.6.1/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.0/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.0/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

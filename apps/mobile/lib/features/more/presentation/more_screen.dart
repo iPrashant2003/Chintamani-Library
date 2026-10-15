@@ -530,33 +530,18 @@ class _ClayItemTileState extends State<_ClayItemTile>
                         ),
                       ],
                     ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Positioned(
-                          top: 4,
-                          left: 4,
-                          child: Container(
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withValues(alpha: 0.25),
-                            ),
+                    child: Center(
+                      child: Icon(
+                        item.icon,
+                        color: item.color,
+                        size: 21,
+                        shadows: [
+                          Shadow(
+                            color: item.color.withValues(alpha: 0.5),
+                            blurRadius: 6,
                           ),
-                        ),
-                        Icon(
-                          item.icon,
-                          color: item.color,
-                          size: 21,
-                          shadows: [
-                            Shadow(
-                              color: item.color.withValues(alpha: 0.7),
-                              blurRadius: 8,
-                            ),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },

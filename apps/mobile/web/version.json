@@ -1,19 +1,19 @@
 {
-  "version": "2.7.1",
-  "buildNumber": 2071,
+  "version": "2.7.2",
+  "buildNumber": 2072,
   "minimumSupportedVersion": "2.3.0",
   "releaseDate": "16 Oct 2026",
-  "title": "Chintamani Library v2.7.1 — Symmetrical 4D Member Action Controls, Luxury Executive Cards & Centered Brand Watermark",
+  "title": "Chintamani Library v2.7.2 — Official Insignia Watermark, Clean WhatsApp Hub & Refined Controls",
   "releaseNotes": [
-    "SYMMETRICAL 4D MEMBER CONTROLS: All 15 member action buttons (WhatsApp, Edit, Renew, SMS, ID Card, Logs, Gift Days, etc.) redesigned with identical uniform dimensions",
-    "4D GRAPHIC BUTTONS: Tactile 3D embossed icon pods with jewel-tone glyphs and labels; button container surrounds streamlined to clean neutral dark obsidian glass without neon glare",
-    "CLEAN LUXURY MEMBER CARDS: Purged neon and bright glare from member ID cards, headers, and backgrounds; sleek dark titanium obsidian card surfaces with elegant gold trim",
-    "CENTERED WATERMARK BACKGROUND: Centered official ChintaMani insignia watermark rendered with calibrated transparency across app pages, keeping text and data 100% crisp and readable",
-    "OFFICIAL SCHOLAR ID PASS: Cleaned digital student ID pass modal with official library seal, QR code, and luxury gold styling",
+    "OFFICIAL INSIGNIA WATERMARK: Centered official golden laurel wreath and 'Infinity under a roof' insignia watermark across all app pages and Universal QR portal with calibrated opacity for crisp readability",
+    "CLEAN WHATSAPP HUB: Purged claymorphic bubbles, neon glare, and glowing borders; sleek obsidian executive surfaces with solid status indicators and responsive messaging buttons",
+    "REFINED 4D CONTROLS & ICONS: Removed white specular highlight dots from all More section icons and cleaned seat/expiry dots from member cards",
+    "UNIFIED UNIVERSAL QR PORTAL: Universal QR screens now seamlessly showcase the centered insignia watermark in pure dark luxury",
+    "VERIFIED WORKFLOWS: Fully verified WhatsApp Auto Bot queue, broadcast flows, student direct messaging, and member action buttons",
     "SEAMLESS OTA UPDATE: In-app instant auto-update delivery without manual APK installation"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.1/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.1/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.2/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.2/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

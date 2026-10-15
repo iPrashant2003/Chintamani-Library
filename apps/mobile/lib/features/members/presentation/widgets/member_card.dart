@@ -1057,45 +1057,26 @@ class _MemberCardState extends ConsumerState<MemberCard>
     );
   }
 
-  /// Expiry date with optional amber warning dot for near-expiry members
+  /// Expiry date with clean typography — no dots
   Widget _buildExpiryWidget(
       Member member, String expiryDate, Color cardAccent) {
     final sub = member.activeSubscription;
     final daysRemaining = sub?.endDate != null
         ? sub!.endDate.difference(DateTime.now()).inDays
         : 999;
-    final showDot = member.isActive && daysRemaining < 7;
+    final isExpiringSoon = member.isActive && daysRemaining < 7;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          expiryDate,
-          style: TextStyle(
-            color: member.isActive ? Colors.white : const Color(0xFFDC2626),
-            fontSize: 12.5,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        if (showDot) ...[
-          const SizedBox(width: 5),
-          Container(
-            width: 7,
-            height: 7,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFFF59E0B),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFF59E0B).withValues(alpha: 0.40),
-                  blurRadius: 4,
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ],
+    return Text(
+      expiryDate,
+      style: TextStyle(
+        color: !member.isActive
+            ? const Color(0xFFEF4444)
+            : isExpiringSoon
+                ? const Color(0xFFF59E0B)
+                : Colors.white,
+        fontSize: 12.5,
+        fontWeight: FontWeight.w700,
+      ),
     );
   }
 
@@ -1295,31 +1276,8 @@ class _MemberCardState extends ConsumerState<MemberCard>
                                 ),
                               ),
 
-                              // ── Shimmer Seat Badge & Chair Status ──
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  _buildShimmerSeatBadge(seatNum, cardAccent),
-                                  const SizedBox(height: 6),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.chair_alt_rounded,
-                                          color: cardAccent, size: 13),
-                                      const SizedBox(width: 2),
-                                      Text(
-                                        '.......',
-                                        style: TextStyle(
-                                          color: cardAccent.withOpacity(0.8),
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 1.0,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                              // ── Seat Badge ──
+                              _buildShimmerSeatBadge(seatNum, cardAccent),
                             ],
                           ),
 

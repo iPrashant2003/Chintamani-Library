@@ -513,51 +513,27 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
                 child: Row(
                   children: [
-                    // Chintamani Library Logo with 4D layered aura
+                    // Chintamani Library Logo — clean luxury dark box
                     Container(
-                      width: 50,
-                      height: 50,
+                      width: 48,
+                      height: 48,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xFF38290E), Color(0xFF181206), Color(0xFF0D0B07)],
+                        color: const Color(0xFF16151B),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                          width: 1.0,
                         ),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFFFDF00).withValues(alpha: 0.8), width: 1.4),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFD4AF37).withValues(alpha: 0.40),
-                            blurRadius: 18,
-                            spreadRadius: 2,
-                            offset: const Offset(0, 4),
-                          ),
-                          const BoxShadow(
-                            color: Colors.black,
+                            color: Colors.black.withValues(alpha: 0.45),
                             blurRadius: 10,
-                            offset: Offset(0, 2),
+                            offset: const Offset(0, 3),
                           ),
                         ],
                       ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Positioned(
-                            top: 4,
-                            left: 4,
-                            child: Container(
-                              width: 14,
-                              height: 14,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.18),
-                              ),
-                            ),
-                          ),
-                          const Center(
-                            child: ChintaManiLogo(size: 34, showGlow: false, showCircularBackground: false),
-                          ),
-                        ],
+                      child: const Center(
+                        child: ChintaManiLogo(size: 32, showGlow: false, showCircularBackground: false),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -582,57 +558,37 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              TweenAnimationBuilder<double>(
-                                tween: Tween(begin: 0.4, end: 1.0),
-                                duration: const Duration(milliseconds: 1000),
-                                builder: (ctx, val, child) => Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: const Color(0xFF10B981),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(0xFF10B981).withValues(alpha: val * 0.8),
-                                        blurRadius: 8 * val,
-                                        spreadRadius: 2 * val,
-                                      ),
-                                    ],
-                                  ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3), width: 0.8),
                                 ),
-                              ),
-                              const SizedBox(width: 6),
-                              const Text(
-                                'Bot Active',
-                                style: TextStyle(
-                                  color: Color(0xFF10B981),
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w800,
+                                child: const Text(
+                                  'BOT ACTIVE',
+                                  style: TextStyle(
+                                    color: Color(0xFF10B981),
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.5,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [Color(0xFF221A0E), Color(0xFF141009)],
-                                  ),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.5), width: 0.9),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
-                                      blurRadius: 4,
-                                    ),
-                                  ],
+                                  color: const Color(0xFF16151B),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 0.8),
                                 ),
                                 child: Text(
                                   '+91 $adminNumber',
-                                  style: const TextStyle(
-                                    color: Color(0xFFFDE68A),
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.7),
                                     fontSize: 9.5,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.4,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
@@ -645,42 +601,36 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
                 ),
               ),
 
-              // ── Tab Bar: 4D Multicolor Obsidian Glass ──────────────────────────────
+              // ── Tab Bar: Clean Executive Dark Glass ──────────────────────────────
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFF1C1917), Color(0xFF0F0E12), Color(0xFF09080A)],
-                  ),
-                  borderRadius: BorderRadius.circular(16),
+                  color: const Color(0xFF141318),
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.12),
-                    width: 1.2,
+                    color: Colors.white.withValues(alpha: 0.08),
+                    width: 1.0,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.6),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
+                      color: Colors.black.withValues(alpha: 0.45),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
                 child: TabBar(
                   controller: _tabCtrl,
                   indicator: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFD4AF37), width: 1.2),
+                    color: const Color(0xFF22202A),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.4), width: 1.0),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
+                        color: Colors.black.withValues(alpha: 0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
                       ),
                     ],
                   ),
@@ -692,41 +642,20 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
                   padding: EdgeInsets.zero,
                   dividerColor: Colors.transparent,
                   isScrollable: false,
-                  tabs: [
+                  tabs: const [
                     Tab(
-                      icon: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFF059669).withValues(alpha: 0.2),
-                        ),
-                        child: const Icon(Icons.smart_toy_rounded, size: 16, color: Color(0xFF34D399)),
-                      ),
-                      iconMargin: const EdgeInsets.only(bottom: 2),
+                      icon: Icon(Icons.smart_toy_rounded, size: 18, color: Color(0xFF10B981)),
+                      iconMargin: EdgeInsets.only(bottom: 2),
                       text: 'Auto Bot',
                     ),
                     Tab(
-                      icon: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFF7C3AED).withValues(alpha: 0.2),
-                        ),
-                        child: const Icon(Icons.campaign_rounded, size: 16, color: Color(0xFFA78BFA)),
-                      ),
-                      iconMargin: const EdgeInsets.only(bottom: 2),
+                      icon: Icon(Icons.campaign_rounded, size: 18, color: Color(0xFFA78BFA)),
+                      iconMargin: EdgeInsets.only(bottom: 2),
                       text: 'Broadcast',
                     ),
                     Tab(
-                      icon: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
-                        ),
-                        child: const Icon(Icons.people_alt_rounded, size: 16, color: Color(0xFFFDE68A)),
-                      ),
-                      iconMargin: const EdgeInsets.only(bottom: 2),
+                      icon: Icon(Icons.people_alt_rounded, size: 18, color: Color(0xFFD4AF37)),
+                      iconMargin: EdgeInsets.only(bottom: 2),
                       text: 'Students',
                     ),
                   ],
@@ -864,17 +793,13 @@ class _BotEngineTab extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF1E1035), Color(0xFF120920)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: const Color(0xFF16151B),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFF7C3AED).withValues(alpha: 0.6), width: 1.2),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1.0),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF7C3AED).withValues(alpha: 0.18),
-                        blurRadius: 10,
+                        color: Colors.black.withValues(alpha: 0.35),
+                        blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
                     ],
@@ -1021,74 +946,51 @@ class _BotEngineTab extends StatelessWidget {
                   itemBuilder: (ctx, i) {
                     final item = queue[i];
                     Color stageColor;
-                    Color stageBg;
 
                     switch (item.stage) {
                       case BotDueStage.stage1Day1:
                         stageColor = const Color(0xFF38BDF8); // Electric Sky Blue
-                        stageBg = const Color(0x330284C7);
                         break;
                       case BotDueStage.stage2Day3:
                         stageColor = const Color(0xFFA855F7); // Royal Purple
-                        stageBg = const Color(0x337C3AED);
                         break;
                       case BotDueStage.stage3Day5:
                         stageColor = const Color(0xFFF97316); // Amber Orange
-                        stageBg = const Color(0x33EA580C);
                         break;
                       case BotDueStage.stage4Day5Plus12h:
                         stageColor = const Color(0xFFEF4444); // Crimson Ruby
-                        stageBg = const Color(0x33DC2626);
                         break;
                     }
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            stageColor.withValues(alpha: 0.18),
-                            const Color(0xFF141216),
-                            const Color(0xFF0C0A0E),
-                          ],
+                        color: const Color(0xFF141318),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          width: 1.0,
                         ),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: stageColor.withValues(alpha: 0.45), width: 1.2),
                         boxShadow: [
                           BoxShadow(
-                            color: stageColor.withValues(alpha: 0.16),
-                            blurRadius: 12,
-                            offset: const Offset(0, 3),
-                          ),
-                          const BoxShadow(
-                            color: Colors.black54,
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
+                            color: Colors.black.withValues(alpha: 0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(14),
                         child: IntrinsicHeight(
                           child: Row(
                             children: [
-                              // 4D Left Accent Stripe
+                              // Left Status Stripe (clean, solid, no glowing shadow)
                               Container(
-                                width: 5,
-                                decoration: BoxDecoration(
-                                  color: stageColor,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: stageColor.withValues(alpha: 0.8),
-                                      blurRadius: 6,
-                                    ),
-                                  ],
-                                ),
+                                width: 3.5,
+                                color: stageColor,
                               ),
                               const SizedBox(width: 10),
-                              // 4D Avatar with glowing aura
+                              // Clean Avatar
                               Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 10),
                                 child: Container(
@@ -1096,19 +998,15 @@ class _BotEngineTab extends StatelessWidget {
                                   height: 42,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: stageColor, width: 1.5),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: stageColor.withValues(alpha: 0.45),
-                                        blurRadius: 8,
-                                        spreadRadius: 1,
-                                      ),
-                                    ],
+                                    color: const Color(0xFF1C1A22),
+                                    border: Border.all(color: stageColor.withValues(alpha: 0.4), width: 1.2),
                                   ),
-                                  child: MemberImageHelper.buildAvatar(
-                                    member: item.member,
-                                    size: 42,
-                                    accentColor: stageColor,
+                                  child: ClipOval(
+                                    child: MemberImageHelper.buildAvatar(
+                                      member: item.member,
+                                      size: 42,
+                                      accentColor: stageColor,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -1136,9 +1034,9 @@ class _BotEngineTab extends StatelessWidget {
                                           Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                             decoration: BoxDecoration(
-                                              color: stageBg,
+                                              color: stageColor.withValues(alpha: 0.12),
                                               borderRadius: BorderRadius.circular(6),
-                                              border: Border.all(color: stageColor.withValues(alpha: 0.7), width: 0.9),
+                                              border: Border.all(color: stageColor.withValues(alpha: 0.3), width: 0.8),
                                             ),
                                             child: Text(
                                               item.stageBadge,
@@ -1149,9 +1047,9 @@ class _BotEngineTab extends StatelessWidget {
                                           Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                             decoration: BoxDecoration(
-                                              color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                                              color: const Color(0xFFD4AF37).withValues(alpha: 0.12),
                                               borderRadius: BorderRadius.circular(6),
-                                              border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.4), width: 0.8),
+                                              border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.3), width: 0.8),
                                             ),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.min,
@@ -1171,7 +1069,7 @@ class _BotEngineTab extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              // 4D Send Now Button
+                              // Clean WhatsApp Send Button
                               Padding(
                                 padding: const EdgeInsets.only(right: 12),
                                 child: GestureDetector(
@@ -1179,15 +1077,13 @@ class _BotEngineTab extends StatelessWidget {
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                     decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [Color(0xFF25D366), Color(0xFF059669)],
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
+                                      color: const Color(0xFF059669),
+                                      borderRadius: BorderRadius.circular(8),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: const Color(0xFF25D366).withValues(alpha: 0.35),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 2),
+                                          color: Colors.black.withValues(alpha: 0.25),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 1),
                                         ),
                                       ],
                                     ),
@@ -1412,18 +1308,14 @@ class _BroadcastTab extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF2A1F0D), Color(0xFF140F05)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.5), width: 1.2),
+                        color: const Color(0xFF141318),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1.0),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
+                            color: Colors.black.withValues(alpha: 0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
@@ -1435,16 +1327,16 @@ class _BroadcastTab extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                                  color: const Color(0xFFD4AF37).withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Icon(Icons.groups_rounded, color: Color(0xFFFDE68A), size: 16),
+                                child: const Icon(Icons.groups_rounded, color: Color(0xFFD4AF37), size: 16),
                               ),
                               const SizedBox(width: 8),
                               const Expanded(
                                 child: Text(
                                   'All Students',
-                                  style: TextStyle(color: Color(0xFFFDE68A), fontSize: 12.5, fontWeight: FontWeight.w900),
+                                  style: TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w800),
                                 ),
                               ),
                             ],
@@ -1452,7 +1344,7 @@ class _BroadcastTab extends StatelessWidget {
                           const SizedBox(height: 6),
                           Text(
                             '${allMembers.length} Registered',
-                            style: const TextStyle(color: Color(0xFFB8975A), fontSize: 11, fontWeight: FontWeight.w600),
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11, fontWeight: FontWeight.w500),
                           ),
                           const SizedBox(height: 10),
                           GestureDetector(
@@ -1461,10 +1353,8 @@ class _BroadcastTab extends StatelessWidget {
                               width: double.infinity,
                               padding: const EdgeInsets.symmetric(vertical: 9),
                               decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [Color(0xFFD4AF37), Color(0xFFF59E0B)],
-                                ),
-                                borderRadius: BorderRadius.circular(10),
+                                color: const Color(0xFFD4AF37),
+                                borderRadius: BorderRadius.circular(8),
                               ),
                               child: Center(
                                 child: Row(
@@ -1492,18 +1382,14 @@ class _BroadcastTab extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [activeChip.bg, const Color(0xFF100D1A)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: activeChip.color.withValues(alpha: 0.6), width: 1.2),
+                        color: const Color(0xFF141318),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1.0),
                         boxShadow: [
                           BoxShadow(
-                            color: activeChip.color.withValues(alpha: 0.18),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
+                            color: Colors.black.withValues(alpha: 0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
@@ -1530,7 +1416,7 @@ class _BroadcastTab extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.all(6),
                                   decoration: BoxDecoration(
-                                    color: activeChip.color.withValues(alpha: 0.2),
+                                    color: activeChip.color.withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Icon(activeChip.icon, color: activeChip.color, size: 16),
@@ -1541,7 +1427,7 @@ class _BroadcastTab extends StatelessWidget {
                                     activeChip.title,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(color: activeChip.color, fontSize: 12, fontWeight: FontWeight.w900),
+                                    style: TextStyle(color: activeChip.color, fontSize: 12, fontWeight: FontWeight.w800),
                                   ),
                                 ),
                                 const Icon(Icons.arrow_drop_down_rounded, color: Colors.white70, size: 20),
@@ -1551,7 +1437,7 @@ class _BroadcastTab extends StatelessWidget {
                           const SizedBox(height: 6),
                           Text(
                             '${filtered.length} Students Selected',
-                            style: TextStyle(color: activeChip.color.withValues(alpha: 0.8), fontSize: 11, fontWeight: FontWeight.w600),
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11, fontWeight: FontWeight.w500),
                           ),
                           const SizedBox(height: 10),
                           Row(
@@ -1577,9 +1463,9 @@ class _BroadcastTab extends StatelessWidget {
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(vertical: 9),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF14120E),
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(color: activeChip.color.withValues(alpha: 0.5)),
+                                      color: const Color(0xFF1E1D24),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
                                     ),
                                     child: Center(
                                       child: Row(
@@ -1606,18 +1492,14 @@ class _BroadcastTab extends StatelessWidget {
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(vertical: 9),
                                     decoration: BoxDecoration(
-                                      gradient: filtered.isEmpty
-                                          ? const LinearGradient(colors: [Color(0xFF333333), Color(0xFF222222)])
-                                          : LinearGradient(
-                                              colors: [activeChip.color, activeChip.color.withValues(alpha: 0.75)],
-                                            ),
-                                      borderRadius: BorderRadius.circular(10),
+                                      color: filtered.isEmpty ? const Color(0xFF26252C) : const Color(0xFF059669),
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Center(
                                       child: Text(
                                         'Send (${filtered.length})',
                                         style: TextStyle(
-                                          color: filtered.isEmpty ? Colors.grey : Colors.white,
+                                          color: filtered.isEmpty ? Colors.white38 : Colors.white,
                                           fontSize: 11,
                                           fontWeight: FontWeight.w900,
                                         ),
@@ -2122,53 +2004,32 @@ class _StudentsTab extends StatelessWidget {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            accentColor.withValues(alpha: 0.16),
-                            const Color(0xFF141216),
-                            const Color(0xFF0B090E),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
+                        color: const Color(0xFF141318),
+                        borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: accentColor.withValues(alpha: 0.40),
-                          width: 1.2,
+                          color: Colors.white.withValues(alpha: 0.08),
+                          width: 1.0,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: accentColor.withValues(alpha: 0.14),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                          const BoxShadow(
-                            color: Colors.black45,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
+                            color: Colors.black.withValues(alpha: 0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(14),
                         child: IntrinsicHeight(
                           child: Row(
                             children: [
-                              // 4D vertical accent stripe
+                              // Left Status Stripe (clean, solid, no glowing shadow)
                               Container(
-                                width: 4.5,
-                                decoration: BoxDecoration(
-                                  color: accentColor,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: accentColor.withValues(alpha: 0.8),
-                                      blurRadius: 6,
-                                    ),
-                                  ],
-                                ),
+                                width: 3.5,
+                                color: accentColor,
                               ),
                               const SizedBox(width: 10),
-                              // 4D Avatar with glowing border
+                              // Clean Avatar
                               Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 10),
                                 child: Container(
@@ -2176,19 +2037,15 @@ class _StudentsTab extends StatelessWidget {
                                   height: 42,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: accentColor, width: 1.5),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: accentColor.withValues(alpha: 0.45),
-                                        blurRadius: 8,
-                                        spreadRadius: 1,
-                                      ),
-                                    ],
+                                    color: const Color(0xFF1C1A22),
+                                    border: Border.all(color: accentColor.withValues(alpha: 0.45), width: 1.2),
                                   ),
-                                  child: MemberImageHelper.buildAvatar(
-                                    member: m,
-                                    size: 42,
-                                    accentColor: accentColor,
+                                  child: ClipOval(
+                                    child: MemberImageHelper.buildAvatar(
+                                      member: m,
+                                      size: 42,
+                                      accentColor: accentColor,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -2221,7 +2078,7 @@ class _StudentsTab extends StatelessWidget {
                                               color: isAct ? const Color(0x2210B981) : const Color(0x22EF4444),
                                               borderRadius: BorderRadius.circular(5),
                                               border: Border.all(
-                                                color: isAct ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                                                color: isAct ? const Color(0xFF10B981).withValues(alpha: 0.5) : const Color(0xFFEF4444).withValues(alpha: 0.5),
                                                 width: 0.8,
                                               ),
                                             ),
@@ -2239,9 +2096,9 @@ class _StudentsTab extends StatelessWidget {
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                                               decoration: BoxDecoration(
-                                                color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                                                color: const Color(0xFFD4AF37).withValues(alpha: 0.12),
                                                 borderRadius: BorderRadius.circular(5),
-                                                border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.4), width: 0.8),
+                                                border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.3), width: 0.8),
                                               ),
                                               child: Text(
                                                 'Seat: ${m.currentSeatNumber}',
@@ -2268,7 +2125,7 @@ class _StudentsTab extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              // 4D Action Button
+                              // Clean WhatsApp Chat Button
                               Padding(
                                 padding: const EdgeInsets.only(right: 12),
                                 child: hasPhone
@@ -2290,15 +2147,13 @@ class _StudentsTab extends StatelessWidget {
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7.5),
                                           decoration: BoxDecoration(
-                                            gradient: const LinearGradient(
-                                              colors: [Color(0xFF25D366), Color(0xFF059669)],
-                                            ),
-                                            borderRadius: BorderRadius.circular(10),
+                                            color: const Color(0xFF059669),
+                                            borderRadius: BorderRadius.circular(8),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: const Color(0xFF25D366).withValues(alpha: 0.35),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 2),
+                                                color: Colors.black.withValues(alpha: 0.25),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 1),
                                               ),
                                             ],
                                           ),
@@ -2447,63 +2302,40 @@ class _AudienceFilterSheet extends StatelessWidget {
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 9),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: selected == item.audience
-                                ? [item.color.withValues(alpha: 0.28), item.bg, const Color(0xFF0D0B12)]
-                                : [const Color(0xFF181514), const Color(0xFF100E10)],
-                          ),
-                          borderRadius: BorderRadius.circular(16),
+                          color: selected == item.audience ? const Color(0xFF221F28) : const Color(0xFF141318),
+                          borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: selected == item.audience ? item.color : item.color.withValues(alpha: 0.25),
-                            width: selected == item.audience ? 1.6 : 1,
+                            color: selected == item.audience ? const Color(0xFFD4AF37) : Colors.white.withValues(alpha: 0.08),
+                            width: selected == item.audience ? 1.4 : 1.0,
                           ),
-                          boxShadow: selected == item.audience
-                              ? [
-                                  BoxShadow(color: item.color.withValues(alpha: 0.35), blurRadius: 14, spreadRadius: 1),
-                                  BoxShadow(color: Colors.black.withValues(alpha: 0.6), blurRadius: 6, offset: const Offset(0, 3)),
-                                ]
-                              : [
-                                  BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 4, offset: const Offset(0, 2)),
-                                ],
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withValues(alpha: 0.35), blurRadius: 6, offset: const Offset(0, 2)),
+                          ],
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(14),
                           child: IntrinsicHeight(
                             child: Row(
                               children: [
-                                // Left 4D accent stripe
+                                // Clean Left accent stripe
                                 Container(
-                                  width: 4.5,
-                                  decoration: BoxDecoration(
-                                    color: selected == item.audience ? item.color : item.color.withValues(alpha: 0.4),
-                                    boxShadow: selected == item.audience
-                                        ? [BoxShadow(color: item.color, blurRadius: 6)]
-                                        : [],
-                                  ),
+                                  width: 3.5,
+                                  color: selected == item.audience ? const Color(0xFFD4AF37) : item.color.withValues(alpha: 0.4),
                                 ),
                                 const SizedBox(width: 10),
-                                // 4D Icon box
+                                // Icon box
                                 Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 10),
                                   child: Container(
-                                    width: 40,
-                                    height: 40,
+                                    width: 38,
+                                    height: 38,
                                     decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [item.color.withValues(alpha: 0.35), item.color.withValues(alpha: 0.12)],
-                                      ),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: item.color.withValues(alpha: 0.5), width: 1.2),
-                                      boxShadow: selected == item.audience
-                                          ? [BoxShadow(color: item.color.withValues(alpha: 0.4), blurRadius: 8)]
-                                          : [],
+                                      color: item.color.withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: item.color.withValues(alpha: 0.3), width: 1.0),
                                     ),
                                     child: Center(
-                                      child: Icon(item.icon, color: selected == item.audience ? Colors.white : item.color, size: 20),
+                                      child: Icon(item.icon, color: item.color, size: 18),
                                     ),
                                   ),
                                 ),
@@ -2529,7 +2361,7 @@ class _AudienceFilterSheet extends StatelessWidget {
                                           item.subtitle,
                                           style: TextStyle(
                                             color: selected == item.audience
-                                                ? item.color.withValues(alpha: 0.9)
+                                                ? const Color(0xFFFDE68A)
                                                 : const Color(0xFF94A3B8),
                                             fontSize: 11,
                                             height: 1.25,
@@ -2542,15 +2374,7 @@ class _AudienceFilterSheet extends StatelessWidget {
                                 Padding(
                                   padding: const EdgeInsets.only(right: 14),
                                   child: selected == item.audience
-                                      ? Container(
-                                          padding: const EdgeInsets.all(4),
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: item.color,
-                                            boxShadow: [BoxShadow(color: item.color.withValues(alpha: 0.6), blurRadius: 6)],
-                                          ),
-                                          child: const Icon(Icons.check_rounded, color: Colors.black, size: 14),
-                                        )
+                                      ? const Icon(Icons.check_circle_rounded, color: Color(0xFFD4AF37), size: 18)
                                       : const Icon(Icons.chevron_right_rounded, color: Color(0xFF555555), size: 18),
                                 ),
                               ],

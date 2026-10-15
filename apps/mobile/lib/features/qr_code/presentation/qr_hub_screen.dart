@@ -5,7 +5,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../theme/app_colors.dart';
-import '../../../core/api/api_endpoints.dart';
+import '../../../widgets/ambient_background.dart';
 import '../../branch/providers/branch_provider.dart';
 import 'universal_qr_screen.dart';
 
@@ -161,9 +161,9 @@ class QrHubScreen extends ConsumerWidget {
     final branchName = qrDataAsync.value?['branchName'] as String? ?? activeBranch.name;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080B12),
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF080B12),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
           'Universal QR & Attendance Hub',
@@ -185,10 +185,11 @@ class QrHubScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-        child: Column(
+      body: AmbientBackground(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          child: Column(
           children: [
             // ── 1. MAIN UNIVERSAL QR CARD ────────────────────────────────────
             Container(
@@ -513,6 +514,7 @@ class QrHubScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

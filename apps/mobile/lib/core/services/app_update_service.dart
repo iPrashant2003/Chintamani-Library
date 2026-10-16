@@ -80,8 +80,8 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.7.4';
-  static const currentBuildNumber = 2074;
+  static const currentVersion = '2.7.5';
+  static const currentBuildNumber = 2075;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   /// The update info discovered from cloud manifest, if any.
@@ -332,21 +332,39 @@ class AppUpdateService {
     }
 
     try {
-      final dir = await getTemporaryDirectory();
-      final apkFile = File('${dir.path}/Chintamani_Update_v${info.version}.apk');
+      Directory dir;
+      try {
+        final externalDirs = await getExternalCacheDirectories();
+        dir = (externalDirs != null && externalDirs.isNotEmpty)
+            ? externalDirs.first
+            : await getTemporaryDirectory();
+      } catch (_) {
+        dir = await getTemporaryDirectory();
+      }
 
-      // Detect ABI: If arm64-v8a, prioritize the smaller 35 MB package (2.5x faster!)
+      final apkFile = File('${dir.path}/Chintamani_Update_v${info.version}.apk');
+      final partFile = File('${apkFile.path}.part');
+
+      // Purge any existing partial or stale file to ensure pristine package
+      if (await apkFile.exists()) {
+        try { await apkFile.delete(); } catch (_) {}
+      }
+      if (await partFile.exists()) {
+        try { await partFile.delete(); } catch (_) {}
+      }
+
+      // Detect ABI: Only prioritize arm64 if explicitly confirmed as arm64
       final deviceAbi = await getDeviceAbi();
-      final isArm64 = deviceAbi == null || deviceAbi.contains('arm64');
+      final isArm64 = deviceAbi != null && deviceAbi.toLowerCase().contains('arm64');
 
       final downloadCandidates = <String>[
-        // 1. If device is arm64, try arm64 build first (35 MB vs 85 MB)
+        // 1. If device is strictly arm64, try optimized arm64 build
         if (isArm64) ...[
           if (info.arm64ApkUrl != null && info.arm64ApkUrl!.isNotEmpty)
             info.arm64ApkUrl!,
           'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-arm64.apk',
         ],
-        // 2. Primary release APK (Universal 85 MB)
+        // 2. Universal release APK (Works on 100% of devices: 32-bit, 64-bit, x86)
         if (info.apkUrl.isNotEmpty) info.apkUrl,
         'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-Release.apk',
         // 3. Fallback URL if pointing to an APK
@@ -385,6 +403,20 @@ class AppUpdateService {
       );
 
       return success ?? false;
+    } on PlatformException catch (pe) {
+      debugPrint('[UpdateService] Platform error during install: ${pe.code} - ${pe.message}');
+      if (pe.code == 'UNKNOWN_SOURCES_REQUIRED') {
+        // Directed to OS settings screen to allow install unknown apps; do not open browser
+        return false;
+      }
+      if (info.fallbackUrl.isNotEmpty) {
+        final uri = Uri.parse(info.fallbackUrl);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+          return true;
+        }
+      }
+      return false;
     } catch (e) {
       debugPrint('In-app update install failed: $e');
 

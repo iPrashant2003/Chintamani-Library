@@ -143,6 +143,8 @@ class MainActivity : FlutterFragmentActivity() {
                                         flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                     }
                                     startActivity(manageIntent)
+                                    result.error("UNKNOWN_SOURCES_REQUIRED", "Permission required to install unknown apps.", null)
+                                    return@setMethodCallHandler
                                 }
                             }
 
@@ -155,7 +157,15 @@ class MainActivity : FlutterFragmentActivity() {
                             val intent = Intent(Intent.ACTION_VIEW).apply {
                                 setDataAndType(uri, "application/vnd.android.package-archive")
                                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                addFlags(Intent.FLAG_GRANT_PREFIX_URI_PERMISSION)
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            }
+
+                            // Explicitly grant read URI permission to all potential installers
+                            val resolvedList = packageManager.queryIntentActivities(intent, 0)
+                            for (info in resolvedList) {
+                                grantUriPermission(info.activityInfo.packageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                             }
 
                             startActivity(intent)

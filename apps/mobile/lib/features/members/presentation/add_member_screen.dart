@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
@@ -11,6 +12,8 @@ import '../../../widgets/info_row.dart';
 import '../data/member_repository.dart';
 import '../../branch/providers/branch_provider.dart';
 import '../../../core/services/batch_timing_service.dart';
+import '../../seats/data/seat_repository.dart';
+import '../../lockers/data/locker_repository.dart';
 
 class AddMemberScreen extends ConsumerStatefulWidget {
   const AddMemberScreen({super.key});
@@ -47,9 +50,11 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
   double _planPrice = 500.0;
   DateTime _startDate = DateTime.now();
 
-  // Step 5: Seat & Locker
-  String _selectedSeat = 'A06';
+  // Step 5: Seat & Locker (sourced dynamically from active branch)
+  String? _selectedSeat;
+  String? _selectedSeatId;
   String? _selectedLocker = 'None';
+  String? _selectedLockerId;
 
   // Step 6: Payment
   final _amountPaidController = TextEditingController(text: '500');
@@ -133,17 +138,54 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
       'batch': _selectedBatch,
       'notes': _notesController.text.trim(),
       'branchId': activeBranch.id,
+      'seatNumber': _selectedSeat,
+      'seatId': _selectedSeatId,
+      'lockerNumber': _selectedLocker == 'None' ? null : _selectedLocker,
+      'lockerId': _selectedLockerId,
+      'planName': _selectedPlan,
+      'planPrice': _planPrice,
+      'amountPaid': double.tryParse(_amountPaidController.text) ?? _planPrice,
+      'paymentMethod': _paymentMethod,
+      'txnRef': _txnRefController.text.trim(),
     };
 
     try {
-      await ref.read(memberRepositoryProvider).createMember(payload);
+      final createdMember = await ref.read(memberRepositoryProvider).createMember(payload);
+
+      // 1. Mark seat OCCUPIED in database
+      if (_selectedSeatId != null && _selectedSeatId!.isNotEmpty) {
+        try {
+          await ref.read(seatRepositoryProvider).updateSeatStatus(_selectedSeatId!, 'OCCUPIED');
+        } catch (_) {}
+      }
+
+      // 2. Mark locker OCCUPIED if selected
+      if (_selectedLockerId != null && _selectedLockerId!.isNotEmpty) {
+        try {
+          await ref.read(lockerRepositoryProvider).updateLockerStatus(_selectedLockerId!, 'OCCUPIED');
+        } catch (_) {}
+      }
+
+      // 3. Renew / initialize active subscription with chosen plan and seat
+      final subDays = _selectedPlan.toLowerCase().contains('quarter') ? 90 : 30;
+      await ref.read(memberRepositoryProvider).renewSubscription(
+        createdMember.id,
+        planName: _selectedPlan,
+        price: _planPrice,
+        days: subDays,
+      );
+
+      // Invalidate all providers for real-time consistency across entire app
       ref.invalidate(membersListProvider);
+      ref.invalidate(seatsListProvider);
+      ref.invalidate(lockersListProvider);
+      ref.invalidate(memberStatsProvider);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: AppColors.statusActive,
-            content: Text('Member "${_nameController.text.trim()}" enrolled successfully!'),
+            content: Text('Member "${_nameController.text.trim()}" enrolled with Seat ${_selectedSeat ?? "Assigned"}!'),
           ),
         );
         Navigator.pop(context);
@@ -153,10 +195,13 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: AppColors.statusActive,
-            content: Text('Member "${_nameController.text.trim()}" saved to ${activeBranch.name}!'),
+            content: Text('Member "${_nameController.text.trim()}" enrolled in ${activeBranch.name}!'),
           ),
         );
         ref.invalidate(membersListProvider);
+        ref.invalidate(seatsListProvider);
+        ref.invalidate(lockersListProvider);
+        ref.invalidate(memberStatsProvider);
         Navigator.pop(context);
       }
     } finally {
@@ -504,49 +549,361 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
   }
 
   Widget _buildStep5SeatLocker() {
-    final availableSeats = ['A06', 'A07', 'A09', 'A10', 'B03', 'B04', 'B06', 'B07'];
-    final availableLockers = ['None', 'L04', 'L05', 'L06', 'L07', 'L09'];
+    final activeBranch = ref.watch(activeBranchProvider);
+    final isMehdawal = activeBranch.shortName.toLowerCase().contains('mehda');
+    final totalCapacity = isMehdawal ? 65 : 72;
+
+    final seatsAsync = ref.watch(seatsListProvider);
+    final lockersAsync = ref.watch(lockersListProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Seat Allocation', style: TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.bold)),
+        // Branch Badge & Capacity Header
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFF120F08),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.goldPrimary.withValues(alpha: 0.3), width: 0.8),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.location_on_rounded, color: AppColors.goldPrimary, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '${activeBranch.name} • Single Hall ($totalCapacity Seats)',
+                  style: const TextStyle(
+                    color: AppColors.goldLight,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        // Seat Matrix Section
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Hall Seat Allocation',
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.bold),
+            ),
+            seatsAsync.maybeWhen(
+              data: (seats) {
+                final availableCount = seats.where((s) => s.isAvailable).length;
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppColors.emeraldPrimary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.emeraldPrimary.withValues(alpha: 0.3)),
+                  ),
+                  child: Text(
+                    '$availableCount / $totalCapacity Available',
+                    style: const TextStyle(
+                      color: AppColors.emeraldPrimary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                );
+              },
+              orElse: () => const SizedBox.shrink(),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+
+        // Legend
+        Row(
+          children: [
+            _buildLegendDot(const Color(0xFF10B981), 'Available'),
+            const SizedBox(width: 14),
+            _buildLegendDot(const Color(0xFFD4AF37), 'Selected'),
+            const SizedBox(width: 14),
+            _buildLegendDot(Colors.white.withValues(alpha: 0.2), 'Occupied'),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // Matrix Grid with Loading & Error States
+        seatsAsync.when(
+          loading: () => Container(
+            height: 180,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.bgCard,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: CircularProgressIndicator(color: AppColors.goldPrimary, strokeWidth: 2.2),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Fetching real-time single hall matrix for ${activeBranch.name}...',
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          error: (err, _) => Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.bgCard,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.redPrimary.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.error_outline_rounded, color: AppColors.redPrimary, size: 22),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'Unable to retrieve live seat availability.',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => ref.refresh(seatsListProvider),
+                  child: const Text('Retry', style: TextStyle(color: AppColors.goldPrimary)),
+                ),
+              ],
+            ),
+          ),
+          data: (seats) {
+            // Auto-allocate first available seat if none selected or invalid
+            final availableSeats = seats.where((s) => s.isAvailable).toList();
+            final isCurrentValid = availableSeats.any((s) => s.seatNumber == _selectedSeat);
+            if (!isCurrentValid && availableSeats.isNotEmpty) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  setState(() {
+                    _selectedSeat = availableSeats.first.seatNumber;
+                    _selectedSeatId = availableSeats.first.id;
+                  });
+                }
+              });
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Deterministic allocation alert banner
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.goldPrimary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.goldPrimary.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle_rounded, color: AppColors.goldPrimary, size: 16),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Allocated desk: ${_selectedSeat ?? "None"}. Tap any available desk to switch.',
+                          style: const TextStyle(color: AppColors.goldLight, fontSize: 11.5, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Seat Matrix Graphic Container (matching Universal Portal single hall desks)
+                Container(
+                  constraints: const BoxConstraints(maxHeight: 280),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                  ),
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 6,
+                      crossAxisSpacing: 6,
+                      mainAxisSpacing: 6,
+                      childAspectRatio: 0.95,
+                    ),
+                    itemCount: seats.length,
+                    itemBuilder: (context, index) {
+                      final seat = seats[index];
+                      final isSelected = _selectedSeat == seat.seatNumber;
+                      final isAvail = seat.isAvailable;
+
+                      return GestureDetector(
+                        onTap: isAvail
+                            ? () {
+                                HapticFeedback.selectionClick();
+                                setState(() {
+                                  _selectedSeat = seat.seatNumber;
+                                  _selectedSeatId = seat.id;
+                                });
+                              }
+                            : null,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            gradient: isSelected
+                                ? const LinearGradient(
+                                    colors: [Color(0xFFF9EED2), Color(0xFFD6B65E)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  )
+                                : null,
+                            color: isSelected
+                                ? null
+                                : (isAvail
+                                    ? const Color(0xFF10B981).withValues(alpha: 0.10)
+                                    : Colors.white.withValues(alpha: 0.03)),
+                            border: Border.all(
+                              color: isSelected
+                                  ? const Color(0xFFFFF5D0)
+                                  : (isAvail
+                                      ? const Color(0xFF10B981).withValues(alpha: 0.35)
+                                      : Colors.white.withValues(alpha: 0.05)),
+                              width: isSelected ? 1.5 : 0.8,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Desk top bar
+                              Container(
+                                width: 14,
+                                height: 2,
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? const Color(0xFF080B12).withValues(alpha: 0.6)
+                                      : (isAvail
+                                          ? const Color(0xFF34D399).withValues(alpha: 0.5)
+                                          : Colors.white.withValues(alpha: 0.15)),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                seat.seatNumber,
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? const Color(0xFF080B12)
+                                      : (isAvail ? const Color(0xFF34D399) : Colors.white.withValues(alpha: 0.2)),
+                                  fontSize: 10.5,
+                                  fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 22),
+
+        // Lockers Section (Personal Storage L01–L09)
+        const Text(
+          'Locker Facility (Personal Storage L01–L09 • ₹200/mo)',
+          style: TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 6),
-        const Text('Select an available seat for this member:', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-        const SizedBox(height: 10),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: availableSeats.map((s) {
-            final isSelected = _selectedSeat == s;
-            return ChoiceChip(
-              label: Text('Seat $s'),
-              selected: isSelected,
-              selectedColor: AppColors.primaryGreen,
-              backgroundColor: AppColors.bgCard,
-              labelStyle: TextStyle(color: isSelected ? Colors.white : AppColors.textPrimary, fontWeight: FontWeight.w600),
-              onSelected: (_) => setState(() => _selectedSeat = s),
-            );
-          }).toList(),
+        const Text(
+          'Select an optional personal storage locker for this member:',
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
         ),
-        const SizedBox(height: 20),
-        const Text('Locker Facility (Optional)', style: TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.bold)),
         const SizedBox(height: 10),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: availableLockers.map((l) {
-            final isSelected = _selectedLocker == l;
-            return ChoiceChip(
-              label: Text(l == 'None' ? 'No Locker' : 'Locker $l'),
-              selected: isSelected,
-              selectedColor: AppColors.primaryTeal,
-              backgroundColor: AppColors.bgCard,
-              labelStyle: TextStyle(color: isSelected ? Colors.white : AppColors.textPrimary),
-              onSelected: (_) => setState(() => _selectedLocker = l),
+
+        lockersAsync.maybeWhen(
+          data: (lockers) {
+            final lockerOptions = [
+              {'number': 'None', 'id': '', 'isAvail': true},
+              ...lockers.map((l) => {'number': l.lockerNumber, 'id': l.id, 'isAvail': l.isAvailable}),
+            ];
+
+            return Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: lockerOptions.map((opt) {
+                final lockerNum = opt['number'] as String;
+                final lockerId = opt['id'] as String;
+                final isAvail = opt['isAvail'] as bool;
+                final isSelected = _selectedLocker == lockerNum;
+
+                return ChoiceChip(
+                  label: Text(lockerNum == 'None' ? 'No Locker' : 'Locker $lockerNum ${isAvail ? "" : "(Occupied)"}'),
+                  selected: isSelected,
+                  selectedColor: AppColors.primaryTeal,
+                  backgroundColor: isAvail ? AppColors.bgCard : Colors.white.withValues(alpha: 0.03),
+                  labelStyle: TextStyle(
+                    color: isSelected
+                        ? Colors.white
+                        : (isAvail ? AppColors.textPrimary : Colors.white.withValues(alpha: 0.25)),
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    fontSize: 12,
+                  ),
+                  onSelected: isAvail || lockerNum == 'None'
+                      ? (_) {
+                          setState(() {
+                            _selectedLocker = lockerNum;
+                            _selectedLockerId = lockerNum == 'None' ? null : lockerId;
+                          });
+                        }
+                      : null,
+                );
+              }).toList(),
             );
-          }).toList(),
+          },
+          orElse: () => Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: ['None', 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09'].map((l) {
+              final isSelected = _selectedLocker == l;
+              return ChoiceChip(
+                label: Text(l == 'None' ? 'No Locker' : 'Locker $l'),
+                selected: isSelected,
+                selectedColor: AppColors.primaryTeal,
+                backgroundColor: AppColors.bgCard,
+                labelStyle: TextStyle(color: isSelected ? Colors.white : AppColors.textPrimary),
+                onSelected: (_) => setState(() => _selectedLocker = l),
+              );
+            }).toList(),
+          ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildLegendDot(Color color, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 9,
+          height: 9,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
       ],
     );
   }
@@ -616,7 +973,7 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
           InfoRow(label: 'Full Name', value: _nameController.text.trim()),
           InfoRow(label: 'Mobile', value: _phoneController.text.trim()),
           InfoRow(label: 'Plan', value: _selectedPlan),
-          InfoRow(label: 'Assigned Seat', value: 'Seat $_selectedSeat'),
+          InfoRow(label: 'Assigned Seat', value: _selectedSeat != null ? 'Seat $_selectedSeat' : 'Auto-Assigned'),
           InfoRow(label: 'Assigned Locker', value: _selectedLocker ?? 'None'),
           InfoRow(label: 'Fee Collected', value: '₹${_amountPaidController.text} via $_paymentMethod'),
           InfoRow(label: 'Start Date', value: DateFormat('dd MMM yyyy').format(_startDate)),

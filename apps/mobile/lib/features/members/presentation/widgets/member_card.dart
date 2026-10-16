@@ -1101,29 +1101,30 @@ class _MemberCardState extends ConsumerState<MemberCard>
     final expiryDate = sub != null
         ? _formatDate(sub.endDate, defaultVal: '07 Oct, 2026')
         : '07 Oct, 2026';
-    final amt = sub?.plan?.price.toInt() ?? 500;
-    const paid = 500;
-    final due = amt > paid ? amt - paid : 0;
+    final amt = sub?.plan?.price.toInt() ?? (member.isActive ? 500 : 0);
+    final paid = member.isActive ? amt : 0;
+    final due = member.isActive ? 0 : amt;
 
-    // ── 4D Perspective Tilt Wrapper ──
-    return AnimatedBuilder(
-      animation: _tiltAnimation,
-      builder: (context, child) {
-        // Oscillates -0.01 to +0.01 radians on the Y axis
-        final tiltAngle =
-            ((_tiltAnimation.value - 0.5) * 2) * 0.012; // −0.012 → +0.012
-        final scaleY = 1.0 - (_tiltAnimation.value * 0.003); // tiny depth
+    // ── 4D Perspective Tilt Wrapper (Isolated in RepaintBoundary for smooth 60fps scrolling) ──
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _tiltAnimation,
+        builder: (context, child) {
+          // Oscillates -0.01 to +0.01 radians on the Y axis
+          final tiltAngle =
+              ((_tiltAnimation.value - 0.5) * 2) * 0.012; // −0.012 → +0.012
+          final scaleY = 1.0 - (_tiltAnimation.value * 0.003); // tiny depth
 
-        return Transform(
-          alignment: Alignment.center,
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.001) // perspective
-            ..rotateY(tiltAngle)
-            ..scale(1.0, scaleY),
-          child: child,
-        );
-      },
-      child: Container(
+          return Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001) // perspective
+              ..rotateY(tiltAngle)
+              ..scale(1.0, scaleY),
+            child: child,
+          );
+        },
+        child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
@@ -1427,8 +1428,8 @@ class _MemberCardState extends ConsumerState<MemberCard>
                                                   color: Color(0xFFA1A1AA),
                                                   fontSize: 10.5)),
                                           const SizedBox(height: 2),
-                                          const Text('₹500',
-                                              style: TextStyle(
+                                          Text('₹$paid',
+                                              style: const TextStyle(
                                                   color: Colors.white,
                                                   fontSize: 12.5,
                                                   fontWeight:
@@ -1579,8 +1580,9 @@ class _MemberCardState extends ConsumerState<MemberCard>
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   // ── Uniform 4D Action Chip — color on icon & text only, clean neutral container ──
   Widget _buildActionChip({

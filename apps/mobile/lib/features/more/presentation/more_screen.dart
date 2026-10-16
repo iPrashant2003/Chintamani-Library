@@ -12,6 +12,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../../core/services/app_update_service.dart';
 import '../../registrations/data/registration_repository.dart';
 import '../../complaints/data/complaint_repository.dart';
+import '../../lockers/data/locker_repository.dart';
 
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
@@ -24,6 +25,8 @@ class MoreScreen extends ConsumerWidget {
     final pendingRegs = ref.watch(pendingRegistrationsCountProvider).value ?? 0;
     final pendingVerifs = ref.watch(pendingVerificationsCountProvider).value ?? 0;
     final openComplaints = ref.watch(openComplaintsCountProvider).value ?? 0;
+    final lockersAsync = ref.watch(lockersListProvider);
+    final lockerCount = lockersAsync.value?.length ?? 9;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -76,7 +79,7 @@ class MoreScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-                child: _ProfileHeroCard(user: user, activeBranch: activeBranch),
+                child: _ProfileHeroCard(user: user, activeBranch: activeBranch, lockerCount: lockerCount),
               ),
             ),
 
@@ -136,11 +139,11 @@ class MoreScreen extends ConsumerWidget {
                   route: RouteNames.universalQr,
                 ),
                 _MoreItem(
-                  title: '9 Lockers Vault',
-                  subtitle: 'Personal storage lockers L01-L09 • ₹200/mo fee',
+                  title: '$lockerCount Lockers Vault',
+                  subtitle: 'Personal storage lockers L01-L${lockerCount.toString().padLeft(2, '0')} • ₹200/mo fee',
                   icon: Icons.lock_clock_rounded,
                   icon3d: Icon3DType.locker,
-                  badge: '9 VAULT',
+                  badge: '$lockerCount VAULT',
                   color: const Color(0xFF8B5CF6),
                   route: RouteNames.lockers,
                 ),
@@ -610,14 +613,12 @@ class _ClayItemTileState extends State<_ClayItemTile>
 class _ProfileHeroCard extends StatelessWidget {
   final dynamic user;
   final dynamic activeBranch;
+  final int lockerCount;
 
-  const _ProfileHeroCard({required this.user, required this.activeBranch});
+  const _ProfileHeroCard({required this.user, required this.activeBranch, required this.lockerCount});
 
   @override
   Widget build(BuildContext context) {
-    final initial = (user?.name as String? ?? 'A').isNotEmpty
-        ? (user?.name as String).substring(0, 1).toUpperCase()
-        : 'A';
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -652,18 +653,12 @@ class _ProfileHeroCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Avatar with gold glow ring
+          // Logo Avatar with official emblem & glow
           Container(
             width: 54,
             height: 54,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  AppColors.goldPrimary.withValues(alpha: 0.35),
-                  AppColors.goldPrimary.withValues(alpha: 0.05),
-                ],
-              ),
               border: Border.all(
                 color: AppColors.goldPrimary.withValues(alpha: 0.6),
                 width: 1.5,
@@ -676,14 +671,11 @@ class _ProfileHeroCard extends StatelessWidget {
                 ),
               ],
             ),
-            child: Center(
-              child: Text(
-                initial,
-                style: const TextStyle(
-                  color: AppColors.goldBright,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                ),
+            child: const Center(
+              child: ChintaManiLogo(
+                size: 46,
+                showGlow: true,
+                showCircularBackground: true,
               ),
             ),
           ),
@@ -693,7 +685,7 @@ class _ProfileHeroCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user?.name ?? 'Chinta Mani Administrator',
+                  user?.name ?? 'Manglesh Mani Tripathi',
                   style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 15,
@@ -727,7 +719,7 @@ class _ProfileHeroCard extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    '${activeBranch.occupiedSeats}/${activeBranch.totalSeats} Seats Active • 9 Lockers Vault',
+                    '${activeBranch.occupiedSeats}/${activeBranch.totalSeats} Seats Active • $lockerCount Lockers Vault',
                     style: const TextStyle(
                       color: AppColors.emeraldPrimary,
                       fontSize: 10.5,

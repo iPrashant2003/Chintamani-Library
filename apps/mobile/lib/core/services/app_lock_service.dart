@@ -11,7 +11,7 @@ class AppLockService {
 
   static const String _lockEnabledKey = 'cml_app_lock_enabled';
   static const String _passwordKey = 'app_admin_password';
-  static const String masterPin = 'CML6050';
+  static const String masterPin = 'Mani6050';
 
   bool _isLocked = false;
   bool get isLocked => _isLocked;

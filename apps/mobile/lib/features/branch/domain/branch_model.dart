@@ -116,6 +116,10 @@ class Branch {
   // ===========================================================================
   // THE TWO OFFICIAL CHINTA MANI LIBRARY BRANCHES
   // ===========================================================================
+  // Khalilabad: 72 seats configured capacity (per official library records)
+  // Mehdawal: 65 seats configured capacity (per official library records)
+  // occupiedSeats / availableSeats below are default fallbacks only.
+  // Real values are loaded at runtime from the seat API (seatsListProvider).
   static const Branch khalilabadBranch = Branch(
     id: 'chintamani-khalilabad',
     name: 'Chinta Mani Library',
@@ -126,9 +130,9 @@ class Branch {
     phone: '+91 9415919277',
     email: 'khalilabad@chintamanilibrary.com',
     openingHours: '06:00 AM – 11:00 PM (Daily)',
-    totalSeats: 65,
-    availableSeats: 15,
-    occupiedSeats: 50,
+    totalSeats: 72,
+    availableSeats: 72,
+    occupiedSeats: 0,
     status: 'Open',
   );
 
@@ -143,8 +147,8 @@ class Branch {
     email: 'mehdawal@chintamanilibrary.com',
     openingHours: '06:00 AM – 11:00 PM (Daily)',
     totalSeats: 65,
-    availableSeats: 18,
-    occupiedSeats: 47,
+    availableSeats: 65,
+    occupiedSeats: 0,
     status: 'Open',
   );
 

@@ -1,21 +1,19 @@
 {
-  "version": "2.7.5",
-  "buildNumber": 2075,
+  "version": "2.7.6",
+  "buildNumber": 2076,
   "minimumSupportedVersion": "2.3.0",
-  "releaseDate": "16 Oct 2026",
-  "title": "Chintamani Library v2.7.5 — Permanent OTA Update Fix & Universal Package Installer Support",
+  "releaseDate": "17 Oct 2026",
+  "title": "Chintamani Library v2.7.6 — Graphical Seat Matrix, Sliding Navigation & Real Analytics Rebuild",
   "releaseNotes": [
-    "PERMANENT OTA UPDATE FIX: Resolved Android PackageInstaller 'package is invalid' failure by producing 100% clean single-ABI splits and comprehensive multi-architecture universal releases",
-    "PACKAGE VISIBILITY ENHANCEMENT: Added explicit package-archive queries in AndroidManifest for seamless intent activity resolution on Android 11+",
-    "FILEPROVIDER & MULTI-USER STORAGE: Upgraded APK staging target to external cache storage with prefix URI permissions for flawless installation across all Android OEMs (Xiaomi, Samsung, Realme, Vivo, OnePlus)",
-    "UPI PAYMENT GATEWAY OVERHAUL: Dynamic intent construction with automated amount, Prashant Mani Tripathi payee data, and graceful copy/QR fallback",
-    "PAYMENT SCREENSHOT UPLOADS: Direct Cloudinary storage for fee payment receipts linked to admin verification requests",
-    "DASHBOARD 'PAY VERIFY' QUICK ACCESS: Replaced Record Fee with live Payment Verification card showing real-time pending notification badges",
-    "ZERO DEMO DATA: Purged all mock and hardcoded fallback records across notifications, payments, attendance, enquiries, expenses, lockers, and maintenance",
-    "WHATSAPP 4D CLAYMORPHIC HUB: Upgraded AutoBot, Broadcast, and Students selectors to multicolour 4D claymorphic cards with zero neon glow"
+    "REAL-TIME SEAT & LOCKER ALLOCATION: Admin Step 5 member registration rebuilt with official Single Hall capacity (Khalilabad: 72 seats K01-K72, Mehdawal: 65 seats M01-M65, Lockers L01-L09) with atomic occupancy assignment",
+    "SLIDING BOTTOM NAVIGATION SELECTOR: Rebuilt 5-tab 4D bottom navigation bar with fluid AnimatedPositioned top runner pill and travelling ambient specular glow pod",
+    "REAL-TIME LIBRARY INSIGHTS: Purged hardcoded statistics in Insights screen; hooked to live dashboard stats, occupancy percentages, and intelligent branch alerts",
+    "PROFILE & BRANDING UPGRADE: More screen updated with official ChintaManiLogo emblem and dynamic locker count badges",
+    "MEMBER DIRECTORY OPTIMIZATION: Isolated 4D perspective tilt in RepaintBoundary for smooth 60fps scrolling with accurate paid/due plan calculations",
+    "ADMIN MASTER PIN: Updated local security credential to Mani6050 with secure storage synchronization"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.5/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.5/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.6/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.6/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

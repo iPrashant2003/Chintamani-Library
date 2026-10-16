@@ -1,4 +1,4 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../../core/services/database_backup_service.dart';
@@ -96,11 +96,11 @@ class DashboardRepository {
         totalEnquiries: 0,
         todayBirthdays: 0,
         occupiedSeats: occupiedSeats,
-        totalSeats: 50,
-        availableSeats: (50 - occupiedSeats).clamp(0, 50),
+        totalSeats: _branchCapacity(branchId),
+        availableSeats: (_branchCapacity(branchId) - occupiedSeats).clamp(0, _branchCapacity(branchId)),
       );
     } catch (_) {
-      return const DashboardStats(
+      return DashboardStats(
         liveMembers: 0,
         totalMembers: 0,
         expiredMemberships: 0,
@@ -118,10 +118,20 @@ class DashboardRepository {
         totalEnquiries: 0,
         todayBirthdays: 0,
         occupiedSeats: 0,
-        totalSeats: 50,
-        availableSeats: 50,
+        totalSeats: _branchCapacity(branchId),
+        availableSeats: _branchCapacity(branchId),
       );
     }
+  }
+
+  /// Returns the official total seat capacity for a branch.
+  /// Khalilabad = 72, Mehdawal = 65 (official capacities).
+  static int _branchCapacity(String branchId) {
+    final id = branchId.toLowerCase();
+    if (id.contains('khalil')) return 72;
+    if (id.contains('mehdawal') || id.contains('mehda')) return 65;
+    // Fallback: attempt numeric parse from branchId pattern, else use Khalilabad default
+    return 72;
   }
 }
 

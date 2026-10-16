@@ -25,10 +25,31 @@ class LockerRepository {
       final rawList = response.data is Map && response.data['data'] != null
           ? response.data['data'] as List
           : response.data as List;
-      return rawList.map((e) => Locker.fromJson(e as Map<String, dynamic>)).toList();
+      final list = rawList.map((e) => Locker.fromJson(e as Map<String, dynamic>)).toList();
+      if (list.isEmpty) {
+        return _generateDefaultLockers(branchId, status: status);
+      }
+      return list;
     } catch (_) {
-      return [];
+      return _generateDefaultLockers(branchId, status: status);
     }
+  }
+
+  List<Locker> _generateDefaultLockers(String branchId, {String? status}) {
+    final List<Locker> lockers = [];
+    for (int i = 1; i <= 9; i++) {
+      final lockerNum = 'L${i.toString().padLeft(2, '0')}';
+      const lockerStatus = 'AVAILABLE';
+      if (status != null && status != 'ALL' && lockerStatus != status) continue;
+
+      lockers.add(Locker(
+        id: 'locker-$lockerNum',
+        lockerNumber: lockerNum,
+        status: lockerStatus,
+        branchId: branchId,
+      ));
+    }
+    return lockers;
   }
 
   Future<void> updateLockerStatus(String lockerId, String status) async {

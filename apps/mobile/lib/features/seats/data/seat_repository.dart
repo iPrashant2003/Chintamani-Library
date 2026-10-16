@@ -26,7 +26,11 @@ class SeatRepository {
       final rawList = response.data is Map && response.data['data'] != null
           ? response.data['data'] as List
           : response.data as List;
-      return rawList.map((e) => Seat.fromJson(e as Map<String, dynamic>)).toList();
+      final seats = rawList.map((e) => Seat.fromJson(e as Map<String, dynamic>)).toList();
+      if (seats.isEmpty) {
+        return _generateMockSeats(branchId, floor: floor, status: status);
+      }
+      return seats;
     } catch (_) {
       return _generateMockSeats(branchId, floor: floor, status: status);
     }
@@ -47,12 +51,15 @@ class SeatRepository {
   List<Seat> _generateMockSeats(String branchId, {String? floor, String? status}) {
     final List<Seat> seats = [];
     final isMehdawal = branchId.toLowerCase().contains('mehdawal');
+    // Khalilabad: 72 seats | Mehdawal: 65 seats (official capacities)
     final totalSeats = isMehdawal ? 65 : 72;
     const singleFloor = 'Main Hall';
 
+    final prefix = isMehdawal ? 'M' : 'K';
+
     // 100% Real data: All seats start AVAILABLE. Real members added manually get assigned.
     for (int i = 1; i <= totalSeats; i++) {
-      final seatNum = i.toString().padLeft(2, '0');
+      final seatNum = '$prefix${i.toString().padLeft(2, '0')}';
       const seatStatus = 'AVAILABLE';
 
       if (status != null && status != 'ALL' && seatStatus != status) {

@@ -165,20 +165,84 @@ class _MobileLayout extends StatelessWidget {
           top: false,
           child: SizedBox(
             height: 70,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(_navItems.length, (index) {
-                final item = _navItems[index];
-                final isSelected = index == currentIndex;
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final tabWidth = constraints.maxWidth / _navItems.length;
+                final activeIndex = currentIndex.clamp(0, _navItems.length - 1);
+                final activeItem = _navItems[activeIndex];
+                const indicatorWidth = 36.0;
 
-                return Expanded(
-                  child: _BottomNav4DItem(
-                    item: item,
-                    isSelected: isSelected,
-                    onTap: () => onTap(index),
-                  ),
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // ── Sliding ambient backplate glow ──
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 320),
+                      curve: Curves.easeOutCubic,
+                      left: activeIndex * tabWidth + (tabWidth - 54) / 2,
+                      top: 6,
+                      child: Container(
+                        width: 54,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18),
+                          gradient: RadialGradient(
+                            center: Alignment.center,
+                            radius: 0.8,
+                            colors: [
+                              activeItem.color.withValues(alpha: 0.16),
+                              activeItem.color.withValues(alpha: 0.0),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // ── Sliding Top Indicator Pill with glowing bloom ──
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 320),
+                      curve: Curves.easeOutCubic,
+                      left: activeIndex * tabWidth + (tabWidth - indicatorWidth) / 2,
+                      top: 0,
+                      child: Container(
+                        width: indicatorWidth,
+                        height: 3,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(3),
+                          gradient: LinearGradient(
+                            colors: activeItem.gradient,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: activeItem.color.withValues(alpha: 0.85),
+                              blurRadius: 8,
+                              spreadRadius: 1,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // ── Navigation Tab Icons Row ──
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: List.generate(_navItems.length, (index) {
+                        final item = _navItems[index];
+                        final isSelected = index == currentIndex;
+
+                        return Expanded(
+                          child: _BottomNav4DItem(
+                            item: item,
+                            isSelected: isSelected,
+                            onTap: () => onTap(index),
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
                 );
-              }),
+              },
             ),
           ),
         ),

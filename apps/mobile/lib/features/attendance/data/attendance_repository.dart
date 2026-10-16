@@ -24,7 +24,7 @@ class AttendanceRepository {
           : response.data as List;
       return rawList.map((e) => Attendance.fromJson(e as Map<String, dynamic>)).toList();
     } catch (_) {
-      return _generateMockAttendance(branchId);
+      return [];
     }
   }
 
@@ -84,48 +84,6 @@ class AttendanceRepository {
     }
   }
 
-  List<Attendance> _generateMockAttendance(String branchId) {
-    final now = DateTime.now();
-    return [
-      Attendance(
-        id: 'att-1',
-        memberId: 'mem-1',
-        branchId: branchId,
-        checkIn: DateTime(now.year, now.month, now.day, 7, 30),
-        method: 'QR',
-        memberName: 'Aarav Sharma',
-        memberCode: 'CML-942810',
-      ),
-      Attendance(
-        id: 'att-2',
-        memberId: 'mem-2',
-        branchId: branchId,
-        checkIn: DateTime(now.year, now.month, now.day, 8, 15),
-        method: 'MANUAL',
-        memberName: 'Priya Verma',
-        memberCode: 'CML-810423',
-      ),
-      Attendance(
-        id: 'att-3',
-        memberId: 'mem-3',
-        branchId: branchId,
-        checkIn: DateTime(now.year, now.month, now.day, 8, 45),
-        checkOut: DateTime(now.year, now.month, now.day, 12, 30),
-        method: 'QR',
-        memberName: 'Aditya Tripathi',
-        memberCode: 'CML-724190',
-      ),
-      Attendance(
-        id: 'att-4',
-        memberId: 'mem-5',
-        branchId: branchId,
-        checkIn: DateTime(now.year, now.month, now.day, 9, 0),
-        method: 'MANUAL',
-        memberName: 'Krishna Yadav',
-        memberCode: 'CML-539012',
-      ),
-    ];
-  }
 }
 
 final todayAttendanceProvider = FutureProvider.autoDispose<List<Attendance>>((ref) async {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../features/registrations/data/registration_repository.dart';
 import '../routing/route_names.dart';
 
 class QuickActionData {
@@ -32,11 +34,11 @@ class MulticolorQuickAccessBar extends StatelessWidget {
       route: RouteNames.addMember,
     ),
     QuickActionData(
-      label: 'Record Fee',
-      icon: Icons.receipt_long_rounded,
-      accent: Color(0xFF7B6AA0),           // Muted amethyst
-      discGradient: [Color(0xFF1E1630), Color(0xFF100B18)],
-      route: RouteNames.recordPayment,
+      label: 'Pay Verify',
+      icon: Icons.verified_user_rounded,
+      accent: Color(0xFF6B4FA0),           // Deep amethyst purple
+      discGradient: [Color(0xFF18103A), Color(0xFF0C091E)],
+      route: RouteNames.paymentVerifications,
     ),
     QuickActionData(
       label: 'Universal QR',
@@ -73,15 +75,15 @@ class MulticolorQuickAccessBar extends StatelessWidget {
   }
 }
 
-class _QuickActionButton extends StatefulWidget {
+class _QuickActionButton extends ConsumerStatefulWidget {
   final QuickActionData action;
   const _QuickActionButton({required this.action});
 
   @override
-  State<_QuickActionButton> createState() => _QuickActionButtonState();
+  ConsumerState<_QuickActionButton> createState() => _QuickActionButtonState();
 }
 
-class _QuickActionButtonState extends State<_QuickActionButton>
+class _QuickActionButtonState extends ConsumerState<_QuickActionButton>
     with TickerProviderStateMixin {
   late final AnimationController _pulseCtrl;
   late final AnimationController _pressCtrl;
@@ -153,38 +155,82 @@ class _QuickActionButtonState extends State<_QuickActionButton>
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Premium 3D Luxury Disc — deep gradient, specular rim, no neon
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: act.discGradient,
-                    ),
-                    border: Border.all(
-                      color: act.accent.withValues(alpha: 0.40),
-                      width: 1.2,
-                    ),
-                    boxShadow: [
-                      // Inner-rim specular highlight (3D depth effect)
-                      BoxShadow(
-                        color: act.accent.withValues(alpha: 0.18),
-                        blurRadius: 8,
-                        offset: const Offset(-1, -1),
-                        spreadRadius: -1,
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.60),
-                        blurRadius: 6,
-                        offset: const Offset(2, 3),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Icon(act.icon, color: act.accent, size: 20),
-                  ),
+                Builder(
+                  builder: (context) {
+                    final pendingCount = act.route == RouteNames.paymentVerifications
+                        ? (ref.watch(pendingVerificationsCountProvider).value ?? 0)
+                        : 0;
+
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: act.discGradient,
+                            ),
+                            border: Border.all(
+                              color: act.accent.withValues(alpha: 0.40),
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              // Inner-rim specular highlight (3D depth effect)
+                              BoxShadow(
+                                color: act.accent.withValues(alpha: 0.18),
+                                blurRadius: 8,
+                                offset: const Offset(-1, -1),
+                                spreadRadius: -1,
+                              ),
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.60),
+                                blurRadius: 6,
+                                offset: const Offset(2, 3),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: Icon(act.icon, color: act.accent, size: 20),
+                          ),
+                        ),
+                        if (pendingCount > 0)
+                          Positioned(
+                            top: -2,
+                            right: -4,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFDC2626),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: const Color(0xFFFFD700).withValues(alpha: 0.8),
+                                  width: 1,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFFDC2626).withValues(alpha: 0.6),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                pendingCount > 99 ? '99+' : '$pendingCount',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 7),
                 Text(

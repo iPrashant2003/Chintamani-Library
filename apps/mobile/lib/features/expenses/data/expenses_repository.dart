@@ -27,7 +27,7 @@ class ExpensesRepository {
           : response.data as List;
       return rawList.map((e) => Expense.fromJson(e as Map<String, dynamic>)).toList();
     } catch (_) {
-      return _generateMockExpenses(branchId, category: category);
+      return [];
     }
   }
 
@@ -50,21 +50,6 @@ class ExpensesRepository {
     }
   }
 
-  List<Expense> _generateMockExpenses(String branchId, {String? category}) {
-    final now = DateTime.now();
-    final list = [
-      Expense(id: 'e-1', branchId: branchId, category: 'ELECTRICITY', amount: 3450.0, description: 'Electricity Bill September', date: now.subtract(const Duration(days: 2))),
-      Expense(id: 'e-2', branchId: branchId, category: 'INTERNET', amount: 1299.0, description: 'Airtel Fiber 300Mbps', date: now.subtract(const Duration(days: 5))),
-      Expense(id: 'e-3', branchId: branchId, category: 'CLEANING', amount: 1500.0, description: 'Housekeeping supplies and phenyl', date: now.subtract(const Duration(days: 8))),
-      Expense(id: 'e-4', branchId: branchId, category: 'MAINTENANCE', amount: 850.0, description: 'AC Filter replacement', date: now.subtract(const Duration(days: 12))),
-      Expense(id: 'e-5', branchId: branchId, category: 'SALARY', amount: 12000.0, description: 'Staff Salary - Rajesh', date: now.subtract(const Duration(days: 15))),
-    ];
-
-    if (category != null && category != 'ALL') {
-      return list.where((e) => e.category == category).toList();
-    }
-    return list;
-  }
 }
 
 final expenseCategoryFilterProvider = StateProvider<String>((ref) => 'ALL');

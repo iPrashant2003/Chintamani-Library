@@ -938,9 +938,9 @@
           </div>
 
           <!-- Deep Link Intent Button -->
-          <a id="btn-upi-intent" href="upi://pay?pa=prashantmanitripathi2003-2@oksbi&pn=Prashant%20Mani%20Tripathi&cu=INR" class="block w-full py-3 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 active:scale-95 transition">
+          <button onclick="launchUpiIntent()" class="block w-full py-3 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 active:scale-95 transition">
             Pay via Installed UPI App
-          </a>
+          </button>
         </div>
 
         <!-- Payment Verification Form -->
@@ -1858,6 +1858,20 @@
     }
 
     function goToPaymentFromReg() {
+      const regPhone = document.getElementById('reg-phone')?.value?.trim();
+      const regName = document.getElementById('reg-name')?.value?.trim();
+      if (regPhone) {
+        const payPhone = document.getElementById('pay-phone');
+        if (payPhone) payPhone.value = regPhone;
+      }
+      if (regName) {
+        const payName = document.getElementById('pay-name');
+        if (payName) payName.value = regName;
+      }
+      const payAmount = document.getElementById('pay-amount');
+      if (payAmount) payAmount.value = selectedPlanPrice || 800;
+      const payType = document.getElementById('pay-type');
+      if (payType) payType.value = 'MEMBERSHIP';
       showView('payment');
     }
 
@@ -1955,46 +1969,93 @@
       });
     }
 
-    // ── Submit Payment Proof (Strictly for Active Branch) ──
+    // ── Launch UPI Intent with dynamic amount & payee ──
+    function launchUpiIntent() {
+      const amountVal = parseFloat(document.getElementById('pay-amount')?.value) || selectedPlanPrice || 800;
+      const formattedAmount = amountVal.toFixed(2);
+      const upiId = 'prashantmanitripathi2003-2@oksbi';
+      const payeeName = 'Prashant Mani Tripathi';
+      const note = 'Chintamani Library Fee';
+
+      const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${formattedAmount}&cu=INR&tn=${encodeURIComponent(note)}`;
+
+      const isAndroid = /android/i.test(navigator.userAgent);
+      if (isAndroid) {
+        const start = Date.now();
+        window.location.href = upiUri;
+        setTimeout(() => {
+          if (Date.now() - start < 1800) {
+            showToast('If UPI app didn\'t open, scan QR or copy UPI ID above');
+          }
+        }, 1500);
+      } else {
+        window.open(upiUri, '_blank');
+        showToast('Redirecting to UPI app or scan the QR code above');
+      }
+    }
+
+    // ── Submit Payment Proof (Cloudinary Screenshot + Active Branch) ──
     async function submitPaymentProof() {
       const phone = document.getElementById('pay-phone').value.trim();
       const utr = document.getElementById('pay-utr').value.trim();
       const amount = document.getElementById('pay-amount').value.trim();
+      const memberName = document.getElementById('pay-name')?.value?.trim() || '';
 
       if (!phone || phone.length < 10) { showToast('Please enter your 10-digit registered number'); return; }
       if (!utr || utr.length < 6) { showToast('Please enter the 12-digit UTR or Txn ID'); return; }
 
-      const refId = 'PAY-' + Math.floor(100000 + Math.random() * 900000);
-      document.getElementById('pay-succ-ref').textContent = refId;
+      const btn = event?.currentTarget || document.querySelector('button[onclick="submitPaymentProof()"]');
+      let originalBtnHtml = '';
+      if (btn) {
+        originalBtnHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Uploading Proof...';
+      }
 
       try {
+        let screenshotUrl = document.getElementById('url-pay-screenshot')?.value?.trim() || null;
+        if (!screenshotUrl && _fileStore['preview-pay-screenshot-box']) {
+          showToast('Uploading payment screenshot... ⏳');
+          screenshotUrl = await uploadPortalFile('preview-pay-screenshot-box', 'payments');
+        }
+
         const res = await fetch('/portal/payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             memberPhone: phone,
+            memberName: memberName || undefined,
             amount: parseFloat(amount) || selectedPlanPrice,
             paymentType: document.getElementById('pay-type').value,
             txnRef: utr,
+            screenshotUrl: screenshotUrl || undefined,
             upiId: 'prashantmanitripathi2003-2@oksbi',
             branchId: currentViewingBranch,
             branch: currentViewingBranch
           })
         });
+
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
           showToast(errData.message || 'Payment proof submission failed');
           return;
         }
+
         const data = await res.json().catch(() => ({}));
-        if (data.referenceId || data.paymentId) {
-          document.getElementById('pay-succ-ref').textContent = data.referenceId || data.paymentId;
+        if (data.referenceId || data.paymentId || data.verificationId) {
+          document.getElementById('pay-succ-ref').textContent = data.referenceId || data.verificationId || data.paymentId;
         }
         document.getElementById('pay-success-box').classList.remove('hidden');
         initIcons();
-        showToast('✓ Payment Proof Submitted! Pending Verification');
+        showToast('✓ Payment Proof Submitted! Pending Admin Verification');
       } catch (e) {
         showToast(e.message || 'Network error submitting payment');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalBtnHtml || '<span>Submit Payment for Verification</span>';
+          initIcons();
+        }
       }
     }
 

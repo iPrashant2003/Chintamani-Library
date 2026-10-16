@@ -179,6 +179,9 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
   void initState() {
     super.initState();
     _tabCtrl = TabController(length: 3, vsync: this);
+    _tabCtrl.addListener(() {
+      if (mounted) setState(() {});
+    });
     _loadSettings();
   }
 
@@ -494,6 +497,168 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
     ));
   }
 
+  Widget _build4DTabSelector() {
+    final curIdx = _tabCtrl.index;
+
+    final tabs = [
+      (
+        index: 0,
+        title: 'AutoBot',
+        subtitle: 'Due Flow',
+        icon: Icons.smart_toy_rounded,
+        accent: const Color(0xFF10B981), // Emerald
+        discGradient: [const Color(0xFF16382B), const Color(0xFF0A1C15)],
+      ),
+      (
+        index: 1,
+        title: 'Broadcast',
+        subtitle: 'Multi-Cast',
+        icon: Icons.campaign_rounded,
+        accent: const Color(0xFFA78BFA), // Amethyst
+        discGradient: [const Color(0xFF281C44), const Color(0xFF120C22)],
+      ),
+      (
+        index: 2,
+        title: 'Students',
+        subtitle: 'Directory',
+        icon: Icons.people_alt_rounded,
+        accent: const Color(0xFFD4AF37), // Imperial Gold
+        discGradient: [const Color(0xFF38290E), const Color(0xFF1C1405)],
+      ),
+    ];
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: const Color(0xFF111016),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.08),
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.65),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Colors.white.withValues(alpha: 0.02),
+            blurRadius: 1,
+            offset: const Offset(0, -1),
+          ),
+        ],
+      ),
+      child: Row(
+        children: tabs.map((tab) {
+          final isSelected = curIdx == tab.index;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                _tabCtrl.animateTo(tab.index);
+                setState(() {});
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFF1C1A24) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: isSelected
+                        ? tab.accent.withValues(alpha: 0.35)
+                        : Colors.transparent,
+                    width: 0.8,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                          BoxShadow(
+                            color: tab.accent.withValues(alpha: 0.08),
+                            blurRadius: 10,
+                            offset: const Offset(0, -1),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // 4D Icon Disc
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: isSelected ? tab.discGradient : [const Color(0xFF1E1C26), const Color(0xFF14121B)],
+                        ),
+                        border: Border.all(
+                          color: isSelected
+                              ? tab.accent.withValues(alpha: 0.55)
+                              : Colors.white.withValues(alpha: 0.08),
+                          width: 0.8,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Icon(
+                          tab.icon,
+                          size: 16,
+                          color: isSelected ? tab.accent : Colors.white.withValues(alpha: 0.45),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Titles
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          tab.title,
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.55),
+                            fontSize: 11.5,
+                            fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        Text(
+                          tab.subtitle,
+                          style: TextStyle(
+                            color: isSelected ? tab.accent : Colors.white.withValues(alpha: 0.3),
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final adminNumberAsync = ref.watch(adminWhatsAppNumberProvider);
@@ -601,66 +766,8 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen>
                 ),
               ),
 
-              // ── Tab Bar: Clean Executive Dark Glass ──────────────────────────────
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF141318),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.08),
-                    width: 1.0,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.45),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: TabBar(
-                  controller: _tabCtrl,
-                  indicator: BoxDecoration(
-                    color: const Color(0xFF22202A),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.4), width: 1.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        blurRadius: 4,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  labelColor: const Color(0xFFFDE68A),
-                  unselectedLabelColor: const Color(0xFFA1A1AA),
-                  labelStyle: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800),
-                  unselectedLabelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-                  padding: EdgeInsets.zero,
-                  dividerColor: Colors.transparent,
-                  isScrollable: false,
-                  tabs: const [
-                    Tab(
-                      icon: Icon(Icons.smart_toy_rounded, size: 18, color: Color(0xFF10B981)),
-                      iconMargin: EdgeInsets.only(bottom: 2),
-                      text: 'Auto Bot',
-                    ),
-                    Tab(
-                      icon: Icon(Icons.campaign_rounded, size: 18, color: Color(0xFFA78BFA)),
-                      iconMargin: EdgeInsets.only(bottom: 2),
-                      text: 'Broadcast',
-                    ),
-                    Tab(
-                      icon: Icon(Icons.people_alt_rounded, size: 18, color: Color(0xFFD4AF37)),
-                      iconMargin: EdgeInsets.only(bottom: 2),
-                      text: 'Students',
-                    ),
-                  ],
-                ),
-              ),
+              // ── 4D Claymorphic Multicolour Tab Selector (AutoBot / Broadcast / Students) ──
+              _build4DTabSelector(),
 
               // ── Tab Views ────────────────────────────────────────────────────
               Expanded(

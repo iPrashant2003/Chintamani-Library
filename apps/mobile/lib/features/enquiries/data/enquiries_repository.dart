@@ -27,7 +27,7 @@ class EnquiriesRepository {
           : response.data as List;
       return rawList.map((e) => Enquiry.fromJson(e as Map<String, dynamic>)).toList();
     } catch (_) {
-      return _generateMockEnquiries(branchId, status: status);
+      return [];
     }
   }
 
@@ -57,55 +57,6 @@ class EnquiriesRepository {
     } catch (_) {}
   }
 
-  List<Enquiry> _generateMockEnquiries(String branchId, {String? status}) {
-    final now = DateTime.now();
-    final list = [
-      Enquiry(
-        id: 'enq-1',
-        branchId: branchId,
-        name: 'Rohit Mehra',
-        phone: '9876501928',
-        email: 'rohit.mehra@gmail.com',
-        status: 'NEW',
-        followUpDate: now.add(const Duration(days: 1)),
-        notes: 'Needs morning 7am-2pm slot with AC seat',
-        createdAt: now.subtract(const Duration(hours: 4)),
-      ),
-      Enquiry(
-        id: 'enq-2',
-        branchId: branchId,
-        name: 'Ankita Jain',
-        phone: '9876501929',
-        status: 'INTERESTED',
-        followUpDate: now,
-        notes: 'Wants to visit and check locker facility tomorrow',
-        createdAt: now.subtract(const Duration(days: 1)),
-      ),
-      Enquiry(
-        id: 'enq-3',
-        branchId: branchId,
-        name: 'Vikram Rathore',
-        phone: '9876501930',
-        status: 'CONTACTED',
-        notes: 'Called, shared plan brochures via WhatsApp',
-        createdAt: now.subtract(const Duration(days: 2)),
-      ),
-      Enquiry(
-        id: 'enq-4',
-        branchId: branchId,
-        name: 'Simran Kaur',
-        phone: '9876501931',
-        status: 'CONVERTED',
-        notes: 'Joined Quarterly plan A12',
-        createdAt: now.subtract(const Duration(days: 4)),
-      ),
-    ];
-
-    if (status != null && status != 'ALL') {
-      return list.where((e) => e.status == status).toList();
-    }
-    return list;
-  }
 }
 
 final enquiryFilterProvider = StateProvider<String>((ref) => 'ALL');

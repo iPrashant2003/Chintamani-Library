@@ -1,19 +1,20 @@
 {
-  "version": "2.7.3",
-  "buildNumber": 2073,
+  "version": "2.7.4",
+  "buildNumber": 2074,
   "minimumSupportedVersion": "2.3.0",
   "releaseDate": "16 Oct 2026",
-  "title": "Chintamani Library v2.7.3 — Universal Portal Registration Fix, Premium Claymorphism Directory & Live Polling Alerts",
+  "title": "Chintamani Library v2.7.4 — Critical UPI Payment Fix, Real-Time Verification, Zero Demo Data & Premium 4D Hub",
   "releaseNotes": [
-    "FIXED UNIVERSAL PORTAL REGISTRATION: Resolved 'Selected plan not found' root cause with dynamic database plan fetching and multi-tier plan resolver across Mehdawal and Khalilabad",
-    "STRICT BRANCH ISOLATION: Member admission, seat reservation, fee calculation, and payment transactions strictly scoped to the user-selected branch",
-    "SAFE DATE OF BIRTH: Implemented timezone-safe local date parsing across backend and portal, eliminating day-shift errors and rejecting future birth dates",
-    "PREMIUM CLAYMORPHISM SUMMARY CARDS: Redesigned Members Directory status cards with compact 90px dimensions, subtle tactile depth, muted luxury palette, and zero white highlight dots",
-    "FOREGROUND & RESUME PUSH POLLING: 20-second active foreground polling and instant lifecycle-resume synchronization for incoming registrations, payments, and complaints with native heads-up system tray alerts",
-    "INSTANT OTA UPDATE: Automatic in-app update trigger delivered seamlessly without manual APK download"
+    "UPI PAYMENT GATEWAY OVERHAUL: Dynamic intent construction with automated amount, Prashant Mani Tripathi payee data, and graceful copy/QR fallback",
+    "PAYMENT SCREENSHOT UPLOADS: Direct Cloudinary storage for fee payment receipts linked to admin verification requests",
+    "DASHBOARD 'PAY VERIFY' QUICK ACCESS: Replaced Record Fee with live Payment Verification card showing real-time pending notification badges",
+    "ZERO DEMO DATA: Purged all mock and hardcoded fallback records across notifications, payments, attendance, enquiries, expenses, lockers, and maintenance",
+    "WHATSAPP 4D CLAYMORPHIC HUB: Upgraded AutoBot, Broadcast, and Students selectors to multicolour 4D claymorphic cards with zero neon glow",
+    "MORE SECTION REFINEMENT: Replaced neon borders and glowing shadows with refined luxury dark charcoal claymorphism",
+    "INSTANT OTA UPDATE: In-app seamless auto-update delivered via GitHub Releases"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.3/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.3/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.4/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.4/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

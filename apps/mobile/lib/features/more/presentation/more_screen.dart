@@ -364,18 +364,11 @@ class _ClaySectionCard extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  width: 3,
+                  width: 3.5,
                   height: 14,
                   decoration: BoxDecoration(
                     color: accentColor,
                     borderRadius: BorderRadius.circular(2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: accentColor.withValues(alpha: 0.5),
-                        blurRadius: 6,
-                        offset: const Offset(0, 0),
-                      ),
-                    ],
                   ),
                 ),
                 const SizedBox(width: 9),
@@ -474,14 +467,14 @@ class _ClayItemTileState extends State<_ClayItemTile>
         ),
         child: Container(
           margin: const EdgeInsets.symmetric(vertical: 2),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           decoration: BoxDecoration(
-            color: item.color.withValues(alpha: 0.05),
+            color: Colors.white.withValues(alpha: 0.02),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
             children: [
-              // 4D Icon Container
+              // Premium Claymorphic 4D Icon Container
               Builder(
                 builder: (context) {
                   if (item.icon3d != null) {
@@ -489,9 +482,9 @@ class _ClayItemTileState extends State<_ClayItemTile>
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: item.color.withValues(alpha: 0.25),
-                            blurRadius: 12,
-                            spreadRadius: 1,
+                            color: Colors.black.withValues(alpha: 0.45),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
                           ),
                         ],
                       ),
@@ -502,31 +495,29 @@ class _ClayItemTileState extends State<_ClayItemTile>
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
+                      gradient: const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          item.color.withValues(alpha: 0.32),
-                          item.color.withValues(alpha: 0.10),
-                          const Color(0xFF0F0D16),
+                          Color(0xFF24222E),
+                          Color(0xFF131118),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: item.color.withValues(alpha: 0.55),
-                        width: 1.2,
+                        color: Colors.white.withValues(alpha: 0.08),
+                        width: 0.8,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: item.color.withValues(alpha: 0.35),
-                          blurRadius: 12,
-                          spreadRadius: 1,
+                          color: Colors.black.withValues(alpha: 0.55),
+                          blurRadius: 8,
                           offset: const Offset(0, 3),
                         ),
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
+                          color: Colors.white.withValues(alpha: 0.03),
+                          blurRadius: 1,
+                          offset: const Offset(0, -1),
                         ),
                       ],
                     ),
@@ -535,12 +526,6 @@ class _ClayItemTileState extends State<_ClayItemTile>
                         item.icon,
                         color: item.color,
                         size: 21,
-                        shadows: [
-                          Shadow(
-                            color: item.color.withValues(alpha: 0.5),
-                            blurRadius: 6,
-                          ),
-                        ],
                       ),
                     ),
                   );

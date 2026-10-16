@@ -8,6 +8,7 @@ import '../../features/branch/providers/branch_provider.dart';
 import '../../features/branch/domain/branch_model.dart';
 import '../../features/notifications/data/notifications_repository.dart';
 import 'database_backup_service.dart';
+import 'app_update_service.dart';
 
 /// Service to display native Android system notifications (status bar / lockscreen)
 /// with real server-side identity tracking, deduplication, branch awareness, and tap routing.
@@ -22,11 +23,20 @@ class SystemNotificationService {
   static bool _routingInitialized = false;
   Timer? _pollingTimer;
 
-  /// Start periodic foreground polling for new server notifications
+  int _pollTicks = 0;
+
+  /// Start periodic foreground polling for new server notifications and app updates
   void startForegroundPolling(WidgetRef ref, {Duration interval = const Duration(seconds: 20)}) {
     _pollingTimer?.cancel();
     _pollingTimer = Timer.periodic(interval, (_) {
       syncServerNotifications(ref);
+      _pollTicks++;
+      if (_pollTicks % 3 == 0) {
+        // Check for app updates every 60 seconds
+        try {
+          ref.read(appUpdateServiceProvider).checkForUpdate();
+        } catch (_) {}
+      }
     });
   }
 

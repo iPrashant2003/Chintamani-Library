@@ -62,8 +62,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     try {
       final service = ref.read(appUpdateServiceProvider);
       // Actively await update check with a 3.5s timeout
-      update = await service.checkForUpdate().timeout(
-        const Duration(milliseconds: 3500),
+      update = await service.checkForUpdate(force: true).timeout(
+        const Duration(milliseconds: 4500),
         onTimeout: () => null,
       );
     } catch (e) {

@@ -70,9 +70,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> with WidgetsB
     }
   }
 
-  Future<void> _checkUpdate({bool force = false}) async {
+  Future<void> _checkUpdate({bool force = true}) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 1500));
+      await Future.delayed(const Duration(milliseconds: 1200));
       if (!mounted) return;
       final service = ref.read(appUpdateServiceProvider);
       final update = await service.checkForUpdate(force: force);

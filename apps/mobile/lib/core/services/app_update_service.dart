@@ -80,8 +80,8 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.7.8';
-  static const currentBuildNumber = 2078;
+  static const currentVersion = '2.7.9';
+  static const currentBuildNumber = 2079;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   /// The update info discovered from cloud manifest, if any.
@@ -255,12 +255,11 @@ class AppUpdateService {
     final savedUrl = await getManifestUrl();
     final cacheBust = DateTime.now().millisecondsSinceEpoch;
     final candidateUrls = <String>[
-      'https://chintamani-backend.onrender.com/version.json?t=$cacheBust',
-      'https://cdn.jsdelivr.net/gh/iPrashant2003/Chintamani-Library@main/version.json?t=$cacheBust',
       'https://raw.githubusercontent.com/iPrashant2003/Chintamani-Library/main/version.json?t=$cacheBust',
-      'https://chintamani-backend.onrender.com/version.json',
-      'https://cdn.jsdelivr.net/gh/iPrashant2003/Chintamani-Library@main/version.json',
+      'https://raw.githubusercontent.com/iPrashant2003/Chintamani-Library/main/apps/backend/public/version.json?t=$cacheBust',
+      'https://chintamani-backend.onrender.com/version.json?t=$cacheBust',
       'https://raw.githubusercontent.com/iPrashant2003/Chintamani-Library/main/version.json',
+      'https://chintamani-backend.onrender.com/version.json',
       if (savedUrl.isNotEmpty &&
           !savedUrl.contains('172.21.232.210') &&
           savedUrl != _defaultManifestUrl)
@@ -290,7 +289,7 @@ class AppUpdateService {
           final semverDiff = compareSemver(info.version, installedVersionName);
           final hasUpdate = info.buildNumber > installedBuildNumber || semverDiff > 0;
 
-          debugPrint('[UpdateService] Remote: v${info.version}+${info.buildNumber}, Installed: v$installedVersionName+$installedBuildNumber (hasUpdate: $hasUpdate)');
+          debugPrint('[UpdateService] Remote: v${info.version}+${info.buildNumber}, Installed: v$installedVersionName+$installedBuildNumber (hasUpdate: $hasUpdate) from $url');
 
           if (hasUpdate) {
             final isBelowMin = compareSemver(info.minimumSupportedVersion, installedVersionName) > 0;
@@ -302,16 +301,15 @@ class AppUpdateService {
               title: resolvedInfo.title,
             );
             return resolvedInfo;
-          } else {
-            discoveredUpdate = null;
-            return null; // up to date — prevents update loop!
           }
+          // Do not return null immediately — if this mirror is stale or delayed, continue checking others!
         }
       } catch (e) {
         debugPrint('[UpdateService] Manifest check failed on $url: $e');
       }
     }
-    return discoveredUpdate;
+    discoveredUpdate = null;
+    return null;
   }
 
 

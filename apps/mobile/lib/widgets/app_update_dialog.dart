@@ -90,14 +90,8 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     } else {
       setState(() {
         _isDownloading = false;
-        _errorMessage = 'In-app update could not start installer. Opening browser download...';
+        _errorMessage = 'Download or installer was interrupted. Tap "Retry Update" to resume.';
       });
-      if (widget.updateInfo.fallbackUrl.isNotEmpty) {
-        final uri = Uri.parse(widget.updateInfo.fallbackUrl);
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-        }
-      }
     }
   }
 
@@ -323,14 +317,14 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                                 height: 20,
                                 child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2.2),
                               )
-                            : const Row(
+                            : Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.system_update_rounded, color: Colors.black, size: 18),
-                                  SizedBox(width: 8),
+                                  const Icon(Icons.system_update_rounded, color: Colors.black, size: 18),
+                                  const SizedBox(width: 8),
                                   Text(
-                                    'Update Now (1-Tap)',
-                                    style: TextStyle(
+                                    _errorMessage != null ? 'Retry Update (1-Tap)' : 'Update Now (1-Tap)',
+                                    style: const TextStyle(
                                       color: Colors.black,
                                       fontSize: 13.5,
                                       fontWeight: FontWeight.w900,
@@ -344,6 +338,24 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                 ),
               ],
             ),
+            if (_errorMessage != null && info.fallbackUrl.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Center(
+                child: TextButton.icon(
+                  onPressed: () async {
+                    final uri = Uri.parse(info.fallbackUrl);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    }
+                  },
+                  icon: const Icon(Icons.open_in_browser_rounded, size: 15, color: Color(0xFFD4AF37)),
+                  label: const Text(
+                    'Or open manual download page in browser',
+                    style: TextStyle(color: Color(0xFFD4AF37), fontSize: 11.5, decoration: TextDecoration.underline),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

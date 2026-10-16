@@ -80,8 +80,8 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.7.5';
-  static const currentBuildNumber = 2075;
+  static const currentVersion = '2.7.6';
+  static const currentBuildNumber = 2076;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   /// The update info discovered from cloud manifest, if any.
@@ -363,10 +363,12 @@ class AppUpdateService {
           if (info.arm64ApkUrl != null && info.arm64ApkUrl!.isNotEmpty)
             info.arm64ApkUrl!,
           'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-arm64.apk',
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/app-arm64-v8a-release.apk',
         ],
         // 2. Universal release APK (Works on 100% of devices: 32-bit, 64-bit, x86)
         if (info.apkUrl.isNotEmpty) info.apkUrl,
         'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-Release.apk',
+        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/app-release.apk',
         // 3. Fallback URL if pointing to an APK
         if (info.fallbackUrl.isNotEmpty && info.fallbackUrl.endsWith('.apk')) info.fallbackUrl,
       ];
@@ -409,25 +411,9 @@ class AppUpdateService {
         // Directed to OS settings screen to allow install unknown apps; do not open browser
         return false;
       }
-      if (info.fallbackUrl.isNotEmpty) {
-        final uri = Uri.parse(info.fallbackUrl);
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-          return true;
-        }
-      }
       return false;
     } catch (e) {
-      debugPrint('In-app update install failed: $e');
-
-      // Fallback: Open browser download URL
-      if (info.fallbackUrl.isNotEmpty) {
-        final uri = Uri.parse(info.fallbackUrl);
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-          return true;
-        }
-      }
+      debugPrint('[UpdateService] In-app update download/install failed: $e');
       return false;
     }
   }

@@ -749,8 +749,8 @@
         <!-- Plan Selection -->
         <div>
           <label class="text-[11px] font-semibold text-gray-300 block mb-1.5">Membership Plan *</label>
-          <div class="space-y-2">
-            <div onclick="selectPlan('PLAN_6H', 500, '6 Hours Shift')" class="p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition" id="plan-opt-6h">
+          <div id="plan-options-container" class="space-y-2">
+            <div onclick="selectPlanById('PLAN_6H', 500, '6 Hours Shift')" class="p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition" id="plan-opt-PLAN_6H">
               <div>
                 <span class="text-xs font-bold text-white">6 Hours Single Shift</span>
                 <p class="text-[10px] text-gray-400">Morning, Afternoon or Evening</p>
@@ -758,7 +758,7 @@
               <span class="text-sm font-bold text-emerald-400">₹500<span class="text-[10px] text-gray-400 font-normal">/mo</span></span>
             </div>
 
-            <div onclick="selectPlan('PLAN_12H', 800, '12 Hours Double Shift')" class="p-3 rounded-xl border border-gold-500/50 bg-gold-500/10 cursor-pointer flex items-center justify-between transition" id="plan-opt-12h">
+            <div onclick="selectPlanById('PLAN_12H', 800, '12 Hours Double Shift')" class="p-3 rounded-xl border border-gold-500/50 bg-gold-500/10 cursor-pointer flex items-center justify-between transition" id="plan-opt-PLAN_12H">
               <div>
                 <span class="text-xs font-bold text-white">12 Hours Double Shift</span>
                 <p class="text-[10px] text-gold-300/80">06:00 AM – 06:00 PM or 12:00 PM – 12:00 AM</p>
@@ -766,7 +766,7 @@
               <span class="text-sm font-bold text-gold-400">₹800<span class="text-[10px] text-gray-400 font-normal">/mo</span></span>
             </div>
 
-            <div onclick="selectPlan('PLAN_24H', 1000, '24 Hours Full Day (Dedicated Seat)')" class="p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition" id="plan-opt-24h">
+            <div onclick="selectPlanById('PLAN_24H', 1000, '24 Hours Full Day (Dedicated Seat)')" class="p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition" id="plan-opt-PLAN_24H">
               <div>
                 <span class="text-xs font-bold text-white">24 Hours Full Day (Dedicated)</span>
                 <p class="text-[10px] text-gray-400">24/7 dedicated personal study station</p>
@@ -1361,7 +1361,9 @@
     // ── Global State ──
     let currentViewingBranch = localStorage.getItem('cml_selected_branch') || 'mehdawal';
     let selectedPlanCode = 'PLAN_12H';
+    let selectedPlanId = null;
     let selectedPlanPrice = 800;
+    let availablePlans = [];
     let selectedSeatNumber = 'M01';
     let currentRating = 5;
 
@@ -1420,6 +1422,7 @@
         heroBranch.textContent = BRANCH_CONFIG[branchKey].badgeName;
       }
       fetchAndUpdateSeatStats(branchKey);
+      fetchAndRenderPlans();
 
       // 4. Update Attendance Tag
       const attBranch = document.getElementById('att-branch-tag');
@@ -1511,9 +1514,10 @@
         if (!phone || phone.length < 10) { showToast('Please enter a valid 10-digit WhatsApp number'); return; }
       }
 
-      // Step 2 -> 3: Refresh seat matrix for active branch
+      // Step 2 -> 3: Refresh seat matrix and load plans for active branch
       if (step === 3) {
         refreshBranchSeats();
+        fetchAndRenderPlans();
       }
 
       // Toggle step cards
@@ -1541,26 +1545,72 @@
       initIcons();
     }
 
-    // ── Plan Selection in Registration ──
-    function selectPlan(code, price, label) {
-      selectedPlanCode = code;
-      selectedPlanPrice = price;
-
-      ['6h', '12h', '24h'].forEach(p => {
-        const el = document.getElementById(`plan-opt-${p}`);
-        if (el) {
-          el.className = 'p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition';
+    // ── Dynamic Plan Loading from Backend API ──
+    async function fetchAndRenderPlans() {
+      const container = document.getElementById('plan-options-container');
+      if (!container) return;
+      try {
+        const res = await fetch(`/portal/plans?branchId=${encodeURIComponent(currentViewingBranch)}`);
+        if (!res.ok) throw new Error('API status ' + res.status);
+        const plans = await res.json();
+        if (plans && Array.isArray(plans) && plans.length > 0) {
+          availablePlans = plans;
+          container.innerHTML = '';
+          plans.forEach((plan, idx) => {
+            const isDefault = (selectedPlanId ? plan.id === selectedPlanId : idx === 0);
+            if (isDefault) {
+              selectedPlanId = plan.id;
+              selectedPlanCode = plan.id;
+              selectedPlanPrice = plan.price;
+              const summaryAmt = document.getElementById('summary-total-amt');
+              const summaryPlan = document.getElementById('summary-plan-text');
+              if (summaryAmt) summaryAmt.textContent = `₹${plan.price}`;
+              if (summaryPlan) summaryPlan.textContent = plan.name;
+            }
+            const el = document.createElement('div');
+            el.id = `plan-opt-${plan.id}`;
+            const priceColor = plan.price >= 1000 ? 'text-purple-300' : (plan.price <= 600 ? 'text-emerald-400' : 'text-gold-400');
+            el.className = isDefault
+              ? 'p-3 rounded-xl border border-gold-500/60 bg-gold-500/10 cursor-pointer flex items-center justify-between transition'
+              : 'p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition';
+            el.onclick = () => selectPlanById(plan.id, plan.price, plan.name);
+            el.innerHTML = `
+              <div>
+                <span class="text-xs font-bold text-white">${plan.name}</span>
+                <p class="text-[10px] text-gray-400">${plan.badge || (plan.durationDays + ' Days Membership')}</p>
+              </div>
+              <span class="text-sm font-bold ${priceColor}">₹${plan.price}<span class="text-[10px] text-gray-400 font-normal">/mo</span></span>
+            `;
+            container.appendChild(el);
+          });
+          return;
         }
-      });
+      } catch (e) {
+        console.warn('[Portal] Failed to load plans dynamically, using defaults:', e);
+      }
+    }
 
-      const activeEl = document.getElementById(`plan-opt-${code.replace('PLAN_', '').toLowerCase()}`);
+    function selectPlanById(id, price, label) {
+      selectedPlanId = id;
+      selectedPlanCode = id;
+      selectedPlanPrice = price;
+      document.querySelectorAll('[id^="plan-opt-"]').forEach(el => {
+        el.className = 'p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition';
+      });
+      const activeEl = document.getElementById(`plan-opt-${id}`);
       if (activeEl) {
         activeEl.className = 'p-3 rounded-xl border border-gold-500/60 bg-gold-500/10 cursor-pointer flex items-center justify-between transition';
       }
-
-      document.getElementById('summary-total-amt').textContent = `₹${price}`;
-      document.getElementById('summary-plan-text').textContent = label;
+      const summaryAmt = document.getElementById('summary-total-amt');
+      const summaryPlan = document.getElementById('summary-plan-text');
+      if (summaryAmt) summaryAmt.textContent = `₹${price}`;
+      if (summaryPlan) summaryPlan.textContent = label;
       refreshBranchSeats();
+    }
+
+    // ── Plan Selection in Registration (Backward Compatible) ──
+    function selectPlan(code, price, label) {
+      selectPlanById(code, price, label);
     }
 
     // ── Architectural Single-Hall Seat Matrix (65 Mehdawal / 72 Khalilabad) ──
@@ -1715,6 +1765,16 @@
         return;
       }
 
+      const dobVal = (document.getElementById('reg-dob')?.value || '').trim();
+      if (dobVal) {
+        const parsedDob = new Date(dobVal);
+        if (parsedDob > new Date()) {
+          showToast('Date of birth cannot be in the future');
+          goToRegStep(1);
+          return;
+        }
+      }
+
       const timing = document.getElementById('reg-timing').value;
       const branchConfig = BRANCH_CONFIG[currentViewingBranch];
       const appId = 'REG-' + Math.floor(100000 + Math.random() * 900000);
@@ -1765,7 +1825,7 @@
           course: (document.getElementById('reg-course')?.value || '').trim(),
           institute: (document.getElementById('reg-institute')?.value || '').trim(),
           occupation: (document.getElementById('reg-occupation')?.value || '').trim(),
-          planId: selectedPlanCode,
+          planId: selectedPlanId || selectedPlanCode,
           branch: currentViewingBranch,
           branchId: currentViewingBranch,
           seatNumber: selectedSeatNumber,
@@ -2174,6 +2234,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       initIcons();
       switchPortalBranch(currentViewingBranch);
+      fetchAndRenderPlans();
     });
   </script>
 </body>

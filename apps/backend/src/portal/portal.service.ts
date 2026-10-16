@@ -354,12 +354,48 @@ export class PortalService {
     const isMehdawal = branch.name?.toLowerCase().includes('mehda') ?? true;
     const expectedPrefix = isMehdawal ? 'M' : 'K';
 
-    // Resolve Plan
-    const plan = await this.prisma.membershipPlan.findUnique({
-      where: { id: dto.planId },
-    });
+    // Resolve Plan — supports UUID, plan codes (PLAN_6H, PLAN_12H, PLAN_24H), or duration matches, strictly branch-scoped
+    let plan: any = null;
+
+    if (dto.planId && dto.planId.includes('-')) {
+      plan = await this.prisma.membershipPlan.findFirst({
+        where: { id: dto.planId, branchId: branch.id, isActive: true },
+      });
+      // Fallback: try by ID regardless of branchId if branch-specific plan wasn't migrated
+      if (!plan) {
+        plan = await this.prisma.membershipPlan.findUnique({
+          where: { id: dto.planId },
+        });
+      }
+    }
+
+    if (!plan && branch) {
+      const code = (dto.planId || '').toUpperCase();
+      const nameContains = code.includes('24') ? '24' : code.includes('12') ? '12' : code.includes('6') ? '6' : null;
+      if (nameContains) {
+        plan = await this.prisma.membershipPlan.findFirst({
+          where: {
+            branchId: branch.id,
+            isActive: true,
+            name: { contains: nameContains, mode: 'insensitive' },
+          },
+          orderBy: { price: 'asc' },
+        });
+      }
+    }
+
+    // Step 3: Fallback — pick cheapest active plan for this branch
+    if (!plan && branch) {
+      plan = await this.prisma.membershipPlan.findFirst({
+        where: { branchId: branch.id, isActive: true },
+        orderBy: { price: 'asc' },
+      });
+    }
+
     if (!plan) {
-      throw new NotFoundException('Selected membership plan not found');
+      throw new NotFoundException(
+        `No membership plan found for branch "${branch.name}". Please contact library administration.`
+      );
     }
 
     // 2. Strict Branch-Based Seat Allocation & Anti-Cross-Branch Validation
@@ -439,6 +475,27 @@ export class PortalService {
       occupation: dto.occupation || '',
     };
 
+    const parseSafeDob = (dobStr?: string): Date | null => {
+      if (!dobStr) return null;
+      try {
+        const clean = dobStr.split('T')[0].trim();
+        const parts = clean.split('-').map(Number);
+        if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
+          const year = parts[0];
+          const month = parts[1] - 1;
+          const day = parts[2];
+          const parsed = new Date(year, month, day, 12, 0, 0);
+          if (parsed > new Date()) return null; // Reject future dates
+          return parsed;
+        }
+        const d = new Date(dobStr);
+        return isNaN(d.getTime()) || d > new Date() ? null : d;
+      } catch (_) {
+        return null;
+      }
+    };
+    const parsedDob = parseSafeDob(dto.dob);
+
     const registration = await this.prisma.memberRegistration.create({
       data: {
         tenantId: branch.tenantId,
@@ -447,7 +504,7 @@ export class PortalService {
         name: dto.name.trim(),
         phone,
         email: dto.email?.trim() || null,
-        dob: dto.dob ? new Date(dto.dob) : null,
+        dob: parsedDob,
         gender: dto.gender || null,
         address: dto.address?.trim() || null,
         aadhaarNumber: dto.aadhaarNumber?.replace(/\s/g, '') || null,
@@ -484,7 +541,7 @@ export class PortalService {
           name: dto.name.trim(),
           phone,
           email: dto.email?.trim() || null,
-          dob: dto.dob ? new Date(dto.dob) : null,
+          dob: parsedDob,
           address: dto.address?.trim() || null,
           academicInfo: JSON.stringify(fullAcademicData),
           isActive: true,

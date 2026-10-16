@@ -13,6 +13,26 @@ export class MembersService {
     return `${prefix}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
   }
 
+  private parseSafeDob(dobStr?: string): Date | null {
+    if (!dobStr) return null;
+    try {
+      const clean = dobStr.split('T')[0].trim();
+      const parts = clean.split('-').map(Number);
+      if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
+        const year = parts[0];
+        const month = parts[1] - 1;
+        const day = parts[2];
+        const parsed = new Date(year, month, day, 12, 0, 0);
+        if (parsed > new Date()) return null;
+        return parsed;
+      }
+      const d = new Date(dobStr);
+      return isNaN(d.getTime()) || d > new Date() ? null : d;
+    } catch (_) {
+      return null;
+    }
+  }
+
   async create(user: any, createMemberDto: CreateMemberDto) {
     let tenantId = user?.tenantId;
     let tenantCode = 'LIB';
@@ -57,7 +77,7 @@ export class MembersService {
         name: createMemberDto.name,
         phone: createMemberDto.phone,
         email: createMemberDto.email,
-        dob: createMemberDto.dob ? new Date(createMemberDto.dob) : null,
+        dob: this.parseSafeDob(createMemberDto.dob),
         address: createMemberDto.address,
         academicInfo: JSON.stringify(academicData),
         branchId: resolvedBranchId,
@@ -141,7 +161,7 @@ export class MembersService {
     if (updateMemberDto.name) dataToUpdate.name = updateMemberDto.name;
     if (updateMemberDto.phone) dataToUpdate.phone = updateMemberDto.phone;
     if (updateMemberDto.email) dataToUpdate.email = updateMemberDto.email;
-    if (updateMemberDto.dob) dataToUpdate.dob = new Date(updateMemberDto.dob);
+    if (updateMemberDto.dob) dataToUpdate.dob = this.parseSafeDob(updateMemberDto.dob);
     if (updateMemberDto.address) dataToUpdate.address = updateMemberDto.address;
 
     return this.prisma.member.update({

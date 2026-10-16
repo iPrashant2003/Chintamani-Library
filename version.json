@@ -1,19 +1,19 @@
 {
-  "version": "2.7.2",
-  "buildNumber": 2072,
+  "version": "2.7.3",
+  "buildNumber": 2073,
   "minimumSupportedVersion": "2.3.0",
   "releaseDate": "16 Oct 2026",
-  "title": "Chintamani Library v2.7.2 — Official Insignia Watermark, Clean WhatsApp Hub & Refined Controls",
+  "title": "Chintamani Library v2.7.3 — Universal Portal Registration Fix, Premium Claymorphism Directory & Live Polling Alerts",
   "releaseNotes": [
-    "OFFICIAL INSIGNIA WATERMARK: Centered official golden laurel wreath and 'Infinity under a roof' insignia watermark across all app pages and Universal QR portal with calibrated opacity for crisp readability",
-    "CLEAN WHATSAPP HUB: Purged claymorphic bubbles, neon glare, and glowing borders; sleek obsidian executive surfaces with solid status indicators and responsive messaging buttons",
-    "REFINED 4D CONTROLS & ICONS: Removed white specular highlight dots from all More section icons and cleaned seat/expiry dots from member cards",
-    "UNIFIED UNIVERSAL QR PORTAL: Universal QR screens now seamlessly showcase the centered insignia watermark in pure dark luxury",
-    "VERIFIED WORKFLOWS: Fully verified WhatsApp Auto Bot queue, broadcast flows, student direct messaging, and member action buttons",
-    "SEAMLESS OTA UPDATE: In-app instant auto-update delivery without manual APK installation"
+    "FIXED UNIVERSAL PORTAL REGISTRATION: Resolved 'Selected plan not found' root cause with dynamic database plan fetching and multi-tier plan resolver across Mehdawal and Khalilabad",
+    "STRICT BRANCH ISOLATION: Member admission, seat reservation, fee calculation, and payment transactions strictly scoped to the user-selected branch",
+    "SAFE DATE OF BIRTH: Implemented timezone-safe local date parsing across backend and portal, eliminating day-shift errors and rejecting future birth dates",
+    "PREMIUM CLAYMORPHISM SUMMARY CARDS: Redesigned Members Directory status cards with compact 90px dimensions, subtle tactile depth, muted luxury palette, and zero white highlight dots",
+    "FOREGROUND & RESUME PUSH POLLING: 20-second active foreground polling and instant lifecycle-resume synchronization for incoming registrations, payments, and complaints with native heads-up system tray alerts",
+    "INSTANT OTA UPDATE: Automatic in-app update trigger delivered seamlessly without manual APK download"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.2/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.2/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.3/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.3/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

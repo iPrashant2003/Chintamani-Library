@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +20,21 @@ class SystemNotificationService {
 
   static const String _processedNotifsKey = 'processed_notification_ids';
   static bool _routingInitialized = false;
+  Timer? _pollingTimer;
+
+  /// Start periodic foreground polling for new server notifications
+  void startForegroundPolling(WidgetRef ref, {Duration interval = const Duration(seconds: 20)}) {
+    _pollingTimer?.cancel();
+    _pollingTimer = Timer.periodic(interval, (_) {
+      syncServerNotifications(ref);
+    });
+  }
+
+  /// Stop periodic polling when app is minimized or backgrounded
+  void stopForegroundPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
+  }
 
   /// Request notification permission on Android 13+ (API 33+)
   Future<bool> requestPermission() async {

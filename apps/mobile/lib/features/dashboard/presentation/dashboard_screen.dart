@@ -31,11 +31,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> with WidgetsB
       _initSystemNotifications();
       _checkUpdate();
       _syncServerNotifications();
+      SystemNotificationService.instance.startForegroundPolling(ref);
     });
   }
 
   @override
   void dispose() {
+    SystemNotificationService.instance.stopForegroundPolling();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -44,6 +46,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> with WidgetsB
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _checkUpdate();
+      _syncServerNotifications();
+      SystemNotificationService.instance.startForegroundPolling(ref);
+    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+      SystemNotificationService.instance.stopForegroundPolling();
     }
   }
 

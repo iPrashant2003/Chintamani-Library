@@ -11,56 +11,6 @@ import '../../../core/services/app_update_service.dart';
 import '../../../widgets/app_update_dialog.dart';
 import '../providers/auth_provider.dart';
 
-// ---------------------------------------------------------------------------
-// Particle data model matching login page
-// ---------------------------------------------------------------------------
-class _SplashParticle {
-  final double x;
-  final double y;
-  final double size;
-  final double speed;
-  final double phase;
-  final Color color;
-
-  const _SplashParticle({
-    required this.x,
-    required this.y,
-    required this.size,
-    required this.speed,
-    required this.phase,
-    required this.color,
-  });
-}
-
-class _SplashParticlePainter extends CustomPainter {
-  final double progress;
-  final List<_SplashParticle> particles;
-
-  _SplashParticlePainter({required this.progress, required this.particles});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    for (final p in particles) {
-      final t = (progress + p.phase) % 1.0;
-      final dx = p.x * size.width + math.sin(t * 2 * math.pi + p.phase) * 28;
-      final dy = p.y * size.height + math.cos(t * 2 * math.pi * p.speed + p.phase) * 22;
-
-      final glowPaint = Paint()
-        ..color = p.color.withValues(alpha: 0.18)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
-      canvas.drawCircle(Offset(dx, dy), p.size * 3.5, glowPaint);
-
-      final corePaint = Paint()
-        ..color = p.color.withValues(alpha: 0.75)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.5);
-      canvas.drawCircle(Offset(dx, dy), p.size, corePaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_SplashParticlePainter old) => old.progress != progress;
-}
-
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -71,108 +21,87 @@ class SplashScreen extends ConsumerStatefulWidget {
 class _SplashScreenState extends ConsumerState<SplashScreen>
     with TickerProviderStateMixin {
   late final AnimationController _pulseController;
-  late final Animation<double> _pulseAnim;
-  late final AnimationController _particleController;
+  late final AnimationController _rayController;
   late final AnimationController _progressController;
 
-  bool _hasError = false;
-  String _errorMessage = '';
-
-  static final _particles = <_SplashParticle>[
-    const _SplashParticle(x: 0.08, y: 0.12, size: 3.0, speed: 0.7, phase: 0.00, color: AppColors.goldPrimary),
-    const _SplashParticle(x: 0.85, y: 0.18, size: 2.2, speed: 1.1, phase: 0.15, color: Color(0xFF00E5BC)),
-    const _SplashParticle(x: 0.55, y: 0.07, size: 1.8, speed: 0.9, phase: 0.33, color: AppColors.goldLight),
-    const _SplashParticle(x: 0.20, y: 0.75, size: 2.6, speed: 0.6, phase: 0.52, color: AppColors.goldPrimary),
-    const _SplashParticle(x: 0.90, y: 0.62, size: 1.5, speed: 1.3, phase: 0.71, color: Color(0xFF00E5BC)),
-    const _SplashParticle(x: 0.40, y: 0.88, size: 2.0, speed: 0.8, phase: 0.44, color: AppColors.goldLight),
-    const _SplashParticle(x: 0.70, y: 0.45, size: 1.6, speed: 1.0, phase: 0.62, color: AppColors.goldPrimary),
-    const _SplashParticle(x: 0.15, y: 0.42, size: 3.2, speed: 0.5, phase: 0.83, color: Color(0xFF00E5BC)),
-  ];
+  /// Update info fetched during splash; shown after navigation completes.
+  AppUpdateInfo? _pendingUpdate;
 
   @override
   void initState() {
     super.initState();
 
-    // 1. Particle field animation
-    _particleController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 8),
-    )..repeat();
-
-    // 2. Pulsating golden ring matching login page
+    // Pulse animation for logo illumination
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1600),
+      duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
-    _pulseAnim = Tween<double>(begin: 0.93, end: 1.07).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
 
-    // 3. Progress bar indicator
+    // Rotating ambient golden aura rays
+    _rayController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 6000),
+    )..repeat();
+
+    // 3-second progress indicator
     _progressController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2600),
+      duration: const Duration(milliseconds: 3000),
     )..forward();
 
+    // Start synchronized splash sequence
     _startSplashSequence();
   }
 
+  /// Synchronized splash sequence: ensures golden branding plays while awaiting
+  /// cloud update manifest, displaying update dialog immediately if available.
   Future<void> _startSplashSequence() async {
-    setState(() {
-      _hasError = false;
-      _errorMessage = '';
-    });
-    _progressController.reset();
-    _progressController.forward();
-
-    final minDuration = Future.delayed(const Duration(milliseconds: 2500));
+    final minSplashDuration = Future.delayed(const Duration(milliseconds: 2800));
 
     AppUpdateInfo? update;
     try {
       final service = ref.read(appUpdateServiceProvider);
+      // Actively await update check with a 3.5s timeout
       update = await service.checkForUpdate().timeout(
         const Duration(milliseconds: 3500),
         onTimeout: () => null,
       );
     } catch (e) {
-      debugPrint('[SplashScreen] Update check note: $e');
+      debugPrint('[SplashScreen] Update check error: $e');
     }
 
-    await minDuration;
+    // Ensure splash branding animation displays for at least 2.8 seconds
+    await minSplashDuration;
     if (!mounted) return;
 
-    try {
-      if (update != null) {
-        final autoCheck = await ref.read(appUpdateServiceProvider).isAutoCheckEnabled();
-        if (update.forceUpdate || autoCheck) {
-          await AppUpdateDialog.show(context, update);
-          if (!mounted) return;
-          if (update.forceUpdate) {
-            return;
-          }
+    HapticFeedback.lightImpact();
+
+    // If an update was discovered:
+    if (update != null) {
+      final autoCheck = await ref.read(appUpdateServiceProvider).isAutoCheckEnabled();
+      if (update.forceUpdate || autoCheck) {
+        await AppUpdateDialog.show(context, update);
+        if (!mounted) return;
+        if (update.forceUpdate) {
+          // Mandatory update: user must complete update before continuing
+          return;
         }
       }
+    }
 
-      final authState = ref.read(authProvider).value;
-      if (authState is AuthAuthenticated) {
-        context.go(RouteNames.dashboard);
-      } else {
-        context.go(RouteNames.login);
-      }
-    } catch (err) {
-      if (mounted) {
-        setState(() {
-          _hasError = true;
-          _errorMessage = 'Initialization timed out or connection failed.';
-        });
-      }
+    final authState = ref.read(authProvider).value;
+    if (authState is AuthAuthenticated) {
+      context.go(RouteNames.dashboard);
+    } else {
+      // User explicitly signed out: request login credentials
+      context.go(RouteNames.login);
     }
   }
 
   @override
   void dispose() {
-    _particleController.dispose();
     _pulseController.dispose();
+    _rayController.dispose();
     _progressController.dispose();
     super.dispose();
   }
@@ -180,23 +109,25 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
+      backgroundColor: AppColors.bgDark, // Deep luxury black
       body: Stack(
         children: [
-          // ── Layer 0: Matching Floating Particle Field ──
+          // Background Golden Aura & Light Rays
           Positioned.fill(
             child: AnimatedBuilder(
-              animation: _particleController,
-              builder: (_, __) => CustomPaint(
-                painter: _SplashParticlePainter(
-                  progress: _particleController.value,
-                  particles: _particles,
-                ),
-              ),
+              animation: _rayController,
+              builder: (context, _) {
+                return CustomPaint(
+                  painter: _GoldenAuraPainter(
+                    angle: _rayController.value * 2 * math.pi,
+                    pulse: _pulseController.value,
+                  ),
+                );
+              },
             ),
           ),
 
-          // ── Layer 1: Center Brand Symbol (Infinity Under a Roof) ──
+          // Main Center Content
           SafeArea(
             child: Center(
               child: Padding(
@@ -206,151 +137,127 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   children: [
                     const Spacer(flex: 3),
 
-                    // Pulsating golden ring + Official Logo
+                    // Illuminated Official Chinta Mani Logo with Golden Aura
                     AnimatedBuilder(
-                      animation: _pulseAnim,
-                      builder: (_, child) => Transform.scale(
-                        scale: _pulseAnim.value,
-                        child: child,
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            width: 114,
-                            height: 114,
+                      animation: _pulseController,
+                      builder: (context, child) {
+                        final scale = 1.0 + (_pulseController.value * 0.06);
+                        return Transform.scale(
+                          scale: scale,
+                          child: Container(
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(
-                                color: AppColors.goldPrimary.withValues(alpha: 0.55),
-                                width: 2.2,
-                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.goldPrimary.withValues(alpha: 0.28),
-                                  blurRadius: 24,
-                                  spreadRadius: 4,
+                                  color: AppColors.goldPrimary
+                                      .withValues(alpha: 0.35 + _pulseController.value * 0.35),
+                                  blurRadius: 40 + (_pulseController.value * 20),
+                                  spreadRadius: 4 + (_pulseController.value * 6),
                                 ),
                                 BoxShadow(
-                                  color: AppColors.goldLight.withValues(alpha: 0.12),
-                                  blurRadius: 44,
+                                  color: AppColors.goldBright
+                                      .withValues(alpha: 0.2 + _pulseController.value * 0.2),
+                                  blurRadius: 70,
                                   spreadRadius: 8,
                                 ),
                               ],
                             ),
+                            child: const ChintaManiLogo(
+                              size: 110,
+                              showGlow: true,
+                              showCircularBackground: true,
+                            ),
                           ),
-                          const ChintaManiLogo(
-                            size: 98,
-                            showGlow: true,
-                            showCircularBackground: true,
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
 
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 28),
 
-                    // Brand Title
+                    // Official Brand Title
                     const Text(
                       'CHINTA MANI LIBRARY',
                       style: TextStyle(
                         color: AppColors.textPrimary,
-                        fontSize: 22,
+                        fontSize: 24,
                         fontWeight: FontWeight.w900,
-                        letterSpacing: 1.2,
+                        letterSpacing: 2.0,
+                        shadows: [
+                          Shadow(
+                            color: AppColors.goldGlow,
+                            blurRadius: 16,
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 6),
 
-                    // Infinity under a roof subtitle pill
+                    // Dual Branches Badge
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppColors.goldPrimary.withValues(alpha: 0.15),
+                        color: AppColors.goldPrimary.withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppColors.goldPrimary.withValues(alpha: 0.4)),
+                        border: Border.all(
+                          color: AppColors.goldPrimary.withValues(alpha: 0.4),
+                          width: 1,
+                        ),
                       ),
                       child: const Text(
-                        'Infinity under a roof',
+                        'Khalilabad • Mehdawal',
                         style: TextStyle(
                           color: AppColors.goldLight,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Official Quote
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        '“Where Silence Meets Ambition • Infinity Under A Roof”',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppColors.goldLight.withValues(alpha: 0.85),
+                          fontSize: 13,
                           fontStyle: FontStyle.italic,
+                          height: 1.4,
+                          letterSpacing: 0.3,
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 32),
 
-                    const Text(
-                      'Khalilabad • Mehdawal',
-                      style: TextStyle(
-                        color: AppColors.textTertiary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
+                    // 3-Second Golden Progress Bar
+                    SizedBox(
+                      width: 180,
+                      child: AnimatedBuilder(
+                        animation: _progressController,
+                        builder: (context, _) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: LinearProgressIndicator(
+                              value: _progressController.value,
+                              backgroundColor: Colors.white.withValues(alpha: 0.1),
+                              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.goldPrimary),
+                              minHeight: 4,
+                            ),
+                          );
+                        },
                       ),
                     ),
-
-                    const SizedBox(height: 30),
-
-                    // Progress or Error state
-                    if (!_hasError) ...[
-                      SizedBox(
-                        width: 170,
-                        child: AnimatedBuilder(
-                          animation: _progressController,
-                          builder: (context, _) {
-                            return ClipRRect(
-                              borderRadius: BorderRadius.circular(6),
-                              child: LinearProgressIndicator(
-                                value: _progressController.value,
-                                backgroundColor: Colors.white.withValues(alpha: 0.1),
-                                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.goldPrimary),
-                                minHeight: 3.5,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ] else ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: AppColors.redPrimary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.redPrimary.withValues(alpha: 0.4)),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              _errorMessage,
-                              style: const TextStyle(color: AppColors.redLight, fontSize: 11),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 8),
-                            ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFFACC15),
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                              onPressed: _startSplashSequence,
-                              icon: const Icon(Icons.refresh_rounded, size: 16),
-                              label: const Text('Retry', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
 
                     const Spacer(flex: 3),
 
-                    // Developer Credit
+                    // Mandatory Footer: Developed by Prashant Mani Tripathi
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                       decoration: BoxDecoration(
                         color: const Color(0x1AD4AF37),
                         borderRadius: BorderRadius.circular(20),
@@ -364,24 +271,24 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         children: [
                           Icon(
                             Icons.auto_awesome_rounded,
-                            size: 13,
+                            size: 14,
                             color: AppColors.goldPrimary,
                           ),
-                          SizedBox(width: 6),
+                          SizedBox(width: 8),
                           Text(
                             'Developed by Prashant Mani Tripathi',
                             style: TextStyle(
                               color: AppColors.goldLight,
-                              fontSize: 11.5,
+                              fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              letterSpacing: 0.4,
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -390,5 +297,50 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         ],
       ),
     );
+  }
+}
+
+class _GoldenAuraPainter extends CustomPainter {
+  final double angle;
+  final double pulse;
+
+  _GoldenAuraPainter({required this.angle, required this.pulse});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width * 0.5, size.height * 0.42);
+    final maxRadius = size.width * 0.75;
+
+    // Ambient radial gradient
+    final bgPaint = Paint()
+      ..shader = RadialGradient(
+        center: const Alignment(0.0, -0.16),
+        radius: 0.8,
+        colors: [
+          AppColors.goldPrimary.withValues(alpha: 0.15 + pulse * 0.08),
+          AppColors.bluePrimary.withValues(alpha: 0.04),
+          Colors.transparent,
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
+
+    // Radiating golden branches / light rays
+    final rayPaint = Paint()
+      ..color = AppColors.goldPrimary.withValues(alpha: 0.03 + pulse * 0.03)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    const numRays = 16;
+    for (int i = 0; i < numRays; i++) {
+      final a = angle + (i * 2 * math.pi / numRays);
+      final p1 = Offset(center.dx + math.cos(a) * 70, center.dy + math.sin(a) * 70);
+      final p2 = Offset(center.dx + math.cos(a) * maxRadius, center.dy + math.sin(a) * maxRadius);
+      canvas.drawLine(p1, p2, rayPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _GoldenAuraPainter oldDelegate) {
+    return oldDelegate.angle != angle || oldDelegate.pulse != pulse;
   }
 }

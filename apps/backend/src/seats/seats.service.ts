@@ -7,7 +7,7 @@ export class SeatsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(branchId?: string, floor?: string, status?: string) {
-    return this.prisma.seat.findMany({
+    const rawSeats = await this.prisma.seat.findMany({
       where: {
         ...(branchId && { branchId }),
         ...(floor && { floor }),
@@ -20,8 +20,39 @@ export class SeatsService {
           take: 1,
         }
       },
-      orderBy: [{ floor: 'asc' }, { seatNumber: 'asc' }]
     });
+
+    // ── Enforce Single Hall seat numbering for Chintamani branches ──
+    // Only return seats that match the official single-hall pattern:
+    //   Khalilabad: K01–K72 (floor: 'Single Hall')
+    //   Mehdawal:   M01–M65 (floor: 'Single Hall')
+    // Old demo seeds created A01–A25 / B01–B25 seats; filter those out.
+    let seats = rawSeats;
+    if (branchId) {
+      // Determine which prefix is valid for this branch
+      const branchRecord = await this.prisma.branch.findUnique({ where: { id: branchId }, select: { name: true } }).catch(() => null);
+      if (branchRecord) {
+        const isKhl = branchRecord.name.toLowerCase().includes('khalilabad');
+        const prefix = isKhl ? 'K' : 'M';
+        const maxSeat = isKhl ? 72 : 65;
+        const validPattern = new RegExp(`^${prefix}(\\d{2})$`);
+        seats = rawSeats.filter(s => {
+          const m = s.seatNumber.match(validPattern);
+          if (!m) return false;
+          const num = parseInt(m[1], 10);
+          return num >= 1 && num <= maxSeat;
+        });
+      }
+    }
+
+    // Natural sort: K01, K02, ..., K10, K11, ... K72
+    seats.sort((a, b) => {
+      const numA = parseInt(a.seatNumber.replace(/[^0-9]/g, ''), 10) || 0;
+      const numB = parseInt(b.seatNumber.replace(/[^0-9]/g, ''), 10) || 0;
+      return numA - numB;
+    });
+
+    return seats;
   }
 
   async findOne(id: string) {

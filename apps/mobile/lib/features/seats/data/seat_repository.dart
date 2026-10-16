@@ -27,13 +27,44 @@ class SeatRepository {
           ? response.data['data'] as List
           : response.data as List;
       final seats = rawList.map((e) => Seat.fromJson(e as Map<String, dynamic>)).toList();
-      if (seats.isEmpty) {
+
+      // ── Front-end safety: filter to only valid Single Hall seats ──
+      final filtered = _filterAndSortSeats(seats, branchId);
+
+      if (filtered.isEmpty) {
         return _generateMockSeats(branchId, floor: floor, status: status);
       }
-      return seats;
+      // Apply status filter if backend didn't do it
+      if (status != null && status != 'ALL') {
+        return filtered.where((s) => s.status == status).toList();
+      }
+      return filtered;
     } catch (_) {
       return _generateMockSeats(branchId, floor: floor, status: status);
     }
+  }
+
+  /// Filter to official seat numbers only and sort numerically.
+  List<Seat> _filterAndSortSeats(List<Seat> seats, String branchId) {
+    final isMehdawal = branchId.toLowerCase().contains('mehdawal');
+    final prefix = isMehdawal ? 'M' : 'K';
+    final max = isMehdawal ? 65 : 72;
+    final pattern = RegExp('^$prefix(\\d{2})\$');
+
+    final filtered = seats.where((s) {
+      final match = pattern.firstMatch(s.seatNumber);
+      if (match == null) return false;
+      final num = int.tryParse(match.group(1) ?? '') ?? 0;
+      return num >= 1 && num <= max;
+    }).toList();
+
+    filtered.sort((a, b) {
+      final numA = int.tryParse(a.seatNumber.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+      final numB = int.tryParse(b.seatNumber.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+      return numA.compareTo(numB);
+    });
+
+    return filtered;
   }
 
   Future<void> updateSeatStatus(String seatId, String status) async {

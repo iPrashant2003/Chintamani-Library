@@ -52,6 +52,16 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
+  // Run database cleanup to ensure only real records and official 72/65 seats exist
+  try {
+    const { PrismaService } = await import('./prisma/prisma.service');
+    const { runDatabaseCleanup } = await import('./database-cleanup');
+    const prisma = app.get(PrismaService);
+    await runDatabaseCleanup(prisma);
+  } catch (e: any) {
+    console.error('Failed to run database cleanup:', e.message);
+  }
+
   const port = configService.get<number>('PORT') || 3000;
   await app.listen(port, '0.0.0.0');
   console.log(`Application is running on: http://localhost:${port}`);

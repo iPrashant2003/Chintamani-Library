@@ -118,7 +118,7 @@ class _MemberCardState extends ConsumerState<MemberCard>
     if (digits.isNotEmpty) {
       return digits.length > 3 ? digits.substring(digits.length - 3) : digits;
     }
-    return '327';
+    return '—';
   }
 
   // ── Action Handlers (All wired to real database & device actions) ──
@@ -1116,19 +1116,19 @@ class _MemberCardState extends ConsumerState<MemberCard>
     final planName =
         member.currentPlanName.isNotEmpty && member.currentPlanName != 'No Plan'
             ? member.currentPlanName
-            : '6 hrs batch';
+            : 'No Active Plan';
     final batchType =
         member.batch != null && member.batch!.isNotEmpty
             ? member.batch!
-            : 'morning~afternoon~evening';
+            : 'General Study';
     final sub = member.activeSubscription;
     final joinDate = sub != null
-        ? _formatDate(sub.startDate, defaultVal: '08 Sep, 2026')
-        : '08 Sep, 2026';
+        ? _formatDate(sub.startDate, defaultVal: '—')
+        : '—';
     final expiryDate = sub != null
-        ? _formatDate(sub.endDate, defaultVal: '07 Oct, 2026')
-        : '07 Oct, 2026';
-    final amt = sub?.plan?.price.toInt() ?? (member.isActive ? 500 : 0);
+        ? _formatDate(sub.endDate, defaultVal: '—')
+        : '—';
+    final amt = sub?.plan?.price.toInt() ?? 0;
     final paid = member.isActive ? amt : 0;
     final due = member.isActive ? 0 : amt;
 
@@ -1278,7 +1278,7 @@ class _MemberCardState extends ConsumerState<MemberCard>
                                             member.address != null &&
                                                     member.address!.isNotEmpty
                                                 ? member.address!
-                                                : 'moti chauraha khalilabad',
+                                                : 'Address not provided',
                                             style: const TextStyle(
                                                 color: Color(0xFFA1A1AA),
                                                 fontSize: 11),
@@ -1300,7 +1300,7 @@ class _MemberCardState extends ConsumerState<MemberCard>
                                           member.phone != null &&
                                                   member.phone!.isNotEmpty
                                               ? member.phone!
-                                              : '+91 9682960623',
+                                              : 'Phone not provided',
                                           style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 11.5,

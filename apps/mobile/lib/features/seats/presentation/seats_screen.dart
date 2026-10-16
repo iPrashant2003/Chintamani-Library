@@ -105,7 +105,7 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
                               ),
                             ),
                             Text(
-                              'Floor ${seat.floor} • Study Hall',
+                              '${seat.floor} • Study Hall',
                               style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                             ),
                           ],

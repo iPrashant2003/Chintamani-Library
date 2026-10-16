@@ -217,32 +217,7 @@ class QrHubScreen extends ConsumerWidget {
               ),
               child: Column(
                 children: [
-                  // Status Badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFC9A84C).withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFC9A84C).withValues(alpha: 0.35)),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircleAvatar(radius: 3.5, backgroundColor: Color(0xFF34D399)),
-                        SizedBox(width: 6),
-                        Text(
-                          'OFFICIAL MEMBER PORTAL • LIVE',
-                          style: TextStyle(
-                            color: Color(0xFFE8C97A),
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
+
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -333,47 +308,7 @@ class QrHubScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 14),
 
-                  // URL Copy Chip
-                  GestureDetector(
-                    onTap: () {
-                      Clipboard.setData(ClipboardData(text: portalUrl));
-                      HapticFeedback.lightImpact();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Portal link copied to clipboard!'),
-                          duration: Duration(milliseconds: 1400),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.45),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.link_rounded, size: 14, color: Color(0xFFC9A84C)),
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              portalUrl,
-                              style: const TextStyle(
-                                color: Color(0xFFE8C97A),
-                                fontSize: 11,
-                                fontFamily: 'monospace',
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.copy_rounded, size: 14, color: Color(0xFFC9A84C)),
-                        ],
-                      ),
-                    ),
-                  ),
+
                 ],
               ),
             ),
@@ -469,49 +404,7 @@ class QrHubScreen extends ConsumerWidget {
               ],
             ),
 
-            const SizedBox(height: 16),
 
-            // Brand statement info card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xF20D111A),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 0.8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'CHINTAMANI LIBRARY UNIVERSAL QR ECOSYSTEM',
-                    style: TextStyle(
-                      color: Color(0xFFC9A84C),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'One QR for Every Member & Scholar Service',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Members can scan this universal QR code from anywhere to record their daily attendance, register for study seats, submit UPI payment proofs, or raise facility support tickets.',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.65),
-                      fontSize: 11,
-                      height: 1.45,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),

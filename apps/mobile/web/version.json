@@ -1,19 +1,20 @@
 {
-  "version": "2.7.6",
-  "buildNumber": 2076,
+  "version": "2.7.7",
+  "buildNumber": 2077,
   "minimumSupportedVersion": "2.3.0",
   "releaseDate": "17 Oct 2026",
-  "title": "Chintamani Library v2.7.6 — Graphical Seat Matrix, Sliding Navigation & Real Analytics Rebuild",
+  "title": "Chintamani Library v2.7.7 — Login Fix, Claymorphism Drawer, 4D Portal QR & Live Card Motion",
   "releaseNotes": [
-    "REAL-TIME SEAT & LOCKER ALLOCATION: Admin Step 5 member registration rebuilt with official Single Hall capacity (Khalilabad: 72 seats K01-K72, Mehdawal: 65 seats M01-M65, Lockers L01-L09) with atomic occupancy assignment",
-    "SLIDING BOTTOM NAVIGATION SELECTOR: Rebuilt 5-tab 4D bottom navigation bar with fluid AnimatedPositioned top runner pill and travelling ambient specular glow pod",
-    "REAL-TIME LIBRARY INSIGHTS: Purged hardcoded statistics in Insights screen; hooked to live dashboard stats, occupancy percentages, and intelligent branch alerts",
-    "PROFILE & BRANDING UPGRADE: More screen updated with official ChintaManiLogo emblem and dynamic locker count badges",
-    "MEMBER DIRECTORY OPTIMIZATION: Isolated 4D perspective tilt in RepaintBoundary for smooth 60fps scrolling with accurate paid/due plan calculations",
-    "ADMIN MASTER PIN: Updated local security credential to Mani6050 with secure storage synchronization"
+    "CRITICAL LOGIN FIX: Resolved authentication failure when signing in with admin password Mani6050 across both cloud backend and offline fallback",
+    "BOTTOM NAVIGATION: Removed sliding line and ambient glow pod; upgraded active tab buttons to softly rounded rectangles with 9px corner radius",
+    "UNIVERSAL PORTAL CLEANUP: Removed plain text portal URL, 'Official Member Portal' banner, and 'Universal QR Ecosystem' card for a clean, distraction-free interface",
+    "PREMIUM 4D PORTAL QR: Multi-layer depth container with 3D perspective tilt, periodic specular glint sweep, and fine dot-matrix background accent while keeping QR 100% crisp and scannable",
+    "DEEP-BLACK CLAYMORPHISM DRAWER: Sidebar drawer rebuilt with #040404 deep black base, tactile clay surfaces, outer drop shadows, and responsive press feedback",
+    "MATCHING LOADING SCREEN: Splash screen redesigned with floating particles, pulsating golden ring, and brand mark (infinity symbol under a roof) with retry handling",
+    "MEMBER DIRECTORY LIVE MOTION: Added gentle breathing glow, pulsing border indicating live active data, entrance transition, and tactile press feedback on every card"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.6/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.6/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.7/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.7/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

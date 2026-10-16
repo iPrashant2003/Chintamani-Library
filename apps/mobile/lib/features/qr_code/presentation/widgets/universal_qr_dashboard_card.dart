@@ -354,39 +354,7 @@ class UniversalQrDashboardCard extends ConsumerWidget {
                                 height: 1.4,
                               ),
                             ),
-                            const SizedBox(height: 10),
-                            // Clickable URL bar
-                            GestureDetector(
-                              onTap: () => _copyPortalLink(context, portalUrl),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.4),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.link_rounded, size: 12, color: Color(0xFFC9A84C)),
-                                    const SizedBox(width: 5),
-                                    Flexible(
-                                      child: Text(
-                                        portalUrl,
-                                        style: const TextStyle(
-                                          color: Color(0xFFE8C97A),
-                                          fontSize: 10,
-                                          fontFamily: 'monospace',
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    const Icon(Icons.copy_rounded, size: 11, color: Color(0xFFC9A84C)),
-                                  ],
-                                ),
-                              ),
-                            ),
+
                           ],
                         );
 

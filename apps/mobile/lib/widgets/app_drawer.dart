@@ -20,26 +20,35 @@ class AppDrawer extends ConsumerWidget {
     final authState = ref.watch(authProvider).value;
     final user = authState is AuthAuthenticated ? authState.user : null;
 
+    // True Deep Black base (#040404) for claymorphism
     return Drawer(
-      backgroundColor: const Color(0xF8100C05), // Luxury golden obsidian
+      backgroundColor: const Color(0xFF040404),
       child: SafeArea(
         child: Column(
           children: [
-            // Drawer Header with Official Chinta Mani Brand & Interactive Branch Switch
+            // ── Claymorphic Drawer Header with Official Brand & Branch Switch ──
             Container(
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-              decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: Color(0x33D4AF37), width: 1),
+              margin: const EdgeInsets.fromLTRB(10, 10, 10, 6),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0A0A0D),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.06),
+                  width: 1,
                 ),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0x33D4AF37),
-                    Color(0x08000000),
-                  ],
-                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.8),
+                    offset: const Offset(0, 6),
+                    blurRadius: 16,
+                  ),
+                  BoxShadow(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.05),
+                    offset: const Offset(0, 1),
+                    blurRadius: 8,
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,7 +56,7 @@ class AppDrawer extends ConsumerWidget {
                   Row(
                     children: [
                       const ChintaManiLogo(
-                        size: 46,
+                        size: 44,
                         showGlow: true,
                         showCircularBackground: true,
                       ),
@@ -88,84 +97,31 @@ class AppDrawer extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
 
-                  // Interactive Quick Branch Switcher Chip
-                  GestureDetector(
+                  // Tactile Claymorphic Quick Branch Switcher Chip
+                  _ClaymorphicBranchChip(
+                    activeBranch: activeBranch,
                     onTap: () {
                       HapticFeedback.mediumImpact();
                       final isKhl = activeBranch.shortName == 'Khalilabad';
                       ref.read(activeBranchProvider.notifier).state =
                           isKhl ? Branch.mehdawalBranch : Branch.khalilabadBranch;
                     },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                      decoration: BoxDecoration(
-                        color: const Color(0x22D4AF37),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.borderGold, width: 0.8),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.emeraldPrimary,
-                              boxShadow: [
-                                BoxShadow(color: AppColors.emeraldGlow, blurRadius: 6),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  activeBranch.name,
-                                  style: const TextStyle(
-                                    color: AppColors.goldLight,
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const Text(
-                                  'Tap to switch branch (Khalilabad / Mehdawal)',
-                                  style: TextStyle(
-                                    color: AppColors.textTertiary,
-                                    fontSize: 9,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Icon(
-                            Icons.swap_horiz_rounded,
-                            color: AppColors.goldBright,
-                            size: 18,
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
                 ],
               ),
             ),
 
-            // Organized Navigation List Items
+            // ── Organized Claymorphic Navigation List ──
             Expanded(
               child: ListView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 children: [
-                  // SECTION 1: QUICK DESK UTILITIES (Not duplicated in More)
+                  // SECTION 1: QUICK UTILITIES
                   _buildSectionHeader('QUICK UTILITIES', const Color(0xFF06B6D4)),
-                  _buildDrawerItem(
-                    context,
+                  _ClaymorphicDrawerTile(
                     title: 'Universal Portal QR',
                     subtitle: 'Permanent library QR for registration & pay',
                     icon: Icons.qr_code_2_rounded,
@@ -176,8 +132,7 @@ class AppDrawer extends ConsumerWidget {
                       context.push(RouteNames.universalQr);
                     },
                   ),
-                  _buildDrawerItem(
-                    context,
+                  _ClaymorphicDrawerTile(
                     title: 'Quick QR Scanner',
                     subtitle: 'Scan member ID & check-in pass',
                     icon: Icons.qr_code_scanner_rounded,
@@ -188,8 +143,7 @@ class AppDrawer extends ConsumerWidget {
                       context.push(RouteNames.qr);
                     },
                   ),
-                  _buildDrawerItem(
-                    context,
+                  _ClaymorphicDrawerTile(
                     title: 'Branch Comparison',
                     subtitle: 'Khalilabad vs Mehdawal performance',
                     icon: Icons.compare_arrows_rounded,
@@ -200,8 +154,7 @@ class AppDrawer extends ConsumerWidget {
                       context.push(RouteNames.branchComparison);
                     },
                   ),
-                  _buildDrawerItem(
-                    context,
+                  _ClaymorphicDrawerTile(
                     title: 'Library Insights & Trends',
                     subtitle: 'Occupancy patterns & study rush hours',
                     icon: Icons.insights_rounded,
@@ -212,8 +165,7 @@ class AppDrawer extends ConsumerWidget {
                       context.push(RouteNames.insights);
                     },
                   ),
-                  _buildDrawerItem(
-                    context,
+                  _ClaymorphicDrawerTile(
                     title: 'Director Helpline',
                     subtitle: 'Manglesh Mani Tripathi • 9415919277',
                     icon: Icons.phone_in_talk_rounded,
@@ -225,12 +177,11 @@ class AppDrawer extends ConsumerWidget {
                     },
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
 
                   // SECTION 2: ACCESS ALL OPERATIONS
                   _buildSectionHeader('MORE OPERATIONS', const Color(0xFF10B981)),
-                  _buildDrawerItem(
-                    context,
+                  _ClaymorphicDrawerTile(
                     title: 'More Features Hub',
                     subtitle: 'Lockers, Timings, Dues, Expenses & System',
                     icon: Icons.dashboard_customize_rounded,
@@ -241,8 +192,7 @@ class AppDrawer extends ConsumerWidget {
                       context.push(RouteNames.more);
                     },
                   ),
-                  _buildDrawerItem(
-                    context,
+                  _ClaymorphicDrawerTile(
                     title: 'Check for Updates',
                     subtitle: 'v${AppUpdateService.currentVersion} • Scan cloud releases',
                     icon: Icons.system_update_rounded,
@@ -276,26 +226,36 @@ class AppDrawer extends ConsumerWidget {
                         AppUpdateDialog.show(context, update);
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
+                          const SnackBar(
                             content: Text('App is up to date (v${AppUpdateService.currentVersion})!'),
                             backgroundColor: AppColors.emeraldPrimary,
-                            duration: const Duration(seconds: 3),
+                            duration: Duration(seconds: 3),
                           ),
                         );
                       }
                     },
                   ),
 
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
 
-                  // Mandatory Developer Credit
+                  // Developer Credit Claymorphic Plaque
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
-                      color: const Color(0x1AD4AF37),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0x33D4AF37), width: 0.8),
+                      color: const Color(0xFF09090C),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                        width: 0.8,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.6),
+                          offset: const Offset(0, 3),
+                          blurRadius: 8,
+                        ),
+                      ],
                     ),
                     child: const Row(
                       children: [
@@ -327,23 +287,34 @@ class AppDrawer extends ConsumerWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
 
-            // Bottom Profile / Sign Out
+            // ── Bottom Claymorphic Profile & Sign Out ──
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: const BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: Color(0x22FFFFFF), width: 1),
+              margin: const EdgeInsets.fromLTRB(10, 4, 10, 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0A0A0D),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.06),
+                  width: 1,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.7),
+                    offset: const Offset(0, 4),
+                    blurRadius: 10,
+                  ),
+                ],
               ),
               child: Row(
                 children: [
                   CircleAvatar(
-                    radius: 18,
+                    radius: 17,
                     backgroundColor: AppColors.goldPrimary.withValues(alpha: 0.2),
                     child: Text(
                       user?.name.substring(0, 1).toUpperCase() ?? 'A',
@@ -353,7 +324,7 @@ class AppDrawer extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -362,7 +333,7 @@ class AppDrawer extends ConsumerWidget {
                           user?.name ?? 'Chinta Mani Admin',
                           style: const TextStyle(
                             color: AppColors.textPrimary,
-                            fontSize: 13,
+                            fontSize: 12.5,
                             fontWeight: FontWeight.w700,
                           ),
                           maxLines: 1,
@@ -372,14 +343,14 @@ class AppDrawer extends ConsumerWidget {
                           user?.role ?? 'ADMINISTRATOR',
                           style: const TextStyle(
                             color: AppColors.textTertiary,
-                            fontSize: 11,
+                            fontSize: 10,
                           ),
                         ),
                       ],
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.logout_rounded, color: AppColors.redPrimary, size: 20),
+                    icon: const Icon(Icons.logout_rounded, color: AppColors.redPrimary, size: 19),
                     tooltip: 'Sign Out',
                     onPressed: () async {
                       Navigator.pop(context);
@@ -400,90 +371,305 @@ class AppDrawer extends ConsumerWidget {
 
   Widget _buildSectionHeader(String title, Color color) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 4),
-      child: Text(
-        title,
-        style: TextStyle(
-          color: color,
-          fontSize: 9.5,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 1.0,
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 4,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
+              boxShadow: [
+                BoxShadow(color: color.withValues(alpha: 0.8), blurRadius: 4),
+              ],
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            title,
+            style: TextStyle(
+              color: color,
+              fontSize: 9.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Claymorphic Interactive Branch Chip
+class _ClaymorphicBranchChip extends StatefulWidget {
+  final Branch activeBranch;
+  final VoidCallback onTap;
+
+  const _ClaymorphicBranchChip({
+    required this.activeBranch,
+    required this.onTap,
+  });
+
+  @override
+  State<_ClaymorphicBranchChip> createState() => _ClaymorphicBranchChipState();
+}
+
+class _ClaymorphicBranchChipState extends State<_ClaymorphicBranchChip> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedScale(
+        scale: _isPressed ? 0.98 : 1.0,
+        duration: const Duration(milliseconds: 140),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: _isPressed ? const Color(0xFF0E0E12) : const Color(0xFF0F0F14),
+            borderRadius: BorderRadius.circular(13),
+            border: Border.all(
+              color: const Color(0xFFD4AF37).withValues(alpha: _isPressed ? 0.45 : 0.28),
+              width: 0.9,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.7),
+                offset: const Offset(0, 3),
+                blurRadius: 6,
+              ),
+              if (!_isPressed)
+                BoxShadow(
+                  color: Colors.white.withValues(alpha: 0.03),
+                  offset: const Offset(0, -1),
+                  blurRadius: 2,
+                ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 7,
+                height: 7,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.emeraldPrimary,
+                  boxShadow: [
+                    BoxShadow(color: AppColors.emeraldGlow, blurRadius: 6),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.activeBranch.name,
+                      style: const TextStyle(
+                        color: AppColors.goldLight,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Text(
+                      'Tap to switch branch (Khalilabad / Mehdawal)',
+                      style: TextStyle(
+                        color: AppColors.textTertiary,
+                        fontSize: 9,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.swap_horiz_rounded,
+                color: AppColors.goldBright,
+                size: 17,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildDrawerItem(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    Widget? customIcon,
-    required Color accentColor,
-    String? badge,
-    required VoidCallback onTap,
-  }) {
+/// Tactile Deep-Black Claymorphism Navigation Tile
+class _ClaymorphicDrawerTile extends StatefulWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color accentColor;
+  final String? badge;
+  final VoidCallback onTap;
+
+  const _ClaymorphicDrawerTile({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.accentColor,
+    this.badge,
+    required this.onTap,
+  });
+
+  @override
+  State<_ClaymorphicDrawerTile> createState() => _ClaymorphicDrawerTileState();
+}
+
+class _ClaymorphicDrawerTileState extends State<_ClaymorphicDrawerTile> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = widget.accentColor;
+
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 2.5),
-      child: ListTile(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-        leading: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: accentColor.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: accentColor.withValues(alpha: 0.3), width: 0.8),
-          ),
-          child: customIcon ?? Icon(icon, color: accentColor, size: 18),
-        ),
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w700,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+      margin: const EdgeInsets.symmetric(vertical: 3),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => setState(() => _isPressed = true),
+        onTapUp: (_) {
+          setState(() => _isPressed = false);
+          widget.onTap();
+        },
+        onTapCancel: () => setState(() => _isPressed = false),
+        child: AnimatedScale(
+          scale: _isPressed ? 0.98 : 1.0,
+          duration: const Duration(milliseconds: 130),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              // Claymorphic surface: slightly lifted above #040404 background
+              color: _isPressed ? const Color(0xFF08080B) : const Color(0xFF0C0C10),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: _isPressed
+                    ? accent.withValues(alpha: 0.35)
+                    : Colors.white.withValues(alpha: 0.05),
+                width: 1.0,
               ),
-            ),
-            if (badge != null) ...[
-              const SizedBox(width: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: accentColor.withValues(alpha: 0.5), width: 0.6),
+              boxShadow: [
+                // Deep outer shadow giving tangible volume
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.85),
+                  offset: const Offset(2, 4),
+                  blurRadius: 8,
+                  spreadRadius: 0,
                 ),
-                child: Text(
-                  badge,
-                  style: TextStyle(
-                    color: accentColor,
-                    fontSize: 8.5,
-                    fontWeight: FontWeight.w800,
+                // Subtle top edge highlight reflection
+                if (!_isPressed)
+                  BoxShadow(
+                    color: Colors.white.withValues(alpha: 0.03),
+                    offset: const Offset(0, -1),
+                    blurRadius: 2,
+                  ),
+              ],
+            ),
+            child: Row(
+              children: [
+                // Clay Inset Icon Pod
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: accent.withValues(alpha: 0.30),
+                      width: 0.9,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        offset: const Offset(1, 2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: Icon(widget.icon, color: accent, size: 18),
+                ),
+                const SizedBox(width: 10),
+
+                // Title & Subtitle
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              widget.title,
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (widget.badge != null) ...[
+                            const SizedBox(width: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                              decoration: BoxDecoration(
+                                color: accent.withValues(alpha: 0.18),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: accent.withValues(alpha: 0.45),
+                                  width: 0.6,
+                                ),
+                              ),
+                              child: Text(
+                                widget.badge!,
+                                style: TextStyle(
+                                  color: accent,
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        widget.subtitle,
+                        style: const TextStyle(
+                          color: AppColors.textTertiary,
+                          fontSize: 10.5,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ],
-        ),
-        subtitle: Text(
-          subtitle,
-          style: const TextStyle(
-            color: AppColors.textTertiary,
-            fontSize: 10.5,
+
+                const SizedBox(width: 6),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Color(0x44FFFFFF),
+                  size: 16,
+                ),
+              ],
+            ),
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
         ),
-        trailing: const Icon(Icons.chevron_right_rounded, color: Color(0x44FFFFFF), size: 16),
-        onTap: onTap,
       ),
     );
   }

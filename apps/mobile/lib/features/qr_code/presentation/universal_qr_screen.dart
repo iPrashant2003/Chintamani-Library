@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,7 +50,7 @@ class UniversalQrScreen extends ConsumerWidget {
 
   void _shareViaWhatsApp(BuildContext context, String url, String branchName) async {
     final msg = Uri.encodeComponent(
-      '🏛️ *CHINTAMANI LIBRARY — OFFICIAL MEMBER PORTAL*\n'
+      '🏛️ *CHINTAMANI LIBRARY — MEMBER PORTAL*\n'
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
       '📍 *Branch*: $branchName\n\n'
       'Scan or tap the link below to access self-service features:\n'
@@ -75,7 +76,7 @@ class UniversalQrScreen extends ConsumerWidget {
       } catch (e) {
         if (context.mounted) {
           Share.share(
-            'Chintamani Library Official Member Portal:\n$url\n\n'
+            'Chintamani Library Member Portal:\n$url\n\n'
             'Register for admissions, pay monthly fees via UPI, track applications & submit support tickets.',
           );
         }
@@ -222,126 +223,295 @@ class UniversalQrScreen extends ConsumerWidget {
       ),
       body: AmbientBackground(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
           child: Column(
-          children: [
-            // Permanent Luxury QR Poster Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(22),
-              decoration: BoxDecoration(
-                color: const Color(0xF20D111A),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: const Color(0xFFC9A84C).withValues(alpha: 0.28),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.6),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
+            children: [
+              // ── 4D Premium Interactive QR Card ──
+              _UniversalQr4DCard(
+                portalUrl: portalUrl,
+                branchName: branchName,
+                onTapQr: () => _showFullScreenQr(context, portalUrl, branchName),
+              ),
+
+              const SizedBox(height: 20),
+
+              // ── Quick Sharing & Browser Actions ──
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF25D366),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+                        elevation: 3,
+                      ),
+                      onPressed: () => _shareViaWhatsApp(context, portalUrl, branchName),
+                      icon: const Icon(Icons.chat_rounded, size: 16),
+                      label: const Text('Send on WhatsApp', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    ),
                   ),
-                  BoxShadow(
-                    color: const Color(0xFFC9A84C).withValues(alpha: 0.06),
-                    blurRadius: 28,
-                    offset: const Offset(0, 4),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFC9A84C),
+                        foregroundColor: const Color(0xFF080B12),
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+                        elevation: 3,
+                      ),
+                      onPressed: () async {
+                        final uri = Uri.parse(portalUrl);
+                        try {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        } catch (_) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Opening portal in browser...')),
+                            );
+                          }
+                        }
+                      },
+                      icon: const Icon(Icons.open_in_browser_rounded, size: 16),
+                      label: const Text('Open in Browser', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    ),
                   ),
                 ],
               ),
-              child: Column(
+              const SizedBox(height: 10),
+
+              Row(
                 children: [
-                  // Header Badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFC9A84C).withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFC9A84C).withValues(alpha: 0.35)),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircleAvatar(
-                          radius: 3.5,
-                          backgroundColor: Color(0xFF34D399),
-                        ),
-                        SizedBox(width: 6),
-                        Text(
-                          'OFFICIAL MEMBER PORTAL • LIVE',
-                          style: TextStyle(
-                            color: Color(0xFFE8C97A),
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ],
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF06B6D4),
+                        side: BorderSide(color: const Color(0xFF06B6D4).withValues(alpha: 0.45), width: 0.9),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+                      ),
+                      onPressed: () => _showFullScreenQr(context, portalUrl, branchName),
+                      icon: const Icon(Icons.crop_free_rounded, size: 16),
+                      label: const Text('Counter Display Mode', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11.5)),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF8B5CF6),
+                        side: BorderSide(color: const Color(0xFF8B5CF6).withValues(alpha: 0.45), width: 0.9),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+                      ),
+                      onPressed: () {
+                        Share.share(
+                          '🏛️ Chintamani Library ($branchName)\n'
+                          'Scan or tap to access the self-service member portal:\n$portalUrl\n\n'
+                          '• New Student Registration & Seat Booking\n'
+                          '• Direct UPI Fee Payments\n'
+                          '• Complaints Desk & Inquiries\n'
+                          '• Live Seat & Shift Availability',
+                        );
+                      },
+                      icon: const Icon(Icons.share_rounded, size: 16),
+                      label: const Text('Share Portal Link', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11.5)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ClipOval(
-                        child: Image.asset(
-                          'assets/images/logo.png',
-                          width: 24,
-                          height: 24,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => const Icon(
-                            Icons.auto_stories_rounded,
-                            color: Color(0xFFC9A84C),
-                            size: 20,
-                          ),
+/// 4D Premium Animated QR Card Widget
+/// Features:
+/// - Multi-layered depth and subtle 3D perspective tilt
+/// - Animated light reflection / specular glint sweep across frame every 3.5s
+/// - Fine dot-matrix accent in the background
+/// - High-contrast, completely unobstructed 100% scannable QR code
+class _UniversalQr4DCard extends StatefulWidget {
+  final String portalUrl;
+  final String branchName;
+  final VoidCallback onTapQr;
+
+  const _UniversalQr4DCard({
+    required this.portalUrl,
+    required this.branchName,
+    required this.onTapQr,
+  });
+
+  @override
+  State<_UniversalQr4DCard> createState() => _UniversalQr4DCardState();
+}
+
+class _UniversalQr4DCardState extends State<_UniversalQr4DCard>
+    with TickerProviderStateMixin {
+  late final AnimationController _tiltController;
+  late final Animation<double> _tiltAnimation;
+  late final AnimationController _shimmerController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Gentle 4D floating tilt animation (3.8 seconds reverse cycle)
+    _tiltController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3800),
+    )..repeat(reverse: true);
+    _tiltAnimation = CurvedAnimation(
+      parent: _tiltController,
+      curve: Curves.easeInOutSine,
+    );
+
+    // Specular light sweep across card frame every 3.5 seconds
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3500),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _tiltController.dispose();
+    _shimmerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _tiltAnimation,
+      builder: (context, child) {
+        final tiltY = ((_tiltAnimation.value - 0.5) * 2) * 0.025; // Subtle Y rotation
+        final tiltX = math.sin(_tiltAnimation.value * math.pi) * 0.015;
+
+        return Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.001) // 3D Perspective
+            ..rotateX(tiltX)
+            ..rotateY(tiltY),
+          child: child,
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+        decoration: BoxDecoration(
+          color: const Color(0xF40A0D15),
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(
+            color: const Color(0xFFC9A84C).withValues(alpha: 0.35),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.85),
+              blurRadius: 30,
+              offset: const Offset(0, 12),
+            ),
+            BoxShadow(
+              color: const Color(0xFFC9A84C).withValues(alpha: 0.12),
+              blurRadius: 36,
+              spreadRadius: 2,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Background Fine Dot Matrix Accent
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _DotMatrixAccentPainter(),
+              ),
+            ),
+
+            // Main Card Content
+            Column(
+              children: [
+                // Header: Logo & Chintamani Library Title
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ClipOval(
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        width: 26,
+                        height: 26,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.auto_stories_rounded,
+                          color: Color(0xFFC9A84C),
+                          size: 22,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'CHINTAMANI LIBRARY',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    branchName,
-                    style: const TextStyle(
-                      color: Color(0xFFC9A84C),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
                     ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'CHINTAMANI LIBRARY',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  widget.branchName,
+                  style: const TextStyle(
+                    color: Color(0xFFE8C97A),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
                   ),
-                  const SizedBox(height: 18),
+                ),
 
-                  // QR Box — Always renders natively on device with QrImageView
-                  GestureDetector(
-                    onTap: () => _showFullScreenQr(context, portalUrl, branchName),
+                const SizedBox(height: 20),
+
+                // ── QR Container with Specular Glint Border ──
+                GestureDetector(
+                  onTap: widget.onTapQr,
+                  child: AnimatedBuilder(
+                    animation: _shimmerController,
+                    builder: (context, child) {
+                      return CustomPaint(
+                        painter: _FrameSpecularPainter(progress: _shimmerController.value),
+                        child: child,
+                      );
+                    },
                     child: Container(
-                      padding: const EdgeInsets.all(14),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: const Color(0xFFC9A84C).withValues(alpha: 0.4),
-                          width: 1.5,
-                        ),
-                        boxShadow: const [
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
                           BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 10,
-                            offset: Offset(0, 4),
+                            color: Colors.black.withValues(alpha: 0.6),
+                            blurRadius: 18,
+                            offset: const Offset(0, 6),
+                          ),
+                          BoxShadow(
+                            color: const Color(0xFFC9A84C).withValues(alpha: 0.25),
+                            blurRadius: 20,
+                            spreadRadius: 1,
                           ),
                         ],
                       ),
+                      // Completely crisp, un-occluded QR code
                       child: QrImageView(
-                        data: portalUrl,
+                        data: widget.portalUrl,
                         version: QrVersions.auto,
                         size: 220,
                         backgroundColor: Colors.white,
@@ -357,200 +527,88 @@ class UniversalQrScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 14),
+                ),
 
-                  const Text(
-                    'Scan with Phone Camera or Google Lens',
-                    style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Admissions • UPI Payments • Seat Status • Support',
-                    style: TextStyle(color: AppColors.textTertiary, fontSize: 11),
-                  ),
-                  const SizedBox(height: 16),
+                const SizedBox(height: 18),
 
-                  // URL copy chip
-                  GestureDetector(
-                    onTap: () {
-                      Clipboard.setData(ClipboardData(text: portalUrl));
-                      HapticFeedback.lightImpact();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Portal link copied to clipboard!'),
-                          duration: Duration(milliseconds: 1400),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.45),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.link_rounded, size: 14, color: Color(0xFFC9A84C)),
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              portalUrl,
-                              style: const TextStyle(
-                                color: Color(0xFFE8C97A),
-                                fontSize: 11,
-                                fontFamily: 'monospace',
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.copy_rounded, size: 14, color: Color(0xFFC9A84C)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Share & Open Buttons
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF25D366),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    onPressed: () => _shareViaWhatsApp(context, portalUrl, branchName),
-                    icon: const Icon(Icons.chat_rounded, size: 16),
-                    label: const Text('Send on WhatsApp', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                // Instructions & Features List
+                const Text(
+                  'Scan with Phone Camera or Google Lens',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFC9A84C),
-                      foregroundColor: const Color(0xFF080B12),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 0,
-                    ),
-                    onPressed: () async {
-                      final uri = Uri.parse(portalUrl);
-                      try {
-                        await launchUrl(uri, mode: LaunchMode.externalApplication);
-                      } catch (_) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Portal link: $portalUrl')),
-                          );
-                        }
-                      }
-                    },
-                    icon: const Icon(Icons.open_in_browser_rounded, size: 16),
-                    label: const Text('Open in Browser', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                const SizedBox(height: 5),
+                const Text(
+                  'Admissions • UPI Payment • Complaints • Seat Info',
+                  style: TextStyle(
+                    color: AppColors.textTertiary,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 10),
-
-            // Fullscreen & Share Sheet buttons
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF06B6D4),
-                      side: BorderSide(color: const Color(0xFF06B6D4).withValues(alpha: 0.4), width: 0.8),
-                      padding: const EdgeInsets.symmetric(vertical: 11),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    onPressed: () => _showFullScreenQr(context, portalUrl, branchName),
-                    icon: const Icon(Icons.crop_free_rounded, size: 16),
-                    label: const Text('Counter Display Mode', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11.5)),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF8B5CF6),
-                      side: BorderSide(color: const Color(0xFF8B5CF6).withValues(alpha: 0.4), width: 0.8),
-                      padding: const EdgeInsets.symmetric(vertical: 11),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    onPressed: () {
-                      Share.share(
-                        '🏛️ Chintamani Library — Official Member Portal ($branchName)\n'
-                        'One simple entry point for members.\n\n'
-                        'Scan or tap to access:\n$portalUrl\n\n'
-                        '• New Student Registration & Seat Booking\n'
-                        '• Direct UPI Fee Payments\n'
-                        '• Complaint & Maintenance Desk\n'
-                        '• Live Seat & Shift Availability',
-                      );
-                    },
-                    icon: const Icon(Icons.share_rounded, size: 16),
-                    label: const Text('Share Portal Link', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11.5)),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Clean Brand Value Card (Replaces Cluttered Capabilities Section)
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: const Color(0xF20D111A),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 0.8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'CHINTAMANI LIBRARY MEMBER PORTAL',
-                    style: TextStyle(
-                      color: Color(0xFFC9A84C),
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'One QR. One simple entry point for members.',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Members can scan this QR code from any smartphone camera anywhere in the world to complete admissions, transfer fees via official UPI, check seat availability, or raise support tickets.',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.65),
-                      fontSize: 11.5,
-                      height: 1.45,
-                    ),
-                  ),
-                ],
-              ),
             ),
           ],
         ),
       ),
-      ),
     );
   }
+}
+
+/// Shimmer glint traveling along the border frame of the QR container
+class _FrameSpecularPainter extends CustomPainter {
+  final double progress;
+
+  _FrameSpecularPainter({required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Rect.fromLTWH(-4, -4, size.width + 8, size.height + 8);
+    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(24));
+
+    final sweepX = (progress * 2.0 - 0.5) * size.width;
+    const sweepWidth = 80.0;
+
+    final paint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          Colors.transparent,
+          const Color(0xFFD4AF37).withValues(alpha: 0.6),
+          Colors.white.withValues(alpha: 0.9),
+          const Color(0xFFD4AF37).withValues(alpha: 0.6),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.35, 0.5, 0.65, 1.0],
+      ).createShader(Rect.fromLTWH(sweepX - sweepWidth, -4, sweepWidth * 2, size.height + 8))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    canvas.drawRRect(rrect, paint);
+  }
+
+  @override
+  bool shouldRepaint(_FrameSpecularPainter oldDelegate) => oldDelegate.progress != progress;
+}
+
+/// Fine Background Dot-Matrix Accent
+class _DotMatrixAccentPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final dotPaint = Paint()
+      ..color = const Color(0xFFC9A84C).withValues(alpha: 0.08)
+      ..style = PaintingStyle.fill;
+
+    const spacing = 18.0;
+    for (double x = 8.0; x < size.width; x += spacing) {
+      for (double y = 8.0; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), 1.0, dotPaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -26,29 +26,56 @@ class MemberCard extends ConsumerStatefulWidget {
 }
 
 class _MemberCardState extends ConsumerState<MemberCard>
-    with SingleTickerProviderStateMixin {
-  // ── 4D Subtle Perspective Tilt Controller ──
+    with TickerProviderStateMixin {
+  // ── 4D Subtle Perspective Tilt & Ambient Breathing Controller ──
   late final AnimationController _tiltController;
   late final Animation<double> _tiltAnimation;
+
+  // ── Smooth Entrance Animation Controller ──
+  late final AnimationController _entranceController;
+  late final Animation<double> _entranceFade;
+  late final Animation<Offset> _entranceSlide;
+
+  bool _isCardPressed = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Tilt controller: gentle idle floating tilt (0 → 1 → 0) every 4.0s
+    // Tilt controller: gentle idle floating tilt + breathing pulse (0 → 1 → 0) every 3.8s
     _tiltController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 4000),
+      duration: const Duration(milliseconds: 3800),
     )..repeat(reverse: true);
     _tiltAnimation = CurvedAnimation(
       parent: _tiltController,
-      curve: Curves.easeInOut,
+      curve: Curves.easeInOutSine,
     );
+
+    // Entrance animation: 400ms smooth fade-and-slide on card arrival
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _entranceFade = CurvedAnimation(
+      parent: _entranceController,
+      curve: Curves.easeOut,
+    );
+    _entranceSlide = Tween<Offset>(
+      begin: const Offset(0, 0.05),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _entranceController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _entranceController.forward();
   }
 
   @override
   void dispose() {
     _tiltController.dispose();
+    _entranceController.dispose();
     super.dispose();
   }
 
@@ -1105,65 +1132,89 @@ class _MemberCardState extends ConsumerState<MemberCard>
     final paid = member.isActive ? amt : 0;
     final due = member.isActive ? 0 : amt;
 
-    // ── 4D Perspective Tilt Wrapper (Isolated in RepaintBoundary for smooth 60fps scrolling) ──
-    return RepaintBoundary(
-      child: AnimatedBuilder(
-        animation: _tiltAnimation,
-        builder: (context, child) {
-          // Oscillates -0.01 to +0.01 radians on the Y axis
-          final tiltAngle =
-              ((_tiltAnimation.value - 0.5) * 2) * 0.012; // −0.012 → +0.012
-          final scaleY = 1.0 - (_tiltAnimation.value * 0.003); // tiny depth
+    // ── 4D Perspective Tilt & Live Breathing Motion (Isolated in RepaintBoundary for 60fps) ──
+    return FadeTransition(
+      opacity: _entranceFade,
+      child: SlideTransition(
+        position: _entranceSlide,
+        child: RepaintBoundary(
+          child: AnimatedBuilder(
+            animation: _tiltAnimation,
+            builder: (context, child) {
+              final tiltAngle = ((_tiltAnimation.value - 0.5) * 2) * 0.012;
+              final scaleY = 1.0 - (_tiltAnimation.value * 0.003);
 
-          return Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.001) // perspective
-              ..rotateY(tiltAngle)
-              ..scale(1.0, scaleY),
-            child: child,
-          );
-        },
-        child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.55),
-              blurRadius: 18,
-              offset: const Offset(0, 6),
-              spreadRadius: 0,
-            ),
-            BoxShadow(
-              color: cardAccent.withValues(alpha: 0.08),
-              blurRadius: 24,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-            child: Container(
-              decoration: BoxDecoration(
-                // Clean obsidian surface — no accent color tint
-                color: const Color(0xEE141318),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.07),
-                  width: 1.0,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ── ZONE 1 & 2: Header + Details Box (Tappable for Profile) ──
-                  InkWell(
-                    onTap: widget.onTap,
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(20)),
+              return Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.001)
+                  ..rotateY(tiltAngle)
+                  ..scale(1.0, scaleY),
+                child: child,
+              );
+            },
+            child: AnimatedScale(
+              scale: _isCardPressed ? 0.985 : 1.0,
+              duration: const Duration(milliseconds: 140),
+              curve: Curves.easeOutCubic,
+              child: AnimatedBuilder(
+                animation: _tiltAnimation,
+                builder: (context, innerChild) {
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.55),
+                          blurRadius: 18,
+                          offset: const Offset(0, 6),
+                          spreadRadius: 0,
+                        ),
+                        // Gentle breathing live glow
+                        BoxShadow(
+                          color: cardAccent.withValues(alpha: 0.05 + (_tiltAnimation.value * 0.07)),
+                          blurRadius: 20 + (_tiltAnimation.value * 8),
+                          offset: const Offset(0, 4),
+                          spreadRadius: _tiltAnimation.value * 0.8,
+                        ),
+                      ],
+                    ),
+                    child: innerChild,
+                  );
+                },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                    child: AnimatedBuilder(
+                      animation: _tiltAnimation,
+                      builder: (context, contentChild) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xEE141318),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Color.lerp(
+                                Colors.white.withValues(alpha: 0.07),
+                                cardAccent.withValues(alpha: 0.32),
+                                _tiltAnimation.value,
+                              )!,
+                              width: 1.0,
+                            ),
+                          ),
+                          child: contentChild,
+                        );
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // ── ZONE 1 & 2: Header + Details Box (Tappable for Profile) ──
+                          InkWell(
+                            onTap: widget.onTap,
+                            onHighlightChanged: (val) => setState(() => _isCardPressed = val),
+                            borderRadius:
+                                const BorderRadius.vertical(top: Radius.circular(20)),
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
                       child: Column(
@@ -1581,7 +1632,10 @@ class _MemberCardState extends ConsumerState<MemberCard>
         ),
       ),
     ),
-  );
+  ),
+),
+),
+);
 }
 
   // ── Uniform 4D Action Chip — color on icon & text only, clean neutral container ──

@@ -1,16 +1,46 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLockerDto } from './dto/create-locker.dto';
+import { resolveBranchInfo } from '../common/utils/branch-resolver.util';
 
 @Injectable()
 export class LockersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(branchId?: string, status?: string) {
-    return this.prisma.locker.findMany({
+    let resolvedBranchId = branchId;
+    let branchInfo: any = null;
+    if (branchId) {
+      branchInfo = await resolveBranchInfo(this.prisma, branchId);
+      if (branchInfo) {
+        resolvedBranchId = branchInfo.id;
+      }
+    }
+
+    // Official library policy: exactly 9 lockers per branch (L01–L09)
+    const validLockerNumbers = [
+      'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09',
+      'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9',
+    ];
+
+    // Clean up any excess lockers (> 9) from the database
+    if (resolvedBranchId) {
+      try {
+        await this.prisma.locker.deleteMany({
+          where: {
+            branchId: resolvedBranchId,
+            lockerNumber: { notIn: validLockerNumbers },
+            subscriptions: { none: {} },
+          },
+        });
+      } catch (_) {}
+    }
+
+    const lockers = await this.prisma.locker.findMany({
       where: {
-        ...(branchId && { branchId }),
+        ...(resolvedBranchId && { branchId: resolvedBranchId }),
         ...(status && { status: status as any }),
+        lockerNumber: { in: validLockerNumbers },
       },
       include: {
         subscriptions: {
@@ -21,6 +51,8 @@ export class LockersService {
       },
       orderBy: { lockerNumber: 'asc' }
     });
+
+    return lockers.slice(0, 9);
   }
 
   async findOne(id: string) {

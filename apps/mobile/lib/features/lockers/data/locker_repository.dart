@@ -26,10 +26,21 @@ class LockerRepository {
           ? response.data['data'] as List
           : response.data as List;
       final list = rawList.map((e) => Locker.fromJson(e as Map<String, dynamic>)).toList();
-      if (list.isEmpty) {
+
+      // Enforce strictly 9 lockers: L01 through L09
+      final filtered = list.where((l) {
+        final match = RegExp(r'^L0?([1-9])$', caseSensitive: false).firstMatch(l.lockerNumber.trim());
+        if (match == null) return false;
+        final num = int.tryParse(match.group(1) ?? '') ?? 0;
+        return num >= 1 && num <= 9;
+      }).toList();
+
+      filtered.sort((a, b) => a.lockerNumber.compareTo(b.lockerNumber));
+
+      if (filtered.isEmpty) {
         return _generateDefaultLockers(branchId, status: status);
       }
-      return list;
+      return filtered.length > 9 ? filtered.sublist(0, 9) : filtered;
     } catch (_) {
       return _generateDefaultLockers(branchId, status: status);
     }

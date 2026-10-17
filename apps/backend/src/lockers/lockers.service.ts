@@ -39,7 +39,6 @@ export class LockersService {
     const lockers = await this.prisma.locker.findMany({
       where: {
         ...(resolvedBranchId && { branchId: resolvedBranchId }),
-        ...(status && { status: status as any }),
         lockerNumber: { in: validLockerNumbers },
       },
       include: {
@@ -47,23 +46,80 @@ export class LockersService {
           where: { status: 'ACTIVE' },
           include: { member: { select: { id: true, name: true, memberCode: true } }, plan: { select: { name: true } } },
           take: 1,
+        },
+        assignments: {
+          where: { releasedAt: null },
+          include: { subscription: { include: { member: { select: { id: true, name: true, memberCode: true } } } } },
+          take: 1,
         }
       },
       orderBy: { lockerNumber: 'asc' }
     });
 
-    return lockers.slice(0, 9);
+    // Authoritative status calculation: A locker is OCCUPIED only if an active subscription or unreleased assignment exists
+    const reconciledLockers = await Promise.all(lockers.map(async (locker) => {
+      const activeSub = locker.subscriptions[0] || locker.assignments[0]?.subscription;
+      const hasActiveAssignment = !!activeSub;
+      const authoritativeStatus = hasActiveAssignment
+        ? 'OCCUPIED'
+        : (locker.status === 'MAINTENANCE' ? 'MAINTENANCE' : 'AVAILABLE');
+
+      // Reconcile database state if out of sync
+      if (locker.status !== authoritativeStatus && locker.status !== 'MAINTENANCE') {
+        try {
+          await this.prisma.locker.update({
+            where: { id: locker.id },
+            data: { status: authoritativeStatus as any },
+          });
+        } catch (_) {}
+      }
+
+      return {
+        ...locker,
+        status: authoritativeStatus,
+        currentMemberName: activeSub?.member?.name || null,
+        currentMemberId: activeSub?.member?.id || null,
+      };
+    }));
+
+    const filtered = status && status !== 'ALL'
+      ? reconciledLockers.filter((l) => l.status === status)
+      : reconciledLockers;
+
+    return filtered.slice(0, 9);
   }
 
   async findOne(id: string) {
     const locker = await this.prisma.locker.findUnique({
       where: { id },
       include: {
-        subscriptions: { where: { status: 'ACTIVE' }, include: { member: true, plan: true }, take: 1 }
+        subscriptions: { where: { status: 'ACTIVE' }, include: { member: true, plan: true }, take: 1 },
+        assignments: { where: { releasedAt: null }, include: { subscription: { include: { member: true } } }, take: 1 }
       }
     });
     if (!locker) throw new NotFoundException('Locker not found');
-    return locker;
+
+    const activeSub = locker.subscriptions[0] || locker.assignments[0]?.subscription;
+    const hasActiveAssignment = !!activeSub;
+    const authoritativeStatus = hasActiveAssignment
+      ? 'OCCUPIED'
+      : (locker.status === 'MAINTENANCE' ? 'MAINTENANCE' : 'AVAILABLE');
+
+    if (locker.status !== authoritativeStatus && locker.status !== 'MAINTENANCE') {
+      try {
+        await this.prisma.locker.update({
+          where: { id: locker.id },
+          data: { status: authoritativeStatus as any },
+        });
+      } catch (_) {}
+    }
+
+    return {
+      ...locker,
+      status: authoritativeStatus,
+      currentMemberName: activeSub?.member?.name || null,
+      currentMemberId: activeSub?.member?.id || null,
+    };
   }
 
   async create(dto: CreateLockerDto) { 
@@ -81,18 +137,35 @@ export class LockersService {
   }
 
   async assign(id: string, subscriptionId: string) {
-    const sub = await this.prisma.subscription.findUniqueOrThrow({ where: { id: subscriptionId } });
-    await this.prisma.locker.update({ where: { id }, data: { status: 'OCCUPIED' } });
-    await this.prisma.subscription.update({ where: { id: subscriptionId }, data: { assignedLockerId: id } });
-    return this.prisma.lockerAssignment.create({ data: { lockerId: id, subscriptionId } });
+    const sub = await this.prisma.subscription.findUniqueOrThrow({
+      where: { id: subscriptionId },
+      include: { member: true }
+    });
+    const locker = await this.prisma.locker.findUniqueOrThrow({ where: { id } });
+
+    // Validate branch match
+    if (sub.member.branchId && locker.branchId && sub.member.branchId !== locker.branchId) {
+      throw new Error('Locker and Member belong to different branches');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.locker.update({ where: { id }, data: { status: 'OCCUPIED' } }),
+      this.prisma.subscription.update({ where: { id: subscriptionId }, data: { assignedLockerId: id } }),
+      this.prisma.lockerAssignment.create({ data: { lockerId: id, subscriptionId } }),
+    ]);
+
+    return { message: 'Locker assigned successfully', lockerId: id, memberName: sub.member.name };
   }
 
   async release(id: string) {
-    await this.prisma.locker.update({ where: { id }, data: { status: 'AVAILABLE' } });
-    const activeAssignment = await this.prisma.lockerAssignment.findFirst({ where: { lockerId: id, releasedAt: null } });
-    if (activeAssignment) {
-      await this.prisma.lockerAssignment.update({ where: { id: activeAssignment.id }, data: { releasedAt: new Date() } });
-    }
+    await this.prisma.$transaction(async (tx) => {
+      await tx.locker.update({ where: { id }, data: { status: 'AVAILABLE' } });
+      await tx.subscription.updateMany({ where: { assignedLockerId: id }, data: { assignedLockerId: null } });
+      await tx.lockerAssignment.updateMany({
+        where: { lockerId: id, releasedAt: null },
+        data: { releasedAt: new Date() },
+      });
+    });
     return { message: 'Locker released successfully' };
   }
 

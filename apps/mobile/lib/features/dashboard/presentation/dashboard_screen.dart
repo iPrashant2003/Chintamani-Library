@@ -223,41 +223,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> with WidgetsB
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.25)),
                           ),
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              IconButton(
-                                tooltip: 'Notifications & Alerts',
-                                visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.all(7),
-                                constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
-                                icon: const Icon(Icons.notifications_outlined,
-                                    color: Color(0xFFD4AF37), size: 20),
-                                onPressed: () {
-                                  HapticFeedback.mediumImpact();
-                                  context.push(RouteNames.notifications);
-                                },
-                              ),
-                              Positioned(
-                                right: 6,
-                                top: 6,
-                                child: Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Color(0xFF10B981),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Color(0xFF10B981),
-                                        blurRadius: 4,
-                                        spreadRadius: 1,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
+                          child: IconButton(
+                            tooltip: 'Notifications & Alerts',
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.all(7),
+                            constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+                            icon: const Icon(Icons.notifications_outlined,
+                                color: Color(0xFFD4AF37), size: 20),
+                            onPressed: () {
+                              HapticFeedback.mediumImpact();
+                              context.push(RouteNames.notifications);
+                            },
                           ),
                         ),
                       ],

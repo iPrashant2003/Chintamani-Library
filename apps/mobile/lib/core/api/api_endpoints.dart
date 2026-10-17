@@ -74,6 +74,9 @@ class ApiEndpoints {
   // ── Complaints ──────────────────────────────────────────────────────────────
   static const String complaints = '/complaints';
 
+  // ── AI Assistant ────────────────────────────────────────────────────────────
+  static const String aiChat = '/ai/chat';
+
   // ── Upload ──────────────────────────────────────────────────────────────────
   static const String uploadPhoto = '/upload/profile-photo';
   static const String uploadDocument = '/upload/document';

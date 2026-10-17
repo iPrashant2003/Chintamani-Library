@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../widgets/glass_sidebar.dart';
 import '../../../widgets/app_drawer.dart';
 import '../../../widgets/whatsapp_logo.dart';
+import '../../../widgets/floating_ai_chatbot.dart';
 
 class MainShellScreen extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
@@ -32,17 +33,22 @@ class MainShellScreen extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final useDesktopLayout = screenWidth >= 768;
 
-    if (useDesktopLayout) {
-      return _DesktopLayout(
-        navigationShell: navigationShell,
-        currentRoute: _currentRoute,
-      );
-    }
+    final mainLayout = useDesktopLayout
+        ? _DesktopLayout(
+            navigationShell: navigationShell,
+            currentRoute: _currentRoute,
+          )
+        : _MobileLayout(
+            navigationShell: navigationShell,
+            currentIndex: navigationShell.currentIndex,
+            onTap: _onTap,
+          );
 
-    return _MobileLayout(
-      navigationShell: navigationShell,
-      currentIndex: navigationShell.currentIndex,
-      onTap: _onTap,
+    return Stack(
+      children: [
+        mainLayout,
+        const FloatingAiChatbot(),
+      ],
     );
   }
 }

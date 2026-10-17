@@ -1,0 +1,76 @@
+<USER_REQUEST>
+# MASTER DEVELOPMENT PROMPT — FIX, ENHANCE, AND VERIFY THE ENTIRE APPLICATION
+
+You are a senior full-stack engineer, software architect, UI/UX engineer, and QA specialist working on my existing application through Antigravity.
+
+Your task is to inspect the existing project, identify the root causes of the reported bugs, implement all requested changes, and verify that they work correctly in the actual application.
+
+**Do not just provide recommendations, mockups, sample code, or a plan. Make the changes directly in the existing project.**
+
+Preserve the existing application architecture, design system, authentication, permissions, database structure, and working features wherever possible. Do not rebuild the application unnecessarily.
+
+## 1. First inspect the existing project
+
+Before modifying anything:
+
+- Identify the frontend framework, backend framework, database, authentication system, routing, and existing UI component library.
+- Inspect the global search implementation, notification system, locker/vault assignment logic, branch-specific data models, and existing user/admin dashboards.
+- Identify the current database schema, API endpoints, real-time event mechanisms, and permission checks.
+- Inspect the existing AI integrations, if any, and the QR-related functionality.
+- Reproduce each reported bug and identify its actual root cause.
+- Check for duplicated logic, incorrect default values, hardcoded demo data, stale cached data, incorrect database queries, and frontend/backend state mismatches.
+
+Create a concise internal implementation checklist and then proceed with the changes. Do not stop after creating the checklist.
+
+# 2. Fix and enhance Global Search
+
+The global search bar must allow administrators to search for any relevant information or entity available within the application that their permissions allow them to access.
+
+### Required functionality
+
+1. Search across relevant application modules, such as:
+   - Users and user profiles.
+   - Administrators an
+<truncated 24115 bytes>
+ Gemini backend integration.
+7. Build the floating, draggable chatbot interface.
+8. Implement the Universal QR Portal.
+9. Audit all related buttons and application interactions.
+10. Run tests, fix regressions, and verify the modified workflows.
+11. Review security, environment configuration, and database consistency.
+12. Provide a final implementation report.
+
+# 12. Final Delivery Report
+
+When the work is complete, provide a concise but specific report containing:
+
+- Files and modules modified.
+- Root cause of each original bug.
+- Changes made to global search, notifications, and locker assignment logic.
+- How assignment correctness was verified in both branches.
+- Gemini integration architecture and required environment variables, without exposing credentials.
+- Chatbot UI and dragging behavior implemented.
+- Universal QR Portal functionality implemented.
+- Database migrations or configuration changes required.
+- Tests executed and their actual pass/fail results.
+- Any unresolved issues, external setup requirements, or limitations.
+- Exact steps required to run and deploy the changes.
+
+## Final non-negotiable requirements
+
+- Modify the existing project directly.
+- Fix the actual causes of bugs rather than hiding their symptoms.
+- Do not introduce demo notifications or fabricated application records.
+- Do not hardcode sensitive credentials.
+- Do not falsely mark unassigned lockers as assigned.
+- Keep both branches consistent and properly isolated.
+- Do not bypass authentication, permissions, or backend validation.
+- Do not claim that anything works unless it has been tested.
+- Preserve existing working features.
+- Finish all feasible implementation and verification steps before reporting completion.
+
+Begin by inspecting the existing project and then execute the work systematically. Do not stop at a plan or ask for confirmation for routine implementation decisions.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-10-18T04:00:35+05:30.
+</ADDITIONAL_METADATA>

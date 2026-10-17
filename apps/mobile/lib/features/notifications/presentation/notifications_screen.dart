@@ -41,7 +41,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       case 'PAYMENT_ALERT':
         return const Color(0xFFEF4444);
       case 'BACKUP':
-        return const Color(0xFF10B981);
+        return const Color(0xFF3B82F6);
       case 'UPDATE':
         return const Color(0xFF00E5BC);
       case 'OPERATIONS':
@@ -56,6 +56,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   void _onNotificationTap(BuildContext context, AppNotification notif) {
     HapticFeedback.lightImpact();
     setState(() => _readIds.add(notif.id));
+    ref.read(notificationsRepositoryProvider).markAsRead(notif.id);
 
     switch (notif.type) {
       case 'PAYMENT_ALERT':
@@ -101,6 +102,15 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
+          IconButton(
+            tooltip: 'Mark All Read',
+            icon: const Icon(Icons.done_all_rounded, color: Color(0xFFD4AF37), size: 22),
+            onPressed: () async {
+              HapticFeedback.mediumImpact();
+              await ref.read(notificationsRepositoryProvider).markAllAsRead();
+              ref.invalidate(notificationsListProvider);
+            },
+          ),
           IconButton(
             tooltip: 'Refresh Notifications',
             icon: const Icon(Icons.refresh_rounded, color: Color(0xFFD4AF37)),
@@ -242,15 +252,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                             ),
                                           ),
                                         ),
-                                        if (!isRead)
-                                          Container(
-                                            width: 7,
-                                            height: 7,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: typeColor,
-                                            ),
-                                          ),
+
                                       ],
                                     ),
                                     const SizedBox(height: 5),

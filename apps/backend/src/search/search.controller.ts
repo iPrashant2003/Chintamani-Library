@@ -11,8 +11,8 @@ export class SearchController {
   constructor(private readonly searchService: SearchService) {}
 
   @Get()
-  search(@Query('q') q: string, @Query('branchId') branchId: string) {
-    if (!q || !branchId) return { members: [], seats: [], lockers: [], query: q };
+  search(@Query('q') q: string, @Query('branchId') branchId?: string) {
+    if (!q) return { members: [], seats: [], lockers: [], complaints: [], registrations: [], notifications: [], query: '' };
     return this.searchService.search(q, branchId);
   }
 }

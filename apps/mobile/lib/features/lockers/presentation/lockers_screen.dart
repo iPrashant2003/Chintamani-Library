@@ -104,7 +104,7 @@ class _LockersScreenState extends ConsumerState<LockersScreen> {
                         border: Border.all(color: color.withValues(alpha: 0.4)),
                       ),
                       child: Text(
-                        locker.isOccupied ? 'OCCUPIED' : 'AVAILABLE',
+                        locker.isOccupied ? 'ASSIGNED' : 'UNASSIGNED',
                         style: TextStyle(
                           color: color,
                           fontSize: 11,
@@ -121,7 +121,7 @@ class _LockersScreenState extends ConsumerState<LockersScreen> {
                 Text(
                   locker.isOccupied
                       ? 'Allocated to: ${locker.currentMemberName ?? 'Active Student'}'
-                      : 'This locker is currently available for member assignment.',
+                      : 'Unassigned • Currently available for scholar allocation.',
                   style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
                 ),
                 const SizedBox(height: 20),
@@ -187,8 +187,8 @@ class _LockersScreenState extends ConsumerState<LockersScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _Legend(color: AppColors.primaryGreen, label: 'Available'),
-                    _Legend(color: AppColors.accentPurple, label: 'Occupied'),
+                    _Legend(color: AppColors.primaryGreen, label: 'Unassigned'),
+                    _Legend(color: AppColors.accentPurple, label: 'Assigned'),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
@@ -263,16 +263,21 @@ class _LockersScreenState extends ConsumerState<LockersScreen> {
                                     fontSize: 12,
                                   ),
                                 ),
-                                if (locker.isOccupied)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                                    child: Text(
-                                      locker.currentMemberName?.split(' ').first ?? 'Assigned',
-                                      style: const TextStyle(color: AppColors.textTertiary, fontSize: 9),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                                  child: Text(
+                                    locker.isOccupied
+                                        ? (locker.currentMemberName?.split(' ').first ?? 'Assigned')
+                                        : 'Unassigned',
+                                    style: TextStyle(
+                                      color: locker.isOccupied ? AppColors.textTertiary : AppColors.primaryGreen.withValues(alpha: 0.75),
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w600,
                                     ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
+                                ),
                               ],
                             ),
                           ),

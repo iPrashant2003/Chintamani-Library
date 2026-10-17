@@ -27,6 +27,7 @@ import { QrModule } from './qr/qr.module';
 import { PortalModule } from './portal/portal.module';
 import { RegistrationsModule } from './registrations/registrations.module';
 import { ComplaintsModule } from './complaints/complaints.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { ComplaintsModule } from './complaints/complaints.module';
     PortalModule,
     RegistrationsModule,
     ComplaintsModule,
+    AiModule,
   ],
 })
 export class AppModule {}

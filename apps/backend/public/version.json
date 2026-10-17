@@ -1,17 +1,19 @@
 {
-  "version": "2.8.2",
-  "buildNumber": 2082,
+  "version": "2.8.3",
+  "buildNumber": 2083,
   "minimumSupportedVersion": "2.3.0",
   "releaseDate": "18 Oct 2026",
-  "title": "Chintamani Library v2.8.2 — Strictly 9 Lockers per Branch, Omni Global Search & Functional Notifications",
+  "title": "Chintamani Library v2.8.3 — Gemini AI Chatbot, Real Global Search & Locker Fixes",
   "releaseNotes": [
-    "LOCKERS FIX: Enforced exactly 9 lockers (L01–L09) for both Khalilabad and Mehdawal branches across backend and mobile",
-    "OMNI GLOBAL SEARCH: Rebuilt search engine to search across Members, Single Hall Seats (K01–K72 / M01–M65), 9 Lockers (L01–L09), and all Core Services with instant navigation",
-    "FUNCTIONAL NOTIFICATIONS: Connected dashboard notification bell with active unread badge and rich notification center featuring dues alerts, system backup logs, and operational timings",
-    "TACTILE DASHBOARD HEADER: Upgraded Search and Notification buttons with luxury glass containers and crisp haptic feedback"
+    "GEMINI AI CHATBOT: Floating draggable AI assistant powered by Gemini 1.5 Flash with live database grounding — ask anything about members, seats, lockers, and library stats",
+    "REAL GLOBAL SEARCH: Rebuilt search from scratch — searches Members, Seats, Lockers, Complaints, Registrations, and Notifications with live backend results, debounce, and cancel support",
+    "LOCKER FIX: Lockers with no active member now correctly show 'Unassigned' instead of incorrectly showing 'Occupied'",
+    "CLEAN NOTIFICATIONS: Removed all demo/mock notifications — notification centre now shows only real backend notifications",
+    "NO GREEN DOTS: Removed all unread indicator dots from dashboard header and notification items",
+    "QR SCANNER: Universal QR portal now includes a direct Camera Attendance Scanner launch button"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.2/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.2/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.3/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.3/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

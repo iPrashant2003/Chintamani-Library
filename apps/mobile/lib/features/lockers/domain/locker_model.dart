@@ -26,14 +26,22 @@ class Locker {
         memberId = sub['member']['id'] as String?;
       }
     }
+    memberName ??= json['currentMemberName'] as String?;
+    memberId ??= json['currentMemberId'] as String?;
+
+    String status = json['status'] as String? ?? 'AVAILABLE';
+    final hasActiveMember = memberName != null && memberName.trim().isNotEmpty;
+    if (status == 'OCCUPIED' && !hasActiveMember) {
+      status = 'AVAILABLE';
+    }
 
     return Locker(
       id: json['id'] as String? ?? '',
       lockerNumber: json['lockerNumber'] as String? ?? '',
-      status: json['status'] as String? ?? 'AVAILABLE',
+      status: status,
       branchId: json['branchId'] as String? ?? '',
-      currentMemberName: memberName ?? json['currentMemberName'] as String?,
-      currentMemberId: memberId ?? json['currentMemberId'] as String?,
+      currentMemberName: memberName,
+      currentMemberId: memberId,
     );
   }
 

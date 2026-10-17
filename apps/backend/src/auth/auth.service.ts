@@ -105,14 +105,13 @@ export class AuthService {
         });
       }
 
-      // If no identifier specified or not found yet, default to the primary admin owner
+      // If no identifier specified or not found yet, default to the primary Chintamani admin owner
       if (!user) {
         user = await this.prisma.user.findFirst({
           where: {
             OR: [
               { phone: { contains: '9415919277' } },
               { email: 'owner@chintamani.com' },
-              { role: 'OWNER' },
             ],
           },
         });

@@ -5,8 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:go_router/go_router.dart';
-import '../../../routing/route_names.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/ambient_background.dart';
 import '../../../core/api/api_client.dart';
@@ -323,25 +321,6 @@ class UniversalQrScreen extends ConsumerWidget {
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF14121B),
-                    foregroundColor: const Color(0xFF00E5BC),
-                    side: BorderSide(color: const Color(0xFF00E5BC).withValues(alpha: 0.45), width: 1),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
-                  ),
-                  icon: const Icon(Icons.qr_code_scanner_rounded, size: 18),
-                  label: const Text('Launch Camera Attendance Scanner', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    context.push(RouteNames.attendance);
-                  },
-                ),
               ),
             ],
           ),

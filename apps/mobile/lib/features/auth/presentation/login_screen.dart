@@ -491,7 +491,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               const SizedBox(height: 12),
                             ],
 
-                            // ── Login ID ──────────────────────────────
+                            // ── Login ID (Empty box with only prefix icon) ──────────────
                             TextField(
                               controller: _loginIdController,
                               keyboardType: TextInputType.emailAddress,
@@ -500,12 +500,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold),
                               decoration: InputDecoration(
-                                labelText: 'Mobile Number or Email',
-                                hintText: 'e.g. 9415919277 or owner@chintamani.com',
-                                hintStyle:
-                                    const TextStyle(color: AppColors.textTertiary, fontSize: 12),
-                                labelStyle:
-                                    const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                                 prefixIcon: const Icon(Icons.person_rounded,
                                     color: Color(0xFF00E5BC), size: 18),
                                 filled: true,
@@ -647,11 +641,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     );
   }
 
-  // ── Change password dialog (original, untouched) ─────────────────────────
+  // ── Change password dialog (with eye toggles and authoritative auth) ─────
   void _showChangePasswordDialog(BuildContext context) {
     final oldPass = TextEditingController();
     final newPass = TextEditingController();
     final confirmPass = TextEditingController();
+    bool obscureOld = true;
+    bool obscureNew = true;
+    bool obscureConfirm = true;
     bool isLoading = false;
 
     showDialog(
@@ -671,30 +668,107 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   style: TextStyle(color: AppColors.textPrimary, fontSize: 16)),
             ],
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: oldPass,
-                obscureText: true,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(labelText: 'Current Password'),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: newPass,
-                obscureText: true,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(labelText: 'New Password'),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: confirmPass,
-                obscureText: true,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(labelText: 'Confirm New Password'),
-              ),
-            ],
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: oldPass,
+                  obscureText: obscureOld,
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                  decoration: InputDecoration(
+                    labelText: 'Current Password',
+                    labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                    filled: true,
+                    fillColor: Colors.white.withValues(alpha: 0.04),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.borderSubtle),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.borderSubtle),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFD4AF37), width: 1.4),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        obscureOld ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        color: AppColors.textTertiary,
+                        size: 18,
+                      ),
+                      onPressed: () => setDialogState(() => obscureOld = !obscureOld),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: newPass,
+                  obscureText: obscureNew,
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                  decoration: InputDecoration(
+                    labelText: 'New Password',
+                    labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                    filled: true,
+                    fillColor: Colors.white.withValues(alpha: 0.04),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.borderSubtle),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.borderSubtle),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFD4AF37), width: 1.4),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        obscureNew ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        color: AppColors.textTertiary,
+                        size: 18,
+                      ),
+                      onPressed: () => setDialogState(() => obscureNew = !obscureNew),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: confirmPass,
+                  obscureText: obscureConfirm,
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                  decoration: InputDecoration(
+                    labelText: 'Confirm New Password',
+                    labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                    filled: true,
+                    fillColor: Colors.white.withValues(alpha: 0.04),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.borderSubtle),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.borderSubtle),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFD4AF37), width: 1.4),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        obscureConfirm ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        color: AppColors.textTertiary,
+                        size: 18,
+                      ),
+                      onPressed: () => setDialogState(() => obscureConfirm = !obscureConfirm),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -719,6 +793,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         );
                         return;
                       }
+                      if (newP.length < 6) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('New password must be at least 6 characters')),
+                        );
+                        return;
+                      }
                       if (newP != cfP) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('New passwords do not match')),
@@ -726,7 +806,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         return;
                       }
                       setDialogState(() => isLoading = true);
-                      final ok = await ref.read(authProvider.notifier).changePassword(oldP, newP);
+                      final loginId = _loginIdController.text.trim();
+                      final ok = await ref.read(authProvider.notifier).changePassword(
+                            oldP,
+                            newP,
+                            identifier: loginId.isNotEmpty ? loginId : null,
+                          );
                       setDialogState(() => isLoading = false);
 
                       if (ctx.mounted) Navigator.pop(ctx);

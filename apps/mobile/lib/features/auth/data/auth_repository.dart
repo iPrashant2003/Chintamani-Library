@@ -41,12 +41,13 @@ class AuthRepository {
     } catch (_) {}
   }
 
-  Future<void> changePassword(String oldPassword, String newPassword) async {
+  Future<void> changePassword(String oldPassword, String newPassword, {String? identifier}) async {
     await _apiClient.dio.post(
       ApiEndpoints.changePassword,
       data: {
         'oldPassword': oldPassword,
         'newPassword': newPassword,
+        if (identifier != null && identifier.trim().isNotEmpty) 'identifier': identifier.trim(),
       },
     );
   }

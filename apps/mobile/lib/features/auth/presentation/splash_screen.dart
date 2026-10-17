@@ -23,6 +23,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   late final AnimationController _pulseController;
   late final AnimationController _rayController;
   late final AnimationController _progressController;
+  late final AnimationController _quoteAnimationController;
 
   /// Update info fetched during splash; shown after navigation completes.
   AppUpdateInfo? _pendingUpdate;
@@ -48,6 +49,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       vsync: this,
       duration: const Duration(milliseconds: 3000),
     )..forward();
+
+    // Live continuous shimmer animation for the official quote
+    _quoteAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2800),
+    )..repeat();
 
     // Start synchronized splash sequence
     _startSplashSequence();
@@ -99,6 +106,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     _pulseController.dispose();
     _rayController.dispose();
     _progressController.dispose();
+    _quoteAnimationController.dispose();
     super.dispose();
   }
 
@@ -212,18 +220,53 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
                     const SizedBox(height: 20),
 
-                    // Official Quote
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Text(
-                        '“Where Silence Meets Ambition • Infinity Under A Roof”',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: AppColors.goldLight.withValues(alpha: 0.85),
-                          fontSize: 13,
-                          fontStyle: FontStyle.italic,
-                          height: 1.4,
-                          letterSpacing: 0.3,
+                    // Official Quote with Live Shimmer & Breath Animation
+                    AnimatedBuilder(
+                      animation: _quoteAnimationController,
+                      builder: (context, child) {
+                        final t = _quoteAnimationController.value;
+                        return ShaderMask(
+                          blendMode: BlendMode.srcIn,
+                          shaderCallback: (bounds) {
+                            final double sweepX = (t * 2.4 - 0.7) * bounds.width;
+                            const double bandWidth = 140.0;
+                            return LinearGradient(
+                              colors: [
+                                AppColors.goldLight.withValues(alpha: 0.70),
+                                const Color(0xFFF3E5AB),
+                                Colors.white,
+                                const Color(0xFFF3E5AB),
+                                AppColors.goldLight.withValues(alpha: 0.70),
+                              ],
+                              stops: const [0.0, 0.40, 0.50, 0.60, 1.0],
+                            ).createShader(
+                              Rect.fromLTWH(sweepX - bandWidth, 0, bandWidth * 2, bounds.height),
+                            );
+                          },
+                          child: Transform.scale(
+                            scale: 1.0 + 0.016 * math.sin(t * 2 * math.pi),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Text(
+                          '“Where Silence Meets Ambition • Infinity Under A Roof”',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppColors.goldLight.withValues(alpha: 0.90),
+                            fontSize: 13,
+                            fontStyle: FontStyle.italic,
+                            height: 1.4,
+                            letterSpacing: 0.3,
+                            shadows: const [
+                              Shadow(
+                                color: Color(0x66C9A84C),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

@@ -96,11 +96,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
       }
     }
 
-    // 2. Offline / PIN fallback check
+    // 2. Offline / PIN fallback check (only uses locally-stored password — no hardcoded bypass)
     final cleanId = trimmedId.replaceAll(RegExp(r'[^\d]'), '');
     final currentPassword = await _ref.read(tokenManagerProvider).getAppPassword();
 
-    if (cleanPass == currentPassword || cleanPass == 'Admin@1234' || cleanPass == 'CML6050' || cleanPass == 'Mani6050' || forceDemo) {
+    if (cleanPass == currentPassword || forceDemo) {
       if (cleanId == '7388389944' || trimmedId.contains('7388389944') || trimmedId.contains('admin@chintamani')) {
         await _ref.read(tokenManagerProvider).saveTokens(
           accessToken: 'cml-session-7388389944',
@@ -125,12 +125,26 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
     return false;
   }
 
-  /// Change admin password — validates old password, saves new one persistently
+  /// Change admin password — calls backend API first; falls back to local storage update.
   Future<bool> changePassword(String oldPassword, String newPassword) async {
-    final currentPassword = await _ref.read(tokenManagerProvider).getAppPassword();
     final oldTrimmed = oldPassword.trim();
-    if (oldTrimmed != currentPassword && oldTrimmed != 'Mani6050' && oldTrimmed != 'CML6050') return false;
-    await _ref.read(tokenManagerProvider).saveAppPassword(newPassword.trim());
+    final newTrimmed = newPassword.trim();
+
+    // 1. Try backend change (uses JWT token already saved)
+    try {
+      final repo = _ref.read(authRepositoryProvider);
+      await repo.changePassword(oldTrimmed, newTrimmed).timeout(const Duration(seconds: 10));
+      // Backend succeeded — also update local password cache
+      await _ref.read(tokenManagerProvider).saveAppPassword(newTrimmed);
+      return true;
+    } catch (_) {
+      // Backend failed (offline or wrong old password on server) — fall back to local only
+    }
+
+    // 2. Offline local fallback — validate against stored local password
+    final currentPassword = await _ref.read(tokenManagerProvider).getAppPassword();
+    if (oldTrimmed != currentPassword) return false;
+    await _ref.read(tokenManagerProvider).saveAppPassword(newTrimmed);
     return true;
   }
 

@@ -44,9 +44,26 @@ class SeatRepository {
     }
   }
 
+  /// Resolves whether a branchId refers to Mehdawal branch.
+  /// Matches by slug/name AND by the known Mehdawal DB UUID.
+  static bool _isMehdawalBranch(String branchId) {
+    final lower = branchId.toLowerCase();
+    return lower.contains('mehdawal') ||
+        lower.contains('mehda') ||
+        lower == 'a45d90e2-8154-4a83-b83b-fcfa7db86c44';
+  }
+
   /// Filter to official seat numbers only and sort numerically.
   List<Seat> _filterAndSortSeats(List<Seat> seats, String branchId) {
-    final isMehdawal = branchId.toLowerCase().contains('mehdawal');
+    // First check if any returned seats have an M prefix — that tells us definitively
+    final hasMSeats = seats.any((s) => s.seatNumber.startsWith('M'));
+    final hasKSeats = seats.any((s) => s.seatNumber.startsWith('K'));
+
+    final isMehdawal = hasMSeats && !hasKSeats
+        ? true
+        : (!hasKSeats && !hasMSeats)
+            ? _isMehdawalBranch(branchId)
+            : _isMehdawalBranch(branchId);
     final prefix = isMehdawal ? 'M' : 'K';
     final max = isMehdawal ? 65 : 72;
     final pattern = RegExp('^$prefix(\\d{2})\$');
@@ -81,7 +98,7 @@ class SeatRepository {
 
   List<Seat> _generateMockSeats(String branchId, {String? floor, String? status}) {
     final List<Seat> seats = [];
-    final isMehdawal = branchId.toLowerCase().contains('mehdawal');
+    final isMehdawal = _isMehdawalBranch(branchId);
     // Khalilabad: 72 seats | Mehdawal: 65 seats (official capacities)
     final totalSeats = isMehdawal ? 65 : 72;
     const singleFloor = 'Main Hall';

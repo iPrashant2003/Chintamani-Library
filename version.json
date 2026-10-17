@@ -1,19 +1,20 @@
 {
-  "version": "2.7.9",
-  "buildNumber": 2079,
+  "version": "2.8.0",
+  "buildNumber": 2080,
   "minimumSupportedVersion": "2.3.0",
-  "releaseDate": "17 Oct 2026",
-  "title": "Chintamani Library v2.7.9 — Immediate Auto-Update Engine, Splash Restored, 72/65 Seats & Clean Data",
+  "releaseDate": "18 Oct 2026",
+  "title": "Chintamani Library v2.8.0 — Password Fix, Single Splash, Member Sync & Direct APK Download",
   "releaseNotes": [
-    "REAL-TIME UPDATE ENGINE: Switched update manifest discovery to high-speed raw GitHub CDN (100ms response), eliminating delays and stale CDN caching",
-    "SPLASH SCREEN RESTORED: Returned to exact original loading screen with golden aura painter, 110px insignia, dual branch badge, and smooth progress tracking",
-    "SINGLE HALL SEAT ALLOCATION: Strictly enforced 72 seats (K01–K72) for Khalilabad and 65 seats (M01–M65) for Mehdawal in a Single Study Hall; removed all non-standard and random seat numbering",
-    "DEMO DATA PURGED: Completely removed synthetic demo members; app now serves only genuine scholar records",
-    "MEMBER CARD SEAT DISPLAY: Fixed unassigned seat indicator to cleanly display '—' instead of random numbers derived from member codes",
-    "AUTOMATIC IN-APP POLLING: Added 60s background update check so new releases are announced immediately even while app is open"
+    "CRITICAL AUTH FIX: Removed all hardcoded bypass passwords (Admin@1234, CML6050, Mani6050) from backend and mobile — authentication is now 100% secure",
+    "CHANGE PASSWORD: Added real /auth/change-password API endpoint — password changes now persist to the cloud database",
+    "SINGLE SPLASH SCREEN: Fixed double loading screen after login using refreshListenable router pattern — one clean transition",
+    "SEAT BRANCH FIX: Mehdawal UUID (a45d90e2-...) now correctly resolves to M-prefix seats; backend uses resolveBranchInfo for all seat queries",
+    "MEMBER SYNC: Backend members now sync to local cache on every successful fetch, keeping offline view consistent with cloud",
+    "PAGINATED RESPONSE FIX: TransformInterceptor now preserves total/page/limit from paginated endpoints",
+    "DIRECT APK INSTALL: Update button now downloads and installs APK directly in-app without opening GitHub browser"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.9/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.9/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.0/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.0/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

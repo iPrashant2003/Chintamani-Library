@@ -1000,32 +1000,49 @@ class _MemberCardState extends ConsumerState<MemberCard>
 
   // ── Enhanced Visual Helpers ──
 
-  /// Clean avatar with subtle status ring (no neon glow)
+  /// Clean avatar with subtle live status ring
   Widget _buildGlowingAvatar(Member member, Color cardAccent) {
     final statusColor =
         member.isActive ? const Color(0xFF10B981) : const Color(0xFFDC2626);
-    return Container(
-      width: 52,
-      height: 52,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: const Color(0xFF1A1820),
-        border: Border.all(color: statusColor.withValues(alpha: 0.55), width: 1.8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+    return AnimatedBuilder(
+      animation: _tiltAnimation,
+      builder: (context, _) {
+        return Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: const Color(0xFF1A1820),
+            border: Border.all(
+              color: statusColor.withValues(
+                alpha: 0.40 + (_tiltAnimation.value * 0.45),
+              ),
+              width: 1.8,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.35),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+              BoxShadow(
+                color: statusColor.withValues(
+                  alpha: 0.10 + (_tiltAnimation.value * 0.22),
+                ),
+                blurRadius: 8 + (_tiltAnimation.value * 6),
+                spreadRadius: _tiltAnimation.value * 0.5,
+              ),
+            ],
           ),
-        ],
-      ),
-      child: ClipOval(
-        child: MemberImageHelper.buildAvatar(
-          member: member,
-          size: 52,
-          accentColor: cardAccent,
-        ),
-      ),
+          child: ClipOval(
+            child: MemberImageHelper.buildAvatar(
+              member: member,
+              size: 52,
+              accentColor: cardAccent,
+            ),
+          ),
+        );
+      },
     );
   }
 

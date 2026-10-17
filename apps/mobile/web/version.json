@@ -1,20 +1,20 @@
 {
-  "version": "2.7.7",
-  "buildNumber": 2077,
+  "version": "2.8.0",
+  "buildNumber": 2080,
   "minimumSupportedVersion": "2.3.0",
-  "releaseDate": "17 Oct 2026",
-  "title": "Chintamani Library v2.7.7 — Login Fix, Claymorphism Drawer, 4D Portal QR & Live Card Motion",
+  "releaseDate": "18 Oct 2026",
+  "title": "Chintamani Library v2.8.0 — Password Fix, Single Splash, Member Sync & Direct APK Download",
   "releaseNotes": [
-    "CRITICAL LOGIN FIX: Resolved authentication failure when signing in with admin password Mani6050 across both cloud backend and offline fallback",
-    "BOTTOM NAVIGATION: Removed sliding line and ambient glow pod; upgraded active tab buttons to softly rounded rectangles with 9px corner radius",
-    "UNIVERSAL PORTAL CLEANUP: Removed plain text portal URL, 'Official Member Portal' banner, and 'Universal QR Ecosystem' card for a clean, distraction-free interface",
-    "PREMIUM 4D PORTAL QR: Multi-layer depth container with 3D perspective tilt, periodic specular glint sweep, and fine dot-matrix background accent while keeping QR 100% crisp and scannable",
-    "DEEP-BLACK CLAYMORPHISM DRAWER: Sidebar drawer rebuilt with #040404 deep black base, tactile clay surfaces, outer drop shadows, and responsive press feedback",
-    "MATCHING LOADING SCREEN: Splash screen redesigned with floating particles, pulsating golden ring, and brand mark (infinity symbol under a roof) with retry handling",
-    "MEMBER DIRECTORY LIVE MOTION: Added gentle breathing glow, pulsing border indicating live active data, entrance transition, and tactile press feedback on every card"
+    "CRITICAL AUTH FIX: Removed all hardcoded bypass passwords (Admin@1234, CML6050, Mani6050) from backend and mobile — authentication is now 100% secure",
+    "CHANGE PASSWORD: Added real /auth/change-password API endpoint — password changes now persist to the cloud database",
+    "SINGLE SPLASH SCREEN: Fixed double loading screen after login using refreshListenable router pattern — one clean transition",
+    "SEAT BRANCH FIX: Mehdawal UUID (a45d90e2-...) now correctly resolves to M-prefix seats; backend uses resolveBranchInfo for all seat queries",
+    "MEMBER SYNC: Backend members now sync to local cache on every successful fetch, keeping offline view consistent with cloud",
+    "PAGINATED RESPONSE FIX: TransformInterceptor now preserves total/page/limit from paginated endpoints",
+    "DIRECT APK INSTALL: Update button now downloads and installs APK directly in-app without opening GitHub browser"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.7/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.7.7/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.0/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.0/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
   "forceUpdate": true
 }

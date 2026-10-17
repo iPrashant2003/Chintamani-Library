@@ -1,15 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSeatDto } from './dto/create-seat.dto';
+import { resolveBranchInfo } from '../common/utils/branch-resolver.util';
 
 @Injectable()
 export class SeatsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(branchId?: string, floor?: string, status?: string) {
+    let resolvedBranchId = branchId;
+    let branchInfo: any = null;
+    if (branchId) {
+      branchInfo = await resolveBranchInfo(this.prisma, branchId);
+      if (branchInfo) {
+        resolvedBranchId = branchInfo.id;
+      }
+    }
+
     const rawSeats = await this.prisma.seat.findMany({
       where: {
-        ...(branchId && { branchId }),
+        ...(resolvedBranchId && { branchId: resolvedBranchId }),
         ...(floor && { floor }),
         ...(status && { status: status as any }),
       },
@@ -28,21 +38,17 @@ export class SeatsService {
     //   Mehdawal:   M01–M65 (floor: 'Single Hall')
     // Old demo seeds created A01–A25 / B01–B25 seats; filter those out.
     let seats = rawSeats;
-    if (branchId) {
-      // Determine which prefix is valid for this branch
-      const branchRecord = await this.prisma.branch.findUnique({ where: { id: branchId }, select: { name: true } }).catch(() => null);
-      if (branchRecord) {
-        const isKhl = branchRecord.name.toLowerCase().includes('khalilabad');
-        const prefix = isKhl ? 'K' : 'M';
-        const maxSeat = isKhl ? 72 : 65;
-        const validPattern = new RegExp(`^${prefix}(\\d{2})$`);
-        seats = rawSeats.filter(s => {
-          const m = s.seatNumber.match(validPattern);
-          if (!m) return false;
-          const num = parseInt(m[1], 10);
-          return num >= 1 && num <= maxSeat;
-        });
-      }
+    if (branchInfo) {
+      const isMhd = branchInfo.isMehdawal;
+      const prefix = isMhd ? 'M' : 'K';
+      const maxSeat = isMhd ? 65 : 72;
+      const validPattern = new RegExp(`^${prefix}(\\d{2})$`);
+      seats = rawSeats.filter(s => {
+        const m = s.seatNumber.match(validPattern);
+        if (!m) return false;
+        const num = parseInt(m[1], 10);
+        return num >= 1 && num <= maxSeat;
+      });
     }
 
     // Natural sort: K01, K02, ..., K10, K11, ... K72

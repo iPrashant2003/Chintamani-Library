@@ -40,4 +40,14 @@ class AuthRepository {
       await _apiClient.dio.post(ApiEndpoints.resetPassword, data: {'token': token, 'password': password});
     } catch (_) {}
   }
+
+  Future<void> changePassword(String oldPassword, String newPassword) async {
+    await _apiClient.dio.post(
+      ApiEndpoints.changePassword,
+      data: {
+        'oldPassword': oldPassword,
+        'newPassword': newPassword,
+      },
+    );
+  }
 }

@@ -48,13 +48,29 @@ import '../features/attendance/presentation/live_attendance_checker_screen.dart'
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
+/// A [ChangeNotifier] that bridges Riverpod auth state changes into
+/// GoRouter's [refreshListenable]. Using this pattern keeps the GoRouter
+/// instance alive (created once) while still reacting to auth changes via
+/// redirect — eliminating the double-splash caused by GoRouter recreation.
+class _AuthNotifierBridge extends ChangeNotifier {
+  _AuthNotifierBridge(this._ref) {
+    _ref.listen<AsyncValue<AuthState>>(authProvider, (_, __) {
+      notifyListeners();
+    });
+  }
+  final Ref _ref;
+  AuthState? get authState => _ref.read(authProvider).value;
+}
+
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider).value;
+  final bridge = _AuthNotifierBridge(ref);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: RouteNames.splash,
+    refreshListenable: bridge,
     redirect: (context, state) {
+      final authState = bridge.authState;
       final isAuth = authState is AuthAuthenticated;
       final path = state.uri.toString();
       final isSplash = path == RouteNames.splash;

@@ -38,10 +38,17 @@ class MemberRepository {
       final data = response.data is Map && response.data['data'] != null
           ? response.data
           : {'data': response.data, 'total': (response.data as List).length, 'page': 1, 'limit': limit};
-      return PaginatedResponse<Member>.fromJson(
+      final result = PaginatedResponse<Member>.fromJson(
         data as Map<String, dynamic>,
         (json) => Member.fromJson(json),
       );
+
+      // Sync fetched backend members to local cache (keeps offline view fresh)
+      for (final member in result.data) {
+        await DatabaseBackupService.instance.addMember(member);
+      }
+
+      return result;
     } catch (_) {
       // Fetch from local master database (Clean, zero demo members by default)
       final localMembers = await DatabaseBackupService.instance.getMembers(branchId);

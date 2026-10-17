@@ -193,7 +193,7 @@ class _ChangePasswordBodyState extends ConsumerState<_ChangePasswordBody> {
         // Hint
         const Center(
           child: Text(
-            'Default password: Mani6050 (if not changed)',
+            'Default password: Admin@1234 (if not changed)',
             style: TextStyle(color: AppColors.textTertiary, fontSize: 11),
           ),
         ),

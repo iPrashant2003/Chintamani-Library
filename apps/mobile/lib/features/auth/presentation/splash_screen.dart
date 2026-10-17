@@ -82,10 +82,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       if (update.forceUpdate || autoCheck) {
         await AppUpdateDialog.show(context, update);
         if (!mounted) return;
-        if (update.forceUpdate) {
-          // Mandatory update: user must complete update before continuing
-          return;
-        }
       }
     }
 

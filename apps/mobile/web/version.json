@@ -1,18 +1,18 @@
 {
-  "version": "2.8.4",
-  "buildNumber": 2084,
+  "version": "2.8.5",
+  "buildNumber": 2085,
   "minimumSupportedVersion": "2.3.0",
   "releaseDate": "18 Oct 2026",
-  "title": "Chintamani Library v2.8.4 — Premium AI Chatbot UI, Portal AI Assistant & QR Cleanup",
+  "title": "Chintamani Library v2.8.5 — Update Loop Fix & Permanent Launch Stability",
   "releaseNotes": [
-    "PREMIUM AI CHATBOT: Completely redesigned with structured bold/bullet/section rendering, bouncing typing indicator, gold gradient UI, copy-on-longpress, and clear conversation button",
-    "PORTAL AI ASSISTANT: ChintaMani AI now embedded in the external Member Portal for students and visitors via public endpoint",
-    "STRUCTURED AI RESPONSES: All chatbot answers now use formatted sections, bullet points, and bold values for clarity",
-    "QR PORTAL CLEANUP: Removed camera scanner button from Universal QR Portal screen",
-    "AI SECURITY: New public /ai/chat-public endpoint for external portal; admin /ai/chat preserved with JWT guard"
+    "UPDATE LOOP FIX: Resolved infinite update prompt loop by synchronizing native build versions and strict semver comparison",
+    "LAUNCH STABILITY: Splash screen no longer halts permanently on forceUpdate — users can always proceed into the app",
+    "PREMIUM AI CHATBOT: Completely redesigned with structured bold/bullet/section rendering, bouncing typing indicator, and copy-on-longpress",
+    "PORTAL AI ASSISTANT: ChintaMani AI live on external Member Portal for students and visitors",
+    "QR PORTAL CLEANUP: Camera scanner button removed from Universal QR Portal"
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.4/Chintamani-Library-Release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.4/Chintamani-Library-arm64.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.5/Chintamani-Library-Release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.5/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/latest",
-  "forceUpdate": true
+  "forceUpdate": false
 }

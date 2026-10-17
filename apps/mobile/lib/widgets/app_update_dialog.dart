@@ -277,20 +277,20 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
             // Actions
             Row(
               children: [
-                if (!info.forceUpdate && !_isDownloading)
+                if ((!info.forceUpdate || _errorMessage != null) && !_isDownloading)
                   Expanded(
                     child: TextButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 13),
                       ),
-                      child: const Text(
-                        'Later',
-                        style: TextStyle(color: Color(0xFF888888), fontWeight: FontWeight.w700),
+                      child: Text(
+                        _errorMessage != null ? 'Close' : 'Later',
+                        style: const TextStyle(color: Color(0xFF888888), fontWeight: FontWeight.w700),
                       ),
                     ),
                   ),
-                if (!info.forceUpdate && !_isDownloading) const SizedBox(width: 10),
+                if ((!info.forceUpdate || _errorMessage != null) && !_isDownloading) const SizedBox(width: 10),
                 Expanded(
                   flex: 2,
                   child: GestureDetector(

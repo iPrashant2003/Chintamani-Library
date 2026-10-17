@@ -80,8 +80,8 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.8.4';
-  static const currentBuildNumber = 2084;
+  static const currentVersion = '2.8.5';
+  static const currentBuildNumber = 2085;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   /// The update info discovered from cloud manifest, if any.
@@ -285,9 +285,10 @@ class AppUpdateService {
           }
           final info = AppUpdateInfo.fromJson(json);
 
-          // Canonical check: remote build number is higher OR remote semver is higher
+          // Strict check: only flag update if remote semver is higher,
+          // or if on the same semver and remote build number is strictly higher.
           final semverDiff = compareSemver(info.version, installedVersionName);
-          final hasUpdate = info.buildNumber > installedBuildNumber || semverDiff > 0;
+          final hasUpdate = semverDiff > 0 || (semverDiff == 0 && info.buildNumber > installedBuildNumber);
 
           debugPrint('[UpdateService] Remote: v${info.version}+${info.buildNumber}, Installed: v$installedVersionName+$installedBuildNumber (hasUpdate: $hasUpdate) from $url');
 

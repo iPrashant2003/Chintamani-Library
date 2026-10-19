@@ -44,41 +44,54 @@ export class LockersService {
       include: {
         subscriptions: {
           where: { status: 'ACTIVE' },
-          include: { member: { select: { id: true, name: true, memberCode: true } }, plan: { select: { name: true } } },
+          include: { member: { select: { id: true, name: true, memberCode: true, isActive: true } }, plan: { select: { name: true } } },
+          orderBy: { endDate: 'desc' },
           take: 1,
         },
         assignments: {
           where: { releasedAt: null },
-          include: { subscription: { include: { member: { select: { id: true, name: true, memberCode: true } } } } },
+          include: { subscription: { include: { member: { select: { id: true, name: true, memberCode: true, isActive: true } } } } },
+          orderBy: { assignedAt: 'desc' },
           take: 1,
         }
       },
       orderBy: { lockerNumber: 'asc' }
     });
 
-    // Authoritative status calculation: A locker is OCCUPIED only if an active subscription or unreleased assignment exists
+    const now = new Date();
+    // Authoritative status calculation: A locker is OCCUPIED only if an active valid subscription exists
     const reconciledLockers = await Promise.all(lockers.map(async (locker) => {
       const activeSub = locker.subscriptions[0] || locker.assignments[0]?.subscription;
-      const hasActiveAssignment = !!activeSub;
-      const authoritativeStatus = hasActiveAssignment
+      const isValid = !!(activeSub && activeSub.member?.isActive && new Date(activeSub.endDate) >= now);
+      const authoritativeStatus = isValid
         ? 'OCCUPIED'
         : (locker.status === 'MAINTENANCE' ? 'MAINTENANCE' : 'AVAILABLE');
 
       // Reconcile database state if out of sync
-      if (locker.status !== authoritativeStatus && locker.status !== 'MAINTENANCE') {
+      if (locker.status === 'OCCUPIED' && !isValid) {
         try {
-          await this.prisma.locker.update({
-            where: { id: locker.id },
-            data: { status: authoritativeStatus as any },
-          });
+          await this.prisma.$transaction([
+            this.prisma.locker.update({
+              where: { id: locker.id },
+              data: { status: 'AVAILABLE' },
+            }),
+            this.prisma.subscription.updateMany({
+              where: { assignedLockerId: locker.id },
+              data: { assignedLockerId: null },
+            }),
+            this.prisma.lockerAssignment.updateMany({
+              where: { lockerId: locker.id, releasedAt: null },
+              data: { releasedAt: now },
+            }),
+          ]);
         } catch (_) {}
       }
 
       return {
         ...locker,
         status: authoritativeStatus,
-        currentMemberName: activeSub?.member?.name || null,
-        currentMemberId: activeSub?.member?.id || null,
+        currentMemberName: isValid ? activeSub?.member?.name || null : null,
+        currentMemberId: isValid ? activeSub?.member?.id || null : null,
       };
     }));
 
@@ -167,6 +180,52 @@ export class LockersService {
       });
     });
     return { message: 'Locker released successfully' };
+  }
+
+  async deallocate(id: string, adminUser?: any, reason?: string) {
+    const locker = await this.prisma.locker.findUnique({
+      where: { id },
+      include: {
+        subscriptions: {
+          where: { status: 'ACTIVE' },
+          include: { member: true },
+        },
+      },
+    });
+    if (!locker) throw new NotFoundException('Locker not found');
+    if (locker.status === 'AVAILABLE') {
+      return { success: true, message: `Locker ${locker.lockerNumber} is already available` };
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.locker.update({ where: { id }, data: { status: 'AVAILABLE' } });
+      await tx.subscription.updateMany({ where: { assignedLockerId: id }, data: { assignedLockerId: null } });
+      await tx.lockerAssignment.updateMany({
+        where: { lockerId: id, releasedAt: null },
+        data: { releasedAt: new Date() },
+      });
+
+      try {
+        await tx.auditLog.create({
+          data: {
+            tenantId: locker.tenantId,
+            userId: adminUser?.id || null,
+            branchId: locker.branchId,
+            action: 'DEALLOCATE_LOCKER',
+            entity: 'Locker',
+            entityId: locker.id,
+            metadata: JSON.stringify({
+              lockerNumber: locker.lockerNumber,
+              reason: reason || 'Manual admin deallocation',
+              admin: adminUser?.name || 'Admin',
+              membersAffected: locker.subscriptions.map((s) => ({ id: s.memberId, name: s.member?.name })),
+            }),
+          },
+        });
+      } catch (_) {}
+    });
+
+    return { success: true, message: `Locker ${locker.lockerNumber} has been deallocated and is now available` };
   }
 
   async getHistory(id: string) {

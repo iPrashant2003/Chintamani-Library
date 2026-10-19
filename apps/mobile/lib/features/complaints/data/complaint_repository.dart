@@ -98,13 +98,20 @@ class ComplaintRepository {
     }
   }
 
-  Future<bool> updateStatus(String id, String status, {String? resolution, String? assignedTo}) async {
+  Future<bool> updateStatus(
+    String id,
+    String status, {
+    String? resolution,
+    String? internalNotes,
+    String? assignedTo,
+  }) async {
     try {
       await _apiClient.dio.patch(
         '${ApiEndpoints.complaints}/$id/status',
         data: {
           'status': status,
           if (resolution != null) 'resolution': resolution,
+          if (internalNotes != null) 'internalNotes': internalNotes,
           if (assignedTo != null) 'assignedTo': assignedTo,
         },
       );

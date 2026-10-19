@@ -52,12 +52,31 @@ class MemberRepository {
     } catch (_) {
       // Fetch from local master database (Clean, zero demo members by default)
       final localMembers = await DatabaseBackupService.instance.getMembers(branchId);
+      final now = DateTime.now();
+      final startOfToday = DateTime(now.year, now.month, now.day);
+      final endOfToday = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+      final day3End = endOfToday.add(const Duration(days: 3));
+      final day5End = endOfToday.add(const Duration(days: 5));
+      final day15End = endOfToday.add(const Duration(days: 15));
+
       final filtered = localMembers.where((m) {
-        if (status == 'active' && !m.isActive) return false;
-        if (status == 'expired' && m.isActive) return false;
-        if (status == 'expiring1_3' && (m.daysRemaining == null || m.daysRemaining! > 3 || !m.isActive)) return false;
-        if (status == 'expiring4_7' && (m.daysRemaining == null || m.daysRemaining! < 4 || m.daysRemaining! > 7 || !m.isActive)) return false;
-        if (status == 'expiring8_15' && (m.daysRemaining == null || m.daysRemaining! < 8 || m.daysRemaining! > 15 || !m.isActive)) return false;
+        final sub = m.activeSubscription;
+        final bool hasValidSub = sub != null && sub.endDate.isAfter(startOfToday);
+        if (status == 'active' && (!m.isActive || !hasValidSub)) return false;
+        if (status == 'expired' && (m.isActive && hasValidSub)) return false;
+        if (status == 'expiring1_3') {
+          if (!m.isActive || sub == null) return false;
+          if (!sub.endDate.isAfter(endOfToday) || sub.endDate.isAfter(day3End)) return false;
+        }
+        if (status == 'expiring3_5' || status == 'expiring4_7') {
+          if (!m.isActive || sub == null) return false;
+          if (!sub.endDate.isAfter(day3End) || sub.endDate.isAfter(day5End)) return false;
+        }
+        if (status == 'expiring8_15') {
+          if (!m.isActive || sub == null) return false;
+          final day7End = endOfToday.add(const Duration(days: 7));
+          if (!sub.endDate.isAfter(day7End) || sub.endDate.isAfter(day15End)) return false;
+        }
         if (search != null && search.isNotEmpty) {
           final q = search.toLowerCase();
           return m.name.toLowerCase().contains(q) ||
@@ -302,6 +321,70 @@ class MemberRepository {
     await DatabaseBackupService.instance.updateMember(updated);
     return updated;
   }
+
+  Future<Map<String, int>> getStats(String branchId) async {
+    try {
+      final response = await _apiClient.dio.get(
+        '${ApiEndpoints.members}/stats',
+        queryParameters: {'branchId': branchId},
+      );
+      if (response.data is Map) {
+        final data = response.data as Map;
+        return {
+          'all': (data['all'] as num?)?.toInt() ?? 0,
+          'active': (data['active'] as num?)?.toInt() ?? 0,
+          'expired': (data['expired'] as num?)?.toInt() ?? 0,
+          'expiring1_3': (data['expiring1_3'] as num?)?.toInt() ?? 0,
+          'expiring3_5': (data['expiring3_5'] as num?)?.toInt() ?? 0,
+          'expiring4_7': (data['expiring3_5'] ?? data['expiring4_7'] as num?)?.toInt() ?? 0,
+          'expiring8_15': (data['expiring8_15'] as num?)?.toInt() ?? 0,
+        };
+      }
+    } catch (_) {}
+
+    // Fallback: local calculation with strict non-overlapping date logic
+    final localMembers = await DatabaseBackupService.instance.getMembers(branchId);
+    int active = 0;
+    int expired = 0;
+    int exp1_3 = 0;
+    int exp3_5 = 0;
+    int exp8_15 = 0;
+
+    final now = DateTime.now();
+    final startOfToday = DateTime(now.year, now.month, now.day);
+    final endOfToday = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+    final day3End = endOfToday.add(const Duration(days: 3));
+    final day5End = endOfToday.add(const Duration(days: 5));
+    final day15End = endOfToday.add(const Duration(days: 15));
+
+    for (final m in localMembers) {
+      final sub = m.activeSubscription;
+      final bool hasValidSub = sub != null && sub.endDate.isAfter(startOfToday);
+      if (m.isActive && hasValidSub) {
+        active++;
+        final end = sub.endDate;
+        if (end.isAfter(endOfToday) && !end.isAfter(day3End)) {
+          exp1_3++;
+        } else if (end.isAfter(day3End) && !end.isAfter(day5End)) {
+          exp3_5++;
+        } else if (end.isAfter(endOfToday.add(const Duration(days: 7))) && !end.isAfter(day15End)) {
+          exp8_15++;
+        }
+      } else {
+        expired++;
+      }
+    }
+
+    return {
+      'all': localMembers.length,
+      'active': active,
+      'expired': expired,
+      'expiring1_3': exp1_3,
+      'expiring3_5': exp3_5,
+      'expiring4_7': exp3_5,
+      'expiring8_15': exp8_15,
+    };
+  }
 }
 
 
@@ -343,39 +426,5 @@ final memberDetailProvider = FutureProvider.autoDispose.family<Member, String>((
 final memberStatsProvider = FutureProvider.autoDispose<Map<String, int>>((ref) async {
   final branch = ref.watch(activeBranchProvider);
   final repo = ref.read(memberRepositoryProvider);
-  final res = await repo.getMembers(branchId: branch.id, status: 'all', limit: 1000);
-  final all = res.data;
-
-  int active = 0;
-  int expired = 0;
-  int exp1_3 = 0;
-  int exp4_7 = 0;
-  int exp8_15 = 0;
-
-  for (final m in all) {
-    if (m.isActive) {
-      active++;
-      final rem = m.daysRemaining;
-      if (rem != null) {
-        if (rem <= 3) {
-          exp1_3++;
-        } else if (rem <= 7) {
-          exp4_7++;
-        } else if (rem <= 15) {
-          exp8_15++;
-        }
-      }
-    } else {
-      expired++;
-    }
-  }
-
-  return {
-    'active': active,
-    'expired': expired,
-    'expiring1_3': exp1_3,
-    'expiring4_7': exp4_7,
-    'expiring8_15': exp8_15,
-    'all': all.length,
-  };
+  return repo.getStats(branch.id);
 });

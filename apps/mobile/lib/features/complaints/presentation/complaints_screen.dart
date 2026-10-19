@@ -471,7 +471,7 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
             ),
             const SizedBox(height: 10),
 
-            // Bottom row: Date & details link
+            // Bottom row: Date & Update Complaint button
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -479,15 +479,24 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
                   dateStr,
                   style: const TextStyle(color: AppColors.textTertiary, fontSize: 10),
                 ),
-                const Row(
-                  children: [
-                    Text(
-                      'View & Update',
-                      style: TextStyle(color: AppColors.purpleLight, fontSize: 11, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(width: 2),
-                    Icon(Icons.chevron_right_rounded, size: 14, color: AppColors.purpleLight),
-                  ],
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.goldPrimary.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: AppColors.goldPrimary.withOpacity(0.4), width: 0.8),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.edit_note_rounded, size: 14, color: AppColors.goldLight),
+                      SizedBox(width: 4),
+                      Text(
+                        'Update Complaint',
+                        style: TextStyle(color: AppColors.goldLight, fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

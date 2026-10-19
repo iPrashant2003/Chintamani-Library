@@ -68,6 +68,18 @@ class LockerRepository {
       await _apiClient.dio.patch('${ApiEndpoints.lockers}/$lockerId/status', data: {'status': status});
     } catch (_) {}
   }
+
+  Future<Map<String, dynamic>> deallocateLocker(String lockerId, {String? reason}) async {
+    try {
+      final res = await _apiClient.dio.post(
+        '${ApiEndpoints.lockers}/$lockerId/deallocate',
+        data: reason != null && reason.isNotEmpty ? {'reason': reason} : {},
+      );
+      return {'success': true, 'message': res.data['message'] ?? 'Locker deallocated'};
+    } catch (e) {
+      return {'success': false, 'message': 'Failed to deallocate locker: $e'};
+    }
+  }
 }
 
 final lockersListProvider = FutureProvider.autoDispose<List<Locker>>((ref) async {

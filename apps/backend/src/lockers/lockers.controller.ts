@@ -4,6 +4,7 @@ import { CreateLockerDto } from './dto/create-locker.dto';
 import { AssignLockerDto } from './dto/assign-locker.dto';
 import { UpdateLockerStatusDto } from './dto/update-locker-status.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('lockers')
@@ -46,5 +47,14 @@ export class LockersController {
   @Get(':id/history')
   getHistory(@Param('id') id: string) {
     return this.lockersService.getHistory(id);
+  }
+
+  @Post(':id/deallocate')
+  deallocate(
+    @Param('id') id: string,
+    @Body('reason') reason?: string,
+    @CurrentUser() user?: any,
+  ) {
+    return this.lockersService.deallocate(id, user, reason);
   }
 }

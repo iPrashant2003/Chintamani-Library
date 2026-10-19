@@ -102,8 +102,61 @@ export class MembersService {
         where.branchId = branchId;
       }
     }
-    if (status === 'active') where.isActive = true;
-    if (status === 'inactive') where.isActive = false;
+
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    const day3End = new Date(endOfToday.getTime() + 3 * 86400000);
+    const day5End = new Date(endOfToday.getTime() + 5 * 86400000);
+    const day7End = new Date(endOfToday.getTime() + 7 * 86400000);
+    const day15End = new Date(endOfToday.getTime() + 15 * 86400000);
+
+    if (status === 'active') {
+      where.isActive = true;
+      where.subscriptions = {
+        some: {
+          status: 'ACTIVE',
+          endDate: { gte: startOfToday },
+        },
+      };
+    } else if (status === 'expired' || status === 'inactive') {
+      where.OR = [
+        { isActive: false },
+        {
+          subscriptions: {
+            none: {
+              status: 'ACTIVE',
+              endDate: { gte: startOfToday },
+            },
+          },
+        },
+      ];
+    } else if (status === 'expiring1_3') {
+      where.isActive = true;
+      where.subscriptions = {
+        some: {
+          status: 'ACTIVE',
+          endDate: { gt: endOfToday, lte: day3End },
+        },
+      };
+    } else if (status === 'expiring3_5' || status === 'expiring4_7') {
+      where.isActive = true;
+      where.subscriptions = {
+        some: {
+          status: 'ACTIVE',
+          endDate: { gt: day3End, lte: day5End },
+        },
+      };
+    } else if (status === 'expiring8_15') {
+      where.isActive = true;
+      where.subscriptions = {
+        some: {
+          status: 'ACTIVE',
+          endDate: { gt: day7End, lte: day15End },
+        },
+      };
+    }
+
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -119,9 +172,9 @@ export class MembersService {
         take: limitNum,
         include: {
           subscriptions: {
-            where: { status: 'ACTIVE' },
             include: { plan: true, seat: true, locker: true },
-            take: 1,
+            orderBy: { endDate: 'desc' },
+            take: 3,
           },
         },
         orderBy: { createdAt: 'desc' },
@@ -130,6 +183,105 @@ export class MembersService {
     ]);
 
     return { data: members, total, page: pageNum, limit: limitNum };
+  }
+
+  async getStats(user: any, branchId?: string) {
+    const where: any = {};
+    if (user?.tenantId) where.tenantId = user.tenantId;
+    if (branchId && branchId !== 'ALL' && branchId !== 'all') {
+      const branchInfo = await resolveBranchInfo(this.prisma, branchId, user?.tenantId);
+      if (branchInfo) {
+        where.branchId = { in: branchInfo.allIds };
+      } else {
+        where.branchId = branchId;
+      }
+    }
+
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    const day3End = new Date(endOfToday.getTime() + 3 * 86400000);
+    const day5End = new Date(endOfToday.getTime() + 5 * 86400000);
+    const day7End = new Date(endOfToday.getTime() + 7 * 86400000);
+    const day15End = new Date(endOfToday.getTime() + 15 * 86400000);
+
+    const [total, active, expired, exp1_3, exp3_5, exp8_15] = await Promise.all([
+      this.prisma.member.count({ where }),
+      this.prisma.member.count({
+        where: {
+          ...where,
+          isActive: true,
+          subscriptions: {
+            some: {
+              status: 'ACTIVE',
+              endDate: { gte: startOfToday },
+            },
+          },
+        },
+      }),
+      this.prisma.member.count({
+        where: {
+          ...where,
+          OR: [
+            { isActive: false },
+            {
+              subscriptions: {
+                none: {
+                  status: 'ACTIVE',
+                  endDate: { gte: startOfToday },
+                },
+              },
+            },
+          ],
+        },
+      }),
+      this.prisma.member.count({
+        where: {
+          ...where,
+          isActive: true,
+          subscriptions: {
+            some: {
+              status: 'ACTIVE',
+              endDate: { gt: endOfToday, lte: day3End },
+            },
+          },
+        },
+      }),
+      this.prisma.member.count({
+        where: {
+          ...where,
+          isActive: true,
+          subscriptions: {
+            some: {
+              status: 'ACTIVE',
+              endDate: { gt: day3End, lte: day5End },
+            },
+          },
+        },
+      }),
+      this.prisma.member.count({
+        where: {
+          ...where,
+          isActive: true,
+          subscriptions: {
+            some: {
+              status: 'ACTIVE',
+              endDate: { gt: day7End, lte: day15End },
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      all: total,
+      active,
+      expired,
+      expiring1_3: exp1_3,
+      expiring3_5: exp3_5,
+      expiring4_7: exp3_5,
+      expiring8_15: exp8_15,
+    };
   }
 
   async getMemberProfile(user: any, id: string) {

@@ -141,22 +141,80 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
                     seat.currentMemberName ?? 'Assigned Member',
                     style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEF4444).withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.3)),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.info_outline_rounded, size: 13, color: Color(0xFFEF4444)),
+                        SizedBox(width: 5),
+                        Text(
+                          'Deallocation will not cancel the membership',
+                          style: TextStyle(color: Color(0xFFEF4444), fontSize: 10.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
                   Row(
                     children: [
                       Expanded(
                         child: SecondaryButton(
-                          label: 'Release Seat',
+                          label: 'Deallocate Seat',
                           textColor: AppColors.accentRed,
                           borderColor: AppColors.borderRed,
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            Navigator.pop(ctx);
-                            ref.read(seatRepositoryProvider).releaseSeat(seat.id);
-                            ref.invalidate(seatsListProvider);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Seat ${seat.seatNumber} released!')),
+                          onPressed: () async {
+                            HapticFeedback.mediumImpact();
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (dctx) => AlertDialog(
+                                backgroundColor: const Color(0xFF1A1A2E),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  side: const BorderSide(color: Color(0xFFEF4444), width: 1),
+                                ),
+                                title: const Text('Deallocate Seat', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                                content: Text(
+                                  'Are you sure you want to deallocate Seat ${seat.seatNumber}?\n\n'
+                                  '${seat.currentMemberName != null ? '"${seat.currentMemberName}" will be unlinked from this seat.' : ''}\n\n'
+                                  'The seat will become AVAILABLE. The member\'s subscription will remain active.',
+                                  style: const TextStyle(color: Color(0xFFCCCCCC), fontSize: 13),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(dctx, false),
+                                    child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                                  ),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFFEF4444),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    ),
+                                    onPressed: () => Navigator.pop(dctx, true),
+                                    child: const Text('Deallocate', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                  ),
+                                ],
+                              ),
                             );
+                            if (confirmed == true && ctx.mounted) {
+                              Navigator.pop(ctx);
+                              final result = await ref.read(seatRepositoryProvider).deallocateSeat(seat.id);
+                              ref.invalidate(seatsListProvider);
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(result['message'] ?? 'Seat ${seat.seatNumber} deallocated'),
+                                    backgroundColor: result['success'] == true ? const Color(0xFF059669) : const Color(0xFFEF4444),
+                                  ),
+                                );
+                              }
+                            }
                           },
                         ),
                       ),

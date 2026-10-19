@@ -679,33 +679,43 @@ export class PortalService {
       });
     }
 
-    // Create Payment record (PENDING)
-    const payment = await this.prisma.payment.create({
-      data: {
-        tenantId,
-        memberId: member.id,
-        amount: dto.amount,
-        method: 'UPI',
-        status: 'PENDING',
-        paymentType: dto.paymentType,
-        txnRef: dto.txnRef || null,
-        notes: dto.notes || null,
-      },
-    });
+    if (!dto.screenshotUrl || !dto.screenshotUrl.trim()) {
+      throw new BadRequestException('Payment screenshot is mandatory. Please upload a clear payment screenshot.');
+    }
 
-    // Create PaymentVerification record
-    const verification = await this.prisma.paymentVerification.create({
-      data: {
-        tenantId,
-        paymentId: payment.id,
-        memberId: member.id,
-        amount: dto.amount,
-        paymentType: dto.paymentType,
-        screenshotUrl: dto.screenshotUrl || null,
-        txnRef: dto.txnRef || null,
-        upiId: dto.upiId || null,
-        status: 'PENDING',
-      },
+    const cleanTxnRef = dto.txnRef?.trim() ? dto.txnRef.trim() : null;
+
+    // Create Payment and PaymentVerification atomically in a transaction
+    const { payment, verification } = await this.prisma.$transaction(async (tx) => {
+      const p = await tx.payment.create({
+        data: {
+          tenantId,
+          memberId: member.id,
+          amount: dto.amount,
+          method: 'UPI',
+          status: 'PENDING',
+          paymentType: dto.paymentType,
+          txnRef: cleanTxnRef,
+          notes: dto.notes || null,
+        },
+      });
+
+      const pv = await tx.paymentVerification.create({
+        data: {
+          tenantId,
+          paymentId: p.id,
+          memberId: member.id,
+          amount: dto.amount,
+          paymentType: dto.paymentType,
+          screenshotUrl: dto.screenshotUrl.trim(),
+          txnRef: cleanTxnRef,
+          upiId: dto.upiId || 'prashantmanitripathi2003-2@oksbi',
+          status: 'PENDING',
+          submittedAt: new Date(),
+        },
+      });
+
+      return { payment: p, verification: pv };
     });
 
     // Admin Notification
@@ -715,7 +725,7 @@ export class PortalService {
           tenantId,
           type: 'PAYMENT_VERIFICATION',
           title: `New Payment Verification: ₹${dto.amount}`,
-          body: `${member.name} submitted a ₹${dto.amount} ${dto.paymentType} payment via UPI. Ref: ${dto.txnRef || 'N/A'}`,
+          body: `${member.name} submitted a ₹${dto.amount} ${dto.paymentType} payment via UPI.${cleanTxnRef ? ` Ref: ${cleanTxnRef}` : ' (Screenshot uploaded)'}`,
         },
       });
     } catch (_) {}

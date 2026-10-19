@@ -64,6 +64,20 @@ export class PaymentsController {
     return this.paymentsService.rejectVerification(id, reason);
   }
 
+  @Get('member/:memberId/history')
+  getMemberHistory(
+    @Param('memberId') memberId: string,
+    @Query('months') months?: string,
+  ) {
+    const numMonths = months ? parseInt(months, 10) : 6;
+    return this.paymentsService.getMemberPaymentHistory(memberId, isNaN(numMonths) ? 6 : numMonths);
+  }
+
+  @Get('member/:memberId')
+  findByMember(@Param('memberId') memberId: string) {
+    return this.paymentsService.findByMember(memberId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.paymentsService.findOne(id);
@@ -72,10 +86,5 @@ export class PaymentsController {
   @Patch(':id')
   updateStatus(@Param('id') id: string, @Body('status') status: string) {
     return this.paymentsService.updateStatus(id, status);
-  }
-
-  @Get('member/:memberId')
-  findByMember(@Param('memberId') memberId: string) {
-    return this.paymentsService.findByMember(memberId);
   }
 }

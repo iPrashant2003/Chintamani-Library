@@ -7,6 +7,11 @@ async function main() {
   console.log('🌱 Seeding Multi-Tenant LibraryOS database...\n');
 
   // Clean existing data in reverse relation order
+  await prisma.paymentVerification.deleteMany();
+  await prisma.memberRegistration.deleteMany();
+  await prisma.complaint.deleteMany();
+  await prisma.feedback.deleteMany();
+  await prisma.memberPortalSession.deleteMany();
   await prisma.auditLog.deleteMany();
   await prisma.communicationLog.deleteMany();
   await prisma.notification.deleteMany();
@@ -199,10 +204,10 @@ async function main() {
     seats1[mehdawal.id].push(seat);
   }
 
-  // Lockers for Tenant 1 (20 per branch)
+  // Lockers for Tenant 1 (strictly 9 lockers per branch: L01-L09)
   const lockers1: Record<string, any[]> = { [khalilabad.id]: [], [mehdawal.id]: [] };
   for (const branch of [khalilabad, mehdawal]) {
-    for (let i = 1; i <= 20; i++) {
+    for (let i = 1; i <= 9; i++) {
       const locker = await prisma.locker.create({
         data: {
           tenantId: tenant1.id,
@@ -297,7 +302,7 @@ async function main() {
       }
 
       const seat = i < 25 ? seats1[branch.id][sIdx++] : null;
-      const locker = i < 10 ? lockers1[branch.id][lIdx++] : null;
+      const locker = (i < 4 && lIdx < lockers1[branch.id].length) ? lockers1[branch.id][lIdx++] : null;
 
       const subscription = await prisma.subscription.create({
         data: {
@@ -325,17 +330,36 @@ async function main() {
         });
       }
 
-      await prisma.payment.create({
+      const payment = await prisma.payment.create({
         data: {
           tenantId: tenant1.id,
           memberId: member.id,
           amount: plan.price,
-          method: ['CASH', 'UPI', 'CARD', 'BANK'][Math.floor(Math.random() * 4)] as any,
+          method: (['CASH', 'UPI', 'CARD', 'BANK'][Math.floor(Math.random() * 4)]) as any,
           status: i < 27 ? 'PAID' : 'PENDING',
           paidAt: i < 27 ? startDate : null,
           txnRef: i < 27 ? `TXN${Date.now()}${i}` : null,
         },
       });
+
+      if (i % 3 === 0) {
+        await prisma.paymentVerification.create({
+          data: {
+            tenantId: tenant1.id,
+            paymentId: payment.id,
+            memberId: member.id,
+            amount: plan.price,
+            paymentType: 'MEMBERSHIP',
+            screenshotUrl: '/uploads/payments/sample_receipt.png',
+            txnRef: payment.txnRef || (i % 2 === 0 ? `UPI${Date.now()}${i}` : null),
+            upiId: 'prashantmanitripathi2003-2@oksbi',
+            status: i < 20 ? 'APPROVED' : (i < 26 ? 'PENDING' : 'REJECTED'),
+            verifiedBy: i < 20 ? 'Admin' : null,
+            verifiedAt: i < 20 ? startDate : null,
+            rejectionReason: i >= 26 ? 'Transaction screenshot unreadable or incomplete' : null,
+          },
+        });
+      }
 
       if (subStatus === 'ACTIVE') {
         for (let d = 0; d < 20; d++) {

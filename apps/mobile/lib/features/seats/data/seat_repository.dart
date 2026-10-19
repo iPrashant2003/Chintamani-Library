@@ -96,6 +96,18 @@ class SeatRepository {
     } catch (_) {}
   }
 
+  Future<Map<String, dynamic>> deallocateSeat(String seatId, {String? reason}) async {
+    try {
+      final res = await _apiClient.dio.post(
+        '${ApiEndpoints.seats}/$seatId/deallocate',
+        data: (reason != null && reason.isNotEmpty) ? {'reason': reason} : {},
+      );
+      return {'success': true, 'message': res.data['message'] ?? 'Seat deallocated'};
+    } catch (e) {
+      return {'success': false, 'message': 'Failed to deallocate seat: $e'};
+    }
+  }
+
   List<Seat> _generateMockSeats(String branchId, {String? floor, String? status}) {
     final List<Seat> seats = [];
     final isMehdawal = _isMehdawalBranch(branchId);

@@ -24,6 +24,11 @@ export class MembersController {
     return this.membersService.findAll(user, query);
   }
 
+  @Get('stats')
+  getStats(@CurrentUser() user: any, @Query('branchId') branchId?: string) {
+    return this.membersService.getStats(user, branchId);
+  }
+
   @Get(':id')
   findOne(@CurrentUser() user: any, @Param('id') id: string) {
     return this.membersService.getMemberProfile(user, id);

@@ -21,22 +21,18 @@ export class SeatsService {
       where: {
         ...(resolvedBranchId && { branchId: resolvedBranchId }),
         ...(floor && { floor }),
-        ...(status && { status: status as any }),
       },
       include: {
         subscriptions: {
           where: { status: 'ACTIVE' },
-          include: { member: { select: { id: true, name: true, memberCode: true } }, plan: { select: { name: true } } },
+          include: { member: { select: { id: true, name: true, memberCode: true, isActive: true } }, plan: { select: { name: true } } },
+          orderBy: { endDate: 'desc' },
           take: 1,
         }
       },
     });
 
     // ── Enforce Single Hall seat numbering for Chintamani branches ──
-    // Only return seats that match the official single-hall pattern:
-    //   Khalilabad: K01–K72 (floor: 'Single Hall')
-    //   Mehdawal:   M01–M65 (floor: 'Single Hall')
-    // Old demo seeds created A01–A25 / B01–B25 seats; filter those out.
     let seats = rawSeats;
     if (branchInfo) {
       const isMhd = branchInfo.isMehdawal;
@@ -58,7 +54,49 @@ export class SeatsService {
       return numA - numB;
     });
 
-    return seats;
+    const now = new Date();
+    // Authoritative status calculation and auto-reconciliation
+    const reconciledSeats = await Promise.all(seats.map(async (seat) => {
+      const activeSub = seat.subscriptions[0];
+      const isValid = !!(activeSub && activeSub.member?.isActive && new Date(activeSub.endDate) >= now);
+      const authoritativeStatus = isValid
+        ? 'OCCUPIED'
+        : (seat.status === 'BLOCKED' ? 'BLOCKED' : (seat.status === 'MAINTENANCE' ? 'MAINTENANCE' : 'AVAILABLE'));
+
+      // Reconcile database state if out of sync
+      if (seat.status === 'OCCUPIED' && !isValid) {
+        try {
+          await this.prisma.$transaction([
+            this.prisma.seat.update({
+              where: { id: seat.id },
+              data: { status: 'AVAILABLE' },
+            }),
+            this.prisma.seatAssignment.updateMany({
+              where: { seatId: seat.id, releasedAt: null },
+              data: { releasedAt: now },
+            }),
+            ...(activeSub ? [
+              this.prisma.subscription.update({
+                where: { id: activeSub.id },
+                data: { assignedSeatId: null },
+              }),
+            ] : []),
+          ]);
+        } catch (_) {}
+      }
+
+      return {
+        ...seat,
+        status: authoritativeStatus,
+        currentMemberName: isValid ? activeSub?.member?.name : null,
+      };
+    }));
+
+    if (status && status !== 'ALL') {
+      return reconciledSeats.filter(s => s.status === status);
+    }
+
+    return reconciledSeats;
   }
 
   async findOne(id: string) {
@@ -100,6 +138,60 @@ export class SeatsService {
       await this.prisma.seatAssignment.update({ where: { id: activeAssignment.id }, data: { releasedAt: new Date() } });
     }
     return { message: 'Seat released successfully' };
+  }
+
+  async deallocate(id: string, adminUser?: any, reason?: string) {
+    const seat = await this.prisma.seat.findUnique({
+      where: { id },
+      include: {
+        subscriptions: {
+          where: { status: 'ACTIVE' },
+          include: { member: true },
+        },
+      },
+    });
+    if (!seat) throw new NotFoundException('Seat not found');
+    if (seat.status === 'AVAILABLE') {
+      return { success: true, message: `Seat ${seat.seatNumber} is already available` };
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      // Release the seat
+      await tx.seat.update({ where: { id }, data: { status: 'AVAILABLE' } });
+
+      // Mark any open assignment as released
+      const activeAssignment = await tx.seatAssignment.findFirst({ where: { seatId: id, releasedAt: null } });
+      if (activeAssignment) {
+        await tx.seatAssignment.update({ where: { id: activeAssignment.id }, data: { releasedAt: new Date() } });
+      }
+
+      // Unlink the seat from any active subscriptions
+      for (const sub of seat.subscriptions) {
+        await tx.subscription.update({ where: { id: sub.id }, data: { assignedSeatId: null } });
+      }
+
+      // Audit log
+      try {
+        await tx.auditLog.create({
+          data: {
+            tenantId: seat.tenantId,
+            userId: adminUser?.id || null,
+            branchId: seat.branchId,
+            action: 'DEALLOCATE_SEAT',
+            entity: 'Seat',
+            entityId: seat.id,
+            metadata: JSON.stringify({
+              seatNumber: seat.seatNumber,
+              reason: reason || 'Manual admin deallocation',
+              admin: adminUser?.name || 'Admin',
+              membersAffected: seat.subscriptions.map((s) => ({ id: s.memberId, name: s.member?.name })),
+            }),
+          },
+        });
+      } catch (_) {}
+    });
+
+    return { success: true, message: `Seat ${seat.seatNumber} has been deallocated and is now available` };
   }
 
   async getHistory(id: string) {

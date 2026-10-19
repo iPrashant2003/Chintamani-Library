@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { QueryPaymentsDto } from './dto/query-payments.dto';
@@ -167,53 +167,57 @@ export class PaymentsService {
     });
     if (!verification) throw new NotFoundException('Payment verification request not found');
 
-    // 1. Update verification status
-    await this.prisma.paymentVerification.update({
-      where: { id },
-      data: {
-        status: 'APPROVED',
-        verifiedBy: adminUser?.name || 'Admin',
-        verifiedAt: new Date(),
-      },
-    });
+    if (verification.status !== 'PENDING') {
+      throw new BadRequestException(
+        `This payment verification has already been ${verification.status.toLowerCase()}. Duplicate actions are prevented.`
+      );
+    }
 
-    // 2. Update payment status to PAID
-    await this.prisma.payment.update({
-      where: { id: verification.paymentId },
-      data: {
-        status: 'PAID',
-        paidAt: new Date(),
-      },
-    });
+    await this.prisma.$transaction(async (tx) => {
+      // 1. Update verification status
+      await tx.paymentVerification.update({
+        where: { id },
+        data: {
+          status: 'APPROVED',
+          verifiedBy: adminUser?.name || 'Admin',
+          verifiedAt: new Date(),
+        },
+      });
 
-    // 3. Activate member & activate subscription / seat
-    await this.prisma.member.update({
-      where: { id: verification.memberId },
-      data: { isActive: true },
-    });
+      // 2. Update payment status to PAID
+      await tx.payment.update({
+        where: { id: verification.paymentId },
+        data: {
+          status: 'PAID',
+          paidAt: new Date(),
+        },
+      });
 
-    try {
-      const activeSub = await this.prisma.subscription.findFirst({
+      // 3. Activate member & activate subscription / seat
+      await tx.member.update({
+        where: { id: verification.memberId },
+        data: { isActive: true },
+      });
+
+      const activeSub = await tx.subscription.findFirst({
         where: { memberId: verification.memberId },
         orderBy: { createdAt: 'desc' },
       });
       if (activeSub) {
-        await this.prisma.subscription.update({
+        await tx.subscription.update({
           where: { id: activeSub.id },
           data: { status: 'ACTIVE' },
         });
         if (activeSub.assignedSeatId) {
-          await this.prisma.seat.update({
+          await tx.seat.update({
             where: { id: activeSub.assignedSeatId },
             data: { status: 'OCCUPIED' },
           });
         }
       }
-    } catch (_) {}
 
-    // 4. Audit Log
-    try {
-      await this.prisma.auditLog.create({
+      // 4. Audit Log
+      await tx.auditLog.create({
         data: {
           tenantId: verification.tenantId,
           userId: adminUser?.id || null,
@@ -228,7 +232,7 @@ export class PaymentsService {
           }),
         },
       });
-    } catch (_) {}
+    });
 
     return {
       success: true,
@@ -243,26 +247,32 @@ export class PaymentsService {
     });
     if (!verification) throw new NotFoundException('Payment verification request not found');
 
-    await this.prisma.paymentVerification.update({
-      where: { id },
-      data: {
-        status: 'REJECTED',
-        rejectionReason: reason || 'Transaction could not be verified',
-        verifiedBy: adminUser?.name || 'Admin',
-        verifiedAt: new Date(),
-      },
-    });
+    if (verification.status !== 'PENDING') {
+      throw new BadRequestException(
+        `This payment verification has already been ${verification.status.toLowerCase()}. Duplicate actions are prevented.`
+      );
+    }
 
-    await this.prisma.payment.update({
-      where: { id: verification.paymentId },
-      data: {
-        status: 'REJECTED',
-      },
-    });
+    await this.prisma.$transaction(async (tx) => {
+      await tx.paymentVerification.update({
+        where: { id },
+        data: {
+          status: 'REJECTED',
+          rejectionReason: reason || 'Transaction could not be verified',
+          verifiedBy: adminUser?.name || 'Admin',
+          verifiedAt: new Date(),
+        },
+      });
 
-    // Audit Log
-    try {
-      await this.prisma.auditLog.create({
+      await tx.payment.update({
+        where: { id: verification.paymentId },
+        data: {
+          status: 'REJECTED',
+        },
+      });
+
+      // Audit Log
+      await tx.auditLog.create({
         data: {
           tenantId: verification.tenantId,
           userId: adminUser?.id || null,
@@ -278,11 +288,57 @@ export class PaymentsService {
           }),
         },
       });
-    } catch (_) {}
+    });
 
     return {
       success: true,
       message: `Payment verification for ${verification.member.name} rejected.`,
+    };
+  }
+
+  async getMemberPaymentHistory(memberId: string, months = 6) {
+    const member = await this.prisma.member.findUnique({
+      where: { id: memberId },
+      select: { id: true, name: true, memberCode: true, phone: true },
+    });
+    if (!member) throw new NotFoundException('Member not found');
+
+    const thresholdDate = new Date();
+    thresholdDate.setMonth(thresholdDate.getMonth() - months);
+
+    const payments = await this.prisma.payment.findMany({
+      where: {
+        memberId,
+        createdAt: { gte: thresholdDate },
+      },
+      include: {
+        verification: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return {
+      member,
+      windowMonths: months,
+      thresholdDate,
+      totalCount: payments.length,
+      payments: payments.map((p) => ({
+        id: p.id,
+        amount: p.amount,
+        method: p.method,
+        status: p.status,
+        paymentType: p.paymentType || 'MEMBERSHIP',
+        txnRef: p.txnRef || p.verification?.txnRef || null,
+        notes: p.notes,
+        paidAt: p.paidAt,
+        createdAt: p.createdAt,
+        verificationStatus: p.verification?.status || p.status,
+        screenshotUrl: p.verification?.screenshotUrl || null,
+        upiId: p.verification?.upiId || null,
+        rejectionReason: p.verification?.rejectionReason || null,
+        verifiedBy: p.verification?.verifiedBy || null,
+        verifiedAt: p.verification?.verifiedAt || null,
+      })),
     };
   }
 }

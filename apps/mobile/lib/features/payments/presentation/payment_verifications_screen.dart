@@ -18,6 +18,7 @@ class PaymentVerificationsScreen extends ConsumerStatefulWidget {
 class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerificationsScreen> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
+  final Set<String> _processingIds = {};
 
   @override
   void dispose() {
@@ -42,7 +43,7 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
           children: [
             AppBar(
               backgroundColor: Colors.black,
-              title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 14)),
+              title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
               leading: IconButton(
                 icon: const Icon(Icons.close, color: Colors.white),
                 onPressed: () => Navigator.pop(ctx),
@@ -50,13 +51,36 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
             ),
             Flexible(
               child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
                 child: Image.network(
                   imageUrl,
                   fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                              : null,
+                          color: AppColors.goldPrimary,
+                        ),
+                      ),
+                    );
+                  },
                   errorBuilder: (_, __, ___) => const Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24.0),
-                      child: Text('Failed to load screenshot', style: TextStyle(color: Colors.white70)),
+                      padding: EdgeInsets.all(32.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.broken_image_rounded, size: 48, color: Colors.white38),
+                          SizedBox(height: 8),
+                          Text('Failed to load screenshot from server', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -69,6 +93,8 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
   }
 
   void _showApproveDialog(PaymentVerificationModel item) {
+    if (_processingIds.contains(item.id)) return;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -77,7 +103,7 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: Color(0xFF059669), width: 1),
         ),
-        title: const Text('Approve Payment', style: TextStyle(color: Colors.white, fontSize: 16)),
+        title: const Text('Approve Payment', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
         content: Text(
           'Confirm verification of ₹${item.amount.toInt()} from ${item.memberName}?\n\n'
           'Payment status will be updated to PAID and member account will be activated/credited.',
@@ -95,19 +121,24 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
             ),
             onPressed: () async {
               Navigator.pop(ctx);
-              final success = await ref.read(registrationRepositoryProvider).approveVerification(item.id);
-              if (mounted) {
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Payment approved successfully')),
-                  );
-                  ref.invalidate(paymentVerificationsListProvider);
-                  ref.invalidate(pendingVerificationsCountProvider);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Failed to approve payment')),
-                  );
+              setState(() => _processingIds.add(item.id));
+              try {
+                final success = await ref.read(registrationRepositoryProvider).approveVerification(item.id);
+                if (mounted) {
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('✓ Payment approved and member credited')),
+                    );
+                    ref.invalidate(paymentVerificationsListProvider);
+                    ref.invalidate(pendingVerificationsCountProvider);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Failed to approve payment. Please check connection.')),
+                    );
+                  }
                 }
+              } finally {
+                if (mounted) setState(() => _processingIds.remove(item.id));
               }
             },
             child: const Text('Confirm Approval', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -118,6 +149,7 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
   }
 
   void _showRejectDialog(PaymentVerificationModel item) {
+    if (_processingIds.contains(item.id)) return;
     final reasonController = TextEditingController(text: 'Transaction could not be verified');
 
     showDialog(
@@ -128,15 +160,21 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: Color(0xFFDC2626), width: 1),
         ),
-        title: const Text('Reject Payment Proof', style: TextStyle(color: Colors.white, fontSize: 16)),
+        title: const Text('Reject Payment Proof', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Enter reason for rejecting this payment proof:',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            Text(
+              'Reject payment of ₹${item.amount.toInt()} for ${item.memberName}?',
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
+            const Text(
+              'Enter reason for rejection:',
+              style: TextStyle(color: AppColors.textTertiary, fontSize: 11),
+            ),
+            const SizedBox(height: 6),
             TextField(
               controller: reasonController,
               style: const TextStyle(color: Colors.white, fontSize: 13),
@@ -162,21 +200,26 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
             ),
             onPressed: () async {
               Navigator.pop(ctx);
-              final success = await ref
-                  .read(registrationRepositoryProvider)
-                  .rejectVerification(item.id, reason: reasonController.text.trim());
-              if (mounted) {
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Payment marked as REJECTED')),
-                  );
-                  ref.invalidate(paymentVerificationsListProvider);
-                  ref.invalidate(pendingVerificationsCountProvider);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Failed to reject payment')),
-                  );
+              setState(() => _processingIds.add(item.id));
+              try {
+                final success = await ref
+                    .read(registrationRepositoryProvider)
+                    .rejectVerification(item.id, reason: reasonController.text.trim());
+                if (mounted) {
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Payment marked as REJECTED')),
+                    );
+                    ref.invalidate(paymentVerificationsListProvider);
+                    ref.invalidate(pendingVerificationsCountProvider);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Failed to reject payment. Please check connection.')),
+                    );
+                  }
                 }
+              } finally {
+                if (mounted) setState(() => _processingIds.remove(item.id));
               }
             },
             child: const Text('Confirm Reject', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -231,12 +274,12 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
                     controller: _searchController,
                     onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
                     style: const TextStyle(color: AppColors.textPrimary, fontSize: 12),
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Search by member name, phone, or UTR...',
-                      hintStyle: const TextStyle(color: AppColors.textTertiary, fontSize: 11),
-                      prefixIcon: const Icon(Icons.search_rounded, color: AppColors.goldPrimary, size: 16),
+                      hintStyle: TextStyle(color: AppColors.textTertiary, fontSize: 11),
+                      prefixIcon: Icon(Icons.search_rounded, color: AppColors.goldPrimary, size: 16),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(vertical: 8),
                     ),
                   ),
                 ),
@@ -352,28 +395,53 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
   Widget _buildVerificationCard(PaymentVerificationModel item) {
     final dateStr = DateFormat('dd MMM yyyy, hh:mm a').format(item.submittedAt);
     final screenshot = _formatUrl(item.screenshotUrl);
+    final isProcessing = _processingIds.contains(item.id);
+
+    final statusColor = item.status == 'APPROVED'
+        ? const Color(0xFF059669)
+        : (item.status == 'REJECTED' ? const Color(0xFFDC2626) : const Color(0xFFD97706));
 
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: const Color(0xF2141A24),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0x22FFFFFF), width: 0.8),
+        border: Border.all(
+          color: item.status == 'PENDING' ? const Color(0x33D4AF37) : const Color(0x22FFFFFF),
+          width: 0.8,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top Row: Amount + Type
+          // Top Row: Amount + Status & Type
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '₹${item.amount.toInt()}',
-                style: const TextStyle(
-                  color: Color(0xFF10B981),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                ),
+              Row(
+                children: [
+                  Text(
+                    '₹${item.amount.toInt()}',
+                    style: const TextStyle(
+                      color: Color(0xFF10B981),
+                      fontSize: 19,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: statusColor.withOpacity(0.4)),
+                    ),
+                    child: Text(
+                      item.status,
+                      style: TextStyle(color: statusColor, fontSize: 9.5, fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                ],
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -391,20 +459,34 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
           ),
           const SizedBox(height: 10),
 
-          // Member Info
+          // Member Info + Quick Eye Icon Preview
           Row(
             children: [
               const Icon(Icons.person_outline_rounded, size: 14, color: AppColors.textSecondary),
               const SizedBox(width: 4),
-              Text(
-                item.memberName,
-                style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+              Expanded(
+                child: Row(
+                  children: [
+                    Text(
+                      item.memberName,
+                      style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      item.memberCode,
+                      style: const TextStyle(color: AppColors.goldPrimary, fontSize: 11, fontFamily: 'monospace'),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(width: 8),
-              Text(
-                item.memberCode,
-                style: const TextStyle(color: AppColors.goldPrimary, fontSize: 11, fontFamily: 'monospace'),
-              ),
+              if (screenshot.isNotEmpty)
+                IconButton(
+                  icon: const Icon(Icons.remove_red_eye_rounded, color: AppColors.goldPrimary, size: 18),
+                  tooltip: 'Preview Screenshot',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () => _showImageDialog('Payment Screenshot - ${item.memberName}', screenshot),
+                ),
             ],
           ),
           const SizedBox(height: 4),
@@ -417,25 +499,30 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
                 '+91 ${item.memberPhone}',
                 style: const TextStyle(color: AppColors.textTertiary, fontSize: 11),
               ),
-              if (item.txnRef != null)
-                Text(
-                  'UTR: ${item.txnRef}',
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, fontFamily: 'monospace'),
+              Text(
+                item.txnRef != null && item.txnRef!.isNotEmpty
+                    ? 'UTR: ${item.txnRef}'
+                    : 'UTR: Not provided (Screenshot Attached)',
+                style: TextStyle(
+                  color: item.txnRef != null ? AppColors.textSecondary : AppColors.goldLight.withOpacity(0.8),
+                  fontSize: 10.5,
+                  fontFamily: item.txnRef != null ? 'monospace' : null,
                 ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
 
-          // Screenshot row
+          // Screenshot row / Preview Button
           if (screenshot.isNotEmpty)
             GestureDetector(
-              onTap: () => _showImageDialog('Payment Screenshot', screenshot),
+              onTap: () => _showImageDialog('Payment Screenshot - ${item.memberName}', screenshot),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withOpacity(0.35),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0x22FFFFFF)),
+                  border: Border.all(color: AppColors.goldPrimary.withOpacity(0.25)),
                 ),
                 child: Row(
                   children: [
@@ -447,49 +534,86 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
                         style: TextStyle(color: AppColors.goldLight, fontSize: 11, fontWeight: FontWeight.w600),
                       ),
                     ),
-                    const Icon(Icons.open_in_new_rounded, size: 14, color: AppColors.goldPrimary),
+                    const Icon(Icons.visibility_rounded, size: 16, color: AppColors.goldPrimary),
                   ],
                 ),
+              ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.info_outline_rounded, size: 14, color: AppColors.textTertiary),
+                  SizedBox(width: 6),
+                  Text('No screenshot attached', style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                ],
               ),
             ),
           const SizedBox(height: 8),
 
-          Text(
-            'Submitted: $dateStr',
-            style: const TextStyle(color: AppColors.textTertiary, fontSize: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Submitted: $dateStr',
+                style: const TextStyle(color: AppColors.textTertiary, fontSize: 10),
+              ),
+              if (item.verifiedAt != null)
+                Text(
+                  'Verified: ${DateFormat('dd MMM, hh:mm a').format(item.verifiedAt!)}',
+                  style: TextStyle(color: statusColor.withOpacity(0.85), fontSize: 9.5),
+                ),
+            ],
           ),
 
           // Actions if PENDING
           if (item.status == 'PENDING') ...[
             const Divider(color: Color(0x22FFFFFF), height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFFDC2626),
-                      side: const BorderSide(color: Color(0xFFDC2626)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                    ),
-                    onPressed: () => _showRejectDialog(item),
-                    child: const Text('Reject', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            if (isProcessing)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 4),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.goldPrimary),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF059669),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+              )
+            else
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFFDC2626),
+                        side: const BorderSide(color: Color(0xFFDC2626)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                      onPressed: () => _showRejectDialog(item),
+                      child: const Text('Reject', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                     ),
-                    onPressed: () => _showApproveDialog(item),
-                    child: const Text('Approve & Credit', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF059669),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                      onPressed: () => _showApproveDialog(item),
+                      child: const Text('Approve & Credit', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                    ),
+                  ),
+                ],
+              ),
           ],
         ],
       ),

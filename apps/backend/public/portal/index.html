@@ -976,22 +976,22 @@
           <div class="space-y-1.5 pt-1">
             <label class="text-xs font-semibold text-gold-400 flex items-center space-x-1.5">
               <i data-lucide="image" class="w-3.5 h-3.5"></i>
-              <span>Upload Payment Screenshot *</span>
+              <span>Upload Payment Screenshot * <span class="text-rose-400 font-bold text-[10px] uppercase">(Compulsory)</span></span>
             </label>
             <div class="p-3.5 rounded-xl bg-black/40 border border-dashed border-gold-500/30 text-center relative cursor-pointer hover:bg-black/60 transition" onclick="document.getElementById('file-pay-screenshot').click()">
               <input type="file" id="file-pay-screenshot" accept="image/*" class="hidden" onchange="previewImage(this, 'preview-pay-screenshot-box')">
               <div id="preview-pay-screenshot-box" class="flex flex-col items-center justify-center py-1 text-gray-400">
                 <i data-lucide="upload-cloud" class="w-6 h-6 text-gold-400 mb-1"></i>
-                <span class="text-xs font-semibold text-white">Tap to Upload UPI Screenshot</span>
-                <span class="text-[10px] text-gray-400">Capture from UPI success screen</span>
+                <span class="text-xs font-semibold text-white">Tap to Upload UPI Screenshot *</span>
+                <span class="text-[10px] text-amber-300">Compulsory for payment verification (Max 5MB)</span>
               </div>
               <input type="hidden" id="url-pay-screenshot">
             </div>
           </div>
 
           <div>
-            <label class="text-[11px] font-semibold text-gray-300 block mb-1">Transaction UTR / Reference ID (12 digits) *</label>
-            <input id="pay-utr" type="text" maxlength="16" placeholder="e.g. 423984729103" class="glass-field font-mono">
+            <label class="text-[11px] font-semibold text-gray-300 block mb-1">Transaction UTR / Reference ID <span class="text-gray-400 text-[10px] font-normal">(Optional if screenshot uploaded)</span></label>
+            <input id="pay-utr" type="text" maxlength="24" placeholder="Optional 12-digit UPI UTR" class="glass-field font-mono">
           </div>
 
           <button onclick="submitPaymentProof()" class="w-full py-3.5 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5 mt-2">
@@ -1994,29 +1994,74 @@
       }
     }
 
-    // ── Submit Payment Proof (Cloudinary Screenshot + Active Branch) ──
+    // ── Submit Payment Proof (Mandatory Screenshot + Optional UTR) ──
     async function submitPaymentProof() {
       const phone = document.getElementById('pay-phone').value.trim();
       const utr = document.getElementById('pay-utr').value.trim();
       const amount = document.getElementById('pay-amount').value.trim();
       const memberName = document.getElementById('pay-name')?.value?.trim() || '';
 
-      if (!phone || phone.length < 10) { showToast('Please enter your 10-digit registered number'); return; }
-      if (!utr || utr.length < 6) { showToast('Please enter the 12-digit UTR or Txn ID'); return; }
+      if (!phone || phone.length < 10) {
+        showToast('Please enter your 10-digit registered number');
+        return;
+      }
+
+      // Check screenshot existence (file selected or already uploaded URL)
+      const file = _fileStore['preview-pay-screenshot-box'];
+      let screenshotUrl = document.getElementById('url-pay-screenshot')?.value?.trim() || null;
+
+      if (!file && !screenshotUrl) {
+        showToast('Payment screenshot is compulsory! Please attach your UPI screenshot.');
+        alert('Payment screenshot is required.\n\nPlease tap "Upload UPI Screenshot" to select your payment proof before submitting.');
+        return;
+      }
+
+      // Validate file size and type if new file
+      if (file) {
+        if (!file.type || !file.type.startsWith('image/')) {
+          showToast('Invalid file format. Please upload an image file (JPG, PNG, WEBP).');
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          showToast('Payment screenshot must be smaller than 5 MB.');
+          return;
+        }
+      }
 
       const btn = event?.currentTarget || document.querySelector('button[onclick="submitPaymentProof()"]');
       let originalBtnHtml = '';
       if (btn) {
         originalBtnHtml = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Uploading Proof...';
+        btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Uploading Screenshot...';
       }
 
       try {
-        let screenshotUrl = document.getElementById('url-pay-screenshot')?.value?.trim() || null;
-        if (!screenshotUrl && _fileStore['preview-pay-screenshot-box']) {
+        if (!screenshotUrl && file) {
           showToast('Uploading payment screenshot... ⏳');
           screenshotUrl = await uploadPortalFile('preview-pay-screenshot-box', 'payments');
+          if (!screenshotUrl) {
+            showToast('Failed to upload screenshot. Please check connection and try again.');
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = originalBtnHtml;
+            }
+            return;
+          }
+          document.getElementById('url-pay-screenshot').value = screenshotUrl;
+        }
+
+        if (!screenshotUrl) {
+          showToast('Payment screenshot could not be verified. Please re-upload.');
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalBtnHtml;
+          }
+          return;
+        }
+
+        if (btn) {
+          btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Submitting Proof...';
         }
 
         const res = await fetch('/portal/payment', {
@@ -2025,10 +2070,10 @@
           body: JSON.stringify({
             memberPhone: phone,
             memberName: memberName || undefined,
-            amount: parseFloat(amount) || selectedPlanPrice,
+            amount: parseFloat(amount) || selectedPlanPrice || 800,
             paymentType: document.getElementById('pay-type').value,
-            txnRef: utr,
-            screenshotUrl: screenshotUrl || undefined,
+            txnRef: utr || undefined,
+            screenshotUrl: screenshotUrl,
             upiId: 'prashantmanitripathi2003-2@oksbi',
             branchId: currentViewingBranch,
             branch: currentViewingBranch
@@ -2038,6 +2083,10 @@
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
           showToast(errData.message || 'Payment proof submission failed');
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalBtnHtml;
+          }
           return;
         }
 

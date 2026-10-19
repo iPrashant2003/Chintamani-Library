@@ -124,6 +124,90 @@ class _LockersScreenState extends ConsumerState<LockersScreen> {
                       : 'Unassigned • Currently available for scholar allocation.',
                   style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
                 ),
+                if (locker.isOccupied) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEF4444).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFEF4444).withValues(alpha: 0.3)),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.info_outline_rounded, size: 13, color: Color(0xFFEF4444)),
+                        SizedBox(width: 5),
+                        Text(
+                          'Deallocation will not cancel the membership',
+                          style: TextStyle(color: Color(0xFFEF4444), fontSize: 10.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFEF4444).withValues(alpha: 0.18),
+                        foregroundColor: const Color(0xFFEF4444),
+                        side: const BorderSide(color: Color(0xFFEF4444)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      icon: const Icon(Icons.lock_open_rounded, size: 18),
+                      label: const Text('Deallocate Locker', style: TextStyle(fontWeight: FontWeight.bold)),
+                      onPressed: () async {
+                        HapticFeedback.mediumImpact();
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (dctx) => AlertDialog(
+                            backgroundColor: const Color(0xFF1A1A2E),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              side: const BorderSide(color: Color(0xFFEF4444), width: 1),
+                            ),
+                            title: const Text('Deallocate Locker', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                            content: Text(
+                              'Are you sure you want to deallocate Locker ${locker.lockerNumber}?\n\n'
+                              '${locker.currentMemberName != null ? '"${locker.currentMemberName}" will be unlinked from this locker.' : ''}\n\n'
+                              'The locker will become AVAILABLE. The member\'s subscription will remain active.',
+                              style: const TextStyle(color: Color(0xFFCCCCCC), fontSize: 13),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(dctx, false),
+                                child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                              ),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFEF4444),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                onPressed: () => Navigator.pop(dctx, true),
+                                child: const Text('Deallocate', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true && ctx.mounted) {
+                          Navigator.pop(ctx);
+                          final result = await ref.read(lockerRepositoryProvider).deallocateLocker(locker.id);
+                          ref.invalidate(lockersListProvider);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(result['message'] ?? 'Locker ${locker.lockerNumber} deallocated'),
+                                backgroundColor: result['success'] == true ? const Color(0xFF059669) : const Color(0xFFEF4444),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 20),
               ],
             ),

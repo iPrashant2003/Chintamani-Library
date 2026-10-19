@@ -78,4 +78,13 @@ export class SeatsController {
   getHistory(@Param('id') id: string) {
     return this.seatsService.getHistory(id);
   }
+
+  @Post(':id/deallocate')
+  deallocate(
+    @Param('id') id: string,
+    @Body('reason') reason?: string,
+    @CurrentUser() user?: any,
+  ) {
+    return this.seatsService.deallocate(id, user, reason);
+  }
 }

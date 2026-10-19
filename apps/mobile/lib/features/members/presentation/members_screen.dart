@@ -219,9 +219,9 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
                       const SizedBox(width: 8),
                       _buildCategoryCard(
                         ref: ref,
-                        title: 'Expiring\n(4-7 Days)',
-                        count: stats['expiring4_7'] ?? 0,
-                        statusKey: 'expiring4_7',
+                        title: 'Expiring\n(3-5 Days)',
+                        count: (stats['expiring3_5'] ?? stats['expiring4_7']) ?? 0,
+                        statusKey: 'expiring3_5',
                         currentStatus: filter.status,
                         accentColor: const Color(0xFF92540B),
                         icon: Icons.hourglass_bottom_rounded,
@@ -536,7 +536,7 @@ class _FilterBottomSheet extends StatelessWidget {
       ('active', Icons.verified_rounded, 'Live Memberships', Color(0xFF059669)),
       ('expired', Icons.cancel_rounded, 'Expired', Color(0xFFDC2626)),
       ('expiring1_3', Icons.warning_amber_rounded, 'Expiring in 1-3 Days', Color(0xFFE11D48)),
-      ('expiring4_7', Icons.hourglass_bottom_rounded, 'Expiring in 4-7 Days', Color(0xFFD97706)),
+      ('expiring3_5', Icons.hourglass_bottom_rounded, 'Expiring in 3-5 Days', Color(0xFFD97706)),
       ('expiring8_15', Icons.event_rounded, 'Expiring in 8-15 Days', Color(0xFF2563EB)),
     ];
 

@@ -122,9 +122,9 @@ export class PortalPaymentDto {
   @IsNotEmpty()
   paymentType!: string; // MEMBERSHIP, MAINTENANCE, RENEWAL, OTHER
 
-  @IsOptional()
   @IsString()
-  screenshotUrl?: string;
+  @IsNotEmpty()
+  screenshotUrl!: string;
 
   @IsOptional()
   @IsString()

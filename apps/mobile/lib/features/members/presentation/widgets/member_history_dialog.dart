@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../domain/member_model.dart';
+import '../../../../core/api/api_client.dart';
 import '../../../../core/api/api_endpoints.dart';
 import '../../../../core/utils/member_image_helper.dart';
 
@@ -32,6 +33,66 @@ class _MemberSixMonthHistoryDialogState extends ConsumerState<MemberSixMonthHist
   bool _isLoading = true;
   List<Map<String, dynamic>> _allEvents = [];
   String _selectedCategory = 'ALL';
+
+  void _showImageDialog(String title, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.black,
+        insetPadding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppBar(
+              backgroundColor: Colors.black,
+              title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+              leading: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white),
+                onPressed: () => Navigator.pop(ctx),
+              ),
+            ),
+            Flexible(
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                              : null,
+                          color: const Color(0xFFD4AF37),
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (_, __, ___) => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.broken_image_rounded, size: 48, color: Colors.white38),
+                          SizedBox(height: 8),
+                          Text('Failed to load screenshot from server', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -145,7 +206,50 @@ class _MemberSixMonthHistoryDialogState extends ConsumerState<MemberSixMonthHist
       });
     }
 
-    // 4. Try loading remote history from backend API (Payments, Complaints, Feedback)
+    // 4. Load genuine payment history from authenticated backend
+    try {
+      final client = ref.read(apiClientProvider);
+      final res = await client.dio.get('${ApiEndpoints.payments}/member/${member.id}/history?months=6');
+      if (res.data != null && res.data['payments'] is List) {
+        final paymentList = res.data['payments'] as List;
+        for (final p in paymentList) {
+          final pDate = DateTime.tryParse(p['paidAt']?.toString() ?? p['createdAt']?.toString() ?? '') ?? DateTime.now();
+          final status = (p['status'] ?? 'PAID').toString().toUpperCase();
+          final isApproved = status == 'PAID' || status == 'APPROVED';
+          final isRejected = status == 'REJECTED';
+          final color = isApproved
+              ? const Color(0xFF059669)
+              : (isRejected ? const Color(0xFFDC2626) : const Color(0xFFD97706));
+
+          events.add({
+            'type': 'PAYMENT',
+            'category': 'PAYMENTS',
+            'title': '₹${p['amount']} • ${p['method'] ?? 'UPI'}',
+            'subtitle': p['notes'] != null && p['notes'].toString().isNotEmpty
+                ? p['notes'].toString()
+                : (p['txnRef'] != null ? 'UTR: ${p['txnRef']}' : 'Payment verified'),
+            'date': pDate,
+            'color': color,
+            'icon': Icons.payments_rounded,
+            'screenshotUrl': p['screenshotUrl'],
+            'details': {
+              'Amount': '₹${p['amount']}',
+              'Status': p['verificationStatus'] ?? status,
+              'Method': p['method'] ?? 'UPI',
+              if (p['txnRef'] != null && p['txnRef'].toString().isNotEmpty) 'UTR': p['txnRef'],
+              if (p['verifiedAt'] != null)
+                'Verified On': DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.parse(p['verifiedAt'])),
+              if (p['rejectionReason'] != null && p['rejectionReason'].toString().isNotEmpty)
+                'Reason': p['rejectionReason'],
+            },
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching member payments: $e');
+    }
+
+    // 5. Try loading complaints from portal/history
     try {
       final phone = (member.phone ?? '').replaceAll(RegExp(r'\D'), '');
       if (phone.isNotEmpty) {
@@ -165,22 +269,7 @@ class _MemberSixMonthHistoryDialogState extends ConsumerState<MemberSixMonthHist
             final tDate = DateTime.tryParse(item['date']?.toString() ?? '') ?? DateTime.now();
             final type = item['type']?.toString().toUpperCase() ?? 'EVENT';
 
-            if (type == 'PAYMENT') {
-              events.add({
-                'type': 'PAYMENT',
-                'category': 'PAYMENTS',
-                'title': item['title'] ?? 'UPI Payment',
-                'subtitle': item['subtitle'] ?? 'Payment verified',
-                'date': tDate,
-                'color': const Color(0xFF059669),
-                'icon': Icons.payments_rounded,
-                'details': {
-                  'Amount': '₹${item['amount'] ?? 0}',
-                  'Status': item['status'] ?? 'PAID',
-                  if (item['txnRef'] != null) 'UTR / Txn': item['txnRef'],
-                },
-              });
-            } else if (type == 'COMPLAINT') {
+            if (type == 'COMPLAINT') {
               events.add({
                 'type': 'COMPLAINT',
                 'category': 'SUPPORT',
@@ -199,30 +288,7 @@ class _MemberSixMonthHistoryDialogState extends ConsumerState<MemberSixMonthHist
         }
       }
     } catch (_) {
-      // Local / Offline fallback generated cleanly
-    }
-
-    // Fallback simulated payment records if none retrieved from API
-    final hasPayment = events.any((e) => e['type'] == 'PAYMENT');
-    if (!hasPayment) {
-      final firstSubPrice = member.subscriptions.isNotEmpty
-          ? (member.subscriptions.first.plan?.price.toInt() ?? 800)
-          : 800;
-      events.add({
-        'type': 'PAYMENT',
-        'category': 'PAYMENTS',
-        'title': 'Membership Admission Fee',
-        'subtitle': 'Verified via UPI (prashantmanitripathi2003-2@oksbi)',
-        'date': joinDate,
-        'color': const Color(0xFF059669),
-        'icon': Icons.payments_rounded,
-        'details': {
-          'Amount': '₹$firstSubPrice',
-          'Method': 'UPI Instant Transfer',
-          'Status': 'APPROVED',
-          'Verification': 'Admin Verified',
-        },
-      });
+      // Offline or network error handled gracefully
     }
 
     // Sort descending by date
@@ -676,6 +742,41 @@ class _MemberSixMonthHistoryDialogState extends ConsumerState<MemberSixMonthHist
                       ],
                     );
                   }).toList(),
+                ),
+              ),
+            ],
+            if (event['screenshotUrl'] != null && event['screenshotUrl'].toString().isNotEmpty) ...[
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: () {
+                  final rawUrl = event['screenshotUrl'].toString();
+                  final fullUrl = rawUrl.startsWith('http') ? rawUrl : '${ApiEndpoints.baseUrl}$rawUrl';
+                  _showImageDialog('Payment Proof - ${widget.member.name}', fullUrl);
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD4AF37).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.35)),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.remove_red_eye_rounded, size: 14, color: Color(0xFFE6CA65)),
+                      SizedBox(width: 6),
+                      Text(
+                        'View Uploaded Payment Screenshot',
+                        style: TextStyle(
+                          color: Color(0xFFE6CA65),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

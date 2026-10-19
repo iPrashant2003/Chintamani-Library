@@ -35,5 +35,9 @@ export class UpdateComplaintStatusDto {
 
   @IsOptional()
   @IsString()
+  internalNotes?: string;
+
+  @IsOptional()
+  @IsString()
   assignedTo?: string;
 }

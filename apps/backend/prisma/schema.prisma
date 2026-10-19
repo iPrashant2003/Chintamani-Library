@@ -70,8 +70,12 @@ enum RegistrationStatus {
 
 enum ComplaintStatus {
   OPEN
+  SUBMITTED
+  UNDER_REVIEW
   IN_PROGRESS
   RESOLVED
+  REJECTED
+  REOPENED
   CLOSED
 }
 
@@ -219,6 +223,8 @@ model Member {
   @@index([phone])
   @@index([memberCode])
   @@index([branchId])
+  @@index([branchId, isActive])
+  @@index([createdAt])
 }
 
 model MembershipPlan {
@@ -265,8 +271,11 @@ model Subscription {
   LockerAssignment LockerAssignment[]
 
   @@index([tenantId])
+  @@index([memberId])
+  @@index([memberId, status])
   @@index([endDate])
   @@index([status])
+  @@index([tenantId, status, endDate])
 }
 
 model Seat {
@@ -290,6 +299,7 @@ model Seat {
   @@index([tenantId])
   @@index([seatNumber])
   @@index([status])
+  @@index([branchId, status])
 }
 
 model SeatAssignment {
@@ -319,6 +329,8 @@ model Locker {
 
   @@unique([branchId, lockerNumber])
   @@index([tenantId])
+  @@index([branchId])
+  @@index([branchId, status])
 }
 
 model LockerAssignment {
@@ -369,6 +381,9 @@ model Payment {
   verification PaymentVerification?
 
   @@index([tenantId])
+  @@index([memberId])
+  @@index([memberId, createdAt])
+  @@index([tenantId, createdAt])
   @@index([paidAt])
   @@index([status])
 }
@@ -434,6 +449,9 @@ model Notification {
   tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([memberId])
+  @@index([isRead])
+  @@index([tenantId, isRead, createdAt])
 }
 
 model CommunicationLog {
@@ -541,29 +559,37 @@ model MemberRegistration {
 }
 
 model Complaint {
-  id             String          @id @default(uuid())
-  tenantId       String
-  branchId       String
-  complaintId    String          @unique // e.g. CMP-0012
-  memberId       String?
-  memberName     String
-  memberPhone    String
-  category       String          // AC, ELECTRICITY, SEAT, CLEANLINESS, INTERNET, OTHER
-  description    String
-  attachmentUrls String?         // JSON array of URLs
-  status         ComplaintStatus @default(OPEN)
-  resolution     String?
-  assignedTo     String?
-  resolvedAt     DateTime?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  id                String          @id @default(uuid())
+  tenantId          String
+  branchId          String
+  complaintId       String          @unique // e.g. CMP-0012
+  memberId          String?
+  memberName        String
+  memberPhone       String
+  category          String          // AC, ELECTRICITY, SEAT, CLEANLINESS, INTERNET, OTHER
+  description       String
+  attachmentUrls    String?         // JSON array of URLs
+  status            ComplaintStatus @default(OPEN)
+  resolution        String?
+  internalNotes     String?
+  statusHistory     String?         // JSON array of [{status, adminName, timestamp, notes}]
+  assignedTo        String?
+  resolvedAt        DateTime?
+  whatsappSentAt    DateTime?
+  whatsappMessageId String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   branch  Branch   @relation(fields: [branchId], references: [id])
   member  Member?  @relation(fields: [memberId], references: [id])
 
   @@index([tenantId])
+  @@index([branchId])
+  @@index([memberId])
   @@index([status])
+  @@index([branchId, status])
+  @@index([createdAt])
 }
 
 model PaymentVerification {
@@ -588,7 +614,9 @@ model PaymentVerification {
   member  Member   @relation(fields: [memberId], references: [id])
 
   @@index([tenantId])
+  @@index([memberId])
   @@index([status])
+  @@index([status, submittedAt])
 }
 
 model MemberPortalSession {

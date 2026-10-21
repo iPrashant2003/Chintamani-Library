@@ -1,18 +1,17 @@
-{
-  "version": "2.8.9",
-  "buildNumber": 2089,
-  "minimumSupportedVersion": "2.3.0",
-  "releaseDate": "21 Oct 2026",
-  "title": "Chintamani Library v2.8.9 — Portal Screenshot Upload & Verification Fix",
-  "releaseNotes": [
-    "PORTAL SCREENSHOT UPLOAD FIX: Resolved Prisma findFirst invocation error during screenshot submission by implementing robust phone sanitization, non-empty guards, and applicant fallback.",
-    "PAYMENT VERIFICATION SCREENSHOT PREVIEW: Added inline thumbnail image preview inside pending verification cards with high-res interactive pinch-to-zoom modal.",
-    "6-MONTH PAYMENT HISTORY SCREENSHOT: Fixed screenshot display by dynamically resolving server base URL via ApiEndpoints.baseUrl instead of localhost.",
-    "CROSS-ORIGIN ASSETS: Configured cross-origin resource policy on static uploads to ensure screenshots render reliably across mobile apps, WebViews, and desktop browsers.",
-    "SLIM APK: High-performance split arm64 package (~36 MB) for quick download and instant updates."
-  ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.9/app-arm64-v8a-release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.9/Chintamani-Library-arm64.apk",
-  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.9",
-  "forceUpdate": true
+﻿{
+    "buildNumber":  2090,
+    "apkUrl":  "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.10/app-arm64-v8a-release.apk",
+    "minimumSupportedVersion":  "2.3.0",
+    "version":  "2.8.10",
+    "releaseDate":  "21 Oct 2026",
+    "forceUpdate":  true,
+    "releaseNotes":  [
+                         "PRODUCTION DB FIX: Applied Prisma migration to add isArchived/archivedAt/archivedBy columns to Member table, BackupLog table, and Complaint fields — resolves \u0027column does not exist\u0027 error on Render production server.",
+                         "FAST SPLASH: Reduced splash screen loading time from ~7s to ~3.5s by cutting update-check timeout (4500ms → 1500ms) and minimum splash display (2800ms → 1800ms).",
+                         "PAYMENT SCREENSHOT PREVIEW: Admin can now view member payment screenshots inline (thumbnail + pinch-to-zoom modal) in both Payment Verification and 6-Month History screens.",
+                         "PORTAL UPLOAD FIX: Robust phone sanitization prevents Prisma invocation errors when members submit payment screenshots through the web portal."
+                     ],
+    "arm64ApkUrl":  "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.10/Chintamani-Library-arm64.apk",
+    "title":  "Chintamani Library v2.8.10 — Fast Splash + Production DB Fix",
+    "fallbackUrl":  "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.10"
 }

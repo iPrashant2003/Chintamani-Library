@@ -47,7 +47,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     // 3-second progress indicator
     _progressController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3000),
+    duration: const Duration(milliseconds: 2000),
     )..forward();
 
     // Live continuous shimmer animation for the official quote
@@ -63,21 +63,21 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   /// Synchronized splash sequence: ensures golden branding plays while awaiting
   /// cloud update manifest, displaying update dialog immediately if available.
   Future<void> _startSplashSequence() async {
-    final minSplashDuration = Future.delayed(const Duration(milliseconds: 2800));
+    final minSplashDuration = Future.delayed(const Duration(milliseconds: 1800));
 
     AppUpdateInfo? update;
     try {
       final service = ref.read(appUpdateServiceProvider);
-      // Actively await update check with a 3.5s timeout
+      // Actively await update check with a 1.5s timeout
       update = await service.checkForUpdate(force: true).timeout(
-        const Duration(milliseconds: 4500),
+        const Duration(milliseconds: 1500),
         onTimeout: () => null,
       );
     } catch (e) {
       debugPrint('[SplashScreen] Update check error: $e');
     }
 
-    // Ensure splash branding animation displays for at least 2.8 seconds
+    // Ensure splash branding animation displays for at least 1.8 seconds
     await minSplashDuration;
     if (!mounted) return;
 

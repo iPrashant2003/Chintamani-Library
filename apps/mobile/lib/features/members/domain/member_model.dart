@@ -20,6 +20,9 @@ class Member {
   final String? emergencyContact;
   final String? aadhaar;
   final String? notes;
+  final String? aadhaarFrontUrl;
+  final String? aadhaarBackUrl;
+  final String? otherDocUrls;
   final String branchId;
   final bool isActive;
   final bool isArchived;
@@ -44,6 +47,9 @@ class Member {
     this.emergencyContact,
     this.aadhaar,
     this.notes,
+    this.aadhaarFrontUrl,
+    this.aadhaarBackUrl,
+    this.otherDocUrls,
     required this.branchId,
     required this.isActive,
     this.isArchived = false,
@@ -79,12 +85,26 @@ class Member {
       address: json['address'] as String?,
       gender: json['gender'] as String? ?? academicData['gender'] as String?,
       dob: json['dob'] != null ? DateTime.tryParse(json['dob'].toString()) : null,
-      photoUrl: json['photoUrl'] as String? ?? academicData['photoUrl'] as String?,
+      photoUrl: json['photoUrl'] as String? ??
+          json['registration']?['photoUrl'] as String? ??
+          academicData['photoUrl'] as String?,
       institute: json['institute'] as String? ?? academicData['institute'] as String?,
       course: json['course'] as String? ?? academicData['course'] as String?,
       batch: json['batch'] as String? ?? academicData['batch'] as String?,
       emergencyContact: json['emergencyContact'] as String? ?? academicData['emergencyContact'] as String?,
-      aadhaar: json['aadhaar'] as String? ?? academicData['aadhaar'] as String?,
+      aadhaar: json['aadhaarNumber'] as String? ??
+          json['aadhaar'] as String? ??
+          json['registration']?['aadhaarNumber'] as String? ??
+          academicData['aadhaar'] as String?,
+      aadhaarFrontUrl: json['aadhaarFrontUrl'] as String? ??
+          json['registration']?['aadhaarFrontUrl'] as String? ??
+          academicData['aadhaarFrontUrl'] as String?,
+      aadhaarBackUrl: json['aadhaarBackUrl'] as String? ??
+          json['registration']?['aadhaarBackUrl'] as String? ??
+          academicData['aadhaarBackUrl'] as String?,
+      otherDocUrls: json['otherDocUrls'] as String? ??
+          json['registration']?['otherDocUrls'] as String? ??
+          academicData['otherDocUrls'] as String?,
       notes: json['notes'] as String? ?? academicData['notes'] as String?,
       branchId: json['branchId'] as String? ?? '',
       isActive: json['isActive'] as bool? ?? true,
@@ -112,6 +132,9 @@ class Member {
       'batch': batch,
       'emergencyContact': emergencyContact,
       'aadhaar': aadhaar,
+      'aadhaarFrontUrl': aadhaarFrontUrl,
+      'aadhaarBackUrl': aadhaarBackUrl,
+      'otherDocUrls': otherDocUrls,
       'notes': notes,
       'branchId': branchId,
       'isActive': isActive,

@@ -16,6 +16,10 @@ import { resolveBranchInfo } from '../common/utils/branch-resolver.util';
 export class PortalService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async runMigration() {
+    return this.prisma.ensureSchemaIntegrity();
+  }
+
   private cleanPhone(phone?: string | null): string {
     if (!phone) return '';
     return String(phone).replace(/[^\d]/g, '');
@@ -311,9 +315,13 @@ export class PortalService {
     }
 
     // 1. Duplicate Member Protection
-    const existingMember = await this.prisma.member.findFirst({
-      where: { phone: { contains: phone.slice(-10) }, isActive: true },
-    });
+    let existingMember: any = null;
+    try {
+      existingMember = await this.prisma.member.findFirst({
+        where: { phone: { contains: phone.slice(-10) }, isActive: true },
+        select: { id: true, name: true, phone: true },
+      });
+    } catch (_) {}
     if (existingMember) {
       throw new BadRequestException(
         'An active account already exists for this mobile number. Please log in or contact the library administrator.'
@@ -521,76 +529,15 @@ export class PortalService {
       },
     });
 
-    // Auto-create Member record with selfie and subscription so member immediately appears in Directory
-    const tenantCode = branch.tenant?.code || 'CML';
-    const memberCode = `${tenantCode}-${Math.floor(1000 + Math.random() * 9000)}`;
-    const fullAcademicData = {
-      ...academicInfoObj,
-      gender: dto.gender || '',
-      aadhaar: dto.aadhaarNumber || '',
-      emergencyContact: dto.emergencyContact || '',
-      photoUrl: dto.photoUrl || '',
-    };
-
-    let createdMember: any = null;
-    try {
-      createdMember = await this.prisma.member.create({
-        data: {
-          tenantId: branch.tenantId,
-          branchId: branch.id,
-          memberCode,
-          name: dto.name.trim(),
-          phone,
-          email: dto.email?.trim() || null,
-          dob: parsedDob,
-          address: dto.address?.trim() || null,
-          academicInfo: JSON.stringify(fullAcademicData),
-          isActive: true,
-          registrationId: registration.id,
-          portalAccess: true,
-        },
-      });
-
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + (plan.durationDays || 30));
-
-      await this.prisma.subscription.create({
-        data: {
-          tenantId: branch.tenantId,
-          memberId: createdMember.id,
-          planId: plan.id,
-          startDate,
-          endDate,
-          status: 'ACTIVE',
-          assignedSeatId: reservedSeat?.id || null,
-        },
-      });
-
-      if (reservedSeat) {
-        await this.prisma.seat.update({
-          where: { id: reservedSeat.id },
-          data: { status: 'OCCUPIED' },
-        });
-      }
-
-      await this.prisma.memberRegistration.update({
-        where: { id: registration.id },
-        data: { status: 'APPROVED' },
-      });
-    } catch (e) {
-      console.error('Member auto-creation during registration:', e);
-    }
-
-    // Create Admin Notification
+    // Registration submitted: Remains PENDING awaiting Admin approval (does NOT directly create Member in Directory)
     try {
       await this.prisma.notification.create({
         data: {
           tenantId: branch.tenantId,
           type: 'NEW_REGISTRATION',
           title: `[${branch.name}] New Registration: ${dto.name}`,
-          body: `${dto.name} registered for ${plan.name}. Application ID: ${applicationId}${
-            reservedSeat ? ` (Seat ${reservedSeat.seatNumber} allocated)` : ''
+          body: `${dto.name} submitted application ${applicationId} for ${plan.name}. Awaiting admin review and approval.${
+            reservedSeat ? ` (Seat ${reservedSeat.seatNumber} reserved)` : ''
           }`,
         },
       });
@@ -599,12 +546,11 @@ export class PortalService {
     return {
       success: true,
       applicationId,
-      status: 'APPROVED',
-      memberCode: createdMember?.memberCode || memberCode,
+      status: 'PENDING',
       planName: plan.name,
       planPrice: plan.price,
       reservedSeat: reservedSeat ? { id: reservedSeat.id, seatNumber: reservedSeat.seatNumber } : null,
-      message: 'Registration submitted successfully. Member created and active in directory.',
+      message: 'Application submitted successfully. It is currently pending admin review and approval.',
     };
   }
 
@@ -651,19 +597,31 @@ export class PortalService {
       throw new BadRequestException('Please provide a valid mobile number (at least 6 digits).');
     }
     const searchSuffix = phone && phone.length >= 6 ? (phone.length >= 10 ? phone.slice(-10) : phone) : null;
-    let member = dto.memberId
-      ? await this.prisma.member.findUnique({ where: { id: dto.memberId }, include: { branch: true } })
-      : (searchSuffix
+    let member: any = null;
+    try {
+      member = dto.memberId
+        ? await this.prisma.member.findUnique({ where: { id: dto.memberId }, include: { branch: true } })
+        : (searchSuffix
+            ? await this.prisma.member.findFirst({
+                where: {
+                  OR: [
+                    { phone: { contains: searchSuffix } },
+                    { phone: { endsWith: searchSuffix } },
+                  ],
+                },
+                include: { branch: true },
+              })
+            : null);
+    } catch (e) {
+      try {
+        member = searchSuffix
           ? await this.prisma.member.findFirst({
-              where: {
-                OR: [
-                  { phone: { contains: searchSuffix } },
-                  { phone: { endsWith: searchSuffix } },
-                ],
-              },
-              include: { branch: true },
+              where: { phone: { contains: searchSuffix } },
+              select: { id: true, name: true, phone: true, branchId: true, tenantId: true },
             })
-          : null);
+          : null;
+      } catch (_) {}
+    }
 
     let targetBranch: any = null;
     const branchInfo = await resolveBranchInfo(this.prisma, dto.branchId || member?.branchId);

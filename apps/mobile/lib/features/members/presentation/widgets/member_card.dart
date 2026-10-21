@@ -766,6 +766,64 @@ class _MemberCardState extends ConsumerState<MemberCard>
     );
   }
 
+  void _showArchiveDialog() {
+    final isArchived = widget.member.isArchived;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF14120E),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: isArchived ? const Color(0xFF059669) : const Color(0xFFD97706),
+            width: 1.2,
+          ),
+        ),
+        title: Text(
+          isArchived ? 'Restore Member' : 'Archive Member',
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          isArchived
+              ? 'Restore ${widget.member.name} to active member directory?'
+              : 'Archive ${widget.member.name}? Their assigned seat will be released and the member moved to the Archive section.',
+          style: const TextStyle(color: Color(0xFFA1A1AA)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textTertiary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isArchived ? const Color(0xFF059669) : const Color(0xFFD97706),
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final repo = ref.read(memberRepositoryProvider);
+              if (isArchived) {
+                final res = await repo.restoreMember(widget.member.id);
+                _showSnack(res['message'] ?? 'Member restored');
+              } else {
+                final res = await repo.archiveMember(widget.member.id);
+                _showSnack(res['message'] ?? 'Member archived');
+              }
+              ref.invalidate(membersListProvider);
+              ref.invalidate(memberStatsProvider);
+            },
+            child: Text(
+              isArchived ? 'Confirm Restore' : 'Confirm Archive',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showDeleteDialog() {
     showDialog(
       context: context,
@@ -1631,6 +1689,16 @@ class _MemberCardState extends ConsumerState<MemberCard>
                             label: 'Mark Left',
                             color: const Color(0xFF64748B),
                             onTap: _showMarkLeftDialog,
+                          ),
+                          _buildActionChip(
+                            icon: widget.member.isArchived
+                                ? Icons.unarchive_outlined
+                                : Icons.archive_outlined,
+                            label: widget.member.isArchived ? 'Restore' : 'Archive',
+                            color: widget.member.isArchived
+                                ? const Color(0xFF059669)
+                                : const Color(0xFFD97706),
+                            onTap: _showArchiveDialog,
                           ),
                           _buildActionChip(
                             icon: Icons.delete_outline_rounded,

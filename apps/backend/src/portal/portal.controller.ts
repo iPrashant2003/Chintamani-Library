@@ -34,6 +34,12 @@ export class PortalController {
     private readonly uploadService: UploadService,
   ) {}
 
+  @Get('migrate')
+  @ApiOperation({ summary: 'Run idempotent schema integrity sync' })
+  runMigration() {
+    return this.portalService.runMigration();
+  }
+
   @Post('otp/send')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Send OTP to mobile number for login or verification' })

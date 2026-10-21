@@ -7,6 +7,11 @@
 ALTER TABLE "Member" ADD COLUMN IF NOT EXISTS "isArchived" BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE "Member" ADD COLUMN IF NOT EXISTS "archivedAt" TIMESTAMP(3);
 ALTER TABLE "Member" ADD COLUMN IF NOT EXISTS "archivedBy" TEXT;
+ALTER TABLE "Member" ADD COLUMN IF NOT EXISTS "photoUrl" TEXT;
+ALTER TABLE "Member" ADD COLUMN IF NOT EXISTS "aadhaarNumber" TEXT;
+ALTER TABLE "Member" ADD COLUMN IF NOT EXISTS "aadhaarFrontUrl" TEXT;
+ALTER TABLE "Member" ADD COLUMN IF NOT EXISTS "aadhaarBackUrl" TEXT;
+ALTER TABLE "Member" ADD COLUMN IF NOT EXISTS "otherDocUrls" TEXT;
 
 CREATE INDEX IF NOT EXISTS "Member_isArchived_idx" ON "Member"("isArchived");
 CREATE INDEX IF NOT EXISTS "Member_branchId_isArchived_idx" ON "Member"("branchId", "isArchived");

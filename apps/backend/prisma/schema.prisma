@@ -203,6 +203,11 @@ model Member {
   dob            DateTime?
   address        String?
   academicInfo   String?
+  photoUrl       String?
+  aadhaarNumber  String?
+  aadhaarFrontUrl String?
+  aadhaarBackUrl  String?
+  otherDocUrls    String?
   isActive       Boolean  @default(true)
   isArchived     Boolean  @default(false)
   archivedAt     DateTime?

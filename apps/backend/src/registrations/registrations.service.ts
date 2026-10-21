@@ -201,6 +201,9 @@ export class RegistrationsService {
     if (reg.aadhaarNumber) academicData.aadhaar = reg.aadhaarNumber;
     if (reg.emergencyContact) academicData.emergencyContact = reg.emergencyContact;
     if (reg.photoUrl) academicData.photoUrl = reg.photoUrl;
+    if (reg.aadhaarFrontUrl) academicData.aadhaarFrontUrl = reg.aadhaarFrontUrl;
+    if (reg.aadhaarBackUrl) academicData.aadhaarBackUrl = reg.aadhaarBackUrl;
+    if (reg.otherDocUrls) academicData.otherDocUrls = reg.otherDocUrls;
 
     // 1. Create Member
     const member = await this.prisma.member.create({
@@ -214,6 +217,11 @@ export class RegistrationsService {
         dob: reg.dob,
         address: reg.address,
         academicInfo: JSON.stringify(academicData),
+        photoUrl: reg.photoUrl || null,
+        aadhaarNumber: reg.aadhaarNumber || null,
+        aadhaarFrontUrl: reg.aadhaarFrontUrl || null,
+        aadhaarBackUrl: reg.aadhaarBackUrl || null,
+        otherDocUrls: reg.otherDocUrls || null,
         isActive: true, // Activated upon approval!
         registrationId: reg.id,
         portalAccess: true,

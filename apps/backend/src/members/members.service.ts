@@ -176,6 +176,7 @@ export class MembersService {
             orderBy: { endDate: 'desc' },
             take: 3,
           },
+          registration: true,
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -302,6 +303,7 @@ export class MembersService {
         payments: {
           orderBy: { createdAt: 'desc' },
         },
+        registration: true,
       },
     });
     if (!member) throw new NotFoundException('Member not found');
@@ -358,6 +360,7 @@ export class MembersService {
             orderBy: { endDate: 'desc' },
             take: 3,
           },
+          registration: true,
         },
         orderBy: { archivedAt: 'desc' },
       }),

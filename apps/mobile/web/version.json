@@ -5,6 +5,8 @@
   "releaseDate": "21 Oct 2026",
   "title": "Chintamani Library v2.8.8 — Universal QR Portal, Member Archive & Backup System",
   "releaseNotes": [
+    "SLIM APK: Optimized split arm64 package (35.8 MB instead of 83 MB) for faster, reliable in-app downloads.",
+    "PACKAGE INSTALLER FIX: Solved 'package not available' error by storing update in internal cache and granting explicit FileProvider permissions to system installer.",
     "PAYMENT SCREENSHOT UPLOAD: 100% reliable upload with multi-format support (JPG/PNG/WEBP up to 10MB) and dual local disk + cloud fallback.",
     "6-MONTH PAYMENT HISTORY: Full chronological payment history per member with explicit CASH classification and color-coded badges.",
     "RECORD CASH PAYMENT: Dedicated modal to record authentic cash payments with zero fake transaction references or screenshots.",
@@ -15,7 +17,7 @@
     "AUTOMATED DAILY BACKUPS: Scheduled 2:00 AM IST database backups (SQL dump + JSON snapshot) with 30-day retention and hourly seat auto-reconciliation.",
     "SEAT MATRIX ALLOCATION: Direct seat assignment to members with live search and atomic database updates."
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.8/app-release.apk",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.8/app-arm64-v8a-release.apk",
   "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.8/Chintamani-Library-arm64.apk",
   "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.8",
   "forceUpdate": true

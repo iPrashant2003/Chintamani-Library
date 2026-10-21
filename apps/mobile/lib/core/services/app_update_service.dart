@@ -331,15 +331,9 @@ class AppUpdateService {
     }
 
     try {
-      Directory dir;
-      try {
-        final externalDirs = await getExternalCacheDirectories();
-        dir = (externalDirs != null && externalDirs.isNotEmpty)
-            ? externalDirs.first
-            : await getTemporaryDirectory();
-      } catch (_) {
-        dir = await getTemporaryDirectory();
-      }
+      // ALWAYS use internal cache directory (never getExternalCacheDirectories which is under /Android/data/
+      // and blocked by Android 11+ Scoped Storage from system PackageInstaller).
+      final dir = await getTemporaryDirectory();
 
       final apkFile = File('${dir.path}/Chintamani_Update_v${info.version}.apk');
       final partFile = File('${apkFile.path}.part');
@@ -361,8 +355,8 @@ class AppUpdateService {
         if (isArm64) ...[
           if (info.arm64ApkUrl != null && info.arm64ApkUrl!.isNotEmpty)
             info.arm64ApkUrl!,
-          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-arm64.apk',
           'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/app-arm64-v8a-release.apk',
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-arm64.apk',
         ],
         // 2. Universal release APK (Works on 100% of devices: 32-bit, 64-bit, x86)
         if (info.apkUrl.isNotEmpty) info.apkUrl,

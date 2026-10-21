@@ -159,14 +159,32 @@ class MainActivity : FlutterFragmentActivity() {
                                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                 addFlags(Intent.FLAG_GRANT_PREFIX_URI_PERMISSION)
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                             }
 
-                            // Explicitly grant read URI permission to all potential installers
-                            val resolvedList = packageManager.queryIntentActivities(intent, 0)
-                            for (info in resolvedList) {
-                                grantUriPermission(info.activityInfo.packageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            // Grant URI permission explicitly to all standard OEM & system package installers
+                            val installerPackages = arrayOf(
+                                "com.google.android.packageinstaller",
+                                "com.android.packageinstaller",
+                                "com.samsung.android.packageinstaller",
+                                "com.miui.packageinstaller",
+                                "com.coloros.packageinstaller",
+                                "com.oppo.packageinstaller",
+                                "com.vivo.packageinstaller"
+                            )
+                            for (pkg in installerPackages) {
+                                try {
+                                    grantUriPermission(pkg, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                } catch (_: Exception) {}
                             }
+
+                            try {
+                                val resolvedList = packageManager.queryIntentActivities(intent, 0)
+                                for (info in resolvedList) {
+                                    try {
+                                        grantUriPermission(info.activityInfo.packageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    } catch (_: Exception) {}
+                                }
+                            } catch (_: Exception) {}
 
                             startActivity(intent)
                             result.success(true)

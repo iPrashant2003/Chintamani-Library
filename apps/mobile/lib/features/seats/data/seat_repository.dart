@@ -96,6 +96,19 @@ class SeatRepository {
     } catch (_) {}
   }
 
+  Future<Map<String, dynamic>> assignSeatToMember(String seatId, String memberId) async {
+    try {
+      final res = await _apiClient.dio.post(
+        '${ApiEndpoints.seats}/$seatId/assign-member',
+        data: {'memberId': memberId},
+      );
+      final msg = res.data is Map ? (res.data['message'] ?? 'Seat successfully assigned') : 'Seat assigned';
+      return {'success': true, 'message': msg};
+    } catch (e) {
+      return {'success': false, 'message': 'Failed to assign seat: $e'};
+    }
+  }
+
   Future<Map<String, dynamic>> deallocateSeat(String seatId, {String? reason}) async {
     try {
       final res = await _apiClient.dio.post(

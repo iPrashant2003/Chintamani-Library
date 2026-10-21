@@ -145,42 +145,44 @@ export class PortalController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
-      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max to reliably support mobile camera shots
       fileFilter: (_req, file, cb) => {
-        if (!file.mimetype.startsWith('image/')) {
-          return cb(new BadRequestException('Only image files (JPG, PNG, WEBP, HEIC) are allowed') as any, false);
+        const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/heic', 'image/heif'];
+        if (!file.mimetype || (!allowedMimes.includes(file.mimetype.toLowerCase()) && !file.mimetype.startsWith('image/'))) {
+          return cb(new BadRequestException('Only image files (JPG, JPEG, PNG, WEBP) are allowed') as any, false);
         }
         cb(null, true);
       },
     }),
   )
-  @ApiOperation({ summary: 'Public branch-isolated upload for student photos, Aadhaar & payment screenshots (Max 5MB)' })
+  @ApiOperation({ summary: 'Public branch-isolated upload for student photos, Aadhaar & payment screenshots (Max 10MB)' })
   async uploadFile(
     @UploadedFile() file: any,
     @Query('branchId') branchId?: string,
     @Query('folder') folderType?: string,
   ) {
     if (!file || !file.buffer) {
-      throw new BadRequestException('No file provided or file is empty');
+      throw new BadRequestException('No file provided or file is empty. Please select a valid payment screenshot.');
     }
-    if (file.size > 5 * 1024 * 1024) {
-      throw new BadRequestException('Photo is larger than 5 MB. Please choose a smaller image.');
+    if (file.size > 10 * 1024 * 1024) {
+      throw new BadRequestException('File is larger than 10 MB. Please select or compress the image before uploading.');
     }
     try {
       const bKey = (branchId || '').toLowerCase().includes('mehda') ? 'mehdawal' : 'khalilabad';
-      const subFolder = folderType === 'payment'
+      const cleanFolder = (folderType || '').toLowerCase().trim();
+      const subFolder = cleanFolder === 'payment' || cleanFolder === 'payments'
         ? 'payments'
-        : (folderType === 'document' ? 'documents' : 'members/photos');
+        : (cleanFolder === 'document' || cleanFolder === 'documents' ? 'documents' : 'photos');
       const folderPath = `chintamani/${bKey}/${subFolder}`;
 
       const url = await this.uploadService.uploadFile(
         file.buffer,
-        file.originalname || 'photo.jpg',
+        file.originalname || `upload_${Date.now()}.jpg`,
         folderPath,
       );
       return { success: true, url, branch: bKey, folder: folderPath };
     } catch (err: any) {
-      throw new BadRequestException(`Upload failed: ${err?.message || 'Unknown error'}`);
+      throw new BadRequestException(`Upload failed: ${err?.message || 'Server error saving file'}`);
     }
   }
 }

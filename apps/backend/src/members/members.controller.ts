@@ -29,9 +29,29 @@ export class MembersController {
     return this.membersService.getStats(user, branchId);
   }
 
+  @Get('archived')
+  findArchived(@CurrentUser() user: any, @Query() query: QueryMembersDto) {
+    return this.membersService.findArchived(user, query);
+  }
+
   @Get(':id')
   findOne(@CurrentUser() user: any, @Param('id') id: string) {
     return this.membersService.getMemberProfile(user, id);
+  }
+
+  @Patch(':id/archive')
+  archive(@CurrentUser() user: any, @Param('id') id: string) {
+    return this.membersService.archiveMember(id, user);
+  }
+
+  @Patch(':id/restore')
+  restore(@CurrentUser() user: any, @Param('id') id: string) {
+    return this.membersService.restoreMember(id, user);
+  }
+
+  @Delete(':id/permanent')
+  permanentDelete(@CurrentUser() user: any, @Param('id') id: string) {
+    return this.membersService.permanentDelete(id, user);
   }
 
   @Patch(':id')
@@ -40,8 +60,8 @@ export class MembersController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.membersService.remove(id);
+  remove(@CurrentUser() user: any, @Param('id') id: string) {
+    return this.membersService.remove(id, user);
   }
 
   @Get(':id/payments')

@@ -64,7 +64,8 @@ class ComplaintModel {
     );
   }
 
-  bool get isOpen => status == 'OPEN' || status == 'SUBMITTED' || status == 'UNDER_REVIEW' || status == 'IN_PROGRESS' || status == 'REOPENED';
+  bool get isOpen => status == 'OPEN' || status == 'SUBMITTED' || status == 'UNDER_REVIEW' || status == 'IN_PROGRESS' || status == 'RESOLVED_PENDING' || status == 'REOPENED';
+  bool get isPendingResolution => status == 'RESOLVED_PENDING';
   bool get isResolved => status == 'RESOLVED' || status == 'CLOSED';
   bool get isRejected => status == 'REJECTED';
 }

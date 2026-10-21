@@ -16,6 +16,7 @@ export class ComplaintsService {
     if (clean === 'SUBMITTED') return 'SUBMITTED';
     if (clean === 'UNDER_REVIEW' || clean === 'REVIEW') return 'UNDER_REVIEW';
     if (clean === 'IN_PROGRESS' || clean === 'PROGRESS') return 'IN_PROGRESS';
+    if (clean === 'RESOLVED_PENDING' || clean === 'RESOLVEDPENDING') return 'RESOLVED_PENDING';
     if (clean === 'RESOLVED') return 'RESOLVED';
     if (clean === 'REJECTED') return 'REJECTED';
     if (clean === 'REOPENED') return 'REOPENED';

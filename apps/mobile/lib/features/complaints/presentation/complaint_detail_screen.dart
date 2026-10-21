@@ -110,6 +110,7 @@ class _ComplaintDetailScreenState extends ConsumerState<ComplaintDetailScreen> {
       {'code': 'SUBMITTED', 'label': 'Submitted', 'color': const Color(0xFF6B7280)},
       {'code': 'UNDER_REVIEW', 'label': 'Under Review', 'color': const Color(0xFF3B82F6)},
       {'code': 'IN_PROGRESS', 'label': 'In Progress', 'color': const Color(0xFFD97706)},
+      {'code': 'RESOLVED_PENDING', 'label': 'Resolution Pending', 'color': const Color(0xFF8B5CF6)},
       {'code': 'RESOLVED', 'label': 'Resolved', 'color': const Color(0xFF059669)},
       {'code': 'REJECTED', 'label': 'Rejected', 'color': const Color(0xFFDC2626)},
       {'code': 'REOPENED', 'label': 'Reopened', 'color': const Color(0xFFEC4899)},
@@ -361,6 +362,7 @@ class _ComplaintDetailScreenState extends ConsumerState<ComplaintDetailScreen> {
     final c = _complaint!;
     Color statusColor = const Color(0xFFDC2626);
     if (c.status == 'IN_PROGRESS') statusColor = const Color(0xFFD97706);
+    if (c.status == 'RESOLVED_PENDING') statusColor = const Color(0xFF8B5CF6);
     if (c.status == 'UNDER_REVIEW') statusColor = const Color(0xFF3B82F6);
     if (c.status == 'RESOLVED' || c.status == 'CLOSED') statusColor = const Color(0xFF059669);
     if (c.status == 'REJECTED') statusColor = const Color(0xFFDC2626);

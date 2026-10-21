@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
@@ -92,7 +92,7 @@ export class MembersService {
     const limitNum = Number(limit) || 10;
     const skip = (pageNum - 1) * limitNum;
 
-    const where: any = {};
+    const where: any = { isArchived: false };
     if (user?.tenantId) where.tenantId = user.tenantId;
     if (branchId && branchId !== 'ALL' && branchId !== 'all') {
       const branchInfo = await resolveBranchInfo(this.prisma, branchId, user?.tenantId);
@@ -186,7 +186,7 @@ export class MembersService {
   }
 
   async getStats(user: any, branchId?: string) {
-    const where: any = {};
+    const where: any = { isArchived: false };
     if (user?.tenantId) where.tenantId = user.tenantId;
     if (branchId && branchId !== 'ALL' && branchId !== 'all') {
       const branchInfo = await resolveBranchInfo(this.prisma, branchId, user?.tenantId);
@@ -322,11 +322,282 @@ export class MembersService {
     });
   }
 
-  async remove(id: string) {
-    return this.prisma.member.update({
+  async findArchived(user: any, query: QueryMembersDto) {
+    const { branchId, search, page = 1, limit = 10 } = query;
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 10;
+    const skip = (pageNum - 1) * limitNum;
+
+    const where: any = { isArchived: true };
+    if (user?.tenantId) where.tenantId = user.tenantId;
+    if (branchId && branchId !== 'ALL' && branchId !== 'all') {
+      const branchInfo = await resolveBranchInfo(this.prisma, branchId, user?.tenantId);
+      if (branchInfo) {
+        where.branchId = { in: branchInfo.allIds };
+      } else {
+        where.branchId = branchId;
+      }
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search } },
+        { memberCode: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const [members, total] = await Promise.all([
+      this.prisma.member.findMany({
+        where,
+        skip,
+        take: limitNum,
+        include: {
+          subscriptions: {
+            include: { plan: true, seat: true, locker: true },
+            orderBy: { endDate: 'desc' },
+            take: 3,
+          },
+        },
+        orderBy: { archivedAt: 'desc' },
+      }),
+      this.prisma.member.count({ where }),
+    ]);
+
+    return { data: members, total, page: pageNum, limit: limitNum };
+  }
+
+  async archiveMember(id: string, user?: any) {
+    const member = await this.prisma.member.findUnique({
       where: { id },
-      data: { isActive: false },
+      include: {
+        subscriptions: {
+          where: { status: 'ACTIVE' },
+          include: { seat: true, locker: true },
+        },
+      },
     });
+
+    if (!member) throw new NotFoundException('Member not found');
+    if (member.isArchived) {
+      throw new BadRequestException(`Member ${member.name} is already archived.`);
+    }
+
+    const now = new Date();
+    const adminName = user?.name || 'Admin';
+
+    await this.prisma.$transaction(async (tx) => {
+      // 1. Release assigned seats atomically
+      for (const sub of member.subscriptions) {
+        if (sub.assignedSeatId) {
+          await tx.seat.update({
+            where: { id: sub.assignedSeatId },
+            data: { status: 'AVAILABLE' },
+          });
+          await tx.seatAssignment.updateMany({
+            where: { seatId: sub.assignedSeatId, subscriptionId: sub.id, releasedAt: null },
+            data: { releasedAt: now },
+          });
+          await tx.subscription.update({
+            where: { id: sub.id },
+            data: { assignedSeatId: null },
+          });
+        }
+
+        // 2. Release assigned lockers atomically
+        if (sub.assignedLockerId) {
+          await tx.locker.update({
+            where: { id: sub.assignedLockerId },
+            data: { status: 'AVAILABLE' },
+          });
+          await tx.lockerAssignment.updateMany({
+            where: { lockerId: sub.assignedLockerId, subscriptionId: sub.id, releasedAt: null },
+            data: { releasedAt: now },
+          });
+          await tx.subscription.update({
+            where: { id: sub.id },
+            data: { assignedLockerId: null },
+          });
+        }
+      }
+
+      // 3. Update member record to archived
+      await tx.member.update({
+        where: { id },
+        data: {
+          isArchived: true,
+          archivedAt: now,
+          archivedBy: adminName,
+          isActive: false,
+        },
+      });
+
+      // 4. Audit Log
+      try {
+        await tx.auditLog.create({
+          data: {
+            tenantId: member.tenantId,
+            userId: user?.id || null,
+            branchId: member.branchId,
+            action: 'ARCHIVE_MEMBER',
+            entity: 'Member',
+            entityId: member.id,
+            metadata: JSON.stringify({
+              memberCode: member.memberCode,
+              name: member.name,
+              archivedBy: adminName,
+              archivedAt: now.toISOString(),
+            }),
+          },
+        });
+      } catch (_) {}
+    });
+
+    return {
+      success: true,
+      message: `Member ${member.name} (${member.memberCode}) has been safely archived. Assigned seats and lockers have been released.`,
+    };
+  }
+
+  async restoreMember(id: string, user?: any) {
+    const member = await this.prisma.member.findUnique({ where: { id } });
+    if (!member) throw new NotFoundException('Member not found');
+    if (!member.isArchived) {
+      throw new BadRequestException(`Member ${member.name} is not archived.`);
+    }
+
+    const updated = await this.prisma.member.update({
+      where: { id },
+      data: {
+        isArchived: false,
+        archivedAt: null,
+        archivedBy: null,
+        isActive: true,
+      },
+    });
+
+    try {
+      await this.prisma.auditLog.create({
+        data: {
+          tenantId: member.tenantId,
+          userId: user?.id || null,
+          branchId: member.branchId,
+          action: 'RESTORE_MEMBER',
+          entity: 'Member',
+          entityId: member.id,
+          metadata: JSON.stringify({
+            memberCode: member.memberCode,
+            name: member.name,
+            restoredBy: user?.name || 'Admin',
+            restoredAt: new Date().toISOString(),
+          }),
+        },
+      });
+    } catch (_) {}
+
+    return {
+      success: true,
+      message: `Member ${member.name} (${member.memberCode}) has been restored to active directory.`,
+      member: updated,
+    };
+  }
+
+  async permanentDelete(id: string, user?: any) {
+    const member = await this.prisma.member.findUnique({
+      where: { id },
+      include: {
+        subscriptions: true,
+        payments: true,
+      },
+    });
+
+    if (!member) throw new NotFoundException('Member not found');
+
+    if (!member.isArchived) {
+      throw new BadRequestException(
+        `Direct permanent deletion is prohibited. Member ${member.name} must first be moved to Archive. Permanent deletion can only be performed from the Archive section.`
+      );
+    }
+
+    const adminName = user?.name || 'Admin';
+
+    await this.prisma.$transaction(async (tx) => {
+      // 1. Release any residual seats/lockers
+      for (const sub of member.subscriptions) {
+        if (sub.assignedSeatId) {
+          await tx.seat.update({
+            where: { id: sub.assignedSeatId },
+            data: { status: 'AVAILABLE' },
+          });
+          await tx.seatAssignment.updateMany({
+            where: { seatId: sub.assignedSeatId, subscriptionId: sub.id },
+            data: { releasedAt: new Date() },
+          });
+        }
+        if (sub.assignedLockerId) {
+          await tx.locker.update({
+            where: { id: sub.assignedLockerId },
+            data: { status: 'AVAILABLE' },
+          });
+          await tx.lockerAssignment.updateMany({
+            where: { lockerId: sub.assignedLockerId, subscriptionId: sub.id },
+            data: { releasedAt: new Date() },
+          });
+        }
+      }
+
+      // 2. Delete related records safely
+      await tx.attendance.deleteMany({ where: { memberId: id } });
+      await tx.paymentVerification.deleteMany({ where: { memberId: id } });
+
+      const paymentIds = member.payments.map((p) => p.id);
+      if (paymentIds.length > 0) {
+        await tx.paymentTransaction.deleteMany({ where: { paymentId: { in: paymentIds } } });
+        await tx.payment.deleteMany({ where: { memberId: id } });
+      }
+
+      const subIds = member.subscriptions.map((s) => s.id);
+      if (subIds.length > 0) {
+        await tx.seatAssignment.deleteMany({ where: { subscriptionId: { in: subIds } } });
+        await tx.lockerAssignment.deleteMany({ where: { subscriptionId: { in: subIds } } });
+        await tx.subscription.deleteMany({ where: { memberId: id } });
+      }
+
+      await tx.complaint.deleteMany({ where: { memberId: id } });
+      await tx.feedback.deleteMany({ where: { memberId: id } });
+
+      // 3. Delete member
+      await tx.member.delete({ where: { id } });
+
+      // 4. Audit Log
+      try {
+        await tx.auditLog.create({
+          data: {
+            tenantId: member.tenantId,
+            userId: user?.id || null,
+            branchId: member.branchId,
+            action: 'PERMANENT_DELETE_MEMBER',
+            entity: 'Member',
+            entityId: id,
+            metadata: JSON.stringify({
+              memberCode: member.memberCode,
+              name: member.name,
+              deletedBy: adminName,
+              deletedAt: new Date().toISOString(),
+            }),
+          },
+        });
+      } catch (_) {}
+    });
+
+    return {
+      success: true,
+      message: `Member ${member.name} (${member.memberCode}) and all associated records have been permanently deleted from Archive.`,
+    };
+  }
+
+  async remove(id: string, user?: any) {
+    return this.archiveMember(id, user);
   }
 
   async getPayments(id: string) {

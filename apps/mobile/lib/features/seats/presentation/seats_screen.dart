@@ -11,6 +11,7 @@ import '../../../widgets/icon_3d.dart';
 import '../../branch/providers/branch_provider.dart';
 import '../data/seat_repository.dart';
 import '../domain/seat_model.dart';
+import '../../members/data/member_repository.dart';
 
 class SeatsScreen extends ConsumerStatefulWidget {
   const SeatsScreen({super.key});
@@ -250,9 +251,7 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
                           onPressed: () {
                             HapticFeedback.lightImpact();
                             Navigator.pop(ctx);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Seat ${seat.seatNumber} ready for member enrollment')),
-                            );
+                            _showAssignMemberDialog(context, seat);
                           },
                         ),
                       ),
@@ -268,6 +267,152 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
     ).then((_) {
       if (mounted) setState(() => _selectedSeatId = null);
     });
+  }
+
+  void _showAssignMemberDialog(BuildContext context, Seat seat) {
+    final activeBranch = ref.read(activeBranchProvider);
+    final searchCtrl = TextEditingController();
+    String query = '';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (modalCtx, setModalState) {
+          return Container(
+            height: MediaQuery.of(modalCtx).size.height * 0.75,
+            padding: EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 20,
+              bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 16,
+            ),
+            decoration: const BoxDecoration(
+              color: Color(0xFF141A24),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              border: Border(top: BorderSide(color: Color(0x33FFFFFF), width: 1)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Assign Seat ${seat.seatNumber}',
+                          style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
+                        ),
+                        const Text(
+                          'Select member to allocate this seat',
+                          style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, color: AppColors.textTertiary),
+                      onPressed: () => Navigator.pop(modalCtx),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.bgCard,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0x22FFFFFF)),
+                  ),
+                  child: TextField(
+                    controller: searchCtrl,
+                    onChanged: (val) => setModalState(() => query = val.trim().toLowerCase()),
+                    style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+                    decoration: const InputDecoration(
+                      hintText: 'Search by member name, phone or code...',
+                      hintStyle: TextStyle(color: AppColors.textTertiary, fontSize: 12),
+                      prefixIcon: Icon(Icons.search_rounded, color: AppColors.goldPrimary, size: 18),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: FutureBuilder(
+                    future: ref.read(memberRepositoryProvider).getMembers(
+                      branchId: activeBranch.id,
+                      status: 'active',
+                      search: query.isNotEmpty ? query : null,
+                      limit: 50,
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator(color: AppColors.goldPrimary));
+                      }
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text('Error loading members: ${snapshot.error}', style: const TextStyle(color: Colors.white70)),
+                        );
+                      }
+                      final members = snapshot.data?.data ?? [];
+                      if (members.isEmpty) {
+                        return const Center(
+                          child: Text('No active members found', style: TextStyle(color: AppColors.textTertiary)),
+                        );
+                      }
+                      return ListView.separated(
+                        itemCount: members.length,
+                        separatorBuilder: (_, __) => const Divider(color: Color(0x15FFFFFF), height: 1),
+                        itemBuilder: (context, index) {
+                          final m = members[index];
+                          return ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                            leading: CircleAvatar(
+                              backgroundColor: AppColors.purpleDeep.withOpacity(0.5),
+                              child: Text(
+                                m.name.isNotEmpty ? m.name[0].toUpperCase() : '?',
+                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            title: Text(m.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
+                            subtitle: Text('${m.memberCode} • ${m.phone ?? 'No phone'}', style: const TextStyle(color: AppColors.textTertiary, fontSize: 12)),
+                            trailing: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.goldPrimary,
+                                foregroundColor: Colors.black,
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              onPressed: () async {
+                                Navigator.pop(modalCtx);
+                                final res = await ref.read(seatRepositoryProvider).assignSeatToMember(seat.id, m.id);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(res['message'] ?? 'Seat assigned'),
+                                      backgroundColor: res['success'] == true ? const Color(0xFF059669) : Colors.red,
+                                    ),
+                                  );
+                                  ref.invalidate(seatsListProvider);
+                                }
+                              },
+                              child: const Text('Allocate', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override

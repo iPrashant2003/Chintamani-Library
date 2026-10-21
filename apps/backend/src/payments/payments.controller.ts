@@ -3,6 +3,7 @@ import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { QueryPaymentsDto } from './dto/query-payments.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('payments')
@@ -15,6 +16,14 @@ export class PaymentsController {
   @Post()
   create(@Body() createPaymentDto: CreatePaymentDto) {
     return this.paymentsService.create(createPaymentDto);
+  }
+
+  @Post('cash')
+  recordCash(
+    @Body() body: { memberId: string; amount: number; paidAt?: string; notes?: string },
+    @CurrentUser() user: any,
+  ) {
+    return this.paymentsService.recordCashPayment(body, user);
   }
 
   @Get()

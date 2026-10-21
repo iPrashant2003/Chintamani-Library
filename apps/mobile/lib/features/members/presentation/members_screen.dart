@@ -246,6 +246,16 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
                         accentColor: const Color(0xFF5B21B6),
                         icon: Icons.groups_rounded,
                       ),
+                      const SizedBox(width: 8),
+                      _buildCategoryCard(
+                        ref: ref,
+                        title: 'Archived\nDirectory',
+                        count: 0,
+                        statusKey: 'archived',
+                        currentStatus: filter.status,
+                        accentColor: const Color(0xFF64748B),
+                        icon: Icons.archive_rounded,
+                      ),
                     ],
                   ),
                 ),
@@ -538,6 +548,7 @@ class _FilterBottomSheet extends StatelessWidget {
       ('expiring1_3', Icons.warning_amber_rounded, 'Expiring in 1-3 Days', Color(0xFFE11D48)),
       ('expiring3_5', Icons.hourglass_bottom_rounded, 'Expiring in 3-5 Days', Color(0xFFD97706)),
       ('expiring8_15', Icons.event_rounded, 'Expiring in 8-15 Days', Color(0xFF2563EB)),
+      ('archived', Icons.archive_rounded, 'Archived Members', Color(0xFF64748B)),
     ];
 
     return Container(

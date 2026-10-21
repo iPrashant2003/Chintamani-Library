@@ -25,8 +25,9 @@ class MemberRepository {
     int limit = 20,
   }) async {
     try {
+      final endpoint = status == 'archived' ? '${ApiEndpoints.members}/archived' : ApiEndpoints.members;
       final response = await _apiClient.dio.get(
-        ApiEndpoints.members,
+        endpoint,
         queryParameters: {
           'branchId': branchId,
           if (status != null && status != 'all') 'status': status,
@@ -177,6 +178,34 @@ class MemberRepository {
         return updated;
       }
       throw Exception('Member not found');
+    }
+  }
+
+  Future<Map<String, dynamic>> archiveMember(String id) async {
+    try {
+      final res = await _apiClient.dio.patch('${ApiEndpoints.members}/$id/archive');
+      return {'success': true, 'message': res.data['message'] ?? 'Member archived successfully'};
+    } catch (e) {
+      return {'success': false, 'message': 'Failed to archive member: $e'};
+    }
+  }
+
+  Future<Map<String, dynamic>> restoreMember(String id) async {
+    try {
+      final res = await _apiClient.dio.patch('${ApiEndpoints.members}/$id/restore');
+      return {'success': true, 'message': res.data['message'] ?? 'Member restored successfully'};
+    } catch (e) {
+      return {'success': false, 'message': 'Failed to restore member: $e'};
+    }
+  }
+
+  Future<Map<String, dynamic>> permanentDeleteMember(String id) async {
+    try {
+      final res = await _apiClient.dio.delete('${ApiEndpoints.members}/$id/permanent');
+      await DatabaseBackupService.instance.deleteMember(id);
+      return {'success': true, 'message': res.data['message'] ?? 'Member permanently deleted'};
+    } catch (e) {
+      return {'success': false, 'message': 'Failed to permanently delete member: $e'};
     }
   }
 

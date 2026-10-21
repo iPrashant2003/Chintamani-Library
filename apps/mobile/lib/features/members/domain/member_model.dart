@@ -22,6 +22,9 @@ class Member {
   final String? notes;
   final String branchId;
   final bool isActive;
+  final bool isArchived;
+  final DateTime? archivedAt;
+  final String? archivedBy;
   final List<Subscription> subscriptions;
 
   const Member({
@@ -43,6 +46,9 @@ class Member {
     this.notes,
     required this.branchId,
     required this.isActive,
+    this.isArchived = false,
+    this.archivedAt,
+    this.archivedBy,
     this.subscriptions = const [],
   });
 
@@ -82,6 +88,9 @@ class Member {
       notes: json['notes'] as String? ?? academicData['notes'] as String?,
       branchId: json['branchId'] as String? ?? '',
       isActive: json['isActive'] as bool? ?? true,
+      isArchived: json['isArchived'] as bool? ?? false,
+      archivedAt: json['archivedAt'] != null ? DateTime.tryParse(json['archivedAt'].toString()) : null,
+      archivedBy: json['archivedBy'] as String?,
       subscriptions: subsList,
     );
   }
@@ -106,6 +115,9 @@ class Member {
       'notes': notes,
       'branchId': branchId,
       'isActive': isActive,
+      'isArchived': isArchived,
+      'archivedAt': archivedAt?.toIso8601String(),
+      'archivedBy': archivedBy,
       'subscriptions': subscriptions.map((s) => s.toJson()).toList(),
     };
   }
@@ -129,6 +141,9 @@ class Member {
     String? notes,
     String? branchId,
     bool? isActive,
+    bool? isArchived,
+    DateTime? archivedAt,
+    String? archivedBy,
     List<Subscription>? subscriptions,
   }) {
     return Member(
@@ -150,6 +165,9 @@ class Member {
       notes: notes ?? this.notes,
       branchId: branchId ?? this.branchId,
       isActive: isActive ?? this.isActive,
+      isArchived: isArchived ?? this.isArchived,
+      archivedAt: archivedAt ?? this.archivedAt,
+      archivedBy: archivedBy ?? this.archivedBy,
       subscriptions: subscriptions ?? this.subscriptions,
     );
   }

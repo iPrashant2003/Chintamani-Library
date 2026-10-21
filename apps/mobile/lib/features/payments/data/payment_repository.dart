@@ -68,7 +68,43 @@ class PaymentRepository {
       );
     }
   }
+  Future<Map<String, dynamic>> getMemberPaymentHistory(String memberId, {int months = 6}) async {
+    try {
+      final response = await _apiClient.dio.get('${ApiEndpoints.payments}/member/$memberId/history?months=$months');
+      final data = response.data is Map && response.data['data'] != null
+          ? response.data['data']
+          : response.data;
+      return (data as Map<String, dynamic>?) ?? {};
+    } catch (e) {
+      return {'payments': []};
+    }
+  }
+
+  Future<Map<String, dynamic>> recordCashPayment({
+    required String memberId,
+    required double amount,
+    String? paidAt,
+    String? notes,
+  }) async {
+    try {
+      final response = await _apiClient.dio.post('${ApiEndpoints.payments}/cash', data: {
+        'memberId': memberId,
+        'amount': amount,
+        if (paidAt != null) 'paidAt': paidAt,
+        if (notes != null) 'notes': notes,
+      });
+      final msg = response.data is Map ? (response.data['message'] ?? 'Cash payment recorded') : 'Cash payment recorded';
+      return {'success': true, 'message': msg};
+    } catch (e) {
+      return {'success': false, 'message': 'Failed to record cash payment: $e'};
+    }
+  }
 }
+
+final memberPaymentHistoryProvider = FutureProvider.family.autoDispose<Map<String, dynamic>, String>((ref, memberId) async {
+  final repo = ref.read(paymentRepositoryProvider);
+  return repo.getMemberPaymentHistory(memberId);
+});
 
 final paymentFilterProvider = StateProvider<String>((ref) => 'ALL');
 

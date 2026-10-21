@@ -125,14 +125,19 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
               // Status Filter Tabs
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-                child: Row(
-                  children: [
-                    _buildTabButton('OPEN', 'Open Issues', const Color(0xFFDC2626)),
-                    const SizedBox(width: 8),
-                    _buildTabButton('IN_PROGRESS', 'In Progress', const Color(0xFFD97706)),
-                    const SizedBox(width: 8),
-                    _buildTabButton('RESOLVED', 'Resolved', const Color(0xFF059669)),
-                  ],
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildTabButton('OPEN', 'Open Issues', const Color(0xFFDC2626)),
+                      const SizedBox(width: 8),
+                      _buildTabButton('IN_PROGRESS', 'In Progress', const Color(0xFFD97706)),
+                      const SizedBox(width: 8),
+                      _buildTabButton('RESOLVED_PENDING', 'Pending Resolution', const Color(0xFF8B5CF6)),
+                      const SizedBox(width: 8),
+                      _buildTabButton('RESOLVED', 'Resolved', const Color(0xFF059669)),
+                    ],
+                  ),
                 ),
               ),
 
@@ -338,6 +343,9 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
         break;
       case 'IN_PROGRESS':
         statusColor = const Color(0xFFD97706);
+        break;
+      case 'RESOLVED_PENDING':
+        statusColor = const Color(0xFF8B5CF6);
         break;
       default:
         statusColor = const Color(0xFFDC2626);

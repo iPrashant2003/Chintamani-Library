@@ -73,6 +73,7 @@ enum ComplaintStatus {
   SUBMITTED
   UNDER_REVIEW
   IN_PROGRESS
+  RESOLVED_PENDING
   RESOLVED
   REJECTED
   REOPENED
@@ -203,6 +204,9 @@ model Member {
   address        String?
   academicInfo   String?
   isActive       Boolean  @default(true)
+  isArchived     Boolean  @default(false)
+  archivedAt     DateTime?
+  archivedBy     String?
   registrationId String?  // link to MemberRegistration that created this member
   portalAccess   Boolean  @default(false)
   createdAt      DateTime @default(now())
@@ -224,6 +228,8 @@ model Member {
   @@index([memberCode])
   @@index([branchId])
   @@index([branchId, isActive])
+  @@index([isArchived])
+  @@index([branchId, isArchived])
   @@index([createdAt])
 }
 
@@ -653,5 +659,25 @@ model Feedback {
   member  Member?  @relation(fields: [memberId], references: [id])
 
   @@index([tenantId])
+  @@index([status])
+}
+
+model BackupLog {
+  id          String    @id @default(uuid())
+  tenantId    String?
+  backupName  String
+  filePath    String
+  fileSize    Int       @default(0) // in bytes
+  itemCount   Int       @default(0) // total records & files
+  status      String    @default("SUCCESS") // SUCCESS, FAILED, RUNNING
+  triggerType String    @default("AUTOMATIC") // AUTOMATIC, MANUAL
+  details     String?   // JSON breakdown of tables and files
+  errorMsg    String?
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+  restoredAt  DateTime?
+  restoredBy  String?
+
+  @@index([createdAt])
   @@index([status])
 }

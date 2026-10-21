@@ -69,6 +69,15 @@ export class SeatsController {
     return this.seatsService.assign(id, assignSeatDto.subscriptionId);
   }
 
+  @Post(':id/assign-member')
+  assignMember(
+    @Param('id') id: string,
+    @Body('memberId') memberId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.seatsService.assignToMember(id, memberId, user);
+  }
+
   @Post(':id/release')
   release(@Param('id') id: string) {
     return this.seatsService.release(id);

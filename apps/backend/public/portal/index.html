@@ -2092,7 +2092,7 @@
 
         const data = await res.json().catch(() => ({}));
         if (data.referenceId || data.paymentId || data.verificationId) {
-          document.getElementById('pay-succ-ref').textContent = data.referenceId || data.verificationId || data.paymentId;
+          const pData = data.data || data; document.getElementById('pay-succ-ref').textContent = pData.referenceId || pData.verification?.id || pData.payment?.id || pData.verificationId || pData.paymentId || 'PENDING';
         }
         document.getElementById('pay-success-box').classList.remove('hidden');
         initIcons();
@@ -2306,13 +2306,20 @@
       }
     }
 
-    // Branch-isolated Cloudinary upload
+    // Branch-isolated upload with disk & cloud fallback
     async function uploadPortalFile(boxId, folderType = 'photos') {
       const file = _fileStore[boxId];
       if (!file) return null;
+
+      // File size validation: 10MB limit
+      if (file.size > 10 * 1024 * 1024) {
+        showToast('File size exceeds 10 MB limit. Please select a smaller image.');
+        return null;
+      }
+
       try {
         const formData = new FormData();
-        formData.append('file', file, file.name || 'photo.jpg');
+        formData.append('file', file, file.name || 'screenshot.jpg');
 
         const branchKey = (currentViewingBranch || 'mehdawal').toLowerCase();
         const res = await fetch(`/portal/upload?branchId=${encodeURIComponent(branchKey)}&folder=${encodeURIComponent(folderType)}`, {
@@ -2325,10 +2332,14 @@
           throw new Error(errJson.message || `Upload failed with status ${res.status}`);
         }
         const data = await res.json();
-        return data.url || null;
+        const finalUrl = data.url || data.data?.url || (typeof data.data === 'string' ? data.data : null);
+        if (!finalUrl) {
+          throw new Error('Server returned invalid upload response');
+        }
+        return finalUrl;
       } catch (e) {
         console.error('Portal upload error:', e);
-        showToast(e.message || 'File upload failed');
+        showToast(e.message || 'File upload failed. Please try again.');
         return null;
       }
     }

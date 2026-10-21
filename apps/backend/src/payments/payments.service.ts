@@ -44,9 +44,69 @@ export class PaymentsService {
         method: (dto.method === 'BANK_TRANSFER' ? 'BANK' : dto.method) as any,
         status: 'PAID', 
         txnRef: dto.txnRef || null,
+        notes: dto.notes || null,
         paidAt: dto.paidAt ? new Date(dto.paidAt) : new Date(),
       } 
     }); 
+  }
+
+  async recordCashPayment(
+    dto: { memberId: string; amount: number; paidAt?: string; notes?: string },
+    adminUser?: any,
+  ) {
+    const member = await this.prisma.member.findUnique({
+      where: { id: dto.memberId },
+    });
+    if (!member) throw new NotFoundException('Member not found');
+    if (!dto.amount || Number(dto.amount) <= 0) {
+      throw new BadRequestException('Payment amount must be greater than zero');
+    }
+
+    const paidDate = dto.paidAt ? new Date(dto.paidAt) : new Date();
+
+    const payment = await this.prisma.payment.create({
+      data: {
+        tenantId: member.tenantId,
+        memberId: dto.memberId,
+        amount: Number(dto.amount),
+        method: 'CASH',
+        status: 'PAID',
+        txnRef: null,
+        notes: dto.notes?.trim() || 'Direct Cash payment recorded by admin',
+        paidAt: paidDate,
+      },
+      include: {
+        member: { select: { id: true, name: true, memberCode: true, branchId: true } },
+      },
+    });
+
+    // Create Audit Log
+    try {
+      await this.prisma.auditLog.create({
+        data: {
+          tenantId: member.tenantId,
+          userId: adminUser?.id || null,
+          branchId: member.branchId,
+          action: 'RECORD_CASH_PAYMENT',
+          entity: 'Payment',
+          entityId: payment.id,
+          metadata: JSON.stringify({
+            memberId: member.id,
+            memberName: member.name,
+            amount: Number(dto.amount),
+            paidAt: payment.paidAt,
+            notes: dto.notes,
+            admin: adminUser?.name || 'Admin',
+          }),
+        },
+      });
+    } catch (_) {}
+
+    return {
+      success: true,
+      message: `Cash payment of ₹${dto.amount} successfully recorded for ${member.name}.`,
+      payment,
+    };
   }
 
   async getDues(branchId: string) {

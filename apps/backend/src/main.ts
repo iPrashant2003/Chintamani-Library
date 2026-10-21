@@ -42,6 +42,15 @@ async function bootstrap() {
   const publicPath = join(process.cwd(), 'public');
   app.useStaticAssets(publicPath);
 
+  // Serve user-uploaded screenshots & files (payments, member photos, documents)
+  const uploadsDir = configService.get<string>('STORAGE_PATH') || './uploads';
+  const uploadsPath = join(process.cwd(), uploadsDir);
+  const fs = await import('fs');
+  if (!fs.existsSync(uploadsPath)) {
+    fs.mkdirSync(uploadsPath, { recursive: true });
+  }
+  app.useStaticAssets(uploadsPath, { prefix: '/uploads/' });
+
   // Swagger setup
   const config = new DocumentBuilder()
     .setTitle('Chintamani Library API')
@@ -52,15 +61,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  // Run database cleanup to ensure only real records and official 72/65 seats exist
-  try {
-    const { PrismaService } = await import('./prisma/prisma.service');
-    const { runDatabaseCleanup } = await import('./database-cleanup');
-    const prisma = app.get(PrismaService);
-    await runDatabaseCleanup(prisma);
-  } catch (e: any) {
-    console.error('Failed to run database cleanup:', e.message);
-  }
+  // Startup verification: protect data integrity without destructive resets
+  console.log('[Bootstrap] Database integrity mode: preservation enabled (no destructive resets).');
 
   const port = configService.get<number>('PORT') || 3000;
   await app.listen(port, '0.0.0.0');

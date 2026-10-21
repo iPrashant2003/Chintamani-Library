@@ -28,6 +28,8 @@ import { PortalModule } from './portal/portal.module';
 import { RegistrationsModule } from './registrations/registrations.module';
 import { ComplaintsModule } from './complaints/complaints.module';
 import { AiModule } from './ai/ai.module';
+import { BackupModule } from './backup/backup.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
 
 @Module({
   imports: [
@@ -60,6 +62,8 @@ import { AiModule } from './ai/ai.module';
     RegistrationsModule,
     ComplaintsModule,
     AiModule,
+    BackupModule,
+    SchedulerModule,
   ],
 })
 export class AppModule {}

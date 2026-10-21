@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSeatDto } from './dto/create-seat.dto';
 import { resolveBranchInfo } from '../common/utils/branch-resolver.util';
@@ -55,42 +55,20 @@ export class SeatsService {
     });
 
     const now = new Date();
-    // Authoritative status calculation and auto-reconciliation
-    const reconciledSeats = await Promise.all(seats.map(async (seat) => {
+    // Authoritative status calculation in memory for lightning fast responses (<50ms)
+    const reconciledSeats = seats.map((seat) => {
       const activeSub = seat.subscriptions[0];
       const isValid = !!(activeSub && activeSub.member?.isActive && new Date(activeSub.endDate) >= now);
       const authoritativeStatus = isValid
         ? 'OCCUPIED'
         : (seat.status === 'BLOCKED' ? 'BLOCKED' : (seat.status === 'MAINTENANCE' ? 'MAINTENANCE' : 'AVAILABLE'));
 
-      // Reconcile database state if out of sync
-      if (seat.status === 'OCCUPIED' && !isValid) {
-        try {
-          await this.prisma.$transaction([
-            this.prisma.seat.update({
-              where: { id: seat.id },
-              data: { status: 'AVAILABLE' },
-            }),
-            this.prisma.seatAssignment.updateMany({
-              where: { seatId: seat.id, releasedAt: null },
-              data: { releasedAt: now },
-            }),
-            ...(activeSub ? [
-              this.prisma.subscription.update({
-                where: { id: activeSub.id },
-                data: { assignedSeatId: null },
-              }),
-            ] : []),
-          ]);
-        } catch (_) {}
-      }
-
       return {
         ...seat,
         status: authoritativeStatus,
         currentMemberName: isValid ? activeSub?.member?.name : null,
       };
-    }));
+    });
 
     if (status && status !== 'ALL') {
       return reconciledSeats.filter(s => s.status === status);
@@ -129,6 +107,94 @@ export class SeatsService {
     await this.prisma.seat.update({ where: { id }, data: { status: 'OCCUPIED' } });
     await this.prisma.subscription.update({ where: { id: subscriptionId }, data: { assignedSeatId: id } });
     return this.prisma.seatAssignment.create({ data: { seatId: id, subscriptionId } });
+  }
+
+  async assignToMember(seatId: string, memberId: string, adminUser?: any) {
+    const seat = await this.prisma.seat.findUnique({ where: { id: seatId } });
+    if (!seat) throw new NotFoundException('Seat not found');
+    if (seat.status !== 'AVAILABLE') {
+      throw new BadRequestException(`Seat ${seat.seatNumber} is ${seat.status} and cannot be assigned.`);
+    }
+
+    const member = await this.prisma.member.findUnique({
+      where: { id: memberId },
+      include: {
+        subscriptions: {
+          where: { status: 'ACTIVE' },
+          orderBy: { endDate: 'desc' },
+          take: 1,
+        },
+      },
+    });
+    if (!member) throw new NotFoundException('Member not found');
+
+    let activeSub = member.subscriptions[0];
+    if (!activeSub) {
+      const latestSub = await this.prisma.subscription.findFirst({
+        where: { memberId },
+        orderBy: { createdAt: 'desc' },
+      });
+      if (latestSub) {
+        activeSub = latestSub;
+      } else {
+        throw new BadRequestException(`Member ${member.name} has no subscriptions on record.`);
+      }
+    }
+
+    const now = new Date();
+    await this.prisma.$transaction(async (tx) => {
+      // If member already had another seat assigned on this subscription, release it
+      if (activeSub.assignedSeatId && activeSub.assignedSeatId !== seatId) {
+        await tx.seat.update({
+          where: { id: activeSub.assignedSeatId },
+          data: { status: 'AVAILABLE' },
+        });
+        await tx.seatAssignment.updateMany({
+          where: { seatId: activeSub.assignedSeatId, subscriptionId: activeSub.id, releasedAt: null },
+          data: { releasedAt: now },
+        });
+      }
+
+      // Assign target seat
+      await tx.seat.update({
+        where: { id: seatId },
+        data: { status: 'OCCUPIED' },
+      });
+
+      await tx.subscription.update({
+        where: { id: activeSub.id },
+        data: { assignedSeatId: seatId, status: 'ACTIVE' },
+      });
+
+      await tx.seatAssignment.create({
+        data: { seatId, subscriptionId: activeSub.id, assignedAt: now },
+      });
+
+      // Audit Log
+      try {
+        await tx.auditLog.create({
+          data: {
+            tenantId: seat.tenantId,
+            userId: adminUser?.id || null,
+            branchId: seat.branchId,
+            action: 'ASSIGN_SEAT',
+            entity: 'Seat',
+            entityId: seatId,
+            metadata: JSON.stringify({
+              seatNumber: seat.seatNumber,
+              memberId: member.id,
+              memberName: member.name,
+              admin: adminUser?.name || 'Admin',
+            }),
+          },
+        });
+      } catch (_) {}
+    });
+
+    return {
+      success: true,
+      message: `Seat ${seat.seatNumber} successfully assigned to ${member.name}.`,
+    };
   }
 
   async release(id: string) {

@@ -16,8 +16,9 @@ import { resolveBranchInfo } from '../common/utils/branch-resolver.util';
 export class PortalService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private cleanPhone(phone: string): string {
-    return phone.replace(/[^\d]/g, '');
+  private cleanPhone(phone?: string | null): string {
+    if (!phone) return '';
+    return String(phone).replace(/[^\d]/g, '');
   }
 
   // ── OTP & AUTH ─────────────────────────────────────────────────────────────
@@ -639,13 +640,30 @@ export class PortalService {
   // ── PAYMENT SUBMISSION & VERIFICATION ─────────────────────────────────────
 
   async submitPayment(dto: PortalPaymentDto) {
-    const phone = this.cleanPhone(dto.memberPhone);
+    // Guard: phone is required when memberId is not provided
+    if (!dto.memberId) {
+      if (!dto.memberPhone || !String(dto.memberPhone).trim()) {
+        throw new BadRequestException('Mobile number is required to submit a payment proof.');
+      }
+    }
+    const phone = dto.memberPhone ? this.cleanPhone(String(dto.memberPhone)) : '';
+    if (!dto.memberId && (!phone || phone.length < 6)) {
+      throw new BadRequestException('Please provide a valid mobile number (at least 6 digits).');
+    }
+    const searchSuffix = phone && phone.length >= 6 ? (phone.length >= 10 ? phone.slice(-10) : phone) : null;
     let member = dto.memberId
       ? await this.prisma.member.findUnique({ where: { id: dto.memberId }, include: { branch: true } })
-      : await this.prisma.member.findFirst({
-          where: { phone: { contains: phone.slice(-10) } },
-          include: { branch: true },
-        });
+      : (searchSuffix
+          ? await this.prisma.member.findFirst({
+              where: {
+                OR: [
+                  { phone: { contains: searchSuffix } },
+                  { phone: { endsWith: searchSuffix } },
+                ],
+              },
+              include: { branch: true },
+            })
+          : null);
 
     let targetBranch: any = null;
     const branchInfo = await resolveBranchInfo(this.prisma, dto.branchId || member?.branchId);
@@ -743,9 +761,19 @@ export class PortalService {
 
   async submitComplaint(dto: PortalComplaintDto) {
     const phone = this.cleanPhone(dto.memberPhone);
+    const searchSuffix = phone && phone.length >= 6 ? (phone.length >= 10 ? phone.slice(-10) : phone) : null;
     const member = dto.memberId
       ? await this.prisma.member.findUnique({ where: { id: dto.memberId } })
-      : await this.prisma.member.findFirst({ where: { phone: { contains: phone.slice(-10) } } });
+      : (searchSuffix
+          ? await this.prisma.member.findFirst({
+              where: {
+                OR: [
+                  { phone: { contains: searchSuffix } },
+                  { phone: { endsWith: searchSuffix } },
+                ],
+              },
+            })
+          : null);
 
     // Resolve branch properly (handles stable IDs like 'mehdawal'/'khalilabad' AND db UUIDs)
     let branchRecord: any = null;
@@ -963,31 +991,47 @@ export class PortalService {
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    const member = await this.prisma.member.findFirst({
-      where: { phone: { contains: phone.slice(-10) } },
-      include: {
-        payments: {
-          where: { createdAt: { gte: sixMonthsAgo } },
-          include: { verification: true },
-          orderBy: { createdAt: 'desc' },
-        },
-        subscriptions: {
-          where: { createdAt: { gte: sixMonthsAgo } },
-          include: { plan: true, seat: true, SeatAssignment: { include: { seat: true } } },
-          orderBy: { createdAt: 'desc' },
-        },
-        complaints: {
-          where: { createdAt: { gte: sixMonthsAgo } },
-          orderBy: { createdAt: 'desc' },
-        },
-      },
-    });
+    const searchSuffix = phone && phone.length >= 6 ? (phone.length >= 10 ? phone.slice(-10) : phone) : null;
 
-    const registrations = await this.prisma.memberRegistration.findMany({
-      where: { phone: { contains: phone.slice(-10) } },
-      include: { plan: true, reservedSeat: true },
-      orderBy: { submittedAt: 'desc' },
-    });
+    const member = searchSuffix
+      ? await this.prisma.member.findFirst({
+          where: {
+            OR: [
+              { phone: { contains: searchSuffix } },
+              { phone: { endsWith: searchSuffix } },
+            ],
+          },
+          include: {
+            payments: {
+              where: { createdAt: { gte: sixMonthsAgo } },
+              include: { verification: true },
+              orderBy: { createdAt: 'desc' },
+            },
+            subscriptions: {
+              where: { createdAt: { gte: sixMonthsAgo } },
+              include: { plan: true, seat: true, SeatAssignment: { include: { seat: true } } },
+              orderBy: { createdAt: 'desc' },
+            },
+            complaints: {
+              where: { createdAt: { gte: sixMonthsAgo } },
+              orderBy: { createdAt: 'desc' },
+            },
+          },
+        })
+      : null;
+
+    const registrations = searchSuffix
+      ? await this.prisma.memberRegistration.findMany({
+          where: {
+            OR: [
+              { phone: { contains: searchSuffix } },
+              { phone: { endsWith: searchSuffix } },
+            ],
+          },
+          include: { plan: true, reservedSeat: true },
+          orderBy: { submittedAt: 'desc' },
+        })
+      : [];
 
     const timeline: any[] = [];
 

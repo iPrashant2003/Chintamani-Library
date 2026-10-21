@@ -1996,7 +1996,8 @@
 
     // ── Submit Payment Proof (Mandatory Screenshot + Optional UTR) ──
     async function submitPaymentProof() {
-      const phone = document.getElementById('pay-phone').value.trim();
+      const rawPhone = document.getElementById('pay-phone')?.value || '';
+      const phone = rawPhone.replace(/[^\d]/g, '').trim();
       const utr = document.getElementById('pay-utr').value.trim();
       const amount = document.getElementById('pay-amount').value.trim();
       const memberName = document.getElementById('pay-name')?.value?.trim() || '';

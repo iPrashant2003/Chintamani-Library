@@ -9,6 +9,7 @@ import '../../../widgets/glass_button.dart';
 import '../data/member_repository.dart';
 import '../domain/member_model.dart';
 import '../../payments/data/payment_repository.dart';
+import '../../../core/api/api_endpoints.dart';
 
 class MemberDetailScreen extends ConsumerStatefulWidget {
   final String memberId;
@@ -319,11 +320,17 @@ class _MemberDetailScreenState extends ConsumerState<MemberDetailScreen> with Si
   }
 
   void _showScreenshotModal(BuildContext context, String url, double amount, String dateStr) {
+    final base = ApiEndpoints.baseUrl.replaceAll(RegExp(r'/+$'), '');
+    final fullUrl = url.startsWith('http')
+        ? url
+        : '$base/${url.replaceAll(RegExp(r"^/+"), "")}';
+
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
         backgroundColor: const Color(0xFF141A24),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -333,24 +340,64 @@ class _MemberDetailScreenState extends ConsumerState<MemberDetailScreen> with Si
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Screenshot • ₹${amount.toStringAsFixed(0)}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Screenshot • ₹${amount.toStringAsFixed(0)}',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                      Text(dateStr, style: const TextStyle(color: Colors.white54, fontSize: 11)),
+                    ],
+                  ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white54),
+                    icon: const Icon(Icons.close, color: Colors.white70),
                     onPressed: () => Navigator.pop(ctx),
                   ),
                 ],
               ),
             ),
-            InteractiveViewer(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-                child: Image.network(
-                  url.startsWith('http') ? url : 'http://localhost:3000$url',
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Center(
-                      child: Text('Unable to load screenshot', style: TextStyle(color: Colors.white70)),
+            Flexible(
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                  child: Image.network(
+                    fullUrl,
+                    fit: BoxFit.contain,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(40.0),
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    (loadingProgress.expectedTotalBytes ?? 1)
+                                : null,
+                            color: AppColors.goldPrimary,
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (_, __, ___) => Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.broken_image_rounded, size: 40, color: Colors.white38),
+                            const SizedBox(height: 8),
+                            const Text('Unable to load screenshot', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                            const SizedBox(height: 4),
+                            Text(
+                              fullUrl,
+                              style: const TextStyle(color: Colors.white38, fontSize: 10),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -806,18 +853,58 @@ class _MemberDetailScreenState extends ConsumerState<MemberDetailScreen> with Si
                                               ),
                                             ],
                                             if (screenshotUrl != null && screenshotUrl.isNotEmpty) ...[
-                                              const SizedBox(height: 8),
-                                              OutlinedButton.icon(
-                                                style: OutlinedButton.styleFrom(
-                                                  foregroundColor: AppColors.goldPrimary,
-                                                  side: const BorderSide(color: Color(0x33D4AF37)),
-                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                                ),
-                                                icon: const Icon(Icons.image_outlined, size: 14),
-                                                label: const Text('View Payment Screenshot', style: TextStyle(fontSize: 11)),
-                                                onPressed: () => _showScreenshotModal(context, screenshotUrl, amount, dateStr),
-                                              ),
-                                            ],
+                                               const SizedBox(height: 10),
+                                               GestureDetector(
+                                                 onTap: () => _showScreenshotModal(context, screenshotUrl, amount, dateStr),
+                                                 child: Container(
+                                                   padding: const EdgeInsets.all(8),
+                                                   decoration: BoxDecoration(
+                                                     color: Colors.black.withOpacity(0.35),
+                                                     borderRadius: BorderRadius.circular(10),
+                                                     border: Border.all(color: AppColors.goldPrimary.withOpacity(0.3)),
+                                                   ),
+                                                   child: Row(
+                                                     children: [
+                                                       ClipRRect(
+                                                         borderRadius: BorderRadius.circular(6),
+                                                         child: SizedBox(
+                                                           width: 50,
+                                                           height: 50,
+                                                           child: Image.network(
+                                                             screenshotUrl.startsWith('http')
+                                                                 ? screenshotUrl
+                                                                 : '${ApiEndpoints.baseUrl.replaceAll(RegExp(r"/+$"), "")}/${screenshotUrl.replaceAll(RegExp(r"^/+"), "")}',
+                                                             fit: BoxFit.cover,
+                                                             errorBuilder: (_, __, ___) => Container(
+                                                               color: Colors.white10,
+                                                               child: const Icon(Icons.image_not_supported_rounded, color: Colors.white38, size: 20),
+                                                             ),
+                                                           ),
+                                                         ),
+                                                       ),
+                                                       const SizedBox(width: 10),
+                                                       const Expanded(
+                                                         child: Column(
+                                                           crossAxisAlignment: CrossAxisAlignment.start,
+                                                           children: [
+                                                             Text(
+                                                               'Uploaded Payment Proof',
+                                                               style: TextStyle(color: AppColors.goldLight, fontSize: 12, fontWeight: FontWeight.bold),
+                                                             ),
+                                                             SizedBox(height: 2),
+                                                             Text(
+                                                               'Tap to inspect full screenshot',
+                                                               style: TextStyle(color: AppColors.textTertiary, fontSize: 10.5),
+                                                             ),
+                                                           ],
+                                                         ),
+                                                       ),
+                                                       const Icon(Icons.zoom_in_rounded, color: AppColors.goldPrimary, size: 20),
+                                                     ],
+                                                   ),
+                                                 ),
+                                               ),
+                                             ],
                                           ],
                                         ),
                                       );

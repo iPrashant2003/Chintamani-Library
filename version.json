@@ -1,24 +1,18 @@
 {
-  "version": "2.8.8",
-  "buildNumber": 2088,
+  "version": "2.8.9",
+  "buildNumber": 2089,
   "minimumSupportedVersion": "2.3.0",
   "releaseDate": "21 Oct 2026",
-  "title": "Chintamani Library v2.8.8 — Universal QR Portal, Member Archive & Backup System",
+  "title": "Chintamani Library v2.8.9 — Portal Screenshot Upload & Verification Fix",
   "releaseNotes": [
-    "SLIM APK: Optimized split arm64 package (35.8 MB instead of 83 MB) for faster, reliable in-app downloads.",
-    "PACKAGE INSTALLER FIX: Solved 'package not available' error by storing update in internal cache and granting explicit FileProvider permissions to system installer.",
-    "PAYMENT SCREENSHOT UPLOAD: 100% reliable upload with multi-format support (JPG/PNG/WEBP up to 10MB) and dual local disk + cloud fallback.",
-    "6-MONTH PAYMENT HISTORY: Full chronological payment history per member with explicit CASH classification and color-coded badges.",
-    "RECORD CASH PAYMENT: Dedicated modal to record authentic cash payments with zero fake transaction references or screenshots.",
-    "PAYMENT VERIFICATION: High-resolution full-screen screenshot preview modal with member identity and rejection reason tracking.",
-    "COMPLAINT WORKFLOW: Added RESOLVED_PENDING status with dedicated tab selector and real-time state synchronization.",
-    "MEMBER ARCHIVE & RESTORE: Soft-deletion workflow archives members, auto-vacates seats/lockers, with dedicated Archive Directory and safeguarded permanent deletion.",
-    "DATABASE RELIABILITY: Zero startup data resets, tuned connection pooling (15 connections), eliminating cold disconnects.",
-    "AUTOMATED DAILY BACKUPS: Scheduled 2:00 AM IST database backups (SQL dump + JSON snapshot) with 30-day retention and hourly seat auto-reconciliation.",
-    "SEAT MATRIX ALLOCATION: Direct seat assignment to members with live search and atomic database updates."
+    "PORTAL SCREENSHOT UPLOAD FIX: Resolved Prisma findFirst invocation error during screenshot submission by implementing robust phone sanitization, non-empty guards, and applicant fallback.",
+    "PAYMENT VERIFICATION SCREENSHOT PREVIEW: Added inline thumbnail image preview inside pending verification cards with high-res interactive pinch-to-zoom modal.",
+    "6-MONTH PAYMENT HISTORY SCREENSHOT: Fixed screenshot display by dynamically resolving server base URL via ApiEndpoints.baseUrl instead of localhost.",
+    "CROSS-ORIGIN ASSETS: Configured cross-origin resource policy on static uploads to ensure screenshots render reliably across mobile apps, WebViews, and desktop browsers.",
+    "SLIM APK: High-performance split arm64 package (~36 MB) for quick download and instant updates."
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.8/app-arm64-v8a-release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.8/Chintamani-Library-arm64.apk",
-  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.8",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.9/app-arm64-v8a-release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.9/Chintamani-Library-arm64.apk",
+  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.9",
   "forceUpdate": true
 }

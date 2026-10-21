@@ -29,7 +29,9 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
   String _formatUrl(String? url) {
     if (url == null || url.isEmpty) return '';
     if (url.startsWith('http')) return url;
-    return '${ApiEndpoints.baseUrl}$url';
+    final base = ApiEndpoints.baseUrl.replaceAll(RegExp(r'/+$'), '');
+    final path = url.replaceAll(RegExp(r'^/+'), '');
+    return '$base/$path';
   }
 
   void _showImageDialog(String title, String imageUrl) {
@@ -513,28 +515,52 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
           ),
           const SizedBox(height: 10),
 
-          // Screenshot row / Preview Button
+          // Screenshot row / Inline Preview + Full Zoom
           if (screenshot.isNotEmpty)
             GestureDetector(
               onTap: () => _showImageDialog('Payment Screenshot - ${item.memberName}', screenshot),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.35),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.goldPrimary.withOpacity(0.25)),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.goldPrimary.withOpacity(0.3)),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.image_rounded, size: 16, color: AppColors.goldPrimary),
-                    const SizedBox(width: 8),
-                    const Expanded(
-                      child: Text(
-                        'View Uploaded Payment Screenshot',
-                        style: TextStyle(color: AppColors.goldLight, fontSize: 11, fontWeight: FontWeight.w600),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: SizedBox(
+                        width: 50,
+                        height: 50,
+                        child: Image.network(
+                          screenshot,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: Colors.white10,
+                            child: const Icon(Icons.image_not_supported_rounded, color: Colors.white38, size: 20),
+                          ),
+                        ),
                       ),
                     ),
-                    const Icon(Icons.visibility_rounded, size: 16, color: AppColors.goldPrimary),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Uploaded Payment Screenshot',
+                            style: TextStyle(color: AppColors.goldLight, fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Tap to view / zoom full image',
+                            style: TextStyle(color: AppColors.textTertiary, fontSize: 10.5),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.zoom_in_rounded, color: AppColors.goldPrimary, size: 22),
                   ],
                 ),
               ),

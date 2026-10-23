@@ -37,13 +37,22 @@ class PaymentVerificationModel {
 
   factory PaymentVerificationModel.fromJson(Map<String, dynamic> json) {
     final member = json['member'] as Map<String, dynamic>? ?? {};
+    final reg = member['registration'] as Map<String, dynamic>?;
+    final rawName = member['name']?.toString().trim();
+    final memberName = (rawName != null && rawName.isNotEmpty && rawName != 'Portal Applicant')
+        ? rawName
+        : (reg?['name']?.toString() ?? json['memberName']?.toString() ?? 'Portal Applicant');
+
+    final code = member['memberCode']?.toString() ?? (reg?['applicationId']?.toString() ?? '-');
+    final phone = member['phone']?.toString() ?? (reg?['phone']?.toString() ?? '-');
+
     return PaymentVerificationModel(
       id: json['id'] as String,
       paymentId: json['paymentId'] as String,
       memberId: json['memberId'] as String,
-      memberName: member['name'] as String? ?? 'Unknown Member',
-      memberCode: member['memberCode'] as String? ?? '-',
-      memberPhone: member['phone'] as String? ?? '-',
+      memberName: memberName,
+      memberCode: code,
+      memberPhone: phone,
       amount: (json['amount'] as num? ?? 0).toDouble(),
       paymentType: json['paymentType'] as String? ?? 'MEMBERSHIP',
       screenshotUrl: json['screenshotUrl'] as String?,

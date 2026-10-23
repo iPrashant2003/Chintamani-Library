@@ -79,6 +79,11 @@ export class MembersService {
         email: createMemberDto.email,
         dob: this.parseSafeDob(createMemberDto.dob),
         address: createMemberDto.address,
+        photoUrl: createMemberDto.photoUrl || null,
+        aadhaarNumber: createMemberDto.aadhaar?.replace(/\s/g, '') || null,
+        aadhaarFrontUrl: (createMemberDto as any).aadhaarFrontUrl || null,
+        aadhaarBackUrl: (createMemberDto as any).aadhaarBackUrl || null,
+        otherDocUrls: (createMemberDto as any).otherDocUrls || null,
         academicInfo: JSON.stringify(academicData),
         branchId: resolvedBranchId,
         isActive: true,
@@ -92,7 +97,15 @@ export class MembersService {
     const limitNum = Number(limit) || 10;
     const skip = (pageNum - 1) * limitNum;
 
-    const where: any = { isArchived: false };
+    const where: any = {
+      isArchived: false,
+      NOT: [
+        {
+          isActive: false,
+          subscriptions: { none: {} },
+        },
+      ],
+    };
     if (user?.tenantId) where.tenantId = user.tenantId;
     if (branchId && branchId !== 'ALL' && branchId !== 'all') {
       const branchInfo = await resolveBranchInfo(this.prisma, branchId, user?.tenantId);
@@ -317,6 +330,12 @@ export class MembersService {
     if (updateMemberDto.email) dataToUpdate.email = updateMemberDto.email;
     if (updateMemberDto.dob) dataToUpdate.dob = this.parseSafeDob(updateMemberDto.dob);
     if (updateMemberDto.address) dataToUpdate.address = updateMemberDto.address;
+    if ((updateMemberDto as any).photoUrl !== undefined) dataToUpdate.photoUrl = (updateMemberDto as any).photoUrl;
+    if ((updateMemberDto as any).aadhaar !== undefined) dataToUpdate.aadhaarNumber = (updateMemberDto as any).aadhaar;
+    if ((updateMemberDto as any).aadhaarNumber !== undefined) dataToUpdate.aadhaarNumber = (updateMemberDto as any).aadhaarNumber;
+    if ((updateMemberDto as any).aadhaarFrontUrl !== undefined) dataToUpdate.aadhaarFrontUrl = (updateMemberDto as any).aadhaarFrontUrl;
+    if ((updateMemberDto as any).aadhaarBackUrl !== undefined) dataToUpdate.aadhaarBackUrl = (updateMemberDto as any).aadhaarBackUrl;
+    if ((updateMemberDto as any).otherDocUrls !== undefined) dataToUpdate.otherDocUrls = (updateMemberDto as any).otherDocUrls;
 
     return this.prisma.member.update({
       where: { id },

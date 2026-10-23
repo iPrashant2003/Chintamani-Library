@@ -137,7 +137,34 @@ export class SeatsService {
       if (latestSub) {
         activeSub = latestSub;
       } else {
-        throw new BadRequestException(`Member ${member.name} has no subscriptions on record.`);
+        // Auto-create active 30-day subscription for this member using branch plan
+        const defaultPlan = await this.prisma.membershipPlan.findFirst({
+          where: { branchId: seat.branchId, isActive: true },
+          orderBy: { price: 'asc' },
+        }) || await this.prisma.membershipPlan.findFirst({
+          where: { isActive: true },
+          orderBy: { price: 'asc' },
+        });
+
+        if (!defaultPlan) {
+          throw new BadRequestException('No membership plan available to assign this seat.');
+        }
+
+        const startDate = new Date();
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + (defaultPlan.durationDays || 30));
+
+        activeSub = await this.prisma.subscription.create({
+          data: {
+            tenantId: member.tenantId,
+            memberId: member.id,
+            planId: defaultPlan.id,
+            startDate,
+            endDate,
+            status: 'ACTIVE',
+            assignedSeatId: seatId,
+          },
+        });
       }
     }
 

@@ -10,6 +10,21 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script>
+    // ── Universal API Base URL Interceptor ──
+    // Ensures seamless API requests when portal is hosted on GitHub Pages, Render, or local filesystem
+    (function() {
+      const _origFetch = window.fetch;
+      window.fetch = function(resource, init) {
+        if (typeof resource === 'string' && resource.startsWith('/portal/')) {
+          const origin = window.location.origin || '';
+          if (origin.includes('github.io') || window.location.protocol === 'file:') {
+            resource = 'https://chintamani-backend.onrender.com' + resource;
+          }
+        }
+        return _origFetch(resource, init);
+      };
+    })();
+
     tailwind.config = {
       theme: {
         extend: {
@@ -1756,11 +1771,21 @@
     }
 
     // ── Submit Registration (Strictly to Active Global Branch) ──
+    let _activeApplicationId = null;
+
     async function submitRegistration() {
-      const name = document.getElementById('reg-name').value.trim();
-      const phone = document.getElementById('reg-phone').value.trim();
-      if (!name || !phone || phone.length < 10) {
-        showToast('Please complete personal details');
+      const name = (document.getElementById('reg-name')?.value || '').trim();
+      const rawPhone = (document.getElementById('reg-phone')?.value || '').trim();
+      const phone = rawPhone.replace(/[^\d]/g, '');
+
+      if (!name) {
+        showToast('Please enter full applicant name');
+        goToRegStep(1);
+        return;
+      }
+
+      if (!phone || phone.length < 10) {
+        showToast('Please enter a valid 10-digit mobile number');
         goToRegStep(1);
         return;
       }
@@ -1775,85 +1800,118 @@
         }
       }
 
-      const timing = document.getElementById('reg-timing').value;
-      const branchConfig = BRANCH_CONFIG[currentViewingBranch];
-      const appId = 'REG-' + Math.floor(100000 + Math.random() * 900000);
-
-      document.getElementById('reg-succ-id').textContent = appId;
-      document.getElementById('reg-succ-branch').textContent = branchConfig.name;
-      document.getElementById('reg-succ-seat').textContent = `Seat ${selectedSeatNumber}`;
-      document.getElementById('reg-succ-amt').textContent = selectedPlanPrice;
-
-      // Persist local registration context (without large image blobs to avoid storage quota errors)
-      try {
-        localStorage.setItem('cml_student_record', JSON.stringify({
-          name,
-          phone,
-          branch: currentViewingBranch,
-          branchName: branchConfig.name,
-          seatNumber: selectedSeatNumber,
-          applicationId: appId,
-          timestamp: Date.now()
-        }));
-      } catch (_) { /* localStorage quota exceeded — non-critical, skip */ }
-
-      // Upload images to Cloudinary first via multipart (avoids base64 JSON body size issues)
-      let photoUrl = null;
-      let aadhaarFrontUrl = null;
-      let aadhaarBackUrl = null;
-
-      const photoFile = _fileStore['file-student-photo'] || _fileStore['preview-selfie-box'];
-      if (photoFile) {
-        showToast('Uploading student photo to cloud... ⏳');
-        photoUrl = await uploadPortalFile('file-student-photo', 'photos');
-      }
-      if (_fileStore['preview-aadhaar-box'] || _fileStore['preview-aadhaar-front-box']) {
-        aadhaarFrontUrl = await uploadPortalFile(_fileStore['preview-aadhaar-box'] ? 'preview-aadhaar-box' : 'preview-aadhaar-front-box', 'documents');
+      const btn = document.querySelector('#reg-content-step-3 button[onclick="submitRegistration()"]') || event?.currentTarget;
+      let origHtml = '';
+      if (btn) {
+        origHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Saving Registration...';
       }
 
       try {
+        const timing = document.getElementById('reg-timing')?.value || 'Morning Shift (06:00 AM – 12:00 PM)';
+        const branchConfig = BRANCH_CONFIG[currentViewingBranch] || BRANCH_CONFIG['mehdawal'];
+
+        // Upload images to cloud storage if provided
+        let photoUrl = null;
+        let aadhaarFrontUrl = null;
+        let aadhaarBackUrl = null;
+
+        const photoBoxKey = _fileStore['file-student-photo'] ? 'file-student-photo' : (_fileStore['preview-selfie-box'] ? 'preview-selfie-box' : null);
+        if (photoBoxKey) {
+          if (btn) btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Uploading Student Photo...';
+          showToast('Uploading student photo to cloud... ⏳');
+          try {
+            photoUrl = await uploadPortalFile(photoBoxKey, 'photos');
+          } catch (upErr) {
+            console.warn('Student photo upload warning:', upErr);
+          }
+        }
+
+        const aadhaarBoxKey = _fileStore['preview-aadhaar-box'] ? 'preview-aadhaar-box' : (_fileStore['preview-aadhaar-front-box'] ? 'preview-aadhaar-front-box' : null);
+        if (aadhaarBoxKey) {
+          if (btn) btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Uploading Aadhaar Document...';
+          try {
+            aadhaarFrontUrl = await uploadPortalFile(aadhaarBoxKey, 'documents');
+          } catch (upErr) {
+            console.warn('Aadhaar upload warning:', upErr);
+          }
+        }
+
+        if (btn) btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Submitting Application...';
+
         const regPayload = {
           name,
           phone,
-          email: (document.getElementById('reg-email')?.value || '').trim(),
-          dob: document.getElementById('reg-dob')?.value || '',
-          address: (document.getElementById('reg-address')?.value || '').trim(),
-          gender: document.getElementById('reg-gender')?.value || '',
-          aadhaarNumber: (document.getElementById('reg-aadhaar')?.value || '').replace(/\s/g, ''),
-          emergencyContact: (document.getElementById('reg-emergency')?.value || '').trim(),
+          email: (document.getElementById('reg-email')?.value || '').trim() || undefined,
+          dob: document.getElementById('reg-dob')?.value || undefined,
+          address: (document.getElementById('reg-address')?.value || '').trim() || undefined,
+          gender: document.getElementById('reg-gender')?.value || undefined,
+          aadhaarNumber: (document.getElementById('reg-aadhaar')?.value || '').replace(/\s/g, '') || undefined,
+          emergencyContact: (document.getElementById('reg-emergency')?.value || '').trim() || undefined,
           batch: timing,
-          course: (document.getElementById('reg-course')?.value || '').trim(),
-          institute: (document.getElementById('reg-institute')?.value || '').trim(),
-          occupation: (document.getElementById('reg-occupation')?.value || '').trim(),
-          planId: selectedPlanId || selectedPlanCode,
+          course: (document.getElementById('reg-course')?.value || '').trim() || undefined,
+          institute: (document.getElementById('reg-institute')?.value || '').trim() || undefined,
+          occupation: (document.getElementById('reg-occupation')?.value || '').trim() || undefined,
+          planId: selectedPlanId || selectedPlanCode || 'PLAN_12H',
           branch: currentViewingBranch,
           branchId: currentViewingBranch,
           seatNumber: selectedSeatNumber,
-          // Cloud storage URLs (uploaded separately, not base64 in JSON)
-          photoUrl: photoUrl,
-          aadhaarFrontUrl: aadhaarFrontUrl,
-          aadhaarBackUrl: aadhaarBackUrl,
+          photoUrl: photoUrl || undefined,
+          aadhaarFrontUrl: aadhaarFrontUrl || undefined,
+          aadhaarBackUrl: aadhaarBackUrl || undefined,
         };
+
         const res = await fetch('/portal/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(regPayload)
         });
+
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
-          showToast(errData.message || 'Registration submission failed. Please try again.');
-          return;
+          throw new Error(errData.message || 'Registration submission failed. Please try again.');
         }
+
         const resJson = await res.json().catch(() => ({}));
-        if (resJson.applicationId) {
-          document.getElementById('reg-succ-id').textContent = resJson.applicationId;
-        }
+        const appId = resJson.applicationId || ('REG-' + Math.floor(100000 + Math.random() * 900000));
+        _activeApplicationId = appId;
+
+        // Persist local context safely
+        try {
+          localStorage.setItem('cml_student_record', JSON.stringify({
+            name,
+            phone,
+            branch: currentViewingBranch,
+            branchName: branchConfig.name,
+            seatNumber: selectedSeatNumber,
+            applicationId: appId,
+            timestamp: Date.now()
+          }));
+        } catch (_) {}
+
+        document.getElementById('reg-succ-id').textContent = appId;
+        document.getElementById('reg-succ-branch').textContent = branchConfig.name;
+        document.getElementById('reg-succ-seat').textContent = `Seat ${selectedSeatNumber}`;
+        document.getElementById('reg-succ-amt').textContent = selectedPlanPrice || 800;
+
         document.getElementById('reg-content-step-3').classList.add('hidden');
         document.getElementById('reg-success-box').classList.remove('hidden');
         initIcons();
-        showToast(`Registration submitted for ${branchConfig.name}!`);
+        showToast(`✓ Registration Submitted for ${branchConfig.name}! Application: ${appId}`);
+
+        // Automatically prefill and transition to final payment stage seamlessly
+        goToPaymentFromReg();
       } catch (e) {
-        showToast(e.message || 'Network error submitting registration');
+        console.error('Registration submit error:', e);
+        showToast(e.message || 'Network error submitting registration. Please try again.');
+        alert(e.message || 'Failed to submit registration. Please check your connection and try again.');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml || '<span>Proceed to Payment</span>';
+          initIcons();
+        }
       }
     }
 
@@ -1862,7 +1920,7 @@
       const regName = document.getElementById('reg-name')?.value?.trim();
       if (regPhone) {
         const payPhone = document.getElementById('pay-phone');
-        if (payPhone) payPhone.value = regPhone;
+        if (payPhone) payPhone.value = regPhone.replace(/[^\d]/g, '');
       }
       if (regName) {
         const payName = document.getElementById('pay-name');
@@ -1872,7 +1930,14 @@
       if (payAmount) payAmount.value = selectedPlanPrice || 800;
       const payType = document.getElementById('pay-type');
       if (payType) payType.value = 'MEMBERSHIP';
+
+      switchPaymentBranch(currentViewingBranch);
       showView('payment');
+
+      // Show payment prefill toast
+      if (_activeApplicationId) {
+        showToast(`Proceeding to payment for ${_activeApplicationId} (₹${selectedPlanPrice || 800})`);
+      }
     }
 
     // ── Member Self-Attendance (Strict Global Branch Context) ──

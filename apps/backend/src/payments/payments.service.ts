@@ -175,6 +175,8 @@ export class PaymentsService {
               name: true,
               memberCode: true,
               phone: true,
+              branchId: true,
+              registration: true,
               subscriptions: {
                 where: { status: 'ACTIVE' },
                 include: { plan: true, seat: true },
@@ -259,10 +261,60 @@ export class PaymentsService {
         data: { isActive: true },
       });
 
-      const activeSub = await tx.subscription.findFirst({
+      let activeSub = await tx.subscription.findFirst({
         where: { memberId: verification.memberId },
         orderBy: { createdAt: 'desc' },
       });
+
+      // If no subscription yet, check if member has an unapproved registration
+      if (!activeSub) {
+        const reg = await tx.memberRegistration.findFirst({
+          where: {
+            OR: [
+              { memberId: verification.memberId },
+              { phone: { contains: verification.member.phone.slice(-10) } },
+            ],
+            status: 'PENDING',
+          },
+          include: { plan: true },
+        });
+
+        if (reg) {
+          const plan = reg.plan || await tx.membershipPlan.findFirst({
+            where: { branchId: reg.branchId, isActive: true },
+            orderBy: { price: 'asc' },
+          });
+
+          const duration = plan?.durationDays || 30;
+          const startDate = new Date();
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + duration);
+
+          activeSub = await tx.subscription.create({
+            data: {
+              tenantId: verification.tenantId,
+              memberId: verification.memberId,
+              planId: plan?.id || reg.planId || '',
+              startDate,
+              endDate,
+              status: 'ACTIVE',
+              assignedSeatId: reg.reservedSeatId || null,
+            },
+          });
+
+          // Mark registration as approved
+          await tx.memberRegistration.update({
+            where: { id: reg.id },
+            data: {
+              status: 'APPROVED',
+              memberId: verification.memberId,
+              reviewedBy: adminUser?.name || 'Admin',
+              reviewedAt: new Date(),
+            },
+          });
+        }
+      }
+
       if (activeSub) {
         await tx.subscription.update({
           where: { id: activeSub.id },

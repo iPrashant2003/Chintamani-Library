@@ -10,6 +10,7 @@ import '../data/member_repository.dart';
 import '../domain/member_model.dart';
 import '../../payments/data/payment_repository.dart';
 import '../../../core/api/api_endpoints.dart';
+import '../../../core/utils/member_image_helper.dart';
 
 class MemberDetailScreen extends ConsumerStatefulWidget {
   final String memberId;
@@ -320,10 +321,7 @@ class _MemberDetailScreenState extends ConsumerState<MemberDetailScreen> with Si
   }
 
   void _showImageModal(BuildContext context, String url, String title, String subtitle) {
-    final base = ApiEndpoints.baseUrl.replaceAll(RegExp(r'/+$'), '');
-    final fullUrl = url.startsWith('http')
-        ? url
-        : '$base/${url.replaceAll(RegExp(r"^/+"), "")}';
+    final fullUrl = MemberImageHelper.formatPhotoUrl(url);
 
     showDialog(
       context: context,
@@ -723,33 +721,39 @@ class _MemberDetailScreenState extends ConsumerState<MemberDetailScreen> with Si
                     // Tab 1: Profile
                     SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.bgCard,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withOpacity(0.06)),
-                        ),
-                        child: Column(
-                          children: [
-                            InfoRow(label: 'Full Name', value: member.name, icon: Icons.person_outline),
-                            InfoRow(label: 'Father Name', value: member.fatherName ?? 'Not specified', icon: Icons.people_outline),
-                            InfoRow(label: 'Gender', value: member.gender ?? 'Not specified', icon: Icons.transgender),
-                            InfoRow(
-                              label: 'Date of Birth',
-                              value: member.dob != null ? DateFormat('dd MMM yyyy').format(member.dob!) : 'Not specified',
-                              icon: Icons.cake_outlined,
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: AppColors.bgCard,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.white.withOpacity(0.06)),
                             ),
-                            InfoRow(label: 'Phone', value: member.phone ?? '—', icon: Icons.phone_outlined),
-                            InfoRow(label: 'Email', value: member.email ?? '—', icon: Icons.email_outlined),
-                            InfoRow(label: 'Address', value: member.address ?? '—', icon: Icons.location_on_outlined),
-                            InfoRow(label: 'Emergency Contact', value: member.emergencyContact ?? '—', icon: Icons.contact_phone_outlined),
-                            InfoRow(label: 'Aadhaar / ID', value: member.aadhaar ?? '—', icon: Icons.badge_outlined),
-                            InfoRow(label: 'Institute', value: member.institute ?? 'Self Study', icon: Icons.school_outlined),
-                            InfoRow(label: 'Course / Target', value: member.course ?? 'General Studies', icon: Icons.menu_book_outlined),
-                            InfoRow(label: 'Batch Year', value: member.batch ?? '2024', icon: Icons.calendar_today_outlined),
-                          ],
-                        ),
+                            child: Column(
+                              children: [
+                                InfoRow(label: 'Full Name', value: member.name, icon: Icons.person_outline),
+                                InfoRow(label: 'Father Name', value: member.fatherName ?? 'Not specified', icon: Icons.people_outline),
+                                InfoRow(label: 'Gender', value: member.gender ?? 'Not specified', icon: Icons.transgender),
+                                InfoRow(
+                                  label: 'Date of Birth',
+                                  value: member.dob != null ? DateFormat('dd MMM yyyy').format(member.dob!) : 'Not specified',
+                                  icon: Icons.cake_outlined,
+                                ),
+                                InfoRow(label: 'Phone', value: member.phone ?? '—', icon: Icons.phone_outlined),
+                                InfoRow(label: 'Email', value: member.email ?? '—', icon: Icons.email_outlined),
+                                InfoRow(label: 'Address', value: member.address ?? '—', icon: Icons.location_on_outlined),
+                                InfoRow(label: 'Emergency Contact', value: member.emergencyContact ?? '—', icon: Icons.contact_phone_outlined),
+                                InfoRow(label: 'Aadhaar / ID', value: member.aadhaar ?? '—', icon: Icons.badge_outlined),
+                                InfoRow(label: 'Institute', value: member.institute ?? 'Self Study', icon: Icons.school_outlined),
+                                InfoRow(label: 'Course / Target', value: member.course ?? 'General Studies', icon: Icons.menu_book_outlined),
+                                InfoRow(label: 'Batch Year', value: member.batch ?? '2024', icon: Icons.calendar_today_outlined),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildDocumentsCard(context, member),
+                        ],
                       ),
                     ),
 

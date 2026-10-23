@@ -5,6 +5,7 @@ import '../../../theme/app_colors.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../registrations/data/registration_repository.dart';
 import '../../registrations/domain/payment_verification_model.dart';
+import '../../../core/utils/member_image_helper.dart';
 
 final selectedVerificationStatusProvider = StateProvider<String>((ref) => 'PENDING');
 
@@ -26,12 +27,18 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
     super.dispose();
   }
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(paymentVerificationsListProvider);
+      ref.invalidate(pendingVerificationsCountProvider);
+    });
+  }
+
   String _formatUrl(String? url) {
-    if (url == null || url.isEmpty) return '';
-    if (url.startsWith('http')) return url;
-    final base = ApiEndpoints.baseUrl.replaceAll(RegExp(r'/+$'), '');
-    final path = url.replaceAll(RegExp(r'^/+'), '');
-    return '$base/$path';
+    if (url == null || url.trim().isEmpty) return '';
+    return MemberImageHelper.formatPhotoUrl(url);
   }
 
   void _showImageDialog(String title, String imageUrl) {

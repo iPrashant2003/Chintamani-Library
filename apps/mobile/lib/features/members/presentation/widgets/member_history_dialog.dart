@@ -750,7 +750,7 @@ class _MemberSixMonthHistoryDialogState extends ConsumerState<MemberSixMonthHist
               InkWell(
                 onTap: () {
                   final rawUrl = event['screenshotUrl'].toString();
-                  final fullUrl = rawUrl.startsWith('http') ? rawUrl : '${ApiEndpoints.baseUrl}$rawUrl';
+                  final fullUrl = MemberImageHelper.formatPhotoUrl(rawUrl);
                   _showImageDialog('Payment Proof - ${widget.member.name}', fullUrl);
                 },
                 borderRadius: BorderRadius.circular(8),

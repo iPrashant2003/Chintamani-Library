@@ -1,17 +1,17 @@
-﻿{
-    "buildNumber":  2091,
-    "apkUrl":  "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.11/app-arm64-v8a-release.apk",
-    "minimumSupportedVersion":  "2.3.0",
-    "version":  "2.8.11",
-    "releaseDate":  "21 Oct 2026",
-    "forceUpdate":  true,
-    "releaseNotes":  [
-                         "PORTAL SUBMISSION PERMANENT FIX: Auto-schema synchronization on server boot and query-level safe selects guarantee zero Prisma findFirst crashes on payment screenshot or member registration submissions.",
-                         "REGISTRATION APPROVAL WORKFLOW: New registrations submitted through Universal QR portal now stay PENDING for admin review and approval; members are only reflected in the Member Directory upon admin approval.",
-                         "MEMBER IDENTITY \u0026 DOCUMENTS: Member profile now permanently stores and displays Aadhaar card (front \u0026 back) and photo images in high resolution with pinch-to-zoom preview.",
-                         "CARD ACTION BAR: Added dedicated Archive button directly beside the Delete button on every member card with confirmation dialogs and automatic seat release."
-                     ],
-    "arm64ApkUrl":  "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.11/Chintamani-Library-arm64.apk",
-    "title":  "Chintamani Library v2.8.11 — Approval Workflow, Identity Gallery \u0026 Archive Action",
-    "fallbackUrl":  "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.11"
+{
+  "buildNumber": 2092,
+  "version": "2.8.12",
+  "releaseDate": "23 Oct 2026",
+  "forceUpdate": true,
+  "title": "Chintamani Library v2.8.12 — Payment Verification, Portal Registration & Seat Matrix",
+  "releaseNotes": [
+    "CRITICAL PAYMENT VERIFICATION FIX: Payment screenshots submitted via Universal QR Portal upload reliably to cloud storage, persist verification metadata, and reflect immediately in Admin → Payment Verification with high-res zoomable preview and in 6-month history.",
+    "UNIVERSAL QR REGISTRATION FIX: Fixed submit action, added live progress indicators, secure cloud image uploads, and automatic seamless transition to final fee payment stage.",
+    "SEAT MATRIX CLICK-TO-ASSIGN: Tap any available seat directly in the Seats Matrix to immediately assign it to any member with live search, automatic reallocation of previous seats, and real-time matrix refresh.",
+    "DOCUMENT VAULT IN DIRECTORY: Member details now permanently hold and display Aadhaar card (front & back) and photo images directly in Tab 1 with full pinch-to-zoom modal."
+  ],
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.12/app-arm64-v8a-release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.12/Chintamani-Library-arm64.apk",
+  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.12",
+  "minimumSupportedVersion": "2.3.0"
 }

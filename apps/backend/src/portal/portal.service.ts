@@ -639,6 +639,18 @@ export class PortalService {
       tenantId = defaultBranch.tenantId;
     }
 
+    // Look up pending registration if member does not exist
+    let pendingReg: any = null;
+    if (!member) {
+      pendingReg = await this.prisma.memberRegistration.findFirst({
+        where: {
+          phone: { contains: searchSuffix || phone.slice(-10) },
+          status: 'PENDING',
+        },
+        orderBy: { submittedAt: 'desc' },
+      });
+    }
+
     // Create member if member doesn't exist yet (guest/applicant payment)
     if (!member) {
       const code = `LIB-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
@@ -647,12 +659,22 @@ export class PortalService {
           tenantId,
           branchId,
           memberCode: code,
-          name: dto.memberName || 'Portal Applicant',
+          name: dto.memberName || pendingReg?.name || 'Portal Applicant',
           phone,
-          isActive: false, // inactive until approved
+          isActive: false, // inactive until approved by admin
+          registrationId: pendingReg?.id || null,
         },
         include: { branch: true },
       });
+
+      if (pendingReg && !pendingReg.memberId) {
+        try {
+          await this.prisma.memberRegistration.update({
+            where: { id: pendingReg.id },
+            data: { memberId: member.id },
+          });
+        } catch (_) {}
+      }
     }
 
     if (!dto.screenshotUrl || !dto.screenshotUrl.trim()) {

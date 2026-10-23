@@ -344,9 +344,8 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
                   child: FutureBuilder(
                     future: ref.read(memberRepositoryProvider).getMembers(
                       branchId: activeBranch.id,
-                      status: 'active',
                       search: query.isNotEmpty ? query : null,
-                      limit: 50,
+                      limit: 60,
                     ),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -360,7 +359,7 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
                       final members = snapshot.data?.data ?? [];
                       if (members.isEmpty) {
                         return const Center(
-                          child: Text('No active members found', style: TextStyle(color: AppColors.textTertiary)),
+                          child: Text('No members found in this branch', style: TextStyle(color: AppColors.textTertiary)),
                         );
                       }
                       return ListView.separated(
@@ -368,8 +367,12 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
                         separatorBuilder: (_, __) => const Divider(color: Color(0x15FFFFFF), height: 1),
                         itemBuilder: (context, index) {
                           final m = members[index];
+                          final sub = m.subscriptions.isNotEmpty ? m.subscriptions.first : null;
+                          final planName = sub?.plan?.name ?? 'Standard Membership';
+                          final currentSeat = sub?.seat?.seatNumber;
+
                           return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                             leading: CircleAvatar(
                               backgroundColor: AppColors.purpleDeep.withOpacity(0.5),
                               child: Text(
@@ -377,13 +380,56 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
                                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                               ),
                             ),
-                            title: Text(m.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
-                            subtitle: Text('${m.memberCode} • ${m.phone ?? 'No phone'}', style: const TextStyle(color: AppColors.textTertiary, fontSize: 12)),
+                            title: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    m.name,
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (currentSeat != null) ...[
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFD97706).withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(4),
+                                      border: Border.all(color: const Color(0xFFD97706).withOpacity(0.4)),
+                                    ),
+                                    child: Text(
+                                      'Seat $currentSeat',
+                                      style: const TextStyle(color: Color(0xFFF59E0B), fontSize: 10, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${m.memberCode} • ${m.phone ?? 'No phone'}',
+                                  style: const TextStyle(color: AppColors.textTertiary, fontSize: 11.5),
+                                ),
+                                const SizedBox(height: 1),
+                                Text(
+                                  'Plan: $planName${currentSeat != null ? ' (reallocates seat)' : ''}',
+                                  style: TextStyle(
+                                    color: currentSeat != null ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
                             trailing: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.goldPrimary,
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                backgroundColor: const Color(0xFF059669),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               ),
                               onPressed: () async {
@@ -399,7 +445,7 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
                                   ref.invalidate(seatsListProvider);
                                 }
                               },
-                              child: const Text('Allocate', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                              child: const Text('Assign Seat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5)),
                             ),
                           );
                         },
@@ -581,7 +627,14 @@ class _SeatsScreenState extends ConsumerState<SeatsScreen> {
                         final isSelected = _selectedSeatId == seat.id;
 
                         return GestureDetector(
-                          onTap: () => _showSeatDetails(context, seat),
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            if (seat.status == 'AVAILABLE') {
+                              _showAssignMemberDialog(context, seat);
+                            } else {
+                              _showSeatDetails(context, seat);
+                            }
+                          },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
                             decoration: BoxDecoration(

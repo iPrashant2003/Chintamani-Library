@@ -1335,7 +1335,11 @@
     // ── API & Network Configuration ──
     const urlParams = new URLSearchParams(window.location.search);
     const customApi = urlParams.get('api');
-    const API_BASE = customApi ? customApi.replace(/\/+$/, '') : '';
+    const GITHUB_PAGES_DEFAULT = 'https://chintamani-backend.onrender.com';
+    const isGitHubPages = !window.location.hostname || window.location.hostname.includes('github.io');
+    const API_BASE = customApi
+      ? customApi.replace(/\/+$/, '')
+      : (isGitHubPages ? GITHUB_PAGES_DEFAULT : '');
 
     if (API_BASE) {
       const origFetch = window.fetch;

@@ -112,7 +112,8 @@ export class SeatsService {
   async assignToMember(seatId: string, memberId: string, adminUser?: any) {
     const seat = await this.prisma.seat.findUnique({ where: { id: seatId } });
     if (!seat) throw new NotFoundException('Seat not found');
-    if (seat.status !== 'AVAILABLE') {
+    // Admins can assign AVAILABLE or RESERVED seats (RESERVED = held by portal registration)
+    if (seat.status !== 'AVAILABLE' && seat.status !== 'RESERVED') {
       throw new BadRequestException(`Seat ${seat.seatNumber} is ${seat.status} and cannot be assigned.`);
     }
 
@@ -169,7 +170,32 @@ export class SeatsService {
     }
 
     const now = new Date();
+    // If subscription has expired or is expiring, ensure valid future end date
+    let subEndDate = activeSub.endDate;
+    if (subEndDate < now) {
+      const plan = await this.prisma.membershipPlan.findUnique({ where: { id: activeSub.planId } });
+      const durationDays = plan?.durationDays || 30;
+      subEndDate = new Date();
+      subEndDate.setDate(subEndDate.getDate() + durationDays);
+    }
+
     await this.prisma.$transaction(async (tx) => {
+      // If seat was RESERVED for a pending registration, release registration seat hold
+      if (seat.status === 'RESERVED') {
+        try {
+          await tx.memberRegistration.updateMany({
+            where: { reservedSeatId: seatId, status: 'PENDING' },
+            data: { reservedSeatId: null },
+          });
+        } catch (_) {}
+      }
+
+      // Close any previous unreleased seatAssignment on target seat
+      await tx.seatAssignment.updateMany({
+        where: { seatId, releasedAt: null },
+        data: { releasedAt: now },
+      });
+
       // If member already had another seat assigned on this subscription, release it
       if (activeSub.assignedSeatId && activeSub.assignedSeatId !== seatId) {
         await tx.seat.update({
@@ -190,7 +216,7 @@ export class SeatsService {
 
       await tx.subscription.update({
         where: { id: activeSub.id },
-        data: { assignedSeatId: seatId, status: 'ACTIVE' },
+        data: { assignedSeatId: seatId, status: 'ACTIVE', endDate: subEndDate },
       });
 
       await tx.seatAssignment.create({

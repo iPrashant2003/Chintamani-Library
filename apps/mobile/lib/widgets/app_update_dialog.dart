@@ -338,8 +338,8 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                 ),
               ],
             ),
-            if (_errorMessage != null && info.fallbackUrl.isNotEmpty) ...[
-              const SizedBox(height: 12),
+            if (info.fallbackUrl.isNotEmpty) ...[
+              const SizedBox(height: 10),
               Center(
                 child: TextButton.icon(
                   onPressed: () async {
@@ -348,10 +348,10 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                       await launchUrl(uri, mode: LaunchMode.externalApplication);
                     }
                   },
-                  icon: const Icon(Icons.open_in_browser_rounded, size: 15, color: Color(0xFFD4AF37)),
-                  label: const Text(
-                    'Or open manual download page in browser',
-                    style: TextStyle(color: Color(0xFFD4AF37), fontSize: 11.5, decoration: TextDecoration.underline),
+                  icon: const Icon(Icons.open_in_browser_rounded, size: 14, color: Color(0xFFD4AF37)),
+                  label: Text(
+                    _errorMessage != null ? 'Open manual download page in browser' : 'Or open download page in browser',
+                    style: const TextStyle(color: Color(0xFFD4AF37), fontSize: 11, decoration: TextDecoration.underline),
                   ),
                 ),
               ),

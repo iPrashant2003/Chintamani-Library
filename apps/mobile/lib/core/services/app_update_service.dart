@@ -80,8 +80,8 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.8.8';
-  static const currentBuildNumber = 2088;
+  static const currentVersion = '2.8.13';
+  static const currentBuildNumber = 2093;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   /// The update info discovered from cloud manifest, if any.
@@ -417,123 +417,51 @@ class AppUpdateService {
     required File targetFile,
     required void Function(double progress, int receivedBytes, int totalBytes) onProgress,
   }) async {
-    final partFile = File('${targetFile.path}.part');
-    int retryCount = 0;
-    const maxRetries = 5;
+    final tempPath = '${targetFile.path}.tmp';
+    final tempFile = File(tempPath);
+    if (await tempFile.exists()) {
+      try { await tempFile.delete(); } catch (_) {}
+    }
 
-    while (retryCount < maxRetries) {
-      IOSink? sink;
-      try {
-        int existingBytes = 0;
-        if (await partFile.exists()) {
-          existingBytes = await partFile.length();
-        }
-
-        // Set Range header if partial download exists
-        final headers = <String, dynamic>{};
-        if (existingBytes > 0) {
-          headers['Range'] = 'bytes=$existingBytes-';
-        }
-
-        // Resolve direct CDN storage URL (GitHub 302 -> storage CDN) so Range headers are never dropped
-        String directUrl = url;
-        try {
-          final headRes = await _dio.head(
-            url,
-            options: Options(
-              followRedirects: false,
-              validateStatus: (s) => s != null && s < 400,
-            ),
-          );
-          final loc = headRes.headers.value('location');
-          if (loc != null && loc.isNotEmpty) {
-            directUrl = loc;
-          }
-        } catch (_) {}
-
-        final response = await _downloadDio.get<ResponseBody>(
-          directUrl,
-          options: Options(
-            responseType: ResponseType.stream,
-            headers: headers,
-          ),
-        );
-
-        final statusCode = response.statusCode ?? 200;
-        final isPartial = statusCode == 206;
-        
-        int totalBytes = -1;
-        if (isPartial) {
-          final contentRange = response.headers.value('content-range');
-          if (contentRange != null && contentRange.contains('/')) {
-            totalBytes = int.tryParse(contentRange.split('/').last) ?? -1;
-          }
-        }
-        
-        if (totalBytes <= 0) {
-          final cl = response.headers.value('content-length');
-          if (cl != null) {
-            final len = int.tryParse(cl) ?? -1;
-            totalBytes = isPartial ? (existingBytes + len) : len;
-          }
-        }
-
-        if (!isPartial && existingBytes > 0) {
-          // Server returned full file (200), reset part file
-          existingBytes = 0;
-          sink = partFile.openWrite(mode: FileMode.write);
-        } else {
-          sink = partFile.openWrite(mode: FileMode.append);
-        }
-
-        int currentReceived = existingBytes;
-
-        await for (final chunk in response.data!.stream) {
-          sink.add(chunk);
-          currentReceived += chunk.length;
-          if (totalBytes > 0) {
-            final p = (currentReceived / totalBytes).clamp(0.0, 1.0);
-            onProgress(p, currentReceived, totalBytes);
+    try {
+      final response = await _downloadDio.download(
+        url,
+        tempPath,
+        onReceiveProgress: (received, total) {
+          if (total > 0) {
+            final p = (received / total).clamp(0.0, 1.0);
+            onProgress(p, received, total);
           } else {
-            onProgress(0.5, currentReceived, 0);
+            onProgress(0.5, received, total);
           }
-        }
+        },
+        options: Options(
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Linux; Android; Mobile; rv:109.0) Gecko/109.0 Firefox/109.0',
+            'Accept': 'application/vnd.android.package-archive,*/*',
+          },
+          followRedirects: true,
+          maxRedirects: 10,
+        ),
+      );
 
-        await sink.flush();
-        await sink.close();
-        sink = null;
-
-        final finalPartLength = await partFile.length();
-        if (totalBytes > 0 && finalPartLength < totalBytes) {
-          throw Exception('Incomplete chunk stream: got $finalPartLength of $totalBytes');
-        }
-
-        if (finalPartLength > 5000000) {
+      if (response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300) {
+        if (await tempFile.exists() && await tempFile.length() > 5000000) {
           if (await targetFile.exists()) {
             await targetFile.delete();
           }
-          await partFile.rename(targetFile.path);
+          await tempFile.rename(targetFile.path);
           return true;
-        } else {
-          throw Exception('Downloaded file unexpectedly small ($finalPartLength bytes)');
         }
-      } catch (e) {
-        debugPrint('[UpdateService] Stream interrupted on attempt $retryCount: $e');
-        if (sink != null) {
-          try {
-            await sink.flush();
-            await sink.close();
-          } catch (_) {}
-        }
-        retryCount++;
-        if (retryCount >= maxRetries) {
-          rethrow;
-        }
-        // Exponential backoff before resuming
-        await Future.delayed(Duration(milliseconds: 500 * retryCount));
       }
+      return false;
+    } catch (e) {
+      debugPrint('[UpdateService] Download failed for $url: $e');
+      if (await tempFile.exists()) {
+        try { await tempFile.delete(); } catch (_) {}
+      }
+      return false;
     }
-    return false;
   }
 }
 

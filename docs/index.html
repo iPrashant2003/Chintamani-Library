@@ -10,6 +10,21 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script>
+    // ── Universal API Base URL Interceptor ──
+    // Ensures seamless API requests when portal is hosted on GitHub Pages, Render, or local filesystem
+    (function() {
+      const _origFetch = window.fetch;
+      window.fetch = function(resource, init) {
+        if (typeof resource === 'string' && resource.startsWith('/portal/')) {
+          const origin = window.location.origin || '';
+          if (origin.includes('github.io') || window.location.protocol === 'file:') {
+            resource = 'https://chintamani-backend.onrender.com' + resource;
+          }
+        }
+        return _origFetch(resource, init);
+      };
+    })();
+
     tailwind.config = {
       theme: {
         extend: {
@@ -644,8 +659,8 @@
       <div id="reg-content-step-2" class="hidden glass-card p-5 space-y-4">
         <div class="border-b border-white/10 pb-2.5 flex items-center justify-between">
           <div>
-            <h3 class="text-sm font-bold text-white">02. Member Photo & ID</h3>
-            <p class="text-xs text-gray-400">Upload your selfie/photo for member ID card</p>
+            <h3 class="text-sm font-bold text-white">02. Student Photo & ID</h3>
+            <p class="text-xs text-gray-400">Upload student photo for ID card & verification</p>
           </div>
           <div class="px-2.5 py-1 rounded-full bg-gold-500/15 border border-gold-400/40 text-gold-300 text-[10px] font-extrabold flex items-center space-x-1">
             <i data-lucide="map-pin" class="w-3 h-3 text-gold-400"></i>
@@ -653,20 +668,56 @@
           </div>
         </div>
 
-        <!-- Live Camera Selfie -->
-        <div class="space-y-1.5">
-          <label class="text-xs font-semibold text-gold-400 flex items-center space-x-1.5">
-            <i data-lucide="camera" class="w-3.5 h-3.5"></i>
-            <span>Applicant Selfie / Photo *</span>
-          </label>
-          <div class="p-4 rounded-xl bg-black/40 border border-dashed border-gold-500/30 text-center relative cursor-pointer hover:bg-black/60 transition" onclick="document.getElementById('file-selfie').click()">
-            <input type="file" id="file-selfie" accept="image/*" capture="user" class="hidden" onchange="previewImage(this, 'preview-selfie-box')">
-            <div id="preview-selfie-box" class="flex flex-col items-center justify-center py-2 text-gray-400">
-              <i data-lucide="camera" class="w-7 h-7 text-gold-400 mb-1"></i>
-              <span class="text-xs font-semibold text-white">Tap to Take Selfie or Select Photo</span>
-              <span class="text-[10px] text-gray-400 mt-0.5">Used for Member ID Card & Attendance</span>
+        <!-- Student Photo Upload (Device storage / Gallery, Max 5MB, Branch-Scoped) -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-gold-400 flex items-center space-x-1.5">
+              <i data-lucide="image" class="w-3.5 h-3.5"></i>
+              <span>Student Photo *</span>
+            </label>
+            <span class="text-[10px] text-gray-400">Max 5 MB (JPG, PNG, WEBP)</span>
+          </div>
+
+          <div id="student-photo-container" class="relative rounded-2xl bg-black/50 border border-dashed border-gold-500/40 p-4 transition-all duration-200">
+            <!-- Hidden File Input (NO capture attribute — opens device file picker / gallery) -->
+            <input type="file" id="file-student-photo" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" class="hidden" onchange="handleStudentPhotoSelected(this)">
+
+            <!-- Empty / Selection State -->
+            <div id="student-photo-empty" class="flex flex-col items-center justify-center py-4 cursor-pointer hover:opacity-90 transition text-center" onclick="document.getElementById('file-student-photo').click()">
+              <div class="w-12 h-12 rounded-2xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center mb-2 shadow-inner">
+                <i data-lucide="upload-cloud" class="w-6 h-6 text-gold-400"></i>
+              </div>
+              <span class="text-xs font-bold text-white mb-0.5">Upload Student Photo</span>
+              <span class="text-[11px] text-gray-400">Select from Gallery or Device Storage</span>
+              <button type="button" class="mt-3 px-4 py-1.5 rounded-xl bg-gold-500/20 border border-gold-400/40 text-gold-300 text-xs font-bold hover:bg-gold-500/30 transition flex items-center space-x-1.5">
+                <i data-lucide="folder-open" class="w-3.5 h-3.5"></i>
+                <span>Choose Photo</span>
+              </button>
             </div>
-            <input type="hidden" id="url-selfie">
+
+            <!-- Preview / Active State (Hidden by default) -->
+            <div id="student-photo-preview-wrap" class="hidden flex flex-col items-center">
+              <div class="relative w-full max-w-[200px] aspect-[3/4] rounded-xl overflow-hidden border-2 border-gold-500/50 shadow-xl mb-3 bg-black">
+                <img id="student-photo-preview-img" src="" alt="Student Photo Preview" class="w-full h-full object-cover">
+              </div>
+              <div class="flex items-center space-x-2 w-full justify-center">
+                <button type="button" onclick="document.getElementById('file-student-photo').click()" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-semibold text-gray-200 flex items-center space-x-1">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-gold-400"></i>
+                  <span>Change Photo</span>
+                </button>
+                <button type="button" onclick="removeStudentPhoto()" class="px-3 py-1.5 rounded-lg bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-xs font-semibold text-red-300 flex items-center space-x-1">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  <span>Remove</span>
+                </button>
+              </div>
+              <p id="student-photo-filename" class="text-[10px] text-gray-400 mt-2 truncate max-w-[240px]"></p>
+            </div>
+
+            <!-- Error message container -->
+            <div id="student-photo-error" class="hidden mt-2 p-2.5 rounded-xl bg-red-500/15 border border-red-500/40 text-red-300 text-xs flex items-center space-x-1.5">
+              <i data-lucide="alert-circle" class="w-4 h-4 text-red-400 shrink-0"></i>
+              <span id="student-photo-error-text"></span>
+            </div>
           </div>
         </div>
 
@@ -713,8 +764,8 @@
         <!-- Plan Selection -->
         <div>
           <label class="text-[11px] font-semibold text-gray-300 block mb-1.5">Membership Plan *</label>
-          <div class="space-y-2">
-            <div onclick="selectPlan('PLAN_6H', 500, '6 Hours Shift')" class="p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition" id="plan-opt-6h">
+          <div id="plan-options-container" class="space-y-2">
+            <div onclick="selectPlanById('PLAN_6H', 500, '6 Hours Shift')" class="p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition" id="plan-opt-PLAN_6H">
               <div>
                 <span class="text-xs font-bold text-white">6 Hours Single Shift</span>
                 <p class="text-[10px] text-gray-400">Morning, Afternoon or Evening</p>
@@ -722,7 +773,7 @@
               <span class="text-sm font-bold text-emerald-400">₹500<span class="text-[10px] text-gray-400 font-normal">/mo</span></span>
             </div>
 
-            <div onclick="selectPlan('PLAN_12H', 800, '12 Hours Double Shift')" class="p-3 rounded-xl border border-gold-500/50 bg-gold-500/10 cursor-pointer flex items-center justify-between transition" id="plan-opt-12h">
+            <div onclick="selectPlanById('PLAN_12H', 800, '12 Hours Double Shift')" class="p-3 rounded-xl border border-gold-500/50 bg-gold-500/10 cursor-pointer flex items-center justify-between transition" id="plan-opt-PLAN_12H">
               <div>
                 <span class="text-xs font-bold text-white">12 Hours Double Shift</span>
                 <p class="text-[10px] text-gold-300/80">06:00 AM – 06:00 PM or 12:00 PM – 12:00 AM</p>
@@ -730,7 +781,7 @@
               <span class="text-sm font-bold text-gold-400">₹800<span class="text-[10px] text-gray-400 font-normal">/mo</span></span>
             </div>
 
-            <div onclick="selectPlan('PLAN_24H', 1000, '24 Hours Full Day (Dedicated Seat)')" class="p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition" id="plan-opt-24h">
+            <div onclick="selectPlanById('PLAN_24H', 1000, '24 Hours Full Day (Dedicated Seat)')" class="p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition" id="plan-opt-PLAN_24H">
               <div>
                 <span class="text-xs font-bold text-white">24 Hours Full Day (Dedicated)</span>
                 <p class="text-[10px] text-gray-400">24/7 dedicated personal study station</p>
@@ -902,9 +953,9 @@
           </div>
 
           <!-- Deep Link Intent Button -->
-          <a id="btn-upi-intent" href="upi://pay?pa=prashantmanitripathi2003-2@oksbi&pn=Prashant%20Mani%20Tripathi&cu=INR" class="block w-full py-3 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 active:scale-95 transition">
+          <button onclick="launchUpiIntent()" class="block w-full py-3 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 active:scale-95 transition">
             Pay via Installed UPI App
-          </a>
+          </button>
         </div>
 
         <!-- Payment Verification Form -->
@@ -940,22 +991,22 @@
           <div class="space-y-1.5 pt-1">
             <label class="text-xs font-semibold text-gold-400 flex items-center space-x-1.5">
               <i data-lucide="image" class="w-3.5 h-3.5"></i>
-              <span>Upload Payment Screenshot *</span>
+              <span>Upload Payment Screenshot * <span class="text-rose-400 font-bold text-[10px] uppercase">(Compulsory)</span></span>
             </label>
             <div class="p-3.5 rounded-xl bg-black/40 border border-dashed border-gold-500/30 text-center relative cursor-pointer hover:bg-black/60 transition" onclick="document.getElementById('file-pay-screenshot').click()">
               <input type="file" id="file-pay-screenshot" accept="image/*" class="hidden" onchange="previewImage(this, 'preview-pay-screenshot-box')">
               <div id="preview-pay-screenshot-box" class="flex flex-col items-center justify-center py-1 text-gray-400">
                 <i data-lucide="upload-cloud" class="w-6 h-6 text-gold-400 mb-1"></i>
-                <span class="text-xs font-semibold text-white">Tap to Upload UPI Screenshot</span>
-                <span class="text-[10px] text-gray-400">Capture from UPI success screen</span>
+                <span class="text-xs font-semibold text-white">Tap to Upload UPI Screenshot *</span>
+                <span class="text-[10px] text-amber-300">Compulsory for payment verification (Max 5MB)</span>
               </div>
               <input type="hidden" id="url-pay-screenshot">
             </div>
           </div>
 
           <div>
-            <label class="text-[11px] font-semibold text-gray-300 block mb-1">Transaction UTR / Reference ID (12 digits) *</label>
-            <input id="pay-utr" type="text" maxlength="16" placeholder="e.g. 423984729103" class="glass-field font-mono">
+            <label class="text-[11px] font-semibold text-gray-300 block mb-1">Transaction UTR / Reference ID <span class="text-gray-400 text-[10px] font-normal">(Optional if screenshot uploaded)</span></label>
+            <input id="pay-utr" type="text" maxlength="24" placeholder="Optional 12-digit UPI UTR" class="glass-field font-mono">
           </div>
 
           <button onclick="submitPaymentProof()" class="w-full py-3.5 rounded-xl btn-gold text-xs flex items-center justify-center space-x-1.5 mt-2">
@@ -1282,9 +1333,14 @@
   <!-- ================================================================= -->
   <script>
     // ── API & Network Configuration ──
+    // When served from GitHub Pages (docs/), always use the production backend as base.
     const urlParams = new URLSearchParams(window.location.search);
     const customApi = urlParams.get('api');
-    const API_BASE = customApi ? customApi.replace(/\/+$/, '') : '';
+    const GITHUB_PAGES_DEFAULT = 'https://chintamani-backend.onrender.com';
+    const isGitHubPages = !window.location.hostname || window.location.hostname.includes('github.io');
+    const API_BASE = customApi
+      ? customApi.replace(/\/+$/, '')
+      : (isGitHubPages ? GITHUB_PAGES_DEFAULT : '');
 
     if (API_BASE) {
       const origFetch = window.fetch;
@@ -1325,7 +1381,9 @@
     // ── Global State ──
     let currentViewingBranch = localStorage.getItem('cml_selected_branch') || 'mehdawal';
     let selectedPlanCode = 'PLAN_12H';
+    let selectedPlanId = null;
     let selectedPlanPrice = 800;
+    let availablePlans = [];
     let selectedSeatNumber = 'M01';
     let currentRating = 5;
 
@@ -1384,6 +1442,7 @@
         heroBranch.textContent = BRANCH_CONFIG[branchKey].badgeName;
       }
       fetchAndUpdateSeatStats(branchKey);
+      fetchAndRenderPlans();
 
       // 4. Update Attendance Tag
       const attBranch = document.getElementById('att-branch-tag');
@@ -1475,9 +1534,10 @@
         if (!phone || phone.length < 10) { showToast('Please enter a valid 10-digit WhatsApp number'); return; }
       }
 
-      // Step 2 -> 3: Refresh seat matrix for active branch
+      // Step 2 -> 3: Refresh seat matrix and load plans for active branch
       if (step === 3) {
         refreshBranchSeats();
+        fetchAndRenderPlans();
       }
 
       // Toggle step cards
@@ -1505,26 +1565,72 @@
       initIcons();
     }
 
-    // ── Plan Selection in Registration ──
-    function selectPlan(code, price, label) {
-      selectedPlanCode = code;
-      selectedPlanPrice = price;
-
-      ['6h', '12h', '24h'].forEach(p => {
-        const el = document.getElementById(`plan-opt-${p}`);
-        if (el) {
-          el.className = 'p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition';
+    // ── Dynamic Plan Loading from Backend API ──
+    async function fetchAndRenderPlans() {
+      const container = document.getElementById('plan-options-container');
+      if (!container) return;
+      try {
+        const res = await fetch(`/portal/plans?branchId=${encodeURIComponent(currentViewingBranch)}`);
+        if (!res.ok) throw new Error('API status ' + res.status);
+        const plans = await res.json();
+        if (plans && Array.isArray(plans) && plans.length > 0) {
+          availablePlans = plans;
+          container.innerHTML = '';
+          plans.forEach((plan, idx) => {
+            const isDefault = (selectedPlanId ? plan.id === selectedPlanId : idx === 0);
+            if (isDefault) {
+              selectedPlanId = plan.id;
+              selectedPlanCode = plan.id;
+              selectedPlanPrice = plan.price;
+              const summaryAmt = document.getElementById('summary-total-amt');
+              const summaryPlan = document.getElementById('summary-plan-text');
+              if (summaryAmt) summaryAmt.textContent = `₹${plan.price}`;
+              if (summaryPlan) summaryPlan.textContent = plan.name;
+            }
+            const el = document.createElement('div');
+            el.id = `plan-opt-${plan.id}`;
+            const priceColor = plan.price >= 1000 ? 'text-purple-300' : (plan.price <= 600 ? 'text-emerald-400' : 'text-gold-400');
+            el.className = isDefault
+              ? 'p-3 rounded-xl border border-gold-500/60 bg-gold-500/10 cursor-pointer flex items-center justify-between transition'
+              : 'p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition';
+            el.onclick = () => selectPlanById(plan.id, plan.price, plan.name);
+            el.innerHTML = `
+              <div>
+                <span class="text-xs font-bold text-white">${plan.name}</span>
+                <p class="text-[10px] text-gray-400">${plan.badge || (plan.durationDays + ' Days Membership')}</p>
+              </div>
+              <span class="text-sm font-bold ${priceColor}">₹${plan.price}<span class="text-[10px] text-gray-400 font-normal">/mo</span></span>
+            `;
+            container.appendChild(el);
+          });
+          return;
         }
-      });
+      } catch (e) {
+        console.warn('[Portal] Failed to load plans dynamically, using defaults:', e);
+      }
+    }
 
-      const activeEl = document.getElementById(`plan-opt-${code.replace('PLAN_', '').toLowerCase()}`);
+    function selectPlanById(id, price, label) {
+      selectedPlanId = id;
+      selectedPlanCode = id;
+      selectedPlanPrice = price;
+      document.querySelectorAll('[id^="plan-opt-"]').forEach(el => {
+        el.className = 'p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-gold-500/40 flex items-center justify-between transition';
+      });
+      const activeEl = document.getElementById(`plan-opt-${id}`);
       if (activeEl) {
         activeEl.className = 'p-3 rounded-xl border border-gold-500/60 bg-gold-500/10 cursor-pointer flex items-center justify-between transition';
       }
-
-      document.getElementById('summary-total-amt').textContent = `₹${price}`;
-      document.getElementById('summary-plan-text').textContent = label;
+      const summaryAmt = document.getElementById('summary-total-amt');
+      const summaryPlan = document.getElementById('summary-plan-text');
+      if (summaryAmt) summaryAmt.textContent = `₹${price}`;
+      if (summaryPlan) summaryPlan.textContent = label;
       refreshBranchSeats();
+    }
+
+    // ── Plan Selection in Registration (Backward Compatible) ──
+    function selectPlan(code, price, label) {
+      selectPlanById(code, price, label);
     }
 
     // ── Architectural Single-Hall Seat Matrix (65 Mehdawal / 72 Khalilabad) ──
@@ -1670,80 +1776,173 @@
     }
 
     // ── Submit Registration (Strictly to Active Global Branch) ──
+    let _activeApplicationId = null;
+
     async function submitRegistration() {
-      const name = document.getElementById('reg-name').value.trim();
-      const phone = document.getElementById('reg-phone').value.trim();
-      if (!name || !phone || phone.length < 10) {
-        showToast('Please complete personal details');
+      const name = (document.getElementById('reg-name')?.value || '').trim();
+      const rawPhone = (document.getElementById('reg-phone')?.value || '').trim();
+      const phone = rawPhone.replace(/[^\d]/g, '');
+
+      if (!name) {
+        showToast('Please enter full applicant name');
         goToRegStep(1);
         return;
       }
 
-      const timing = document.getElementById('reg-timing').value;
-      const branchConfig = BRANCH_CONFIG[currentViewingBranch];
-      const appId = 'REG-' + Math.floor(100000 + Math.random() * 900000);
+      if (!phone || phone.length < 10) {
+        showToast('Please enter a valid 10-digit mobile number');
+        goToRegStep(1);
+        return;
+      }
 
-      document.getElementById('reg-succ-id').textContent = appId;
-      document.getElementById('reg-succ-branch').textContent = branchConfig.name;
-      document.getElementById('reg-succ-seat').textContent = `Seat ${selectedSeatNumber}`;
-      document.getElementById('reg-succ-amt').textContent = selectedPlanPrice;
+      const dobVal = (document.getElementById('reg-dob')?.value || '').trim();
+      if (dobVal) {
+        const parsedDob = new Date(dobVal);
+        if (parsedDob > new Date()) {
+          showToast('Date of birth cannot be in the future');
+          goToRegStep(1);
+          return;
+        }
+      }
 
-      // Persist local registration context (without large image blobs to avoid storage quota errors)
-      try {
-        localStorage.setItem('cml_student_record', JSON.stringify({
-          name,
-          phone,
-          branch: currentViewingBranch,
-          branchName: branchConfig.name,
-          seatNumber: selectedSeatNumber,
-          applicationId: appId,
-          timestamp: Date.now()
-        }));
-      } catch (_) { /* localStorage quota exceeded — non-critical, skip */ }
-
-      // Gather compressed image data (stored by previewImage())
-      const photoData = _imgStore['preview-selfie-box'] || null;
-      const aadhaarFrontData = _imgStore['preview-aadhaar-front-box'] || null;
-      const aadhaarBackData = _imgStore['preview-aadhaar-back-box'] || null;
+      const btn = document.querySelector('#reg-content-step-3 button[onclick="submitRegistration()"]') || event?.currentTarget;
+      let origHtml = '';
+      if (btn) {
+        origHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Saving Registration...';
+      }
 
       try {
+        const timing = document.getElementById('reg-timing')?.value || 'Morning Shift (06:00 AM – 12:00 PM)';
+        const branchConfig = BRANCH_CONFIG[currentViewingBranch] || BRANCH_CONFIG['mehdawal'];
+
+        // Upload images to cloud storage if provided
+        let photoUrl = null;
+        let aadhaarFrontUrl = null;
+        let aadhaarBackUrl = null;
+
+        const photoBoxKey = _fileStore['file-student-photo'] ? 'file-student-photo' : (_fileStore['preview-selfie-box'] ? 'preview-selfie-box' : null);
+        if (photoBoxKey) {
+          if (btn) btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Uploading Student Photo...';
+          showToast('Uploading student photo to cloud... ⏳');
+          try {
+            photoUrl = await uploadPortalFile(photoBoxKey, 'photos');
+          } catch (upErr) {
+            console.warn('Student photo upload warning:', upErr);
+          }
+        }
+
+        const aadhaarBoxKey = _fileStore['preview-aadhaar-box'] ? 'preview-aadhaar-box' : (_fileStore['preview-aadhaar-front-box'] ? 'preview-aadhaar-front-box' : null);
+        if (aadhaarBoxKey) {
+          if (btn) btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Uploading Aadhaar Document...';
+          try {
+            aadhaarFrontUrl = await uploadPortalFile(aadhaarBoxKey, 'documents');
+          } catch (upErr) {
+            console.warn('Aadhaar upload warning:', upErr);
+          }
+        }
+
+        if (btn) btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Submitting Application...';
+
         const regPayload = {
           name,
           phone,
-          email: (document.getElementById('reg-email')?.value || '').trim(),
-          dob: document.getElementById('reg-dob')?.value || '',
-          address: (document.getElementById('reg-address')?.value || '').trim(),
-          gender: document.getElementById('reg-gender')?.value || '',
-          aadhaarNumber: (document.getElementById('reg-aadhaar')?.value || '').replace(/\s/g, ''),
-          emergencyContact: (document.getElementById('reg-emergency')?.value || '').trim(),
+          email: (document.getElementById('reg-email')?.value || '').trim() || undefined,
+          dob: document.getElementById('reg-dob')?.value || undefined,
+          address: (document.getElementById('reg-address')?.value || '').trim() || undefined,
+          gender: document.getElementById('reg-gender')?.value || undefined,
+          aadhaarNumber: (document.getElementById('reg-aadhaar')?.value || '').replace(/\s/g, '') || undefined,
+          emergencyContact: (document.getElementById('reg-emergency')?.value || '').trim() || undefined,
           batch: timing,
-          course: (document.getElementById('reg-course')?.value || '').trim(),
-          institute: (document.getElementById('reg-institute')?.value || '').trim(),
-          occupation: (document.getElementById('reg-occupation')?.value || '').trim(),
-          planId: selectedPlanCode,
+          course: (document.getElementById('reg-course')?.value || '').trim() || undefined,
+          institute: (document.getElementById('reg-institute')?.value || '').trim() || undefined,
+          occupation: (document.getElementById('reg-occupation')?.value || '').trim() || undefined,
+          planId: selectedPlanId || selectedPlanCode || 'PLAN_12H',
           branch: currentViewingBranch,
           branchId: currentViewingBranch,
           seatNumber: selectedSeatNumber,
-          // Image data (compressed JPEG base64 or null)
-          photoUrl: photoData,
-          aadhaarFrontUrl: aadhaarFrontData,
-          aadhaarBackUrl: aadhaarBackData,
+          photoUrl: photoUrl || undefined,
+          aadhaarFrontUrl: aadhaarFrontUrl || undefined,
+          aadhaarBackUrl: aadhaarBackUrl || undefined,
         };
-        await fetch('/portal/register', {
+
+        const res = await fetch('/portal/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(regPayload)
         });
-      } catch (_) {}
 
-      document.getElementById('reg-content-step-3').classList.add('hidden');
-      document.getElementById('reg-success-box').classList.remove('hidden');
-      initIcons();
-      showToast(`Registration submitted for ${branchConfig.name}!`);
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.message || 'Registration submission failed. Please try again.');
+        }
+
+        const resJson = await res.json().catch(() => ({}));
+        const appId = resJson.applicationId || ('REG-' + Math.floor(100000 + Math.random() * 900000));
+        _activeApplicationId = appId;
+
+        // Persist local context safely
+        try {
+          localStorage.setItem('cml_student_record', JSON.stringify({
+            name,
+            phone,
+            branch: currentViewingBranch,
+            branchName: branchConfig.name,
+            seatNumber: selectedSeatNumber,
+            applicationId: appId,
+            timestamp: Date.now()
+          }));
+        } catch (_) {}
+
+        document.getElementById('reg-succ-id').textContent = appId;
+        document.getElementById('reg-succ-branch').textContent = branchConfig.name;
+        document.getElementById('reg-succ-seat').textContent = `Seat ${selectedSeatNumber}`;
+        document.getElementById('reg-succ-amt').textContent = selectedPlanPrice || 800;
+
+        document.getElementById('reg-content-step-3').classList.add('hidden');
+        document.getElementById('reg-success-box').classList.remove('hidden');
+        initIcons();
+        showToast(`✓ Registration Submitted for ${branchConfig.name}! Application: ${appId}`);
+
+        // Automatically prefill and transition to final payment stage seamlessly
+        goToPaymentFromReg();
+      } catch (e) {
+        console.error('Registration submit error:', e);
+        showToast(e.message || 'Network error submitting registration. Please try again.');
+        alert(e.message || 'Failed to submit registration. Please check your connection and try again.');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml || '<span>Proceed to Payment</span>';
+          initIcons();
+        }
+      }
     }
 
     function goToPaymentFromReg() {
+      const regPhone = document.getElementById('reg-phone')?.value?.trim();
+      const regName = document.getElementById('reg-name')?.value?.trim();
+      if (regPhone) {
+        const payPhone = document.getElementById('pay-phone');
+        if (payPhone) payPhone.value = regPhone.replace(/[^\d]/g, '');
+      }
+      if (regName) {
+        const payName = document.getElementById('pay-name');
+        if (payName) payName.value = regName;
+      }
+      const payAmount = document.getElementById('pay-amount');
+      if (payAmount) payAmount.value = selectedPlanPrice || 800;
+      const payType = document.getElementById('pay-type');
+      if (payType) payType.value = 'MEMBERSHIP';
+
+      switchPaymentBranch(currentViewingBranch);
       showView('payment');
+
+      // Show payment prefill toast
+      if (_activeApplicationId) {
+        showToast(`Proceeding to payment for ${_activeApplicationId} (₹${selectedPlanPrice || 800})`);
+      }
     }
 
     // ── Member Self-Attendance (Strict Global Branch Context) ──
@@ -1840,37 +2039,144 @@
       });
     }
 
-    // ── Submit Payment Proof (Strictly for Active Branch) ──
+    // ── Launch UPI Intent with dynamic amount & payee ──
+    function launchUpiIntent() {
+      const amountVal = parseFloat(document.getElementById('pay-amount')?.value) || selectedPlanPrice || 800;
+      const formattedAmount = amountVal.toFixed(2);
+      const upiId = 'prashantmanitripathi2003-2@oksbi';
+      const payeeName = 'Prashant Mani Tripathi';
+      const note = 'Chintamani Library Fee';
+
+      const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${formattedAmount}&cu=INR&tn=${encodeURIComponent(note)}`;
+
+      const isAndroid = /android/i.test(navigator.userAgent);
+      if (isAndroid) {
+        const start = Date.now();
+        window.location.href = upiUri;
+        setTimeout(() => {
+          if (Date.now() - start < 1800) {
+            showToast('If UPI app didn\'t open, scan QR or copy UPI ID above');
+          }
+        }, 1500);
+      } else {
+        window.open(upiUri, '_blank');
+        showToast('Redirecting to UPI app or scan the QR code above');
+      }
+    }
+
+    // ── Submit Payment Proof (Mandatory Screenshot + Optional UTR) ──
     async function submitPaymentProof() {
-      const phone = document.getElementById('pay-phone').value.trim();
+      const rawPhone = document.getElementById('pay-phone')?.value || '';
+      const phone = rawPhone.replace(/[^\d]/g, '').trim();
       const utr = document.getElementById('pay-utr').value.trim();
       const amount = document.getElementById('pay-amount').value.trim();
+      const memberName = document.getElementById('pay-name')?.value?.trim() || '';
 
-      if (!phone || phone.length < 10) { showToast('Please enter your 10-digit registered number'); return; }
-      if (!utr || utr.length < 6) { showToast('Please enter the 12-digit UTR or Txn ID'); return; }
+      if (!phone || phone.length < 10) {
+        showToast('Please enter your 10-digit registered number');
+        return;
+      }
 
-      const refId = 'PAY-' + Math.floor(100000 + Math.random() * 900000);
-      document.getElementById('pay-succ-ref').textContent = refId;
+      // Check screenshot existence (file selected or already uploaded URL)
+      const file = _fileStore['preview-pay-screenshot-box'];
+      let screenshotUrl = document.getElementById('url-pay-screenshot')?.value?.trim() || null;
+
+      if (!file && !screenshotUrl) {
+        showToast('Payment screenshot is compulsory! Please attach your UPI screenshot.');
+        alert('Payment screenshot is required.\n\nPlease tap "Upload UPI Screenshot" to select your payment proof before submitting.');
+        return;
+      }
+
+      // Validate file size and type if new file
+      if (file) {
+        if (!file.type || !file.type.startsWith('image/')) {
+          showToast('Invalid file format. Please upload an image file (JPG, PNG, WEBP).');
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          showToast('Payment screenshot must be smaller than 5 MB.');
+          return;
+        }
+      }
+
+      const btn = event?.currentTarget || document.querySelector('button[onclick="submitPaymentProof()"]');
+      let originalBtnHtml = '';
+      if (btn) {
+        originalBtnHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Uploading Screenshot...';
+      }
 
       try {
-        await fetch('/portal/payment', {
+        if (!screenshotUrl && file) {
+          showToast('Uploading payment screenshot... ⏳');
+          screenshotUrl = await uploadPortalFile('preview-pay-screenshot-box', 'payments');
+          if (!screenshotUrl) {
+            showToast('Failed to upload screenshot. Please check connection and try again.');
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = originalBtnHtml;
+            }
+            return;
+          }
+          document.getElementById('url-pay-screenshot').value = screenshotUrl;
+        }
+
+        if (!screenshotUrl) {
+          showToast('Payment screenshot could not be verified. Please re-upload.');
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalBtnHtml;
+          }
+          return;
+        }
+
+        if (btn) {
+          btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Submitting Proof...';
+        }
+
+        const res = await fetch('/portal/payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             memberPhone: phone,
-            amount: parseFloat(amount) || selectedPlanPrice,
+            memberName: memberName || undefined,
+            amount: parseFloat(amount) || selectedPlanPrice || 800,
             paymentType: document.getElementById('pay-type').value,
-            txnRef: utr,
+            txnRef: utr || undefined,
+            screenshotUrl: screenshotUrl,
             upiId: 'prashantmanitripathi2003-2@oksbi',
             branchId: currentViewingBranch,
             branch: currentViewingBranch
           })
         });
-      } catch (_) {}
 
-      document.getElementById('pay-success-box').classList.remove('hidden');
-      initIcons();
-      showToast('✓ Payment Proof Submitted! Pending Verification');
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          showToast(errData.message || 'Payment proof submission failed');
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalBtnHtml;
+          }
+          return;
+        }
+
+        const data = await res.json().catch(() => ({}));
+        if (data.referenceId || data.paymentId || data.verificationId) {
+          const pData = data.data || data; document.getElementById('pay-succ-ref').textContent = pData.referenceId || pData.verification?.id || pData.payment?.id || pData.verificationId || pData.paymentId || 'PENDING';
+        }
+        document.getElementById('pay-success-box').classList.remove('hidden');
+        initIcons();
+        showToast('✓ Payment Proof Submitted! Pending Admin Verification');
+      } catch (e) {
+        showToast(e.message || 'Network error submitting payment');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalBtnHtml || '<span>Submit Payment for Verification</span>';
+          initIcons();
+        }
+      }
     }
 
     // ── Rating & Feedback ──
@@ -1899,7 +2205,7 @@
       if (!review) { showToast('Please write your review comments'); return; }
 
       try {
-        await fetch('/portal/feedback', {
+        const res = await fetch('/portal/feedback', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1912,11 +2218,17 @@
             branch: currentViewingBranch
           })
         });
-      } catch (_) {}
-
-      document.getElementById('fb-success-box').classList.remove('hidden');
-      initIcons();
-      showToast('Thank you for your review!');
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          showToast(errData.message || 'Feedback submission failed');
+          return;
+        }
+        document.getElementById('fb-success-box').classList.remove('hidden');
+        initIcons();
+        showToast('Thank you for your review!');
+      } catch (e) {
+        showToast(e.message || 'Network error submitting review');
+      }
     }
 
     // ── Complaints ──
@@ -1940,7 +2252,7 @@
       document.getElementById('cmp-succ-id').textContent = refId;
 
       try {
-        await fetch('/portal/complaint', {
+        const res = await fetch('/portal/complaint', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1952,49 +2264,155 @@
             branch: currentViewingBranch
           })
         });
-      } catch (_) {}
-
-      document.getElementById('cmp-success-box').classList.remove('hidden');
-      initIcons();
-      showToast('Complaint ticket registered successfully');
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          showToast(errData.message || 'Failed to register complaint');
+          return;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (data.complaintId) {
+          document.getElementById('cmp-succ-id').textContent = data.complaintId;
+        }
+        document.getElementById('cmp-success-box').classList.remove('hidden');
+        initIcons();
+        showToast('Complaint ticket registered successfully');
+      } catch (e) {
+        showToast(e.message || 'Network error submitting complaint ticket');
+      }
     }
 
-    // ── Image Preview Helper ──
-    // Compressed image store (keyed by boxId)
+    // ── Image Handling & Upload Helpers ──
     const _imgStore = {};
+    const _fileStore = {};
+    const MAX_PHOTO_BYTES = 5 * 1024 * 1024; // 5 MB Strict Limit
+
+    function handleStudentPhotoSelected(input) {
+      const errBox = document.getElementById('student-photo-error');
+      const errText = document.getElementById('student-photo-error-text');
+      if (errBox) errBox.classList.add('hidden');
+
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+
+      // 1. Validate file size (Maximum 5MB)
+      if (file.size > MAX_PHOTO_BYTES) {
+        input.value = '';
+        if (errText) errText.textContent = 'Photo is larger than 5 MB. Please choose a smaller image.';
+        if (errBox) errBox.classList.remove('hidden');
+        initIcons();
+        showToast('Photo is larger than 5 MB. Please choose a smaller image.');
+        return;
+      }
+
+      // 2. Validate file type (JPG, PNG, WEBP, HEIC)
+      const allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
+      const ext = (file.name || '').split('.').pop().toLowerCase();
+      if (!file.type.startsWith('image/') && !allowedExts.includes(ext)) {
+        input.value = '';
+        if (errText) errText.textContent = 'Invalid file format. Please select a valid photo (JPG, PNG, WEBP).';
+        if (errBox) errBox.classList.remove('hidden');
+        initIcons();
+        showToast('Invalid file format. Please select JPG, PNG or WEBP.');
+        return;
+      }
+
+      // 3. Memory-Safe Zero-Copy Preview using URL.createObjectURL
+      const previewImg = document.getElementById('student-photo-preview-img');
+      const emptyBox = document.getElementById('student-photo-empty');
+      const previewWrap = document.getElementById('student-photo-preview-wrap');
+      const fnLabel = document.getElementById('student-photo-filename');
+
+      if (previewImg) {
+        if (previewImg.dataset.objectUrl) {
+          URL.revokeObjectURL(previewImg.dataset.objectUrl);
+        }
+        const objUrl = URL.createObjectURL(file);
+        previewImg.src = objUrl;
+        previewImg.dataset.objectUrl = objUrl;
+      }
+
+      if (emptyBox) emptyBox.classList.add('hidden');
+      if (previewWrap) previewWrap.classList.remove('hidden');
+      if (fnLabel) fnLabel.textContent = `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+
+      // Store in file store for upload
+      _fileStore['file-student-photo'] = file;
+      _fileStore['preview-selfie-box'] = file;
+      initIcons();
+    }
+
+    function removeStudentPhoto() {
+      const input = document.getElementById('file-student-photo');
+      if (input) input.value = '';
+      const previewImg = document.getElementById('student-photo-preview-img');
+      if (previewImg && previewImg.dataset.objectUrl) {
+        URL.revokeObjectURL(previewImg.dataset.objectUrl);
+        previewImg.src = '';
+        delete previewImg.dataset.objectUrl;
+      }
+      document.getElementById('student-photo-empty')?.classList.remove('hidden');
+      document.getElementById('student-photo-preview-wrap')?.classList.add('hidden');
+      document.getElementById('student-photo-error')?.classList.add('hidden');
+      delete _fileStore['file-student-photo'];
+      delete _fileStore['preview-selfie-box'];
+      initIcons();
+    }
 
     function previewImage(input, boxId) {
       if (!input.files || !input.files[0]) return;
       const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const orig = e.target.result;
-        // Compress via canvas: max 800px wide, JPEG quality 0.72
-        const img = new Image();
-        img.onload = function() {
-          try {
-            const MAX_W = 800;
-            const scale = img.width > MAX_W ? MAX_W / img.width : 1;
-            const w = Math.round(img.width * scale);
-            const h = Math.round(img.height * scale);
-            const canvas = document.createElement('canvas');
-            canvas.width = w; canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
-            const compressed = canvas.toDataURL('image/jpeg', 0.72);
-            _imgStore[boxId] = compressed;
-            const box = document.getElementById(boxId);
-            if (box) box.innerHTML = `<img src="${compressed}" class="w-full h-28 object-cover rounded-lg border border-gold-500/40">`;
-          } catch (_) {
-            // canvas fallback: use original but only for preview, not upload
-            _imgStore[boxId] = orig.length < 500000 ? orig : null;
-            const box = document.getElementById(boxId);
-            if (box) box.innerHTML = `<img src="${orig}" class="w-full h-28 object-cover rounded-lg border border-gold-500/40">`;
-          }
-        };
-        img.src = orig;
-      };
-      reader.readAsDataURL(file);
+
+      // 5MB limit check
+      if (file.size > MAX_PHOTO_BYTES) {
+        input.value = '';
+        showToast('File is larger than 5 MB. Please choose a smaller image.');
+        return;
+      }
+
+      _fileStore[boxId] = file;
+      const box = document.getElementById(boxId);
+      if (box) {
+        const objUrl = URL.createObjectURL(file);
+        box.innerHTML = `<img src="${objUrl}" class="w-full h-28 object-cover rounded-lg border border-gold-500/40">`;
+      }
+    }
+
+    // Branch-isolated upload with disk & cloud fallback
+    async function uploadPortalFile(boxId, folderType = 'photos') {
+      const file = _fileStore[boxId];
+      if (!file) return null;
+
+      // File size validation: 10MB limit
+      if (file.size > 10 * 1024 * 1024) {
+        showToast('File size exceeds 10 MB limit. Please select a smaller image.');
+        return null;
+      }
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file, file.name || 'screenshot.jpg');
+
+        const branchKey = (currentViewingBranch || 'mehdawal').toLowerCase();
+        const res = await fetch(`/portal/upload?branchId=${encodeURIComponent(branchKey)}&folder=${encodeURIComponent(folderType)}`, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const errJson = await res.json().catch(() => ({}));
+          throw new Error(errJson.message || `Upload failed with status ${res.status}`);
+        }
+        const data = await res.json();
+        const finalUrl = data.url || data.data?.url || (typeof data.data === 'string' ? data.data : null);
+        if (!finalUrl) {
+          throw new Error('Server returned invalid upload response');
+        }
+        return finalUrl;
+      } catch (e) {
+        console.error('Portal upload error:', e);
+        showToast(e.message || 'File upload failed. Please try again.');
+        return null;
+      }
     }
 
     // ── Icon Initializer ──
@@ -2008,6 +2426,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       initIcons();
       switchPortalBranch(currentViewingBranch);
+      fetchAndRenderPlans();
     });
   </script>
 </body>

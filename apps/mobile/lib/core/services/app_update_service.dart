@@ -80,8 +80,8 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.8.18';
-  static const currentBuildNumber = 2097;
+  static const currentVersion = '2.8.19';
+  static const currentBuildNumber = 2099;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   /// The update info discovered from cloud manifest, if any.
@@ -89,6 +89,9 @@ class AppUpdateService {
 
   /// Tracks whether the update dialog was shown to the user in this session.
   static bool hasPromptedThisSession = false;
+
+  /// Holds the human-readable explanation if the last download/install attempt failed.
+  String? lastErrorMessage;
 
   static void markPrompted() {
     hasPromptedThisSession = true;
@@ -319,6 +322,7 @@ class AppUpdateService {
     required AppUpdateInfo info,
     required void Function(double progress, int receivedBytes, int totalBytes) onProgress,
   }) async {
+    lastErrorMessage = null;
     if (kIsWeb) {
       if (info.fallbackUrl.isNotEmpty) {
         final uri = Uri.parse(info.fallbackUrl);
@@ -327,10 +331,23 @@ class AppUpdateService {
           return true;
         }
       }
+      lastErrorMessage = 'Update download not supported on web.';
       return false;
     }
 
     try {
+      // Check install unknown packages permission on Android upfront
+      if (Platform.isAndroid) {
+        try {
+          final canInstall = await _platformChannel.invokeMethod<bool>('canInstallPackages') ?? true;
+          if (!canInstall) {
+            await _platformChannel.invokeMethod('openInstallPermissionSetting');
+            lastErrorMessage = 'Please enable "Allow from this source" in Settings, then tap Retry Update.';
+            return false;
+          }
+        } catch (_) {}
+      }
+
       // ALWAYS use internal cache directory (never getExternalCacheDirectories which is under /Android/data/
       // and blocked by Android 11+ Scoped Storage from system PackageInstaller).
       final dir = await getTemporaryDirectory();
@@ -396,7 +413,8 @@ class AppUpdateService {
       }
 
       if (!downloaded) {
-        throw Exception('Could not complete download from any candidate mirror.');
+        lastErrorMessage = 'Could not download update file. Please verify internet and tap Retry.';
+        return false;
       }
 
       // Invoke Android Package Installer via MethodChannel
@@ -405,16 +423,24 @@ class AppUpdateService {
         {'filePath': apkFile.path},
       );
 
-      return success ?? false;
+      if (success == true) {
+        lastErrorMessage = null;
+        return true;
+      } else {
+        lastErrorMessage = 'Package installer did not launch. Tap Retry Update.';
+        return false;
+      }
     } on PlatformException catch (pe) {
       debugPrint('[UpdateService] Platform error during install: ${pe.code} - ${pe.message}');
       if (pe.code == 'UNKNOWN_SOURCES_REQUIRED') {
-        // Directed to OS settings screen to allow install unknown apps; do not open browser
-        return false;
+        lastErrorMessage = 'Please enable "Allow from this source" in Settings, then tap Retry Update.';
+      } else {
+        lastErrorMessage = 'Installation failed: ${pe.message ?? pe.code}';
       }
       return false;
     } catch (e) {
       debugPrint('[UpdateService] In-app update download/install failed: $e');
+      lastErrorMessage = 'Update failed. Check internet and tap Retry Update.';
       return false;
     }
   }
@@ -449,8 +475,8 @@ class AppUpdateService {
         },
         options: Options(
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Linux; Android; Mobile; rv:109.0) Gecko/109.0 Firefox/109.0',
-            'Accept': 'application/vnd.android.package-archive,*/*',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+            'Accept': '*/*',
           },
           followRedirects: true,
           maxRedirects: 15,
@@ -461,9 +487,14 @@ class AppUpdateService {
       if (response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300) {
         if (await tempFile.exists() && await tempFile.length() > 5000000) {
           if (await targetFile.exists()) {
-            await targetFile.delete();
+            try { await targetFile.delete(); } catch (_) {}
           }
-          await tempFile.rename(targetFile.path);
+          try {
+            await tempFile.rename(targetFile.path);
+          } catch (_) {
+            await tempFile.copy(targetFile.path);
+            try { await tempFile.delete(); } catch (_) {}
+          }
           return true;
         }
       }

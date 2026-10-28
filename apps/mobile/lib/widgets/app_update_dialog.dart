@@ -118,7 +118,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     } else {
       setState(() {
         _isDownloading = false;
-        _errorMessage = 'Download failed. Tap "Retry Update" to try again.';
+        _errorMessage = service.lastErrorMessage ?? 'Download failed. Tap "Retry Update" to try again.';
       });
     }
   }

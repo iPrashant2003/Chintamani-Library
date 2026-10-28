@@ -43,7 +43,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     setState(() {
       _isDownloading = true;
       _progress = 0.01;
-      _statusText = 'Connecting to server...';
+      _statusText = 'Connecting to download server...';
       _errorMessage = null;
     });
 
@@ -239,6 +239,29 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
               ),
             ),
 
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF261D0C),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFF854D0E)),
+              ),
+              child: const Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.info_outline, color: Color(0xFFFDE68A), size: 15),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Package conflict fix: If Android says "package conflicts with an existing package", uninstall the older app once, then install.',
+                      style: TextStyle(color: Color(0xFFFDE68A), fontSize: 10.5, height: 1.3),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             if (_errorMessage != null) ...[
               const SizedBox(height: 10),
               Text(
@@ -337,6 +360,25 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: TextButton.icon(
+                onPressed: () async {
+                  final directUrl = (info.arm64ApkUrl != null && info.arm64ApkUrl!.isNotEmpty)
+                      ? info.arm64ApkUrl!
+                      : (info.apkUrl.isNotEmpty ? info.apkUrl : info.fallbackUrl);
+                  final uri = Uri.parse(directUrl);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
+                icon: const Icon(Icons.download_rounded, size: 16, color: Color(0xFF10B981)),
+                label: const Text(
+                  'Direct 1-Tap Browser Download (Chrome / High Speed)',
+                  style: TextStyle(color: Color(0xFF10B981), fontSize: 11.5, fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
             if (info.fallbackUrl.isNotEmpty) ...[
               const SizedBox(height: 10),

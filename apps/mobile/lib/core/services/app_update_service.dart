@@ -80,8 +80,8 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.8.13';
-  static const currentBuildNumber = 2093;
+  static const currentVersion = '2.8.14';
+  static const currentBuildNumber = 2094;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   /// The update info discovered from cloud manifest, if any.
@@ -173,7 +173,7 @@ class AppUpdateService {
 
   // Dedicated high-speed Dio instance for large APK downloads (NO 45s cutoff!)
   final Dio _downloadDio = Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 30),
+    connectTimeout: const Duration(seconds: 15),
     receiveTimeout: const Duration(minutes: 30),
     sendTimeout: const Duration(minutes: 10),
     followRedirects: true,
@@ -347,23 +347,31 @@ class AppUpdateService {
       }
 
       // Detect ABI: Only prioritize arm64 if explicitly confirmed as arm64
-      final deviceAbi = await getDeviceAbi();
-      final isArm64 = deviceAbi != null && deviceAbi.toLowerCase().contains('arm64');
+      final deviceAbi = (await getDeviceAbi())?.toLowerCase() ?? '';
+      final isArm64 = deviceAbi.contains('arm64') || deviceAbi.contains('aarch64');
+      final isArmV7 = deviceAbi.contains('v7') || deviceAbi.contains('arm');
+      final isX86 = deviceAbi.contains('x86') || deviceAbi.contains('amd64');
 
       final downloadCandidates = <String>[
-        // 1. If device is strictly arm64, try optimized arm64 build
+        // 1. Matched architecture first
         if (isArm64) ...[
-          if (info.arm64ApkUrl != null && info.arm64ApkUrl!.isNotEmpty)
-            info.arm64ApkUrl!,
+          if (info.arm64ApkUrl != null && info.arm64ApkUrl!.isNotEmpty) info.arm64ApkUrl!,
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-${info.version}-arm64.apk',
           'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/app-arm64-v8a-release.apk',
           'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-arm64.apk',
+        ] else if (isArmV7) ...[
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-${info.version}-armeabi.apk',
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/app-armeabi-v7a-release.apk',
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-armeabi.apk',
+        ] else if (isX86) ...[
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-${info.version}-x86_64.apk',
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/app-x86_64-release.apk',
         ],
-        // 2. Universal release APK (Works on 100% of devices: 32-bit, 64-bit, x86)
+        // 2. Generic fallbacks (arm64 is 99% of Android devices)
         if (info.apkUrl.isNotEmpty) info.apkUrl,
-        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-Release.apk',
-        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/app-release.apk',
-        // 3. Fallback URL if pointing to an APK
-        if (info.fallbackUrl.isNotEmpty && info.fallbackUrl.endsWith('.apk')) info.fallbackUrl,
+        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/app-arm64-v8a-release.apk',
+        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-arm64.apk',
+        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/app-armeabi-v7a-release.apk',
       ];
 
       bool downloaded = false;
@@ -424,6 +432,7 @@ class AppUpdateService {
     }
 
     try {
+      onProgress(0.02, 0, 0);
       final response = await _downloadDio.download(
         url,
         tempPath,

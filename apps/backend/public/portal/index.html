@@ -1935,7 +1935,7 @@
       const payType = document.getElementById('pay-type');
       if (payType) payType.value = 'MEMBERSHIP';
 
-      switchPaymentBranch(currentViewingBranch);
+      // switchPaymentBranch was removed — payment view is branch-independent; branch context is sent in submit payload
       showView('payment');
 
       // Show payment prefill toast

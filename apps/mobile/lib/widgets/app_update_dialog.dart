@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -37,6 +38,31 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
   double _progress = 0.0;
   String _statusText = '';
   String? _errorMessage;
+  Timer? _connectingTicker;
+  int _connectingSeconds = 0;
+
+  @override
+  void dispose() {
+    _connectingTicker?.cancel();
+    super.dispose();
+  }
+
+  void _startConnectingTicker() {
+    _connectingSeconds = 0;
+    _connectingTicker?.cancel();
+    _connectingTicker = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) { t.cancel(); return; }
+      _connectingSeconds++;
+      // Only show ticker while still "connecting" (progress < 5%)
+      if (_progress < 0.05) {
+        setState(() {
+          _statusText = 'Connecting to download server... (${_connectingSeconds}s)';
+        });
+      } else {
+        t.cancel();
+      }
+    });
+  }
 
   Future<void> _startUpdate() async {
     HapticFeedback.mediumImpact();
@@ -46,6 +72,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
       _statusText = 'Connecting to download server...';
       _errorMessage = null;
     });
+    _startConnectingTicker();
 
     final service = AppUpdateService();
 
@@ -57,6 +84,8 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
       info: widget.updateInfo,
       onProgress: (p, received, total) {
         if (!mounted) return;
+        // Cancel the connecting ticker once bytes start flowing
+        if (p > 0.03) _connectingTicker?.cancel();
         final now = DateTime.now();
         final elapsedMs = now.difference(lastTime).inMilliseconds;
         if (elapsedMs >= 400) {

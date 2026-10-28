@@ -80,8 +80,8 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.8.14';
-  static const currentBuildNumber = 2094;
+  static const currentVersion = '2.8.15';
+  static const currentBuildNumber = 2095;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   /// The update info discovered from cloud manifest, if any.
@@ -173,13 +173,13 @@ class AppUpdateService {
 
   // Dedicated high-speed Dio instance for large APK downloads (NO 45s cutoff!)
   final Dio _downloadDio = Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 15),
+    connectTimeout: const Duration(seconds: 45), // Extended: GitHub CDN redirect can be slow on mobile
     receiveTimeout: const Duration(minutes: 30),
     sendTimeout: const Duration(minutes: 10),
     followRedirects: true,
-    maxRedirects: 10,
+    maxRedirects: 15,
     headers: {
-      'User-Agent': 'ChintamaniLibraryApp-Updater',
+      'User-Agent': 'ChintamaniLibraryApp-Updater/2.8.14',
     },
   ));
 
@@ -432,16 +432,19 @@ class AppUpdateService {
     }
 
     try {
+      // Immediately emit 2% so UI leaves "Connecting" phase and shows progress bar
       onProgress(0.02, 0, 0);
       final response = await _downloadDio.download(
         url,
         tempPath,
         onReceiveProgress: (received, total) {
           if (total > 0) {
-            final p = (received / total).clamp(0.0, 1.0);
+            // Map 3%–100% so the bar never appears to go backwards from 2%
+            final p = 0.03 + (received / total).clamp(0.0, 1.0) * 0.97;
             onProgress(p, received, total);
           } else {
-            onProgress(0.5, received, total);
+            // Unknown size: pulse between 3%–50%
+            onProgress(0.5, received, 0);
           }
         },
         options: Options(
@@ -450,7 +453,8 @@ class AppUpdateService {
             'Accept': 'application/vnd.android.package-archive,*/*',
           },
           followRedirects: true,
-          maxRedirects: 10,
+          maxRedirects: 15,
+          receiveTimeout: const Duration(minutes: 30),
         ),
       );
 

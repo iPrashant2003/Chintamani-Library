@@ -1,7 +1,7 @@
 name: chintamani_library
 description: Chintamani Library Management System
 publish_to: 'none'
-version: 2.8.14+2094
+version: 2.8.15+2095
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

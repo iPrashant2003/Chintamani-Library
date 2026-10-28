@@ -1333,6 +1333,7 @@
   <!-- ================================================================= -->
   <script>
     // ── API & Network Configuration ──
+    // When served from GitHub Pages (docs/), always use the production backend as base.
     const urlParams = new URLSearchParams(window.location.search);
     const customApi = urlParams.get('api');
     const GITHUB_PAGES_DEFAULT = 'https://chintamani-backend.onrender.com';
@@ -1878,7 +1879,8 @@
         }
 
         const resJson = await res.json().catch(() => ({}));
-        const appId = resJson.applicationId || ('REG-' + Math.floor(100000 + Math.random() * 900000));
+        const pData = resJson.data || resJson;
+        const appId = pData.applicationId || resJson.applicationId || ('REG-' + Math.floor(100000 + Math.random() * 900000));
         _activeApplicationId = appId;
 
         // Persist local context safely
@@ -1969,12 +1971,13 @@
             branchId: currentViewingBranch
           })
         });
-        const data = await res.json();
+        const rawJson = await res.json().catch(() => ({}));
+        const data = rawJson.data || rawJson;
         
         const now = new Date();
         const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-        if (res.ok && data.success) {
+        if (res.ok && (data.success || data.action)) {
           const isOut = data.action === 'CHECK_OUT';
           document.getElementById('att-result-badge').textContent = isOut ? 'CHECKED OUT ✓' : 'CHECKED IN • PRESENT ✓';
           document.getElementById('att-result-badge').style.background = isOut ? 'rgba(234,170,80,0.2)' : 'rgba(16,185,129,0.2)';
@@ -1988,7 +1991,7 @@
           document.getElementById('att-result-box').classList.remove('hidden');
           showToast('✓ ' + (isOut ? 'Checked Out' : 'Checked In') + ' — ' + (data.member?.name || val));
         } else {
-          const errMsg = data.message || 'Member not registered in this branch. Please verify your mobile number or switch the branch at the top.';
+          const errMsg = data.message || rawJson.message || 'Member not registered in this branch. Please verify your mobile number or switch the branch at the top.';
           showToast('⚠ ' + errMsg);
           alert('❌ Attendance Not Recorded\n\n' + errMsg);
         }
@@ -2160,13 +2163,13 @@
           return;
         }
 
-        const data = await res.json().catch(() => ({}));
-        if (data.referenceId || data.paymentId || data.verificationId) {
-          const pData = data.data || data; document.getElementById('pay-succ-ref').textContent = pData.referenceId || pData.verification?.id || pData.payment?.id || pData.verificationId || pData.paymentId || 'PENDING';
-        }
+        const resJson = await res.json().catch(() => ({}));
+        const pData = resJson.data || resJson;
+        const refId = pData.verificationId || pData.paymentId || pData.referenceId || resJson.verificationId || resJson.paymentId || 'PENDING';
+        document.getElementById('pay-succ-ref').textContent = refId;
         document.getElementById('pay-success-box').classList.remove('hidden');
         initIcons();
-        showToast('✓ Payment Proof Submitted! Pending Admin Verification');
+        showToast(`✓ Payment Proof Submitted! Ref: ${refId}`);
       } catch (e) {
         showToast(e.message || 'Network error submitting payment');
       } finally {
@@ -2268,13 +2271,13 @@
           showToast(errData.message || 'Failed to register complaint');
           return;
         }
-        const data = await res.json().catch(() => ({}));
-        if (data.complaintId) {
-          document.getElementById('cmp-succ-id').textContent = data.complaintId;
-        }
+        const resJson = await res.json().catch(() => ({}));
+        const pData = resJson.data || resJson;
+        const realCmpId = pData.complaintId || resJson.complaintId || refId;
+        document.getElementById('cmp-succ-id').textContent = realCmpId;
         document.getElementById('cmp-success-box').classList.remove('hidden');
         initIcons();
-        showToast('Complaint ticket registered successfully');
+        showToast(`Complaint registered successfully! ID: ${realCmpId}`);
       } catch (e) {
         showToast(e.message || 'Network error submitting complaint ticket');
       }

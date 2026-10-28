@@ -5,6 +5,8 @@ class PaymentVerificationModel {
   final String memberName;
   final String memberCode;
   final String memberPhone;
+  final String? branchId;
+  final String? branchName;
   final double amount;
   final String paymentType;
   final String? screenshotUrl;
@@ -23,6 +25,8 @@ class PaymentVerificationModel {
     required this.memberName,
     required this.memberCode,
     required this.memberPhone,
+    this.branchId,
+    this.branchName,
     required this.amount,
     required this.paymentType,
     this.screenshotUrl,
@@ -46,6 +50,14 @@ class PaymentVerificationModel {
     final code = member['memberCode']?.toString() ?? (reg?['applicationId']?.toString() ?? '-');
     final phone = member['phone']?.toString() ?? (reg?['phone']?.toString() ?? '-');
 
+    final branchObj = member['branch'] as Map<String, dynamic>?;
+    final branchId = member['branchId']?.toString() ?? branchObj?['id']?.toString() ?? reg?['branchId']?.toString();
+    final rawBranchName = branchObj?['name']?.toString() ?? reg?['branch']?['name']?.toString();
+    final branchName = rawBranchName ??
+        (branchId?.toLowerCase().contains('mehda') == true
+            ? 'Mehdawal'
+            : (branchId?.toLowerCase().contains('khalil') == true ? 'Khalilabad' : null));
+
     return PaymentVerificationModel(
       id: json['id'] as String,
       paymentId: json['paymentId'] as String,
@@ -53,6 +65,8 @@ class PaymentVerificationModel {
       memberName: memberName,
       memberCode: code,
       memberPhone: phone,
+      branchId: branchId,
+      branchName: branchName,
       amount: (json['amount'] as num? ?? 0).toDouble(),
       paymentType: json['paymentType'] as String? ?? 'MEMBERSHIP',
       screenshotUrl: json['screenshotUrl'] as String?,

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
-import '../../../core/api/api_endpoints.dart';
 import '../../registrations/data/registration_repository.dart';
 import '../../registrations/domain/payment_verification_model.dart';
 import '../../../core/utils/member_image_helper.dart';
+import '../../branch/providers/branch_provider.dart';
 
 final selectedVerificationStatusProvider = StateProvider<String>((ref) => 'PENDING');
+final selectedVerificationBranchProvider = StateProvider<String>((ref) => 'ALL');
 
 class PaymentVerificationsScreen extends ConsumerStatefulWidget {
   const PaymentVerificationsScreen({super.key});
@@ -31,6 +33,9 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final active = ref.read(activeBranchProvider);
+      final key = active.shortName.toLowerCase();
+      ref.read(selectedVerificationBranchProvider.notifier).state = key;
       ref.invalidate(paymentVerificationsListProvider);
       ref.invalidate(pendingVerificationsCountProvider);
     });
@@ -240,8 +245,17 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
 
   @override
   Widget build(BuildContext context) {
+    // React to global active branch changes
+    ref.listen(activeBranchProvider, (_, next) {
+      final key = next.shortName.toLowerCase();
+      ref.read(selectedVerificationBranchProvider.notifier).state = key;
+    });
+
     final status = ref.watch(selectedVerificationStatusProvider);
-    final listAsync = ref.watch(paymentVerificationsListProvider(status));
+    final branchFilter = ref.watch(selectedVerificationBranchProvider);
+    final listAsync = ref.watch(paymentVerificationsListProvider(
+      PaymentVerificationFilterArgs(status: status, branchId: branchFilter),
+    ));
 
     return Scaffold(
       backgroundColor: AppColors.bgDark,
@@ -266,9 +280,22 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(95),
+          preferredSize: const Size.fromHeight(135),
           child: Column(
             children: [
+              // Branch filter selector
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                child: Row(
+                  children: [
+                    _buildBranchButton('ALL', '🏛️ All Branches', const Color(0xFFA855F7)),
+                    const SizedBox(width: 8),
+                    _buildBranchButton('khalilabad', '📍 Khalilabad', const Color(0xFFD4AF37)),
+                    const SizedBox(width: 8),
+                    _buildBranchButton('mehdawal', '📍 Mehdawal', const Color(0xFF14B8A6)),
+                  ],
+                ),
+              ),
               // Search
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
@@ -401,6 +428,41 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
     );
   }
 
+  Widget _buildBranchButton(String key, String label, Color color) {
+    final current = ref.watch(selectedVerificationBranchProvider);
+    final isSelected = current == key;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          ref.read(selectedVerificationBranchProvider.notifier).state = key;
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? color.withOpacity(0.20) : AppColors.bgCard,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected ? color : const Color(0x22FFFFFF),
+              width: isSelected ? 1.4 : 0.8,
+            ),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? color : AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildVerificationCard(PaymentVerificationModel item) {
     final dateStr = DateFormat('dd MMM yyyy, hh:mm a').format(item.submittedAt);
     final screenshot = _formatUrl(item.screenshotUrl);
@@ -485,6 +547,36 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
                       item.memberCode,
                       style: const TextStyle(color: AppColors.goldPrimary, fontSize: 11, fontFamily: 'monospace'),
                     ),
+                    if (item.branchName != null && item.branchName!.isNotEmpty) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: (item.branchName!.toLowerCase().contains('mehda')
+                                  ? const Color(0xFF14B8A6)
+                                  : const Color(0xFFD4AF37))
+                              .withOpacity(0.18),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: (item.branchName!.toLowerCase().contains('mehda')
+                                    ? const Color(0xFF14B8A6)
+                                    : const Color(0xFFD4AF37))
+                                .withOpacity(0.4),
+                            width: 0.6,
+                          ),
+                        ),
+                        child: Text(
+                          item.branchName!.toLowerCase().contains('mehda') ? 'Mehdawal' : 'Khalilabad',
+                          style: TextStyle(
+                            color: item.branchName!.toLowerCase().contains('mehda')
+                                ? const Color(0xFF14B8A6)
+                                : const Color(0xFFD4AF37),
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

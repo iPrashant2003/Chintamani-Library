@@ -46,16 +46,17 @@ export class PaymentsController {
   @Get('verifications')
   getVerifications(
     @Query('status') status?: string,
+    @Query('branchId') branchId?: string,
     @Query('search') search?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
-    return this.paymentsService.getVerifications({ status, search, page, limit });
+    return this.paymentsService.getVerifications({ status, branchId, search, page, limit });
   }
 
   @Get('verifications/pending-count')
-  getPendingVerificationCount() {
-    return this.paymentsService.getPendingVerificationCount();
+  getPendingVerificationCount(@Query('branchId') branchId?: string) {
+    return this.paymentsService.getPendingVerificationCount(branchId);
   }
 
   @Get('verifications/:id')

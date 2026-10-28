@@ -41,6 +41,12 @@ class _RegistrationsScreenState extends ConsumerState<RegistrationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Dynamically react to branch changes in drawer or top bar
+    ref.listen(activeBranchProvider, (_, next) {
+      final key = next.shortName.toLowerCase();
+      ref.read(selectedRegistrationBranchProvider.notifier).state = key;
+    });
+
     final status = ref.watch(selectedRegistrationStatusProvider);
     final branchFilter = ref.watch(selectedRegistrationBranchProvider);
     final registrationsAsync = ref.watch(registrationsListProvider(

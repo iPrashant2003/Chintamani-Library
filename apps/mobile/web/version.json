@@ -1,17 +1,18 @@
 {
-  "buildNumber": 2092,
-  "version": "2.8.12",
-  "releaseDate": "23 Oct 2026",
+  "buildNumber": 2096,
+  "version": "2.8.16",
+  "releaseDate": "28 Oct 2026",
   "forceUpdate": true,
-  "title": "Chintamani Library v2.8.12 — Payment Verification, Portal Registration & Seat Matrix",
+  "title": "Chintamani Library v2.8.16 — Universal QR Portal & Admin Portal Synchronization",
   "releaseNotes": [
-    "CRITICAL PAYMENT VERIFICATION FIX: Payment screenshots submitted via Universal QR Portal upload reliably to cloud storage, persist verification metadata, and reflect immediately in Admin → Payment Verification with high-res zoomable preview and in 6-month history.",
-    "UNIVERSAL QR REGISTRATION FIX: Fixed submit action, added live progress indicators, secure cloud image uploads, and automatic seamless transition to final fee payment stage.",
-    "SEAT MATRIX CLICK-TO-ASSIGN: Tap any available seat directly in the Seats Matrix to immediately assign it to any member with live search, automatic reallocation of previous seats, and real-time matrix refresh.",
-    "DOCUMENT VAULT IN DIRECTORY: Member details now permanently hold and display Aadhaar card (front & back) and photo images directly in Tab 1 with full pinch-to-zoom modal."
+    "UNIVERSAL QR PORTAL & ADMIN SYNC: Permanent end-to-end integration between Universal QR Portal and Admin Portal for both Khalilabad and Mehdawal branches.",
+    "BRANCH-WISE PAYMENT VERIFICATIONS: Added branch filtering (All, Khalilabad, Mehdawal) and branch badges on Payment Verifications with immediate live reaction to branch switcher.",
+    "NEW REGISTRATIONS & COMPLAINTS SYNC: Registrations and complaints submitted from the Universal QR Portal now reliably persist to database and sync seamlessly to Admin Portal.",
+    "RESPONSE PARSING REPAIR: Corrected API payload envelope extraction for registration, payment, attendance, and complaint submissions.",
+    "ADMIN PORTAL ACCESS & JWT REFRESH: Updated web admin portal with secure login, dynamic authentication token handling, and robust branch slug resolution."
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.12/app-arm64-v8a-release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.12/Chintamani-Library-arm64.apk",
-  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.12",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.16/app-arm64-v8a-release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.16/Chintamani-Library-2.8.16-arm64.apk",
+  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.16",
   "minimumSupportedVersion": "2.3.0"
 }

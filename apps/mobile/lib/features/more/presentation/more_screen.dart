@@ -22,8 +22,9 @@ class MoreScreen extends ConsumerWidget {
     final activeBranch = ref.watch(activeBranchProvider);
     final authState = ref.watch(authProvider).value;
     final user = authState is AuthAuthenticated ? authState.user : null;
-    final pendingRegs = ref.watch(pendingRegistrationsCountProvider).value ?? 0;
-    final pendingVerifs = ref.watch(pendingVerificationsCountProvider).value ?? 0;
+    final branchSlug = activeBranch.shortName.toLowerCase();
+    final pendingRegs = ref.watch(pendingRegistrationsCountProvider(branchSlug)).value ?? 0;
+    final pendingVerifs = ref.watch(pendingVerificationsCountProvider(branchSlug)).value ?? 0;
     final openComplaints = ref.watch(openComplaintsCountProvider).value ?? 0;
     final lockersAsync = ref.watch(lockersListProvider);
     final lockerCount = lockersAsync.value?.length ?? 9;

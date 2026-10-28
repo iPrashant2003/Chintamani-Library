@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { QueryPaymentsDto } from './dto/query-payments.dto';
+import { resolveBranchInfo } from '../common/utils/branch-resolver.util';
 
 @Injectable()
 export class PaymentsService {
@@ -145,8 +146,8 @@ export class PaymentsService {
 
   // ── PAYMENT VERIFICATION (ADMIN) ──────────────────────────────────────────
 
-  async getVerifications(query: { status?: string; search?: string; page?: string; limit?: string }) {
-    const { status = 'PENDING', search, page = '1', limit = '20' } = query;
+  async getVerifications(query: { status?: string; branchId?: string; search?: string; page?: string; limit?: string }) {
+    const { status = 'PENDING', branchId, search, page = '1', limit = '20' } = query;
     const pageNum = Number(page) || 1;
     const limitNum = Number(limit) || 20;
     const skip = (pageNum - 1) * limitNum;
@@ -154,6 +155,14 @@ export class PaymentsService {
     const where: any = {};
     if (status && status !== 'ALL') {
       where.status = status;
+    }
+    if (branchId && branchId !== 'ALL' && branchId !== 'all') {
+      const branchInfo = await resolveBranchInfo(this.prisma, branchId);
+      if (branchInfo) {
+        where.member = { branchId: { in: branchInfo.allIds } };
+      } else {
+        where.member = { branchId };
+      }
     }
     if (search) {
       where.OR = [
@@ -176,6 +185,13 @@ export class PaymentsService {
               memberCode: true,
               phone: true,
               branchId: true,
+              branch: {
+                select: {
+                  id: true,
+                  name: true,
+                  address: true,
+                },
+              },
               registration: true,
               subscriptions: {
                 where: { status: 'ACTIVE' },
@@ -194,8 +210,17 @@ export class PaymentsService {
     return { data, total, page: pageNum, limit: limitNum };
   }
 
-  async getPendingVerificationCount() {
-    return this.prisma.paymentVerification.count({ where: { status: 'PENDING' } });
+  async getPendingVerificationCount(branchId?: string) {
+    const where: any = { status: 'PENDING' };
+    if (branchId && branchId !== 'ALL' && branchId !== 'all') {
+      const branchInfo = await resolveBranchInfo(this.prisma, branchId);
+      if (branchInfo) {
+        where.member = { branchId: { in: branchInfo.allIds } };
+      } else {
+        where.member = { branchId };
+      }
+    }
+    return this.prisma.paymentVerification.count({ where });
   }
 
   async getVerification(id: string) {

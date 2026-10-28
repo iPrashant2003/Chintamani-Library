@@ -158,7 +158,7 @@ class _QuickActionButtonState extends ConsumerState<_QuickActionButton>
                 Builder(
                   builder: (context) {
                     final pendingCount = act.route == RouteNames.paymentVerifications
-                        ? (ref.watch(pendingVerificationsCountProvider).value ?? 0)
+                        ? (ref.watch(pendingVerificationsCountProvider(null)).value ?? 0)
                         : 0;
 
                     return Stack(

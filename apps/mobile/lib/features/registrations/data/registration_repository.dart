@@ -35,21 +35,45 @@ final registrationsListProvider = FutureProvider.family<List<RegistrationModel>,
   },
 );
 
-final pendingRegistrationsCountProvider = FutureProvider<int>((ref) async {
+final pendingRegistrationsCountProvider = FutureProvider.family<int, String?>((ref, branchId) async {
   final repo = ref.read(registrationRepositoryProvider);
-  return repo.getPendingCount();
+  return repo.getPendingCount(
+    branchId: (branchId == null || branchId == 'ALL' || branchId == 'all') ? null : branchId,
+  );
 });
 
-final paymentVerificationsListProvider = FutureProvider.family<List<PaymentVerificationModel>, String>(
-  (ref, status) async {
+class PaymentVerificationFilterArgs {
+  final String status;
+  final String? branchId;
+  const PaymentVerificationFilterArgs({required this.status, this.branchId});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PaymentVerificationFilterArgs &&
+          runtimeType == other.runtimeType &&
+          status == other.status &&
+          branchId == other.branchId;
+
+  @override
+  int get hashCode => status.hashCode ^ (branchId?.hashCode ?? 0);
+}
+
+final paymentVerificationsListProvider = FutureProvider.family<List<PaymentVerificationModel>, PaymentVerificationFilterArgs>(
+  (ref, args) async {
     final repo = ref.read(registrationRepositoryProvider);
-    return repo.getPaymentVerifications(status: status);
+    return repo.getPaymentVerifications(
+      status: args.status,
+      branchId: (args.branchId == null || args.branchId == 'ALL' || args.branchId == 'all') ? null : args.branchId,
+    );
   },
 );
 
-final pendingVerificationsCountProvider = FutureProvider<int>((ref) async {
+final pendingVerificationsCountProvider = FutureProvider.family<int, String?>((ref, branchId) async {
   final repo = ref.read(registrationRepositoryProvider);
-  return repo.getPendingVerificationsCount();
+  return repo.getPendingVerificationsCount(
+    branchId: (branchId == null || branchId == 'ALL' || branchId == 'all') ? null : branchId,
+  );
 });
 
 class RegistrationRepository {
@@ -150,6 +174,7 @@ class RegistrationRepository {
   Future<List<PaymentVerificationModel>> getPaymentVerifications({
     String status = 'PENDING',
     String? search,
+    String? branchId,
     int page = 1,
     int limit = 30,
   }) async {
@@ -159,6 +184,7 @@ class RegistrationRepository {
         queryParameters: {
           'status': status,
           if (search != null && search.isNotEmpty) 'search': search,
+          if (branchId != null && branchId != 'ALL' && branchId != 'all') 'branchId': branchId,
           'page': page,
           'limit': limit,
         },
@@ -171,12 +197,17 @@ class RegistrationRepository {
     }
   }
 
-  Future<int> getPendingVerificationsCount() async {
+  Future<int> getPendingVerificationsCount({String? branchId}) async {
     try {
-      final response = await _apiClient.dio.get('${ApiEndpoints.paymentVerifications}/pending-count');
+      final response = await _apiClient.dio.get(
+        '${ApiEndpoints.paymentVerifications}/pending-count',
+        queryParameters: {
+          if (branchId != null && branchId != 'ALL' && branchId != 'all') 'branchId': branchId,
+        },
+      );
       final data = response.data;
       if (data is int) return data;
-      if (data is Map) return data['count'] as int? ?? 0;
+      if (data is Map) return data['count'] as int? ?? (data['data'] as int? ?? 0);
       return 0;
     } catch (_) {
       return 0;

@@ -42,6 +42,12 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Dynamically react to branch changes in drawer or top bar
+    ref.listen(activeBranchProvider, (_, next) {
+      final key = next.shortName.toLowerCase();
+      ref.read(selectedComplaintBranchProvider.notifier).state = key;
+    });
+
     final status = ref.watch(selectedComplaintStatusProvider);
     final category = ref.watch(selectedComplaintCategoryProvider);
     final branchFilter = ref.watch(selectedComplaintBranchProvider);

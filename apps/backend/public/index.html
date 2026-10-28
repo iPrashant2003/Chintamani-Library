@@ -78,8 +78,8 @@
         </button>
         <div class="relative">
           <select id="branchSelect" onchange="switchBranch(this.value)" class="bg-transparent text-white font-bold text-base focus:outline-none cursor-pointer pr-4 appearance-none">
-            <option value="cee90a25-7fcd-4509-bb6c-fc9fe38c26fb" class="bg-white text-slate-900">Chintam... Khalilabad</option>
-            <option value="fe5a799b-3c6b-4fbf-b9fc-f8ec228d8364" class="bg-white text-slate-900">Chintam... Mehdawal</option>
+            <option value="khalilabad" class="bg-white text-slate-900">Chintamani Khalilabad</option>
+            <option value="mehdawal" class="bg-white text-slate-900">Chintamani Mehdawal</option>
           </select>
           <i data-lucide="chevron-down" class="w-3.5 h-3.5 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none opacity-80"></i>
         </div>
@@ -521,21 +521,103 @@
     </div>
   </div>
 
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-[#F04D36]/10 flex items-center justify-center text-[#F04D36]">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-base text-slate-900">Admin Login</h3>
+          <p class="text-xs text-slate-500">Sign in to manage Chintamani Library</p>
+        </div>
+      </div>
+      <form onsubmit="handleLogin(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-600 font-semibold mb-1">Email / Mobile Number</label>
+          <input type="text" id="loginIdentifier" required placeholder="e.g. 9415919277 or admin@chintamanilibrary.com" class="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:border-[#F04D36] text-sm">
+        </div>
+        <div>
+          <label class="block text-slate-600 font-semibold mb-1">Password</label>
+          <input type="password" id="loginPassword" required placeholder="Enter admin password" class="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:border-[#F04D36] text-sm">
+        </div>
+        <div id="loginError" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200"></div>
+        <button type="submit" id="loginSubmitBtn" class="w-full py-2.5 rounded-xl bg-[#F04D36] hover:bg-[#E03E27] text-white font-bold text-sm shadow-md transition">Sign In</button>
+      </form>
+    </div>
+  </div>
+
   <!-- JAVASCRIPT LOGIC -->
   <script>
     const API_BASE = window.location.origin;
-    let authToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NzBmNzgxZS0wM2FmLTQ5NWMtYjg1Mi1iM2ViZjVmNmFlNDQiLCJlbWFpbCI6Im93bmVyQGNoaW50YW1hbmkuY29tIiwicm9sZSI6Ik9XTkVSIiwiYnJhbmNoSWRzIjpbImNlZTkwYTI1LTdmY2QtNDUwOS1iYjZjLWZjOWZlMzhjMjZmYiIsImZlNWE3OTliLTNjNmItNGZiZi1iOWZjLWY4ZWMyMjhkODM2NCJdLCJwZXJtaXNzaW9ucyI6W10sImlhdCI6MTc4ODk0MjI5MSwiZXhwIjoxNzg5MDI4NjkxfQ.dBln8UGGCsGQ1p76Y2QelEaC8PsmAlA0pSUuxys_pJI';
-    let currentBranchId = 'cee90a25-7fcd-4509-bb6c-fc9fe38c26fb'; // Khalilabad
+    let authToken = localStorage.getItem('cml_auth_token') || '';
+    let currentBranchId = localStorage.getItem('cml_branch') || 'khalilabad';
     let currentFloor = 'A';
     let membersCache = [];
+
+    function showLoginModal() {
+      const m = document.getElementById('loginModal');
+      if (m) {
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function hideLoginModal() {
+      const m = document.getElementById('loginModal');
+      if (m) {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const id = document.getElementById('loginIdentifier').value.trim();
+      const pass = document.getElementById('loginPassword').value.trim();
+      const errEl = document.getElementById('loginError');
+      const btn = document.getElementById('loginSubmitBtn');
+      errEl.classList.add('hidden');
+      btn.disabled = true;
+      btn.innerText = 'Signing in...';
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: id, password: pass })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.accessToken) {
+          throw new Error(data.message || 'Invalid credentials');
+        }
+        authToken = data.accessToken;
+        localStorage.setItem('cml_auth_token', authToken);
+        hideLoginModal();
+        loadDashboard();
+        loadMembers();
+        loadSeats();
+      } catch (err) {
+        errEl.innerText = err.message || 'Login failed';
+        errEl.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Sign In';
+      }
+    }
 
     async function apiFetch(url, options = {}) {
       const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`,
+        ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
         ...(options.headers || {})
       };
       const res = await fetch(`${API_BASE}${url}`, { ...options, headers });
+      if (res.status === 401) {
+        showLoginModal();
+        throw new Error('Authentication required');
+      }
       if (!res.ok) throw new Error('API Request Failed');
       return await res.json();
     }
@@ -543,7 +625,8 @@
     // Switch branch
     function switchBranch(branchId) {
       currentBranchId = branchId;
-      const isKhali = branchId === 'cee90a25-7fcd-4509-bb6c-fc9fe38c26fb';
+      localStorage.setItem('cml_branch', branchId);
+      const isKhali = branchId === 'khalilabad' || branchId === 'cee90a25-7fcd-4509-bb6c-fc9fe38c26fb';
       document.getElementById('branchAddressSubtitle').innerText = isKhali ? 'Main Road, Khalilabad • Sant Kabir Nagar' : 'Station Road, Mehdawal • Sant Kabir Nagar';
       loadDashboard();
       loadMembers();
@@ -841,8 +924,18 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
-      loadDashboard();
+      if (window.lucide) lucide.createIcons();
+      const savedBranch = localStorage.getItem('cml_branch');
+      if (savedBranch) {
+        currentBranchId = savedBranch;
+        const bs = document.getElementById('branchSelect');
+        if (bs) bs.value = savedBranch;
+      }
+      if (!authToken) {
+        showLoginModal();
+      } else {
+        loadDashboard();
+      }
     });
   </script>
 </body>

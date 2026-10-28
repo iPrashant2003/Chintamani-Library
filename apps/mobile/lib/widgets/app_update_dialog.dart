@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../core/services/app_update_service.dart';
 
 class AppUpdateDialog extends StatefulWidget {
@@ -119,7 +118,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     } else {
       setState(() {
         _isDownloading = false;
-        _errorMessage = 'Download or installer was interrupted. Tap "Retry Update" to resume.';
+        _errorMessage = 'Download failed. Tap "Retry Update" to try again.';
       });
     }
   }
@@ -243,7 +242,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('✨ ', style: TextStyle(fontSize: 12)),
+                                const Text('• ', style: TextStyle(fontSize: 12, color: Color(0xFFD4AF37))),
                                 Expanded(
                                   child: Text(
                                     note,
@@ -265,29 +264,6 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                           ),
                         ],
                 ),
-              ),
-            ),
-
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF261D0C),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFF854D0E)),
-              ),
-              child: const Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.info_outline, color: Color(0xFFFDE68A), size: 15),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Package conflict fix: If Android says "package conflicts with an existing package", uninstall the older app once, then install.',
-                      style: TextStyle(color: Color(0xFFFDE68A), fontSize: 10.5, height: 1.3),
-                    ),
-                  ),
-                ],
               ),
             ),
 
@@ -326,7 +302,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
 
             const SizedBox(height: 20),
 
-            // Actions
+            // Actions — Later + Update Now only
             Row(
               children: [
                 if ((!info.forceUpdate || _errorMessage != null) && !_isDownloading)
@@ -375,7 +351,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                                   const Icon(Icons.system_update_rounded, color: Colors.black, size: 18),
                                   const SizedBox(width: 8),
                                   Text(
-                                    _errorMessage != null ? 'Retry Update (1-Tap)' : 'Update Now (1-Tap)',
+                                    _errorMessage != null ? 'Retry Update' : 'Update Now',
                                     style: const TextStyle(
                                       color: Colors.black,
                                       fontSize: 13.5,
@@ -390,43 +366,6 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Center(
-              child: TextButton.icon(
-                onPressed: () async {
-                  final directUrl = (info.arm64ApkUrl != null && info.arm64ApkUrl!.isNotEmpty)
-                      ? info.arm64ApkUrl!
-                      : (info.apkUrl.isNotEmpty ? info.apkUrl : info.fallbackUrl);
-                  final uri = Uri.parse(directUrl);
-                  if (await canLaunchUrl(uri)) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                  }
-                },
-                icon: const Icon(Icons.download_rounded, size: 16, color: Color(0xFF10B981)),
-                label: const Text(
-                  'Direct 1-Tap Browser Download (Chrome / High Speed)',
-                  style: TextStyle(color: Color(0xFF10B981), fontSize: 11.5, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            if (info.fallbackUrl.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Center(
-                child: TextButton.icon(
-                  onPressed: () async {
-                    final uri = Uri.parse(info.fallbackUrl);
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
-                    }
-                  },
-                  icon: const Icon(Icons.open_in_browser_rounded, size: 14, color: Color(0xFFD4AF37)),
-                  label: Text(
-                    _errorMessage != null ? 'Open manual download page in browser' : 'Or open download page in browser',
-                    style: const TextStyle(color: Color(0xFFD4AF37), fontSize: 11, decoration: TextDecoration.underline),
-                  ),
-                ),
-              ),
-            ],
           ],
         ),
       ),

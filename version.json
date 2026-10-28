@@ -1,18 +1,19 @@
 {
-  "buildNumber": 2097,
-  "version": "2.8.17",
+  "buildNumber": 2098,
+  "version": "2.8.18",
   "releaseDate": "28 Oct 2026",
-  "forceUpdate": true,
-  "title": "Chintamani Library v2.8.17 — Universal QR Portal to Member Directory & Admin Portal Repair",
+  "forceUpdate": false,
+  "title": "Chintamani Library v2.8.18 — Complete Universal QR Portal & Admin Portal Synchronization",
   "releaseNotes": [
-    "MEMBER DIRECTORY SYNC: Registrations through Universal QR Portal now immediately create active Member records and active Subscriptions in the authoritative database so they appear instantly in Member Directory.",
-    "PAY VERIFY ADMIN SECTION: Added full Pay Verify view with interactive high-resolution screenshot preview modal, UTR details, and 1-tap Approve/Reject actions.",
-    "COMPLAINTS ADMIN SECTION: Added dedicated Member Complaints & Issues view with category chips, branch badges, and Mark Resolved workflow.",
-    "CROSS-BRANCH ACCESS: Admin portal now defaults to ALL branches on load, preventing records from being hidden by active branch filters.",
-    "DATABASE BACKFILL: Automatically backfills all existing portal registrations into Member directory on startup."
+    "WEB ADMIN PORTAL REPAIR: Fixed authentication token extraction so admin login succeeds immediately with persistent session.",
+    "PAYMENT VERIFICATION APPROVALS: Fixed API routes and HTTP methods for 1-tap Approve & Reject actions with full audit sync.",
+    "CAMPUS FILTER BAR: Added instant 1-tap [All Campuses] [Khalilabad] [Mehdawal] filter in Member Directory so all member records are visible globally.",
+    "MEMBER DIRECTORY PERSISTENCE: Universal QR portal submissions immediately create active Member records, Subscriptions, and occupied seat assignments in the database.",
+    "COMPLAINTS & ISSUES SYNC: Complaints submitted from Universal QR cards appear in real-time across both Web Admin Portal and Mobile App.",
+    "ADMINISTRATOR CREDENTIAL SYNC: Guaranteed production admin access with automatic credential validation on backend startup."
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.17/app-arm64-v8a-release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.17/Chintamani-Library-2.8.17-arm64.apk",
-  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.17",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.18/app-arm64-v8a-release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.18/Chintamani-Library-2.8.18-arm64.apk",
+  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.18",
   "minimumSupportedVersion": "2.3.0"
 }

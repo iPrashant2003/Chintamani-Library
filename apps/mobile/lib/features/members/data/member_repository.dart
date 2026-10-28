@@ -29,7 +29,7 @@ class MemberRepository {
       final response = await _apiClient.dio.get(
         endpoint,
         queryParameters: {
-          'branchId': branchId,
+          if (branchId.isNotEmpty && branchId != 'ALL' && branchId != 'all') 'branchId': branchId,
           if (status != null && status != 'all') 'status': status,
           if (search != null && search.isNotEmpty) 'search': search,
           'page': page,
@@ -420,13 +420,15 @@ class MemberRepository {
 class MemberFilterState {
   final String status;
   final String searchQuery;
+  final String branchId;
 
-  const MemberFilterState({this.status = 'all', this.searchQuery = ''});
+  const MemberFilterState({this.status = 'all', this.searchQuery = '', this.branchId = 'ALL'});
 
-  MemberFilterState copyWith({String? status, String? searchQuery}) {
+  MemberFilterState copyWith({String? status, String? searchQuery, String? branchId}) {
     return MemberFilterState(
       status: status ?? this.status,
       searchQuery: searchQuery ?? this.searchQuery,
+      branchId: branchId ?? this.branchId,
     );
   }
 }
@@ -441,7 +443,7 @@ final membersListProvider = FutureProvider.autoDispose<PaginatedResponse<Member>
   final repo = ref.read(memberRepositoryProvider);
 
   return repo.getMembers(
-    branchId: branch.id,
+    branchId: (filter.branchId == 'ALL' || filter.branchId.isEmpty) ? 'ALL' : filter.branchId,
     status: filter.status,
     search: filter.searchQuery,
   );

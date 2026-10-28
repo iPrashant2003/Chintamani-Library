@@ -28,6 +28,47 @@ class MembersScreen extends ConsumerStatefulWidget {
 class _MembersScreenState extends ConsumerState<MembersScreen> {
   MemberSortOption _sortOption = MemberSortOption.newest;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(membersListProvider);
+    });
+  }
+
+  Widget _buildBranchTab({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFFC9A84C) : const Color(0x1AFFFFFF),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected ? const Color(0xFFC9A84C) : const Color(0x22FFFFFF),
+              width: 1,
+            ),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.black : Colors.white70,
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showSortSheet() {
     HapticFeedback.lightImpact();
     showModalBottomSheet(
@@ -172,6 +213,46 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         context.push(RouteNames.addMember);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              // Branch / Campus Selector Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: Row(
+                  children: [
+                    _buildBranchTab(
+                      label: 'All Campuses',
+                      isSelected: filter.branchId == 'ALL',
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        ref.read(memberFilterProvider.notifier).state =
+                            filter.copyWith(branchId: 'ALL');
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    _buildBranchTab(
+                      label: 'Khalilabad',
+                      isSelected: filter.branchId.toLowerCase().contains('khalil'),
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        ref.read(activeBranchProvider.notifier).state = Branch.khalilabadBranch;
+                        ref.read(memberFilterProvider.notifier).state =
+                            filter.copyWith(branchId: Branch.khalilabadBranch.id);
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    _buildBranchTab(
+                      label: 'Mehdawal',
+                      isSelected: filter.branchId.toLowerCase().contains('mehda'),
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        ref.read(activeBranchProvider.notifier).state = Branch.mehdawalBranch;
+                        ref.read(memberFilterProvider.notifier).state =
+                            filter.copyWith(branchId: Branch.mehdawalBranch.id);
                       },
                     ),
                   ],

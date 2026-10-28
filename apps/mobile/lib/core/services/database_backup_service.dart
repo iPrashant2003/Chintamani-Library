@@ -47,7 +47,7 @@ class DatabaseBackupService {
       // return empty list. Real members sync from backend when online.
       
       _cachedMembers = members;
-      if (branchId.isNotEmpty) {
+      if (branchId.isNotEmpty && branchId != 'ALL' && branchId != 'all') {
         final bLower = branchId.toLowerCase();
         return members.where((m) {
           final mBLower = m.branchId.toLowerCase();

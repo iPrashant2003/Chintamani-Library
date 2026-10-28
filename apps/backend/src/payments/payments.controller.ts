@@ -69,8 +69,28 @@ export class PaymentsController {
     return this.paymentsService.approveVerification(id);
   }
 
+  @Post('verifications/:id/approve')
+  approveVerificationPost(@Param('id') id: string) {
+    return this.paymentsService.approveVerification(id);
+  }
+
+  @Patch('verifications/:id/verify')
+  verifyVerificationPatch(@Param('id') id: string) {
+    return this.paymentsService.approveVerification(id);
+  }
+
+  @Post('verifications/:id/verify')
+  verifyVerificationPost(@Param('id') id: string) {
+    return this.paymentsService.approveVerification(id);
+  }
+
   @Patch('verifications/:id/reject')
   rejectVerification(@Param('id') id: string, @Body('reason') reason?: string) {
+    return this.paymentsService.rejectVerification(id, reason);
+  }
+
+  @Post('verifications/:id/reject')
+  rejectVerificationPost(@Param('id') id: string, @Body('reason') reason?: string) {
     return this.paymentsService.rejectVerification(id, reason);
   }
 

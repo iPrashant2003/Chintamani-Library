@@ -81,9 +81,9 @@ export class PortalRegisterDto {
   @IsString()
   otherDocUrls?: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  planId!: string;
+  planId?: string;
 
   @IsOptional()
   @IsString()

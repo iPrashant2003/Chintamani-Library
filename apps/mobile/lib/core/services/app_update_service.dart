@@ -80,7 +80,7 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.8.17';
+  static const currentVersion = '2.8.18';
   static const currentBuildNumber = 2097;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 

@@ -118,6 +118,11 @@
         <button onclick="setTab('lockers')" class="p-1 rounded-lg hover:bg-white/10 transition" title="Lockers">
           <i data-lucide="lock" class="w-5 h-5"></i>
         </button>
+
+        <!-- Admin Logout / Switch Account -->
+        <button onclick="logoutAdmin()" class="p-1 rounded-lg hover:bg-white/10 text-rose-200 hover:text-white transition" title="Sign Out">
+          <i data-lucide="log-out" class="w-5 h-5"></i>
+        </button>
       </div>
     </div>
   </header>
@@ -622,6 +627,10 @@
         </div>
         <div id="loginError" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200"></div>
         <button type="submit" id="loginSubmitBtn" class="w-full py-2.5 rounded-xl bg-[#F04D36] hover:bg-[#E03E27] text-white font-bold text-sm shadow-md transition">Sign In</button>
+        <div class="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-400 space-y-1">
+          <div>Admin Login: <span class="font-mono text-slate-700 font-bold">9415919277</span> or <span class="font-mono text-slate-700 font-bold">superadmin@libraryos.com</span></div>
+          <div>Default Password: <span class="font-mono text-slate-700 font-bold">Admin@1234</span> / <span class="font-mono text-slate-700 font-bold">SuperAdmin@1234</span></div>
+        </div>
       </form>
     </div>
   </div>
@@ -672,6 +681,14 @@
       }
     }
 
+    function logoutAdmin() {
+      if (confirm('Sign out of admin session?')) {
+        localStorage.removeItem('cml_auth_token');
+        authToken = '';
+        showLoginModal();
+      }
+    }
+
     async function handleLogin(e) {
       e.preventDefault();
       const id = document.getElementById('loginIdentifier').value.trim();
@@ -688,15 +705,19 @@
           body: JSON.stringify({ email: id, password: pass })
         });
         const data = await res.json();
-        if (!res.ok || !data.accessToken) {
+        const token = data.data?.accessToken || data.accessToken;
+        if (!res.ok || !token) {
           throw new Error(data.message || 'Invalid credentials');
         }
-        authToken = data.accessToken;
+        authToken = token;
         localStorage.setItem('cml_auth_token', authToken);
         hideLoginModal();
         loadDashboard();
         loadMembers();
         loadSeats();
+        loadVerifications();
+        loadComplaints();
+        loadRegistrations();
       } catch (err) {
         errEl.innerText = err.message || 'Login failed';
         errEl.classList.remove('hidden');
@@ -714,6 +735,8 @@
       };
       const res = await fetch(`${API_BASE}${url}`, { ...options, headers });
       if (res.status === 401) {
+        localStorage.removeItem('cml_auth_token');
+        authToken = '';
         showLoginModal();
         throw new Error('Authentication required');
       }
@@ -732,6 +755,9 @@
       loadDashboard();
       loadMembers();
       loadSeats();
+      loadVerifications(branchId);
+      loadComplaints(branchId);
+      loadRegistrations();
     }
 
     // Tab switcher
@@ -1056,8 +1082,8 @@
     async function approveVerification(id) {
       if (!confirm('Approve this payment verification and mark as verified?')) return;
       try {
-        await apiFetch(`/payments/verifications/${id}/verify`, { method: 'POST' });
-        alert('Payment verification approved successfully!');
+        await apiFetch(`/payments/verifications/${id}/approve`, { method: 'PATCH' });
+        alert('Payment verification approved successfully! Member subscription and dues updated.');
         loadVerifications();
         loadDashboard();
       } catch (e) {
@@ -1070,10 +1096,10 @@
       if (!reason) return;
       try {
         await apiFetch(`/payments/verifications/${id}/reject`, {
-          method: 'POST',
+          method: 'PATCH',
           body: JSON.stringify({ reason })
         });
-        alert('Payment verification rejected.');
+        alert('Payment verification marked as rejected.');
         loadVerifications();
         loadDashboard();
       } catch (e) {

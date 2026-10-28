@@ -33,9 +33,8 @@ class _PaymentVerificationsScreenState extends ConsumerState<PaymentVerification
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final active = ref.read(activeBranchProvider);
-      final key = active.shortName.toLowerCase();
-      ref.read(selectedVerificationBranchProvider.notifier).state = key;
+      // Default to 'ALL' so admin immediately sees all pending verifications across all branches
+      ref.read(selectedVerificationBranchProvider.notifier).state = 'ALL';
       ref.invalidate(paymentVerificationsListProvider);
       ref.invalidate(pendingVerificationsCountProvider);
     });

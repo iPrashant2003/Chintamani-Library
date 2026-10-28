@@ -78,6 +78,7 @@
         </button>
         <div class="relative">
           <select id="branchSelect" onchange="switchBranch(this.value)" class="bg-transparent text-white font-bold text-base focus:outline-none cursor-pointer pr-4 appearance-none">
+            <option value="ALL" class="bg-white text-slate-900">All Branches (Global)</option>
             <option value="khalilabad" class="bg-white text-slate-900">Chintamani Khalilabad</option>
             <option value="mehdawal" class="bg-white text-slate-900">Chintamani Mehdawal</option>
           </select>
@@ -85,26 +86,26 @@
         </div>
       </div>
 
-      <!-- Right: Action Icons (Add User, SMS badge, WhatsApp badge, Seat, Locker) -->
-      <div class="flex items-center space-x-2.5">
+      <!-- Right: Action Icons (Add User, Pay Verify, Complaints, Seats, Lockers) -->
+      <div class="flex items-center space-x-2">
         <!-- Add Member -->
         <button onclick="openAddMemberModal()" class="p-1 rounded-lg hover:bg-white/10 transition" title="Add Member">
           <i data-lucide="user-plus" class="w-5 h-5"></i>
         </button>
 
-        <!-- SMS Messages with green badge -->
-        <button onclick="alert('SMS Delivery Logs: 274 notifications sent successfully this month!')" class="relative p-1 rounded-lg hover:bg-white/10 transition" title="Messages">
-          <i data-lucide="message-square" class="w-5 h-5"></i>
-          <span class="absolute -top-1 -right-1.5 px-1 py-0.2 bg-[#22C55E] text-white text-[9px] font-bold rounded-full">
-            274
+        <!-- Pay Verify Quick Jump -->
+        <button onclick="setTab('verifications')" class="relative p-1 rounded-lg hover:bg-white/10 transition" title="Payment Proof Verifications">
+          <i data-lucide="shield-check" class="w-5 h-5 text-amber-200"></i>
+          <span id="badge-verifs-count" class="absolute -top-1 -right-1 px-1 py-0.2 bg-purple-600 text-white text-[8px] font-bold rounded-full">
+            0
           </span>
         </button>
 
-        <!-- WhatsApp Broadcast with green badge -->
-        <button onclick="alert('WhatsApp Automation: 1,286 renewal & due reminder messages delivered!')" class="relative p-1 rounded-lg hover:bg-white/10 transition" title="WhatsApp">
-          <i data-lucide="phone" class="w-5 h-5"></i>
-          <span class="absolute -top-1 -right-1.5 px-1 py-0.2 bg-[#22C55E] text-white text-[9px] font-bold rounded-full">
-            1286
+        <!-- Complaints Quick Jump -->
+        <button onclick="setTab('complaints')" class="relative p-1 rounded-lg hover:bg-white/10 transition" title="Member Complaints">
+          <i data-lucide="alert-circle" class="w-5 h-5 text-yellow-200"></i>
+          <span id="badge-complaints-count" class="absolute -top-1 -right-1 px-1 py-0.2 bg-amber-500 text-white text-[8px] font-bold rounded-full">
+            0
           </span>
         </button>
 
@@ -449,11 +450,84 @@
       </div>
     </div>
 
+    <!-- VIEW: PAYMENT VERIFICATIONS (PAY VERIFY) -->
+    <div id="view-verifications" class="hidden space-y-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+            <i data-lucide="shield-check" class="w-4 h-4 text-purple-600"></i>
+            Payment Verifications
+          </h3>
+          <p class="text-[10px] text-slate-500">Submitted payment receipts awaiting approval</p>
+        </div>
+        <button onclick="loadVerifications()" class="p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:text-slate-900" title="Refresh">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Branch Filter Buttons -->
+      <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl text-xs font-semibold text-slate-600">
+        <button onclick="loadVerifications('ALL')" id="vf-btn-ALL" class="flex-1 py-1 rounded-lg bg-white shadow-sm font-bold text-slate-900 transition">All</button>
+        <button onclick="loadVerifications('khalilabad')" id="vf-btn-khalilabad" class="flex-1 py-1 rounded-lg hover:bg-white/60 transition">Khalilabad</button>
+        <button onclick="loadVerifications('mehdawal')" id="vf-btn-mehdawal" class="flex-1 py-1 rounded-lg hover:bg-white/60 transition">Mehdawal</button>
+      </div>
+
+      <div id="verificationsList" class="space-y-2.5">
+        <!-- Populated by loadVerifications() -->
+      </div>
+    </div>
+
+    <!-- VIEW: COMPLAINTS -->
+    <div id="view-complaints" class="hidden space-y-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-amber-500"></i>
+            Member Complaints & Issues
+          </h3>
+          <p class="text-[10px] text-slate-500">Student feedback and facility issue reports</p>
+        </div>
+        <button onclick="loadComplaints()" class="p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:text-slate-900" title="Refresh">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Branch Filter Buttons -->
+      <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl text-xs font-semibold text-slate-600">
+        <button onclick="loadComplaints('ALL')" id="cf-btn-ALL" class="flex-1 py-1 rounded-lg bg-white shadow-sm font-bold text-slate-900 transition">All</button>
+        <button onclick="loadComplaints('khalilabad')" id="cf-btn-khalilabad" class="flex-1 py-1 rounded-lg hover:bg-white/60 transition">Khalilabad</button>
+        <button onclick="loadComplaints('mehdawal')" id="cf-btn-mehdawal" class="flex-1 py-1 rounded-lg hover:bg-white/60 transition">Mehdawal</button>
+      </div>
+
+      <div id="complaintsList" class="space-y-2.5">
+        <!-- Populated by loadComplaints() -->
+      </div>
+    </div>
+
+    <!-- VIEW: REGISTRATIONS -->
+    <div id="view-registrations" class="hidden space-y-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+            <i data-lucide="user-check" class="w-4 h-4 text-blue-600"></i>
+            New Member Admissions
+          </h3>
+          <p class="text-[10px] text-slate-500">Applications submitted via Universal QR Portal</p>
+        </div>
+        <button onclick="loadRegistrations()" class="p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:text-slate-900" title="Refresh">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="registrationsList" class="space-y-2.5">
+        <!-- Populated by loadRegistrations() -->
+      </div>
+    </div>
+
   </main>
 
   <!-- BOTTOM NAVIGATION BAR -->
   <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200/80 shadow-lg">
-    <div class="max-w-md mx-auto h-14 flex items-center justify-around px-2 text-[10px] font-semibold text-slate-500">
+    <div class="max-w-md mx-auto h-14 flex items-center justify-around px-1 text-[10px] font-semibold text-slate-500">
       <button onclick="setTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center text-[#F04D36]">
         <i data-lucide="layout-grid" class="w-5 h-5 mb-0.5"></i>
         <span>Home</span>
@@ -462,6 +536,14 @@
         <i data-lucide="users" class="w-5 h-5 mb-0.5"></i>
         <span>Members</span>
       </button>
+      <button onclick="setTab('verifications')" id="nav-verifications" class="flex flex-col items-center hover:text-[#F04D36] relative">
+        <i data-lucide="shield-check" class="w-5 h-5 mb-0.5 text-purple-600"></i>
+        <span>Pay Verify</span>
+      </button>
+      <button onclick="setTab('complaints')" id="nav-complaints" class="flex flex-col items-center hover:text-[#F04D36] relative">
+        <i data-lucide="alert-circle" class="w-5 h-5 mb-0.5 text-amber-500"></i>
+        <span>Issues</span>
+      </button>
       <button onclick="setTab('attendance')" id="nav-attendance" class="flex flex-col items-center hover:text-[#F04D36]">
         <i data-lucide="check-circle" class="w-5 h-5 mb-0.5"></i>
         <span>Attendance</span>
@@ -469,10 +551,6 @@
       <button onclick="setTab('payments')" id="nav-payments" class="flex flex-col items-center hover:text-[#F04D36]">
         <i data-lucide="credit-card" class="w-5 h-5 mb-0.5"></i>
         <span>Payments</span>
-      </button>
-      <button onclick="setTab('enquiries')" id="nav-enquiries" class="flex flex-col items-center hover:text-[#F04D36]">
-        <i data-lucide="phone-call" class="w-5 h-5 mb-0.5"></i>
-        <span>CRM</span>
       </button>
     </div>
   </nav>
@@ -548,13 +626,34 @@
     </div>
   </div>
 
+  <!-- SCREENSHOT PREVIEW MODAL -->
+  <div id="screenshotModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl space-y-3 p-4">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 id="screenshotModalTitle" class="font-bold text-sm text-slate-900">Payment Screenshot</h3>
+        <button onclick="closeScreenshotModal()" class="text-slate-400 hover:text-slate-700 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="flex items-center justify-center bg-slate-950 rounded-xl overflow-hidden min-h-[300px] max-h-[70vh]">
+        <img id="screenshotModalImg" src="" alt="Payment Receipt" class="max-w-full max-h-[70vh] object-contain">
+      </div>
+      <div class="flex justify-between items-center pt-1 text-xs">
+        <span id="screenshotModalMeta" class="text-slate-500 font-mono"></span>
+        <button onclick="closeScreenshotModal()" class="px-4 py-2 rounded-xl bg-slate-100 font-bold text-slate-700 hover:bg-slate-200 transition">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- JAVASCRIPT LOGIC -->
   <script>
     const API_BASE = window.location.origin;
     let authToken = localStorage.getItem('cml_auth_token') || '';
-    let currentBranchId = localStorage.getItem('cml_branch') || 'khalilabad';
+    let currentBranchId = localStorage.getItem('cml_branch') || 'ALL';
     let currentFloor = 'A';
     let membersCache = [];
+    let currentVerifBranch = 'ALL';
+    let currentComplaintBranch = 'ALL';
 
     function showLoginModal() {
       const m = document.getElementById('loginModal');
@@ -627,7 +726,9 @@
       currentBranchId = branchId;
       localStorage.setItem('cml_branch', branchId);
       const isKhali = branchId === 'khalilabad' || branchId === 'cee90a25-7fcd-4509-bb6c-fc9fe38c26fb';
-      document.getElementById('branchAddressSubtitle').innerText = isKhali ? 'Main Road, Khalilabad • Sant Kabir Nagar' : 'Station Road, Mehdawal • Sant Kabir Nagar';
+      const isMehda = branchId === 'mehdawal' || branchId === 'fe5a799b-3c6b-4fbf-b9fc-f8ec228d8364';
+      const subtitle = isKhali ? 'Main Road, Khalilabad • Sant Kabir Nagar' : (isMehda ? 'Station Road, Mehdawal • Sant Kabir Nagar' : 'All Branches • Sant Kabir Nagar');
+      document.getElementById('branchAddressSubtitle').innerText = subtitle;
       loadDashboard();
       loadMembers();
       loadSeats();
@@ -636,7 +737,7 @@
     // Tab switcher
     function setTab(name) {
       // Toggle views
-      ['dashboard', 'insights', 'members', 'seats', 'lockers', 'attendance', 'payments', 'enquiries'].forEach(v => {
+      ['dashboard', 'insights', 'members', 'seats', 'lockers', 'attendance', 'payments', 'enquiries', 'verifications', 'complaints', 'registrations'].forEach(v => {
         const el = document.getElementById(`view-${v}`);
         if (el) el.classList.toggle('hidden', v !== name);
       });
@@ -653,11 +754,11 @@
       }
 
       // Bottom nav highlights
-      ['dashboard', 'members', 'attendance', 'payments', 'enquiries'].forEach(n => {
+      ['dashboard', 'members', 'verifications', 'complaints', 'attendance', 'payments'].forEach(n => {
         const navEl = document.getElementById(`nav-${n}`);
         if (navEl) {
-          if (n === name) navEl.className = 'flex flex-col items-center text-[#F04D36]';
-          else navEl.className = 'flex flex-col items-center hover:text-[#F04D36]';
+          if (n === name) navEl.className = 'flex flex-col items-center text-[#F04D36] font-bold';
+          else navEl.className = 'flex flex-col items-center hover:text-[#F04D36] font-semibold';
         }
       });
 
@@ -667,6 +768,10 @@
       if (name === 'attendance') loadAttendance();
       if (name === 'payments') loadPayments();
       if (name === 'enquiries') loadEnquiries();
+      if (name === 'verifications') loadVerifications();
+      if (name === 'complaints') loadComplaints();
+      if (name === 'registrations') loadRegistrations();
+      if (window.lucide) lucide.createIcons();
     }
 
     // 1. Load 17 Live Metrics from Backend
@@ -701,6 +806,21 @@
         document.getElementById('seatOcc').innerText = d.occupiedSeats;
         document.getElementById('seatAvail').innerText = d.availableSeats;
 
+        // Fetch pending verifications and open complaints count
+        try {
+          const vRes = await apiFetch('/payments/verifications?status=PENDING&limit=1');
+          const vCount = vRes.data?.total || vRes.total || (Array.isArray(vRes.data) ? vRes.data.length : 0);
+          const vEl = document.getElementById('badge-verifs-count');
+          if (vEl) vEl.innerText = vCount;
+        } catch (_) {}
+
+        try {
+          const cRes = await apiFetch('/complaints?status=OPEN&limit=1');
+          const cCount = cRes.data?.total || cRes.total || (Array.isArray(cRes.data) ? cRes.data.length : 0);
+          const cEl = document.getElementById('badge-complaints-count');
+          if (cEl) cEl.innerText = cCount;
+        } catch (_) {}
+
       } catch (e) {
         console.error('Failed to load dashboard metrics:', e);
       }
@@ -709,7 +829,8 @@
     // 2. Load Members
     async function loadMembers() {
       try {
-        const res = await apiFetch(`/members?branchId=${currentBranchId}&limit=50`);
+        const bQuery = (currentBranchId && currentBranchId !== 'ALL') ? `branchId=${currentBranchId}&` : '';
+        const res = await apiFetch(`/members?${bQuery}limit=100`);
         membersCache = res.data || [];
         renderMemberList(membersCache);
       } catch (e) {
@@ -723,22 +844,30 @@
         container.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs">No members found.</div>';
         return;
       }
-      container.innerHTML = list.map(m => `
-        <div class="stat-card p-3 flex items-center justify-between cursor-pointer" onclick="alert('${m.name} (${m.memberCode || 'CML-MEMBER'})\\nPhone: ${m.phone}\\nStatus: ${m.status || 'ACTIVE'}')">
+      container.innerHTML = list.map(m => {
+        const isMehdawal = (m.branch?.name || '').toLowerCase().includes('mehda');
+        const bName = isMehdawal ? 'Mehdawal' : 'Khalilabad';
+        const bColor = isMehdawal ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-amber-50 text-amber-800 border-amber-200';
+        return `
+        <div class="stat-card p-3 flex items-center justify-between cursor-pointer" onclick="alert('${m.name} (${m.memberCode || 'CML-MEMBER'})\\nPhone: ${m.phone}\\nStatus: ${m.status || 'ACTIVE'}\\nBranch: ${m.branch?.name || bName}')">
           <div class="flex items-center space-x-3">
-            <div class="w-9 h-9 rounded-full bg-[#F04D36]/10 text-[#F04D36] font-bold flex items-center justify-center text-xs">
-              ${m.name.substring(0, 2).toUpperCase()}
+            <div class="w-9 h-9 rounded-full bg-[#F04D36]/10 text-[#F04D36] font-bold flex items-center justify-center text-xs overflow-hidden">
+              ${m.photoUrl ? `<img src="${m.photoUrl}" class="w-full h-full object-cover">` : m.name.substring(0, 2).toUpperCase()}
             </div>
             <div>
-              <h4 class="font-bold text-slate-800 text-xs">${m.name}</h4>
-              <span class="text-[10px] text-slate-400 font-mono">${m.memberCode || 'CML-948122'} • ${m.phone}</span>
+              <div class="flex items-center gap-1.5">
+                <h4 class="font-bold text-slate-800 text-xs">${m.name}</h4>
+                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold border ${bColor}">📍 ${bName}</span>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono">${m.memberCode || 'CML-MEMBER'} • ${m.phone}</span>
             </div>
           </div>
           <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${m.status === 'EXPIRED' ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}">
-            ${m.status || 'ACTIVE'}
+            ${m.status || (m.isActive ? 'ACTIVE' : 'INACTIVE')}
           </span>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function searchMembers(q) {
@@ -851,6 +980,243 @@
         `).join('');
       } catch (e) {
         console.error(e);
+      }
+    }
+
+    // 7. Payment Verifications (Pay Verify)
+    async function loadVerifications(branch = currentVerifBranch) {
+      currentVerifBranch = branch;
+      ['ALL', 'khalilabad', 'mehdawal'].forEach(b => {
+        const btn = document.getElementById(`vf-btn-${b}`);
+        if (btn) {
+          if (b === branch) btn.className = 'flex-1 py-1 rounded-lg bg-white shadow-sm font-bold text-slate-900 transition';
+          else btn.className = 'flex-1 py-1 rounded-lg hover:bg-white/60 text-slate-600 transition';
+        }
+      });
+
+      try {
+        const bQuery = (branch && branch !== 'ALL') ? `&branchId=${branch}` : '';
+        const res = await apiFetch(`/payments/verifications?status=PENDING${bQuery}&limit=50`);
+        const list = res.data?.verifications || res.data || [];
+        const container = document.getElementById('verificationsList');
+        const badge = document.getElementById('badge-verifs-count');
+        if (badge) badge.innerText = list.length;
+        if (list.length === 0) {
+          container.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">No pending payment verifications found.</div>';
+          return;
+        }
+        container.innerHTML = list.map(v => {
+          const isMehdawal = (v.member?.branch?.name || '').toLowerCase().includes('mehda');
+          const bName = isMehdawal ? 'Mehdawal' : 'Khalilabad';
+          const bColor = isMehdawal ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-amber-50 text-amber-800 border-amber-200';
+          const safeUrl = v.screenshotUrl ? v.screenshotUrl.replace(/'/g, "\\'") : '';
+          return `
+            <div class="stat-card p-3.5 space-y-2.5 text-xs border border-slate-100 shadow-sm">
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                    ${v.member?.name || 'Applicant'}
+                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${bColor}">📍 ${bName}</span>
+                  </div>
+                  <div class="text-[11px] text-slate-500 font-mono mt-0.5">${v.member?.phone || ''}</div>
+                </div>
+                <div class="text-right">
+                  <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-extrabold text-sm border border-emerald-200">₹${v.amount}</span>
+                  <div class="text-[9px] text-slate-400 uppercase font-semibold mt-1">${v.paymentType || 'FEE'}</div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-[11px] text-slate-500 bg-slate-50 p-2 rounded-xl">
+                <span>UTR: <strong class="font-mono text-slate-700">${v.txnRef || 'UPI Verification'}</strong></span>
+                <span>${new Date(v.submittedAt || v.createdAt).toLocaleDateString()}</span>
+              </div>
+              <div class="pt-1 flex items-center gap-2">
+                ${v.screenshotUrl ? `
+                  <button onclick="openScreenshotModal('${safeUrl}', '${(v.member?.name || 'Payment').replace(/'/g, "\\'")}', '₹${v.amount} • UTR: ${v.txnRef || 'UPI'}')" class="flex-1 py-2 rounded-xl bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="eye" class="w-4 h-4"></i>
+                    <span>View Receipt</span>
+                  </button>
+                ` : `<span class="flex-1 text-[11px] text-slate-400 italic py-1">No screenshot</span>`}
+                <button onclick="approveVerification('${v.id}')" class="py-2 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center justify-center gap-1 shadow-sm transition">
+                  <i data-lucide="check" class="w-4 h-4"></i>
+                  <span>Approve</span>
+                </button>
+                <button onclick="rejectVerification('${v.id}')" class="py-2 px-3 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold transition">
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        if (window.lucide) lucide.createIcons();
+      } catch (e) {
+        console.error('Failed to load verifications:', e);
+      }
+    }
+
+    async function approveVerification(id) {
+      if (!confirm('Approve this payment verification and mark as verified?')) return;
+      try {
+        await apiFetch(`/payments/verifications/${id}/verify`, { method: 'POST' });
+        alert('Payment verification approved successfully!');
+        loadVerifications();
+        loadDashboard();
+      } catch (e) {
+        alert(e.message || 'Approval failed');
+      }
+    }
+
+    async function rejectVerification(id) {
+      const reason = prompt('Reason for rejection:');
+      if (!reason) return;
+      try {
+        await apiFetch(`/payments/verifications/${id}/reject`, {
+          method: 'POST',
+          body: JSON.stringify({ reason })
+        });
+        alert('Payment verification rejected.');
+        loadVerifications();
+        loadDashboard();
+      } catch (e) {
+        alert(e.message || 'Rejection failed');
+      }
+    }
+
+    // 8. Complaints
+    async function loadComplaints(branch = currentComplaintBranch) {
+      currentComplaintBranch = branch;
+      ['ALL', 'khalilabad', 'mehdawal'].forEach(b => {
+        const btn = document.getElementById(`cf-btn-${b}`);
+        if (btn) {
+          if (b === branch) btn.className = 'flex-1 py-1 rounded-lg bg-white shadow-sm font-bold text-slate-900 transition';
+          else btn.className = 'flex-1 py-1 rounded-lg hover:bg-white/60 text-slate-600 transition';
+        }
+      });
+
+      try {
+        const bQuery = (branch && branch !== 'ALL') ? `&branchId=${branch}` : '';
+        const res = await apiFetch(`/complaints?limit=50${bQuery}`);
+        const list = res.data?.complaints || res.data || [];
+        const container = document.getElementById('complaintsList');
+        const badge = document.getElementById('badge-complaints-count');
+        if (badge) badge.innerText = list.filter(c => c.status === 'OPEN').length;
+        if (list.length === 0) {
+          container.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">No complaints found.</div>';
+          return;
+        }
+        container.innerHTML = list.map(c => {
+          const isMehdawal = (c.branch?.name || '').toLowerCase().includes('mehda');
+          const bName = isMehdawal ? 'Mehdawal' : 'Khalilabad';
+          const bColor = isMehdawal ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-amber-50 text-amber-800 border-amber-200';
+          const isOpen = c.status === 'OPEN';
+          return `
+            <div class="stat-card p-3.5 space-y-2 text-xs border border-slate-100 shadow-sm">
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono font-bold text-[#F04D36] text-xs">${c.complaintId || 'CMP'}</span>
+                    <span class="px-2 py-0.5 rounded-md font-bold text-[10px] bg-purple-50 text-purple-700 border border-purple-200">${c.category || 'GENERAL'}</span>
+                    <span class="px-1.5 py-0.5 rounded-md text-[9px] font-bold border ${bColor}">📍 ${bName}</span>
+                  </div>
+                  <div class="font-bold text-slate-900 mt-1">${c.memberName || 'Student'} <span class="text-slate-400 font-mono text-[11px]">(${c.memberPhone || ''})</span></div>
+                </div>
+                <span class="px-2 py-0.5 rounded-full font-bold text-[10px] ${isOpen ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
+                  ${c.status}
+                </span>
+              </div>
+              <div class="text-slate-600 bg-slate-50 p-2.5 rounded-xl text-xs leading-relaxed">
+                ${c.description}
+              </div>
+              <div class="flex items-center justify-between pt-1">
+                <span class="text-[10px] text-slate-400">${new Date(c.createdAt).toLocaleString()}</span>
+                ${isOpen ? `
+                  <button onclick="resolveComplaint('${c.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                    <span>Mark Resolved</span>
+                  </button>
+                ` : '<span class="text-[10px] text-emerald-600 font-bold">Resolved ✓</span>'}
+              </div>
+            </div>
+          `;
+        }).join('');
+        if (window.lucide) lucide.createIcons();
+      } catch (e) {
+        console.error('Failed to load complaints:', e);
+      }
+    }
+
+    async function resolveComplaint(id) {
+      const resolution = prompt('Enter resolution details (optional):') || 'Issue addressed and resolved by admin.';
+      try {
+        await apiFetch(`/complaints/${id}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: 'RESOLVED', resolution })
+        });
+        alert('Complaint resolved successfully!');
+        loadComplaints();
+        loadDashboard();
+      } catch (e) {
+        alert(e.message || 'Action failed');
+      }
+    }
+
+    // 9. Registrations (Universal QR Portal Admissions)
+    async function loadRegistrations() {
+      try {
+        const bQuery = (currentBranchId && currentBranchId !== 'ALL') ? `&branchId=${currentBranchId}` : '';
+        const res = await apiFetch(`/registrations?limit=50${bQuery}`);
+        const list = res.data?.registrations || res.data || [];
+        const container = document.getElementById('registrationsList');
+        if (list.length === 0) {
+          container.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">No pending admissions found.</div>';
+          return;
+        }
+        container.innerHTML = list.map(r => `
+          <div class="stat-card p-3.5 space-y-2 text-xs border border-slate-100 shadow-sm">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-mono font-bold text-blue-600 text-xs">${r.applicationId || 'REG'}</span>
+                  <span class="px-2 py-0.5 rounded-md font-bold text-[10px] bg-slate-100 text-slate-700">${r.plan?.name || 'PLAN'}</span>
+                </div>
+                <div class="font-bold text-slate-900 mt-1">${r.name} <span class="text-slate-400 font-mono text-[11px]">(${r.phone})</span></div>
+              </div>
+              <span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-blue-50 text-blue-700 border border-blue-200">
+                ${r.status}
+              </span>
+            </div>
+            <div class="text-[11px] text-slate-500 bg-slate-50 p-2 rounded-xl flex justify-between">
+              <span>Seat: <strong>${r.reservedSeat?.seatNumber || 'Unassigned'}</strong></span>
+              <span>${new Date(r.submittedAt || r.createdAt).toLocaleDateString()}</span>
+            </div>
+          </div>
+        `).join('');
+        if (window.lucide) lucide.createIcons();
+      } catch (e) {
+        console.error('Failed to load registrations:', e);
+      }
+    }
+
+    // Screenshot Modal Controls
+    function openScreenshotModal(url, title, meta) {
+      const m = document.getElementById('screenshotModal');
+      const img = document.getElementById('screenshotModalImg');
+      const t = document.getElementById('screenshotModalTitle');
+      const d = document.getElementById('screenshotModalMeta');
+      if (img) img.src = url;
+      if (t) t.innerText = `${title} — Payment Receipt`;
+      if (d) d.innerText = meta || '';
+      if (m) {
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function closeScreenshotModal() {
+      const m = document.getElementById('screenshotModal');
+      if (m) {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
       }
     }
 

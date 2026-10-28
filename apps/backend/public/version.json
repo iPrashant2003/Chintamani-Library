@@ -1,18 +1,18 @@
 {
-  "buildNumber": 2096,
-  "version": "2.8.16",
+  "buildNumber": 2097,
+  "version": "2.8.17",
   "releaseDate": "28 Oct 2026",
   "forceUpdate": true,
-  "title": "Chintamani Library v2.8.16 — Universal QR Portal & Admin Portal Synchronization",
+  "title": "Chintamani Library v2.8.17 — Universal QR Portal to Member Directory & Admin Portal Repair",
   "releaseNotes": [
-    "UNIVERSAL QR PORTAL & ADMIN SYNC: Permanent end-to-end integration between Universal QR Portal and Admin Portal for both Khalilabad and Mehdawal branches.",
-    "BRANCH-WISE PAYMENT VERIFICATIONS: Added branch filtering (All, Khalilabad, Mehdawal) and branch badges on Payment Verifications with immediate live reaction to branch switcher.",
-    "NEW REGISTRATIONS & COMPLAINTS SYNC: Registrations and complaints submitted from the Universal QR Portal now reliably persist to database and sync seamlessly to Admin Portal.",
-    "RESPONSE PARSING REPAIR: Corrected API payload envelope extraction for registration, payment, attendance, and complaint submissions.",
-    "ADMIN PORTAL ACCESS & JWT REFRESH: Updated web admin portal with secure login, dynamic authentication token handling, and robust branch slug resolution."
+    "MEMBER DIRECTORY SYNC: Registrations through Universal QR Portal now immediately create active Member records and active Subscriptions in the authoritative database so they appear instantly in Member Directory.",
+    "PAY VERIFY ADMIN SECTION: Added full Pay Verify view with interactive high-resolution screenshot preview modal, UTR details, and 1-tap Approve/Reject actions.",
+    "COMPLAINTS ADMIN SECTION: Added dedicated Member Complaints & Issues view with category chips, branch badges, and Mark Resolved workflow.",
+    "CROSS-BRANCH ACCESS: Admin portal now defaults to ALL branches on load, preventing records from being hidden by active branch filters.",
+    "DATABASE BACKFILL: Automatically backfills all existing portal registrations into Member directory on startup."
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.16/app-arm64-v8a-release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.16/Chintamani-Library-2.8.16-arm64.apk",
-  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.16",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.17/app-arm64-v8a-release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.17/Chintamani-Library-2.8.17-arm64.apk",
+  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.17",
   "minimumSupportedVersion": "2.3.0"
 }

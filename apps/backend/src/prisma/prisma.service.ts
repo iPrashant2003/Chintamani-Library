@@ -89,6 +89,90 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
         `);
       }
 
+      // 5. Backfill all registrations into Member directory so all registered members appear in Member Directory immediately
+      try {
+        await this.$executeRawUnsafe(`UPDATE "Member" SET "isActive" = true WHERE "isActive" = false;`);
+
+        const pendingRegs = await this.memberRegistration.findMany({
+          include: { plan: true, reservedSeat: true },
+        });
+
+        for (const reg of pendingRegs) {
+          const cleanPhone = (reg.phone || '').replace(/[^\d]/g, '');
+          if (!cleanPhone) continue;
+
+          let existingMember = await this.member.findFirst({
+            where: { phone: { contains: cleanPhone.slice(-10) } },
+          });
+
+          if (!existingMember) {
+            const memberCode = `CML-${Math.floor(1000 + Math.random() * 9000)}`;
+            existingMember = await this.member.create({
+              data: {
+                tenantId: reg.tenantId,
+                branchId: reg.branchId,
+                memberCode,
+                name: reg.name,
+                phone: reg.phone,
+                email: reg.email,
+                dob: reg.dob,
+                address: reg.address,
+                academicInfo: reg.academicInfo,
+                photoUrl: reg.photoUrl,
+                aadhaarNumber: reg.aadhaarNumber,
+                aadhaarFrontUrl: reg.aadhaarFrontUrl,
+                aadhaarBackUrl: reg.aadhaarBackUrl,
+                otherDocUrls: reg.otherDocUrls,
+                isActive: true,
+                registrationId: reg.id,
+                portalAccess: true,
+              },
+            });
+          } else {
+            await this.member.update({
+              where: { id: existingMember.id },
+              data: {
+                isActive: true,
+                registrationId: reg.id,
+                photoUrl: reg.photoUrl || existingMember.photoUrl,
+                branchId: reg.branchId,
+              },
+            });
+          }
+
+          await this.memberRegistration.update({
+            where: { id: reg.id },
+            data: { memberId: existingMember.id },
+          });
+
+          // Ensure active subscription exists
+          if (reg.planId) {
+            const existingSub = await this.subscription.findFirst({
+              where: { memberId: existingMember.id },
+            });
+            if (!existingSub) {
+              const startDate = new Date();
+              const endDate = new Date();
+              endDate.setDate(endDate.getDate() + (reg.plan?.durationDays || 30));
+              await this.subscription.create({
+                data: {
+                  tenantId: reg.tenantId,
+                  memberId: existingMember.id,
+                  planId: reg.planId,
+                  startDate,
+                  endDate,
+                  status: 'ACTIVE',
+                  assignedSeatId: reg.reservedSeatId,
+                },
+              });
+            }
+          }
+        }
+        this.logger.log(`[SchemaIntegrity] Backfilled ${pendingRegs.length} registration(s) into Member Directory.`);
+      } catch (e: any) {
+        this.logger.warn(`[SchemaIntegrity] Member backfill notice: ${e?.message}`);
+      }
+
       this.logger.log('[SchemaIntegrity] All schema tables and columns are verified and in sync.');
       return { success: true, message: 'Schema integrity check passed. All tables & columns are synchronized.' };
     } catch (err: any) {

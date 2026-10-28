@@ -28,9 +28,10 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final active = ref.read(activeBranchProvider);
-      final key = active.shortName.toLowerCase();
-      ref.read(selectedComplaintBranchProvider.notifier).state = key;
+      // Default to 'ALL' so admin immediately sees all open complaints across all branches
+      ref.read(selectedComplaintBranchProvider.notifier).state = 'ALL';
+      ref.invalidate(complaintsListProvider);
+      ref.invalidate(openComplaintsCountProvider);
     });
   }
 

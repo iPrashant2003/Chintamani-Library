@@ -99,12 +99,6 @@ export class MembersService {
 
     const where: any = {
       isArchived: false,
-      NOT: [
-        {
-          isActive: false,
-          subscriptions: { none: {} },
-        },
-      ],
     };
     if (user?.tenantId) where.tenantId = user.tenantId;
     if (branchId && branchId !== 'ALL' && branchId !== 'all') {

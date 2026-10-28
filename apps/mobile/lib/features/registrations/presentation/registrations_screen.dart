@@ -27,9 +27,8 @@ class _RegistrationsScreenState extends ConsumerState<RegistrationsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final active = ref.read(activeBranchProvider);
-      final key = active.shortName.toLowerCase();
-      ref.read(selectedRegistrationBranchProvider.notifier).state = key;
+      // Default to 'ALL' so admin immediately sees all pending registrations across all branches
+      ref.read(selectedRegistrationBranchProvider.notifier).state = 'ALL';
     });
   }
 

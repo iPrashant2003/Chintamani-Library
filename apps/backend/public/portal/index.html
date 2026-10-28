@@ -17,7 +17,7 @@
       window.fetch = function(resource, init) {
         if (typeof resource === 'string' && resource.startsWith('/portal/')) {
           const origin = window.location.origin || '';
-          if (origin.includes('github.io') || window.location.protocol === 'file:') {
+          if (!origin.includes('onrender.com') && !origin.includes(':3000')) {
             resource = 'https://chintamani-backend.onrender.com' + resource;
           }
         }

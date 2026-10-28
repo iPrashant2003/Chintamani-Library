@@ -529,15 +529,105 @@ export class PortalService {
       },
     });
 
-    // Registration submitted: Remains PENDING awaiting Admin approval (does NOT directly create Member in Directory)
+    // Create or link Member in Member Directory immediately so they appear across Admin Portals
+    let member = await this.prisma.member.findFirst({
+      where: { phone: { contains: phone.slice(-10) } },
+    });
+
+    const memberCode = `CML-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    if (!member) {
+      member = await this.prisma.member.create({
+        data: {
+          tenantId: branch.tenantId,
+          branchId: branch.id,
+          memberCode,
+          name: dto.name.trim(),
+          phone,
+          email: dto.email?.trim() || null,
+          dob: parsedDob,
+          address: dto.address?.trim() || null,
+          aadhaarNumber: dto.aadhaarNumber?.replace(/\s/g, '') || null,
+          academicInfo: JSON.stringify(academicInfoObj),
+          photoUrl: dto.photoUrl || null,
+          aadhaarFrontUrl: dto.aadhaarFrontUrl || null,
+          aadhaarBackUrl: dto.aadhaarBackUrl || null,
+          otherDocUrls: dto.otherDocUrls || null,
+          isActive: true,
+          registrationId: registration.id,
+          portalAccess: true,
+        },
+      });
+    } else {
+      member = await this.prisma.member.update({
+        where: { id: member.id },
+        data: {
+          branchId: branch.id,
+          name: dto.name.trim(),
+          email: dto.email?.trim() || member.email,
+          dob: parsedDob || member.dob,
+          address: dto.address?.trim() || member.address,
+          academicInfo: JSON.stringify(academicInfoObj),
+          photoUrl: dto.photoUrl || member.photoUrl,
+          aadhaarNumber: dto.aadhaarNumber?.replace(/\s/g, '') || member.aadhaarNumber,
+          aadhaarFrontUrl: dto.aadhaarFrontUrl || member.aadhaarFrontUrl,
+          aadhaarBackUrl: dto.aadhaarBackUrl || member.aadhaarBackUrl,
+          otherDocUrls: dto.otherDocUrls || member.otherDocUrls,
+          isActive: true,
+          registrationId: registration.id,
+        },
+      });
+    }
+
+    // Link registration to created member
+    await this.prisma.memberRegistration.update({
+      where: { id: registration.id },
+      data: { memberId: member.id },
+    });
+
+    // Create Subscription if plan selected
+    let subscription: any = null;
+    if (plan) {
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + (plan.durationDays || 30));
+
+      subscription = await this.prisma.subscription.create({
+        data: {
+          tenantId: branch.tenantId,
+          memberId: member.id,
+          planId: plan.id,
+          startDate,
+          endDate,
+          status: 'ACTIVE',
+          assignedSeatId: reservedSeat?.id || null,
+        },
+      });
+
+      // Mark seat as OCCUPIED and assign to subscription
+      if (reservedSeat) {
+        await this.prisma.seat.update({
+          where: { id: reservedSeat.id },
+          data: { status: 'OCCUPIED' },
+        });
+
+        await this.prisma.seatAssignment.create({
+          data: {
+            seatId: reservedSeat.id,
+            subscriptionId: subscription.id,
+          },
+        });
+      }
+    }
+
     try {
       await this.prisma.notification.create({
         data: {
           tenantId: branch.tenantId,
           type: 'NEW_REGISTRATION',
-          title: `[${branch.name}] New Registration: ${dto.name}`,
-          body: `${dto.name} submitted application ${applicationId} for ${plan.name}. Awaiting admin review and approval.${
-            reservedSeat ? ` (Seat ${reservedSeat.seatNumber} reserved)` : ''
+          title: `[${branch.name}] New Member Enrolled: ${dto.name}`,
+          body: `${dto.name} registered successfully (Code: ${member.memberCode}, Application: ${applicationId}) for ${plan.name}.${
+            reservedSeat ? ` (Seat ${reservedSeat.seatNumber} assigned)` : ''
           }`,
         },
       });
@@ -546,11 +636,13 @@ export class PortalService {
     return {
       success: true,
       applicationId,
-      status: 'PENDING',
+      memberId: member.id,
+      memberCode: member.memberCode,
+      status: 'APPROVED',
       planName: plan.name,
       planPrice: plan.price,
       reservedSeat: reservedSeat ? { id: reservedSeat.id, seatNumber: reservedSeat.seatNumber } : null,
-      message: 'Application submitted successfully. It is currently pending admin review and approval.',
+      message: `Member ${dto.name} (${member.memberCode}) successfully registered and enrolled in ${branch.name}.`,
     };
   }
 
@@ -661,7 +753,7 @@ export class PortalService {
           memberCode: code,
           name: dto.memberName || pendingReg?.name || 'Portal Applicant',
           phone,
-          isActive: false, // inactive until approved by admin
+          isActive: true, // active member in directory
           registrationId: pendingReg?.id || null,
         },
         include: { branch: true },

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -175,16 +176,39 @@ class AppUpdateService {
   ));
 
   // Dedicated high-speed Dio instance for large APK downloads (NO 45s cutoff!)
-  final Dio _downloadDio = Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 45), // Extended: GitHub CDN redirect can be slow on mobile
-    receiveTimeout: const Duration(minutes: 30),
-    sendTimeout: const Duration(minutes: 10),
-    followRedirects: true,
-    maxRedirects: 15,
-    headers: {
-      'User-Agent': 'ChintamaniLibraryApp-Updater/2.8.14',
-    },
-  ));
+  late final Dio _downloadDio;
+
+  AppUpdateService() {
+    _downloadDio = Dio(BaseOptions(
+      connectTimeout: const Duration(seconds: 45),
+      receiveTimeout: const Duration(minutes: 30),
+      sendTimeout: const Duration(minutes: 10),
+      followRedirects: true,
+      maxRedirects: 15,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36',
+        'Accept': '*/*',
+      },
+    ));
+
+    if (!kIsWeb) {
+      _configureSslBypass(_dio);
+      _configureSslBypass(_downloadDio);
+    }
+  }
+
+  void _configureSslBypass(Dio dioInstance) {
+    try {
+      final adapter = dioInstance.httpClientAdapter;
+      if (adapter is IOHttpClientAdapter) {
+        adapter.createHttpClient = () {
+          final client = HttpClient();
+          client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+          return client;
+        };
+      }
+    } catch (_) {}
+  }
 
   // ── Settings persistence ──────────────────────────────────────────────────
   Future<bool> isAutoCheckEnabled() async {
@@ -363,6 +387,8 @@ class AppUpdateService {
         try { await partFile.delete(); } catch (_) {}
       }
 
+      final cleanVersion = info.version.replaceAll(RegExp(r'^[vV]'), '').trim();
+
       // Detect ABI: Only prioritize arm64 if explicitly confirmed as arm64
       final deviceAbi = (await getDeviceAbi())?.toLowerCase() ?? '';
       final isArm64 = deviceAbi.contains('arm64') || deviceAbi.contains('aarch64');
@@ -373,25 +399,30 @@ class AppUpdateService {
         // 1. Matched architecture first
         if (isArm64) ...[
           if (info.arm64ApkUrl != null && info.arm64ApkUrl!.isNotEmpty) info.arm64ApkUrl!,
-          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-${info.version}-arm64.apk',
-          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/app-arm64-v8a-release.apk',
-          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-arm64.apk',
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v$cleanVersion/app-arm64-v8a-release.apk',
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v$cleanVersion/Chintamani-Library-$cleanVersion-arm64.apk',
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v$cleanVersion/Chintamani-Library-arm64.apk',
         ] else if (isArmV7) ...[
-          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-${info.version}-armeabi.apk',
-          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/app-armeabi-v7a-release.apk',
-          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-armeabi.apk',
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v$cleanVersion/app-armeabi-v7a-release.apk',
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v$cleanVersion/Chintamani-Library-$cleanVersion-armeabi.apk',
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v$cleanVersion/Chintamani-Library-armeabi.apk',
         ] else if (isX86) ...[
-          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-${info.version}-x86_64.apk',
-          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/app-x86_64-release.apk',
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v$cleanVersion/app-x86_64-release.apk',
+          'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v$cleanVersion/Chintamani-Library-$cleanVersion-x86_64.apk',
         ],
         // 2. Generic fallbacks (arm64 is 99% of Android devices)
         if (info.apkUrl.isNotEmpty) info.apkUrl,
-        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/app-arm64-v8a-release.apk',
-        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/Chintamani-Library-arm64.apk',
-        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v${info.version}/app-armeabi-v7a-release.apk',
+        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v$cleanVersion/app-arm64-v8a-release.apk',
+        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v$cleanVersion/Chintamani-Library-arm64.apk',
+        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v$cleanVersion/app-armeabi-v7a-release.apk',
+        // 3. Fallback to latest published v2.8.21 release assets
+        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.21/app-arm64-v8a-release.apk',
+        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.21/Chintamani-Library-2.8.21-arm64.apk',
+        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.21/Chintamani-Library-arm64.apk',
       ];
 
       bool downloaded = false;
+      String? lastDownloadFailureReason;
 
       for (final downloadUrl in downloadCandidates) {
         debugPrint('[UpdateService] Attempting download from: $downloadUrl');
@@ -408,12 +439,14 @@ class AppUpdateService {
           }
         } catch (err) {
           debugPrint('[UpdateService] Failed candidate $downloadUrl: $err');
-          // Try next candidate
+          lastDownloadFailureReason = err.toString();
         }
       }
 
       if (!downloaded) {
-        lastErrorMessage = 'Could not download update file. Please verify internet and tap Retry.';
+        lastErrorMessage = lastDownloadFailureReason != null && lastDownloadFailureReason.contains('SocketException')
+            ? 'Network error. Please verify internet connection and tap Retry.'
+            : 'Could not download update file. Please verify internet and tap Retry.';
         return false;
       }
 

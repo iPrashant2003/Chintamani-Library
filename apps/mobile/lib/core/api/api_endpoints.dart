@@ -76,6 +76,7 @@ class ApiEndpoints {
 
   // ── AI Assistant ────────────────────────────────────────────────────────────
   static const String aiChat = '/ai/chat';
+  static const String aiChatPublic = '/ai/chat-public';
 
   // ── Upload ──────────────────────────────────────────────────────────────────
   static const String uploadPhoto = '/upload/profile-photo';

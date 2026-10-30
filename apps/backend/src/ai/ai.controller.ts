@@ -1,6 +1,5 @@
-import { Controller, Post, Body, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { Controller, Post, Body, Request, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AiService } from './ai.service';
 import { ChatRequestDto } from './dto/chat-request.dto';
 
@@ -10,11 +9,10 @@ export class AiController {
   constructor(private readonly aiService: AiService) {}
 
   @Post('chat')
-  @ApiOperation({ summary: 'Chat with Gemini-powered library assistant (admin/authenticated)' })
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Chat with ChintaMani AI assistant (authenticated or guest)' })
   chat(@Body() dto: ChatRequestDto, @Request() req: any) {
-    return this.aiService.chat(dto, req.user);
+    return this.aiService.chat(dto, req?.user || null);
   }
 
   @Post('chat-public')

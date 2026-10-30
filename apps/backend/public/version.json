@@ -1,17 +1,17 @@
 {
-  "buildNumber": 2100,
-  "version": "2.8.20",
+  "buildNumber": 2101,
+  "version": "2.8.21",
   "releaseDate": "30 Oct 2026",
   "forceUpdate": false,
-  "title": "Chintamani Library v2.8.20 — Live 3D Holographic Card & Universal Portal Sync",
+  "title": "Chintamani Library v2.8.21 — Universal ChintaMani AI Bot & Multi-Domain Assistant",
   "releaseNotes": [
-    "Live 3D Holographic Emblem: Beautiful floating 3D logo with interactive perspective tilt and specular lighting.",
-    "Rebuilt Update Card: Clean, clutter-free design featuring only the changes list and seamless 1-tap Update action.",
-    "Universal QR & Admin Portal Sync: Real-time synchronization of Admissions, Payments, and Complaints across all branches.",
-    "Admin Action Enhancements: Instant 1-tap approval for admissions, receipt verification, and complaint resolution."
+    "ChintaMani AI Universal Upgrade: Answers all general questions, study guidance, competitive exams (UPSC/SSC/Banking), and math calculations freely.",
+    "Connection Resilience: Permanent fix for bot connection errors with dual authenticated and public failover endpoints.",
+    "Multi-Domain Conversational Engine: Instant intelligent responses in Hindi and English even during offline or poor connectivity.",
+    "Live 3D Update Card: Clean holographic 3D design with direct in-app update and real-time backend synchronization."
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.20/app-arm64-v8a-release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.20/Chintamani-Library-2.8.20-arm64.apk",
-  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.20",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.21/app-arm64-v8a-release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.21/Chintamani-Library-2.8.21-arm64.apk",
+  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.21",
   "minimumSupportedVersion": "2.3.0"
 }

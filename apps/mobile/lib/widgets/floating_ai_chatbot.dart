@@ -862,8 +862,11 @@ class _FloatingAiChatbotState extends ConsumerState<FloatingAiChatbot>
       ('💺', 'Available seats?'),
       ('🔒', 'Locker status'),
       ('🕐', 'Library timings'),
+      ('🎓', 'Admission process'),
+      ('💡', 'Study tips'),
       ('📞', 'Director contact'),
       ('💳', 'Fee & dues info'),
+      ('📶', 'Wi-Fi & facilities'),
     ];
 
     return Container(

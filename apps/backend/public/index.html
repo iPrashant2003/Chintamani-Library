@@ -86,11 +86,19 @@
         </div>
       </div>
 
-      <!-- Right: Action Icons (Add User, Pay Verify, Complaints, Seats, Lockers) -->
+      <!-- Right: Action Icons (Add User, Admissions, Pay Verify, Complaints, Seats, Lockers) -->
       <div class="flex items-center space-x-2">
         <!-- Add Member -->
         <button onclick="openAddMemberModal()" class="p-1 rounded-lg hover:bg-white/10 transition" title="Add Member">
           <i data-lucide="user-plus" class="w-5 h-5"></i>
+        </button>
+
+        <!-- New Admissions Quick Jump (Universal QR) -->
+        <button onclick="setTab('registrations')" class="relative p-1 rounded-lg hover:bg-white/10 transition" title="New Member Admissions (Universal QR)">
+          <i data-lucide="user-check" class="w-5 h-5 text-sky-200"></i>
+          <span id="badge-admissions-count" class="absolute -top-1 -right-1 px-1 py-0.2 bg-blue-600 text-white text-[8px] font-bold rounded-full">
+            0
+          </span>
         </button>
 
         <!-- Pay Verify Quick Jump -->
@@ -367,6 +375,17 @@
       <div class="relative">
         <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
         <input type="text" id="memberSearch" oninput="searchMembers(this.value)" placeholder="Search name, phone, or code..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#F04D36]">
+      </div>
+
+      <!-- Member Directory Sub-views -->
+      <div class="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+        <button id="btn-sub-members" onclick="switchMemberSubView('members')" class="flex-1 py-1.5 rounded-lg bg-white shadow-sm font-bold text-slate-900 transition">
+          Directory
+        </button>
+        <button id="btn-sub-admissions" onclick="switchMemberSubView('admissions')" class="flex-1 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1">
+          <span>Admissions (QR)</span>
+          <span id="badge-admissions-sub" class="px-1.5 py-0.2 bg-blue-600 text-white text-[9px] font-bold rounded-full">0</span>
+        </button>
       </div>
 
       <div id="membersList" class="space-y-2">
@@ -847,6 +866,15 @@
           if (cEl) cEl.innerText = cCount;
         } catch (_) {}
 
+        try {
+          const rRes = await apiFetch('/registrations?status=PENDING&limit=1');
+          const rCount = rRes.data?.total || rRes.total || (Array.isArray(rRes.data) ? rRes.data.length : 0);
+          const rEl = document.getElementById('badge-admissions-count');
+          const rSub = document.getElementById('badge-admissions-sub');
+          if (rEl) rEl.innerText = rCount;
+          if (rSub) rSub.innerText = rCount;
+        } catch (_) {}
+
       } catch (e) {
         console.error('Failed to load dashboard metrics:', e);
       }
@@ -1185,40 +1213,87 @@
       }
     }
 
+    // Sub-view toggle between Directory & Admissions in Member section
+    function switchMemberSubView(view) {
+      if (view === 'admissions') {
+        setTab('registrations');
+      } else {
+        setTab('members');
+      }
+    }
+
     // 9. Registrations (Universal QR Portal Admissions)
     async function loadRegistrations() {
       try {
         const bQuery = (currentBranchId && currentBranchId !== 'ALL') ? `&branchId=${currentBranchId}` : '';
-        const res = await apiFetch(`/registrations?limit=50${bQuery}`);
+        const res = await apiFetch(`/registrations?status=ALL&limit=50${bQuery}`);
         const list = res.data?.registrations || res.data || [];
         const container = document.getElementById('registrationsList');
+        const badgeTop = document.getElementById('badge-admissions-count');
+        const badgeSub = document.getElementById('badge-admissions-sub');
+        const pendingCount = list.filter(r => r.status === 'PENDING').length;
+        if (badgeTop) badgeTop.innerText = pendingCount;
+        if (badgeSub) badgeSub.innerText = pendingCount;
+
         if (list.length === 0) {
-          container.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">No pending admissions found.</div>';
+          container.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">No admissions found from Universal QR Portal.</div>';
           return;
         }
-        container.innerHTML = list.map(r => `
+        container.innerHTML = list.map(r => {
+          const isMehdawal = (r.branch?.name || '').toLowerCase().includes('mehda');
+          const bName = isMehdawal ? 'Mehdawal' : 'Khalilabad';
+          const bColor = isMehdawal ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-amber-50 text-amber-800 border-amber-200';
+          const isPending = r.status === 'PENDING';
+          const statusBg = isPending ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200';
+          return `
           <div class="stat-card p-3.5 space-y-2 text-xs border border-slate-100 shadow-sm">
             <div class="flex items-start justify-between">
               <div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5 flex-wrap">
                   <span class="font-mono font-bold text-blue-600 text-xs">${r.applicationId || 'REG'}</span>
-                  <span class="px-2 py-0.5 rounded-md font-bold text-[10px] bg-slate-100 text-slate-700">${r.plan?.name || 'PLAN'}</span>
+                  <span class="px-2 py-0.5 rounded-md font-bold text-[10px] bg-slate-100 text-slate-700">${r.plan?.name || 'Standard Plan'}</span>
+                  <span class="px-1.5 py-0.5 rounded text-[9px] font-bold border ${bColor}">📍 ${bName}</span>
                 </div>
                 <div class="font-bold text-slate-900 mt-1">${r.name} <span class="text-slate-400 font-mono text-[11px]">(${r.phone})</span></div>
               </div>
-              <span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-blue-50 text-blue-700 border border-blue-200">
+              <span class="px-2 py-0.5 rounded-full font-bold text-[10px] border ${statusBg}">
                 ${r.status}
               </span>
             </div>
-            <div class="text-[11px] text-slate-500 bg-slate-50 p-2 rounded-xl flex justify-between">
-              <span>Seat: <strong>${r.reservedSeat?.seatNumber || 'Unassigned'}</strong></span>
+            <div class="text-[11px] text-slate-500 bg-slate-50 p-2 rounded-xl flex justify-between items-center">
+              <span>Reserved Desk: <strong class="text-slate-800 font-mono font-bold">${r.reservedSeat?.seatNumber || 'Auto-Allocated'}</strong></span>
               <span>${new Date(r.submittedAt || r.createdAt).toLocaleDateString()}</span>
             </div>
+            ${isPending ? `
+              <button onclick="approveRegistration('${r.id}')" class="mt-1 w-full py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <span>Approve Admission & Enroll Member</span>
+              </button>
+            ` : `
+              <div class="text-[10px] text-emerald-700 font-bold flex items-center gap-1 pt-0.5">
+                <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
+                <span>Member Enrolled & Active in Directory</span>
+              </div>
+            `}
           </div>
-        `).join('');
+        `;
+        }).join('');
         if (window.lucide) lucide.createIcons();
       } catch (e) {
         console.error('Failed to load registrations:', e);
+      }
+    }
+
+    async function approveRegistration(id) {
+      if (!confirm('Approve this student registration and activate membership?')) return;
+      try {
+        await apiFetch(`/registrations/${id}/approve`, { method: 'PATCH' });
+        alert('Admission approved successfully! Member and subscription are now active.');
+        loadRegistrations();
+        loadMembers();
+        loadDashboard();
+      } catch (e) {
+        alert(e.message || 'Approval failed');
       }
     }
 

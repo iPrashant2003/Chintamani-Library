@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Patch,
+  Post,
   Param,
   Body,
   Query,
@@ -65,9 +66,29 @@ export class RegistrationsController {
     return this.registrationsService.approve(id, dto, user);
   }
 
+  @Post(':id/approve')
+  @ApiOperation({ summary: 'Approve registration (POST alias)' })
+  approvePost(
+    @Param('id') id: string,
+    @Body() dto: ApproveRegistrationDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.registrationsService.approve(id, dto, user);
+  }
+
   @Patch(':id/reject')
   @ApiOperation({ summary: 'Reject registration and release reserved seat back to AVAILABLE' })
   reject(
+    @Param('id') id: string,
+    @Body() dto: RejectRegistrationDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.registrationsService.reject(id, dto, user);
+  }
+
+  @Post(':id/reject')
+  @ApiOperation({ summary: 'Reject registration (POST alias)' })
+  rejectPost(
     @Param('id') id: string,
     @Body() dto: RejectRegistrationDto,
     @CurrentUser() user: any,

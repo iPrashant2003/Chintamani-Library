@@ -1,19 +1,17 @@
 {
-  "buildNumber": 2099,
-  "version": "2.8.19",
-  "releaseDate": "28 Oct 2026",
+  "buildNumber": 2100,
+  "version": "2.8.20",
+  "releaseDate": "30 Oct 2026",
   "forceUpdate": false,
-  "title": "Chintamani Library v2.8.19 — Clean Update Engine & Full Admin Sync",
+  "title": "Chintamani Library v2.8.20 — Live 3D Holographic Card & Universal Portal Sync",
   "releaseNotes": [
-    "Clean In-App Update Engine: Streamlined update dialog with seamless 1-tap download and installation.",
-    "Campus Filter Bar: Instant 1-tap filter ([All Campuses], [Khalilabad], [Mehdawal]) in Member Directory.",
-    "Member Directory Persistence: Real-time synchronization of Universal QR admissions with active members, subscriptions, and seat assignments.",
-    "Payment Verification Approvals: Fixed API routes and methods for 1-tap Approve and Reject actions with full audit sync.",
-    "Complaints & Issues Sync: Real-time issue submission and tracking between Universal QR portal, Admin Portal, and Mobile App.",
-    "Admin Credential Validation: Automatic production login sync on backend startup."
+    "Live 3D Holographic Emblem: Beautiful floating 3D logo with interactive perspective tilt and specular lighting.",
+    "Rebuilt Update Card: Clean, clutter-free design featuring only the changes list and seamless 1-tap Update action.",
+    "Universal QR & Admin Portal Sync: Real-time synchronization of Admissions, Payments, and Complaints across all branches.",
+    "Admin Action Enhancements: Instant 1-tap approval for admissions, receipt verification, and complaint resolution."
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.19/app-arm64-v8a-release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.19/Chintamani-Library-2.8.19-arm64.apk",
-  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.19",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.20/app-arm64-v8a-release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.20/Chintamani-Library-2.8.20-arm64.apk",
+  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.20",
   "minimumSupportedVersion": "2.3.0"
 }

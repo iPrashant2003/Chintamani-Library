@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Patch,
+  Post,
   Param,
   Body,
   Query,
@@ -41,6 +42,16 @@ export class ComplaintsController {
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update complaint status and resolution notes' })
   updateStatus(
+    @Param('id') id: string,
+    @Body() dto: UpdateComplaintStatusDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.complaintsService.updateStatus(id, dto, user);
+  }
+
+  @Post(':id/status')
+  @ApiOperation({ summary: 'Update complaint status and resolution notes (POST alias)' })
+  updateStatusPost(
     @Param('id') id: string,
     @Body() dto: UpdateComplaintStatusDto,
     @CurrentUser() user: any,

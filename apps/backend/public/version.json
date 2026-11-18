@@ -1,17 +1,17 @@
 {
-  "buildNumber": 2101,
-  "version": "2.8.21",
-  "releaseDate": "30 Oct 2026",
+  "buildNumber": 2102,
+  "version": "2.8.22",
+  "releaseDate": "18 Nov 2026",
   "forceUpdate": false,
-  "title": "Chintamani Library v2.8.21 — Universal ChintaMani AI Bot & Multi-Domain Assistant",
+  "title": "Chintamani Library v2.8.22 — Production Handover & Full-Stack Sync Release",
   "releaseNotes": [
-    "ChintaMani AI Universal Upgrade: Answers all general questions, study guidance, competitive exams (UPSC/SSC/Banking), and math calculations freely.",
-    "Connection Resilience: Permanent fix for bot connection errors with dual authenticated and public failover endpoints.",
-    "Multi-Domain Conversational Engine: Instant intelligent responses in Hindi and English even during offline or poor connectivity.",
-    "Live 3D Update Card: Clean holographic 3D design with direct in-app update and real-time backend synchronization."
+    "Official Owner & Admin Handover Release: Configured login credentials (9415919277 & 7388389944 with password CML@6050).",
+    "Universal QR Portal Synchronization: Full real-time integration for Admissions, Payment screenshots, Complaints, and Attendance.",
+    "ChintaMani AI Bot Enhanced: Multi-model Gemini fallback with 15-domain offline support (Math, Hindi, Exams, Timings, Admissions).",
+    "In-App Direct Updater: Carrier SSL bypass and direct one-click installation without package conflict."
   ],
-  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.21/app-arm64-v8a-release.apk",
-  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.21/Chintamani-Library-2.8.21-arm64.apk",
-  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.21",
+  "apkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.22/app-arm64-v8a-release.apk",
+  "arm64ApkUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.22/Chintamani-Library-2.8.22-arm64.apk",
+  "fallbackUrl": "https://github.com/iPrashant2003/Chintamani-Library/releases/tag/v2.8.22",
   "minimumSupportedVersion": "2.3.0"
 }

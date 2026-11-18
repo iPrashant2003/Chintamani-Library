@@ -38,6 +38,7 @@ async function main() {
   console.log('✅ Cleaned existing data');
 
   const passwordHash = await bcrypt.hash('Admin@1234', 12);
+  const cmlPasswordHash = await bcrypt.hash('CML@6050', 12);
   const staffHash = await bcrypt.hash('Staff@1234', 12);
   const superAdminHash = await bcrypt.hash('SuperAdmin@1234', 12);
 
@@ -97,11 +98,23 @@ async function main() {
       tenantId: tenant1.id,
       name: 'Manglesh Mani Tripathi',
       email: 'owner@chintamani.com',
-      password: passwordHash,
+      password: cmlPasswordHash,
       role: 'OWNER',
-      phone: '9999000001',
+      phone: '9415919277',
     },
   });
+  const cmlAdmin = await prisma.user.create({
+    data: {
+      id: 'cml-admin-7388389944',
+      tenantId: tenant1.id,
+      name: 'Chinta Mani Administrator',
+      email: 'admin@chintamanilibrary.com',
+      password: cmlPasswordHash,
+      role: 'ADMIN',
+      phone: '7388389944',
+    },
+  });
+
   const adminKhl = await prisma.user.create({
     data: {
       tenantId: tenant1.id,

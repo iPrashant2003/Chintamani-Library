@@ -81,8 +81,8 @@ class AppUpdateInfo {
 }
 
 class AppUpdateService {
-  static const currentVersion = '2.8.21';
-  static const currentBuildNumber = 2101;
+  static const currentVersion = '2.8.22';
+  static const currentBuildNumber = 2102;
   static const _platformChannel = MethodChannel('com.chintamani.library/app_updater');
 
   /// The update info discovered from cloud manifest, if any.
@@ -415,9 +415,10 @@ class AppUpdateService {
         'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v$cleanVersion/app-arm64-v8a-release.apk',
         'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v$cleanVersion/Chintamani-Library-arm64.apk',
         'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v$cleanVersion/app-armeabi-v7a-release.apk',
-        // 3. Fallback to latest published v2.8.21 release assets
+        // 3. Fallback to latest published v2.8.22 release assets (and previous v2.8.21)
+        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.22/app-arm64-v8a-release.apk',
+        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.22/Chintamani-Library-2.8.22-arm64.apk',
         'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.21/app-arm64-v8a-release.apk',
-        'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.21/Chintamani-Library-2.8.21-arm64.apk',
         'https://github.com/iPrashant2003/Chintamani-Library/releases/download/v2.8.21/Chintamani-Library-arm64.apk',
       ];
 

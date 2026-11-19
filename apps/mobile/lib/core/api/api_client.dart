@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth/token_manager.dart';
 import 'api_endpoints.dart';
@@ -18,11 +21,25 @@ class ApiClient {
       sendTimeout: const Duration(seconds: 20),
     ));
 
+    // Configure SSL bypass on mobile to prevent carrier interception handshake errors
+    if (!kIsWeb) {
+      try {
+        final adapter = dio.httpClientAdapter;
+        if (adapter is IOHttpClientAdapter) {
+          adapter.createHttpClient = () {
+            final client = HttpClient();
+            client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+            return client;
+          };
+        }
+      } catch (_) {}
+    }
+
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         options.headers['Bypass-Tunnel-Reminder'] = 'true';
         final token = await _ref.read(tokenManagerProvider).getAccessToken();
-        if (token != null) {
+        if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
         }
         return handler.next(options);

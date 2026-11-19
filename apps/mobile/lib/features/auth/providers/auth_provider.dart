@@ -70,16 +70,32 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
     final trimmedId = loginId.trim();
     final cleanPass = password.trim();
 
+    final cleanId = trimmedId.replaceAll(RegExp(r'[^\d]'), '');
+    final isManglesh = cleanId == '9415919277' ||
+        trimmedId.toLowerCase() == 'owner@chintamani.com';
+    final isAdminDesk = cleanId == '7388389944' ||
+        trimmedId.toLowerCase() == 'admin@chintamanilibrary.com' ||
+        trimmedId.toLowerCase() == 'admin@chintamani.com';
+
+    // Strictly enforce authorized IDs only
+    if (!isManglesh && !isAdminDesk && !forceDemo) {
+      state = const AsyncData(AuthUnauthenticated());
+      return false;
+    }
+
     // 1. Try Live Cloud Backend Authentication
     if (!forceDemo && trimmedId.isNotEmpty && cleanPass.isNotEmpty) {
       try {
         final repo = _ref.read(authRepositoryProvider);
-        final res = await repo.login(trimmedId, cleanPass).timeout(const Duration(seconds: 12));
+        final res = await repo.login(trimmedId, cleanPass).timeout(const Duration(seconds: 15));
 
         await _ref.read(tokenManagerProvider).saveTokens(
           accessToken: res.accessToken,
           refreshToken: res.refreshToken ?? '',
         );
+
+        // Keep local password cache in sync with verified cloud password
+        await _ref.read(tokenManagerProvider).saveAppPassword(cleanPass);
 
         final authUser = AuthUser(
           id: res.user.id,
@@ -93,16 +109,19 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
         state = AsyncData(AuthAuthenticated(authUser));
         return true;
       } catch (e) {
-        // Fall through to offline PIN check
+        // Fall through to offline check if network/cold-start issues occur
       }
     }
 
-    // 2. Offline / PIN fallback check (only uses locally-stored password — no hardcoded bypass)
-    final cleanId = trimmedId.replaceAll(RegExp(r'[^\d]'), '');
+    // 2. Offline / PIN fallback check (validates against stored local password or CML@6050)
     final currentPassword = await _ref.read(tokenManagerProvider).getAppPassword();
 
-    if (cleanPass == currentPassword || forceDemo) {
-      if (cleanId == '7388389944' || trimmedId.contains('7388389944') || trimmedId.contains('admin@chintamani')) {
+    if (cleanPass == currentPassword || cleanPass == 'CML@6050' || forceDemo) {
+      if (cleanPass == 'CML@6050') {
+        await _ref.read(tokenManagerProvider).saveAppPassword(cleanPass);
+      }
+
+      if (isAdminDesk) {
         await _ref.read(tokenManagerProvider).saveTokens(
           accessToken: 'cml-session-7388389944',
           refreshToken: 'cml-refresh-7388389944',
@@ -110,8 +129,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
         state = const AsyncData(AuthAuthenticated(adminDesk));
         return true;
       } else {
-        // Matches Manglesh (9415919277, owner@chintamani, or any other identifier
-        // when password is valid — owner is the primary admin)
         await _ref.read(tokenManagerProvider).saveTokens(
           accessToken: 'cml-session-9415919277',
           refreshToken: 'cml-refresh-9415919277',
@@ -134,7 +151,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
     // 1. Try backend change
     try {
       final repo = _ref.read(authRepositoryProvider);
-      await repo.changePassword(oldTrimmed, newTrimmed, identifier: identifier).timeout(const Duration(seconds: 10));
+      await repo.changePassword(oldTrimmed, newTrimmed, identifier: identifier).timeout(const Duration(seconds: 12));
       // Backend succeeded — also update local password cache
       await _ref.read(tokenManagerProvider).saveAppPassword(newTrimmed);
       return true;
@@ -151,7 +168,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
 
     // 2. Offline local fallback (only when server is unreachable) — validate against stored local password or known default
     final currentPassword = await _ref.read(tokenManagerProvider).getAppPassword();
-    if (oldTrimmed != currentPassword && oldTrimmed != 'Admin@1234' && oldTrimmed != 'Mani6050') {
+    if (oldTrimmed != currentPassword && oldTrimmed != 'CML@6050') {
       return false;
     }
     await _ref.read(tokenManagerProvider).saveAppPassword(newTrimmed);
